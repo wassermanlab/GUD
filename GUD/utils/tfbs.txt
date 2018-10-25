@@ -1,0 +1,147 @@
+import Bio
+import Bio.Seq
+from Bio.SeqFeature import SeqFeature
+
+
+class TFBS(SeqFeature):
+    """Implements a transcription factor binding site object. This essentially
+    parallels the TFBS perl module's TFBS::Site object.
+
+    """
+
+    def __init__(self, location=None, type='TFBS', id='<unknown id>', qualifiers=None, ref_seq=None, motif=None, score=None, rel_score=None, conservation=None):
+
+        if score is None:
+            raise ValueError("No score provided")
+        else:
+            self.score = float(score)
+
+        if rel_score is None:
+            raise ValueError("No relative score provided")
+        else:
+            self.rel_score = float(rel_score)
+
+        if motif is None:
+            raise ValueError("No motif object provided")
+        else:
+            if not isinstance(motif, Bio.motifs.Motif):
+                raise ValueError("Motif is not a Bio.motifs object")
+            self.motif = motif
+
+        #if ref_seq is None:
+        #    raise ValueError("No reference sequence provided")
+        #else:
+        #    if not isinstance(ref_seq, Bio.Seq.Seq) and not isinstance(ref_seq, str):
+        #        raise ValueError("Reference sequence is not a Bio.Seq.Seq or string object")
+        #    self.ref_seq = ref_seq
+
+        self.conservation = conservation
+
+        super(TFBS, self).__init__(location, type=type, id=id, qualifiers=qualifiers)
+
+
+    def __repr__(self):
+        return "TFBS({}, score={})>".format(self.location, self.score)
+
+
+    def __str__(self):
+        motif_name = "<unknown motif>"
+        if self.motif and self.motif.name:
+            motif_name = self.motif.name
+
+        strand = ''
+        if self.strand == 1:
+            strand = '+'
+        elif self.strand == -1:
+            strand = '-'
+
+        return "{}\t{}\t{}\t{}\t{:.3f}\t{:.1f}%".format(motif_name, self.start, self.end, strand, self.score, self.rel_score * 100)
+
+
+    @property
+    def abs_score(self):
+        """Just an alias for score"""
+        return self.score
+
+    @property
+    def start(self):
+        """For convenience"""
+        return self.location.start
+
+    @property
+    def end(self):
+        """For convenience"""
+        return self.location.end
+
+    @property
+    def strand(self):
+        """For convenience"""
+        return self.location.strand
+
+    #
+    # Don't implement this. Just call the SeqFeature extract and pass in
+    # the reference sequence.
+    #
+    #@property
+    #def seq(self):
+    #    """Return the actual bound sequence"""
+    #    if self.ref_seq:
+    #        return self.extract(self.ref_seq)
+    #    else:
+    #        return None
+
+    @property
+    def start_1_based(self):
+        """The standard, BioPython way to return coordinates is 0-based
+        where the end is not included in the feature, i.e. the same as the
+        BED specification. Additionally for binding sites found on the '-'
+        strand, BioPython follows the Python standard of returning -ve
+        indices.
+        
+        This method returns the binding site start position in 1-based
+        coordinates. Additionally '-' strand binding sites are returned
+        with positive coordinates (as if the binding site was on the '+'
+        strand).
+
+        Example:
+        Sequence
+        0                                                50
+        TGCACCTTTGTTTTACACAAAATATTGCTTAAAACAAAGGTATGCAAAGC 
+                                       ------------
+        (reverse complement)
+        0                                               -50
+        GCTTTGCATACCTTTGTTTTAAGCAATATTTTGTGTAAAACAAAGGTGCA
+               ------------
+
+        Standard python/BioPython 0-based start/end with negative indices
+        Foxd3   -19     -7      -1        7.198  81.3%  ATACCTTTGTTT
+
+        1-based start/end with -ve strand positions converted to +ve strand
+        Foxd3   32      43      -1        7.198  81.3%  ATACCTTTGTTT
+
+        """
+        #if self.strand == -1:
+        #    return self.start + len(self.ref_seq) + 1
+        #else:
+        return self.start + 1
+
+    @property
+    def end_1_based(self):
+        """See the description/example for the start_1_based method above.
+        Additionally note that this method returns the end as if it is
+        included in the feature.
+        """
+        return self.start_1_based + len(self.motif) - 1
+
+    def overlap(self, feat):
+        """If given feature overlaps this TFBS return True otherwise
+        return False
+        """
+
+        if feat:
+            # Note for 0-based feature when feat1.end == feat2.start
+            # they don't overlap but are book-ended.
+            if (self.start < feat.end and self.end > feat.start):
+                return True
+
+        return False
