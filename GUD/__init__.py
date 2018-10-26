@@ -1,19 +1,23 @@
 """
-@file: __init__.py
-@author: Oriol Fornes
-@mail: oriol.fornes@gmail.com
-@date: 2018
-@ [wasserman lab](http://www.cisreg.ca)
-@class: Globals
+Genomic Universal Database (GUD) module
 """
+
+__author__ = "Oriol Fornes"
+__credits__ = ["Oriol Fornes", "David J. Arenillas",
+    "Rachelle A. Farkas", "Michelle Kang", "Wyeth W. Wasserman"]
+__email__ = "oriol@cmmt.ubc.ca"
+__organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
+__version__ = "0.0.1"
+
+__all__ = ["ORM"]
 
 import os, sys, re
 import gzip
 
 class Globals(object):
     """
-    This class contains functions that have been designed to work
-    through the whole {GUD} library.
+    This class contains functions designed to work through the
+    whole module.
     """
 
     #-------------#
@@ -22,14 +26,13 @@ class Globals(object):
 
     def parse_file(file_name, gz=False):
         """
-        This function parses any file and yields lines one by one.
+        This function parses a file and yields lines one by one.
 
         @input:
-        file_name {string}
-        gz {boolean} if true, use the gzip module
+        file_name {str}
+        gz {bool} use the gzip module
 
-        @return:
-        line {string}
+        @return: {str}
         """
 
         if os.path.exists(file_name):
@@ -52,14 +55,14 @@ class Globals(object):
 
     def parse_csv_file(file_name, gz=False):
         """
-        This function parses any CSV file and yields lines as a list.
+        This function parses a CSV file and yields lines one by one
+        as a list.
 
         @input:
-        file_name {string}
-        gz {boolean} if true, use the gzip module
+        file_name {str}
+        gz {bool} use the gzip module
 
         @return: {list}
-        line {list}
         """
 
         # For each line... #
@@ -69,14 +72,14 @@ class Globals(object):
 
     def parse_tsv_file(file_name, gz=False):
         """
-        This function parses any TSV file and yields lines as a list.
+        This function parses a TSV file and yields lines one by one
+        as a list.
 
         @input:
-        file_name {string}
-        gz {boolean} if true, use the gzip module
+        file_name {str}
+        gz {bool} use the gzip module
 
         @return: {list}
-        line {list}
         """
 
         # For each line... #
@@ -86,16 +89,14 @@ class Globals(object):
 
     def parse_fasta_file(file_name, gz=False, clean=True):
         """
-        This function parses any FASTA file and yields sequences one
+        This function parses a FASTA file and yields sequences one
         by one as a list in the form [header, sequence].
 
         @input:
-        file_name {string}
-        gz {boolean} if true, use the gzip module
-        clean {boolean} if true, convert non-amino acid res. to Xs
+        file_name {str}
+        gz {bool} use the gzip module
 
-        @return:
-        line {list} header, sequence
+        @return: [header, sequence]
         """
 
         # Initialize #
@@ -125,13 +126,13 @@ class Globals(object):
 
     def write(file_name=None, content=None):
         """
-        This function writes any {content} to a file or to stdout if no
-        file is provided. If the file already exists, it pushed the {content}
-        at the bottom of the file.
+        This function writes {content} to a file or to stdout if no
+        file is provided. Note that {content} will be appended at
+        the end of the file.
 
         @input:
-        file_name {string}
-        content {string}
+        file_name {str}
+        content {str}
         """
         if file_name is not None:
             try:

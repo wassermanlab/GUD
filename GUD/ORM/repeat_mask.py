@@ -1,4 +1,4 @@
-from ..utils.bin_range import BinRange
+from GUD.bin_range import BinRange
 
 from sqlalchemy import (
     Column, Date, Index, PrimaryKeyConstraint, String

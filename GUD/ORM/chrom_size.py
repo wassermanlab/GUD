@@ -1,5 +1,3 @@
-from ..utils.bin_range import BinRange
-
 from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String
 )
