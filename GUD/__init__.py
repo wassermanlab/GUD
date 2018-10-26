@@ -9,10 +9,12 @@ __email__ = "oriol@cmmt.ubc.ca"
 __organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
 __version__ = "0.0.1"
 
-__all__ = ["ORM"]
-
 import os, sys, re
 import gzip
+
+__all__ = ["bin_range", "ORM", "scripts"]
+
+from bin_range import BinRange
 
 class Globals(object):
     """

@@ -17,8 +17,6 @@ class Tad(Base):
     chrom = Column("chrom", String(5), nullable=False)
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
-    hierarchical_level = Column("hierarchical_level", mysql.SMALLINT(unsigned=True),
-        nullable=False)
     cell_or_tissue = Column("cell_or_tissue", String(225), nullable=False)
     experiment_type = Column("experiment_type", String(25), nullable=False)
     restriction_enzyme = Column("restriction_enzyme", String(25), nullable=False)
@@ -28,8 +26,8 @@ class Tad(Base):
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            bin, chrom, start, end, hierarchical_level, cell_or_tissue,
-            experiment_type, restriction_enzyme, source_name
+            chrom, start, end, cell_or_tissue, experiment_type,
+            restriction_enzyme, source_name
         ),
 
         Index("ix_tad", bin, chrom),
@@ -111,8 +109,8 @@ class Tad(Base):
 
     @classmethod
     def feature_exists(cls, session, chrom, start, end,
-        hierarchical_level, cell_or_tissue, experiment_type,
-        restriction_enzyme, source_name): 
+        cell_or_tissue, experiment_type, restriction_enzyme,
+        source_name): 
         """
         Returns whether a feature exists in the database.
         """
@@ -121,7 +119,6 @@ class Tad(Base):
                 cls.chrom == chrom,
                 cls.start == start,
                 cls.end == end,
-                cls.hierarchical_level == hierarchical_level,
                 cls.cell_or_tissue == cell_or_tissue,
                 cls.experiment_type == experiment_type,
                 cls.restriction_enzyme == restriction_enzyme,
@@ -131,12 +128,12 @@ class Tad(Base):
         return session.query(q.exists()).scalar()
 
     def __str__(self):
-        return "{}\t{}\t{}\t{}|{}|{}|{}\t{}".format(self.chrom, self.start,
+        return "{}\t{}\t{}\t{}|{}|{}|{}".format(self.chrom, self.start,
             self.end, self.experiment_type, self.cell_or_tissue,
-            self.source_name, self.restriction_enzyme, self.hierarchical_level)
+            self.source_name, self.restriction_enzyme)
 
     def __repr__(self):
-        return "<Tad(chrom={}, start={}, end={}, level={}, sample={}, experiment={}, enzyme={}, source={}, date={})>".format(
-            self.chrom, self.start, self.end, self.hierarchical_level,
-            self.cell_or_tissue, self.experiment_type, self.restriction_enzyme,
+        return "<Tad(chrom={}, start={}, end={}, sample={}, experiment={}, enzyme={}, source={}, date={})>".format(
+            self.chrom, self.start, self.end, self.cell_or_tissue,
+            self.experiment_type, self.restriction_enzyme,
             self.source_name, self.date)

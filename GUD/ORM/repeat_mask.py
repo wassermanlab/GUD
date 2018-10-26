@@ -37,7 +37,7 @@ class RepeatMask(Base):
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            bin, genoName, genoStart, genoEnd, strand, repName,
+            genoName, genoStart, genoEnd, strand, repName,
             repClass, repFamily, source_name
         ),
 

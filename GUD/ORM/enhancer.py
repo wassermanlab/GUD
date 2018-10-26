@@ -25,7 +25,7 @@ class Enhancer(Base):
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            bin, chrom, start, end, cell_or_tissue,
+            chrom, start, end, cell_or_tissue,
             experiment_type, source_name
         ),
 

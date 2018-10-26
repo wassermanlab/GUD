@@ -26,7 +26,7 @@ class TfBinding(Base):
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            bin, chrom, start, end, tf_name, cell_or_tissue,
+            chrom, start, end, tf_name, cell_or_tissue,
             experiment_type, source_name
         ),
 

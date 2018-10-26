@@ -5,6 +5,7 @@ import argparse
 import ConfigParser
 from datetime import date
 from ftplib import FTP
+import getpass
 import gzip
 from io import BytesIO
 from sqlalchemy import create_engine
@@ -12,8 +13,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
 
 # Import from GUD module
-from GUD import GUDglobals
-from GUD.utils.bin_range import BinRange
+from GUD.bin_range import BinRange
 from GUD.ORM.chrom_size import ChromSize
 from GUD.ORM.conservation import Conservation
 from GUD.ORM.dna_accessibility import DnaAccessibility
@@ -23,12 +23,7 @@ from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.repeat_mask import RepeatMask
 from GUD.ORM.tad import Tad
 from GUD.ORM.tf_binding import TfBinding
-#from ..ORM.tss import TSS
-
-## Read configuration file
-#config = ConfigParser.ConfigParser()
-#config_file = os.path.join(ontarget_path, "config.ini")
-#config.read(config_file)
+#from GUD.ORM.tss import TSS
 
 #-------------#
 # Functions   #
@@ -36,30 +31,32 @@ from GUD.ORM.tf_binding import TfBinding
 
 def parse_args():
     """
-    This function parses arguments provided via command
-    line and returns an {argparse} object.
+    This function parses arguments provided via the command
+    line using argparse.
     """
 
     parser = argparse.ArgumentParser(description="describe what the script does...")
 
-    parser.add_argument("genome", help="Genome assembly (e.g. \"mm10\")")
-    parser.add_argument("database", help="Genome assembly (e.g. \"mm10\")")
-    parser.add_argument("host", help="Genome assembly (e.g. \"mm10\")")
-    parser.add_argument("port", help="Genome assembly (e.g. \"mm10\")")
-    parser.add_argument("user", help="Genome assembly (e.g. \"mm10\")")
-
+    parser.add_argument("genome", help="Genome assembly")
+    
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=config.get("MySQL", "db"),
-        help="Database name (e.g. \"mm10\"; default from \"config.ini\" = %s)" % config.get("MySQL", "db"))
-    mysql_group.add_argument("-H", "--host", default=config.get("MySQL", "host"),
-        help="Host name (e.g. \"ontarget.cmmt.ubc.ca\"; default from \"config.ini\" = %s)" % config.get("MySQL", "host"))
-#    mysql_group.add_argument("-p", "--pass", default="", help="User pass")
-    mysql_group.add_argument("-P", "--port", default=config.get("MySQL", "port"),
-        help="User name (e.g. \"5506\"; default from \"config.ini\" = %s)" % config.get("MySQL", "port"))
-    mysql_group.add_argument("-u", "--user", help="User name", required)
+    mysql_group.add_argument("-d", "--db",
+        help="Database name (default = input genome assembly)")
+    mysql_group.add_argument("-H", "--host", default="localhost",
+        help="Host name (default = localhost)")
+    mysql_group.add_argument("-P", "--port", default=5506, type=int,
+        help="Port number (default = 5506)")
+    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
+        help="User name (default = current user)")
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    
+    # Set default
+    if args.db is None:
+        args.db = args.genome
+
+    return args
 
 def initialize_gud_db(user, host, port, db, genome):
     """

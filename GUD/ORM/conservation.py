@@ -27,7 +27,7 @@ class Conservation(Base):
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            bin, chrom, chromStart, chromEnd, source_name
+            chrom, chromStart, chromEnd, source_name
         ),
 
         Index("ix_conservation", bin, chrom),

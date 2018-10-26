@@ -26,7 +26,7 @@ class HistoneModification(Base):
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            bin, chrom, start, end, histone_type, cell_or_tissue,
+            chrom, start, end, histone_type, cell_or_tissue,
             experiment_type, source_name
         ),
 

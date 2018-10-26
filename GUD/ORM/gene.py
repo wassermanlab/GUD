@@ -44,7 +44,7 @@ class Gene(Base):
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            bin, name, chrom, strand, txStart, txEnd, source_name
+            name, chrom, strand, txStart, txEnd, source_name
         ),
 
         Index("ix_gene", bin, chrom),
