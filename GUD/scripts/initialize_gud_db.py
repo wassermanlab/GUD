@@ -118,14 +118,12 @@ def initialize_gud_db(user, host, port, db, genome):
             genome, directory, file_name):
             # Split line
             line = line.split("\t")
-            print(line)
-            exit(0)
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[1])
             if not m.group(1) in chroms: continue
             # Get bin
-            start = int(line[4])
-            end = int(line[5])
+            start = int(line[2])
+            end = int(line[3])
             bin = BinRange().binFromRange(start, end)
             # Add row
             rows.append(
@@ -185,8 +183,6 @@ def initialize_gud_db(user, host, port, db, genome):
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[2])
             if not m.group(1) in chroms: continue
-            print(line)
-            exit(0)
             # Get bin
             start = int(line[4])
             end = int(line[5])
@@ -244,11 +240,9 @@ def initialize_gud_db(user, host, port, db, genome):
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[5])
             if not m.group(1) in chroms: continue
-            print(line)
-            exit(0)
             # Get bin
-            start = int(line[2])
-            end = int(line[3])
+            start = int(line[6])
+            end = int(line[7])
             bin = BinRange().binFromRange(start, end)
             # Add row
             rows.append(
