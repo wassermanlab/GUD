@@ -1,4 +1,4 @@
-from GUD.bin_range import BinRange
+from binning import containing_bins
 
 from sqlalchemy import (
     Column, Date, Index, PrimaryKeyConstraint, String
@@ -50,7 +50,7 @@ class Tad(Base):
         """
 
         if not bins and compute_bins:
-            bins = BinRange().allBinsInRange(start, end)
+            bins = containing_bins(start, end)
 
         q = session.query(cls).filter(
                 cls.chrom == chrom, cls.end > start, cls.start < end)
@@ -72,7 +72,7 @@ class Tad(Base):
         """
 
         if not bins and compute_bins:
-            bins = BinRange().allBinsInRange(start, end)
+            bins = containing_bins(start, end)
 
         q = session.query(cls).filter(
                 cls.chrom == chrom, cls.start <= start, cls.end >= end)
@@ -94,7 +94,7 @@ class Tad(Base):
         """
 
         if not bins and compute_bins:
-            bins = BinRange().allBinsInRange(start, end)
+            bins = containing_bins(start, end)
 
         q = session.query(cls).filter(
                 cls.chrom == chrom, cls.start < end, cls.end > start)

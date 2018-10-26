@@ -2,6 +2,7 @@
 
 import os, sys, re
 import argparse
+from binning import assign_bin
 import ConfigParser
 from datetime import date
 from ftplib import FTP
@@ -13,7 +14,6 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
 
 # Import from GUD module
-from GUD.bin_range import BinRange
 from GUD.ORM.chrom_size import ChromSize
 from GUD.ORM.conservation import Conservation
 from GUD.ORM.dna_accessibility import DnaAccessibility
@@ -124,7 +124,7 @@ def initialize_gud_db(user, host, port, db, genome):
             # Get bin
             start = int(line[2])
             end = int(line[3])
-            bin = BinRange().binFromRange(start, end)
+            bin = assign_bin(start, end)
             # Add row
             rows.append(
                 {
@@ -186,7 +186,7 @@ def initialize_gud_db(user, host, port, db, genome):
             # Get bin
             start = int(line[4])
             end = int(line[5])
-            bin = BinRange().binFromRange(start, end)
+            bin = assign_bin(start, end)
             # Add row
             rows.append(
                 {
@@ -243,7 +243,7 @@ def initialize_gud_db(user, host, port, db, genome):
             # Get bin
             start = int(line[6])
             end = int(line[7])
-            bin = BinRange().binFromRange(start, end)
+            bin = assign_bin(start, end)
             # Add row
             rows.append(
                 {

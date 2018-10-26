@@ -2,6 +2,7 @@
 
 import os, sys, re
 import argparse
+import binning
 import ConfigParser
 from datetime import date
 import getpass

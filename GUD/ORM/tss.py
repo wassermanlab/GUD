@@ -1,5 +1,4 @@
-from GUD.bin_range import BinRange
-
+import binning
 from Bio.SeqFeature import FeatureLocation
 
 from sqlalchemy import (

@@ -12,9 +12,7 @@ __version__ = "0.0.1"
 import os, sys, re
 import gzip
 
-__all__ = ["bin_range", "ORM"]
-
-from bin_range import BinRange
+__all__ = ["ORM"]
 
 class Globals(object):
     """
