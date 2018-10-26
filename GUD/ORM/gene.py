@@ -1,5 +1,5 @@
-from lib.GUD.utils.bin_range import BinRange
-from lib.GUD.utils.region import Region
+from ..utils.bin_range import BinRange
+from ..utils.region import Region
 
 from Bio.SeqFeature import FeatureLocation
 
