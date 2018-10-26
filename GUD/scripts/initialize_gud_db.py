@@ -329,7 +329,8 @@ def get_ftp_dir_and_file(genome, data_type):
     elif data_type == "conservation":
         regexp = re.compile("(multiz\d+way.txt.gz)")
         for file_name in sorted(filter(regexp.search, ftp.nlst("database"))):
-            print regexp.match(file_name)
+            m = re.search(regexp, file_name)
+            print m.group(1)
             exit(0)
             return "database", regexp.match(file_name)
 
