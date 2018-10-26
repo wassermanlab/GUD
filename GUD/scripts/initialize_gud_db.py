@@ -126,8 +126,8 @@ def initialize_gud_db(user, host, port, db, genome):
             print(line)
             exit(0)
             # Get bin
-            start = int(line[2])
-            end = int(line[3])
+            start = int(line[4])
+            end = int(line[5])
             bin = BinRange().binFromRange(start, end)
             # Add row
             rows.append(
@@ -190,8 +190,8 @@ def initialize_gud_db(user, host, port, db, genome):
             print(line)
             exit(0)
             # Get bin
-            start = int(line[2])
-            end = int(line[3])
+            start = int(line[4])
+            end = int(line[5])
             bin = BinRange().binFromRange(start, end)
             # Add row
             rows.append(
