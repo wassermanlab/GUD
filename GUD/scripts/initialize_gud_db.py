@@ -113,6 +113,8 @@ def initialize_gud_db(user, host, port, db, genome):
         table.metadata.create_all(engine)
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "conservation")
+        print(file_name)
+        exit(0)
         # Get source name
         source_name = re.search("^.+/(.+).txt.gz$", file_name)
         # Download data
