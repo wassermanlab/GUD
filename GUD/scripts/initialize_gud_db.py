@@ -113,8 +113,6 @@ def initialize_gud_db(user, host, port, db, genome):
         table.metadata.create_all(engine)
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "conservation")
-        print(directory, file_name)
-        exit(0)
         # Download data
         for line in fetch_lines_from_ftp_file(
             genome, directory, file_name):
@@ -330,9 +328,7 @@ def get_ftp_dir_and_file(genome, data_type):
         regexp = re.compile("(multiz\d+way.txt.gz)")
         for file_name in sorted(filter(regexp.search, ftp.nlst("database"))):
             m = re.search(regexp, file_name)
-            print m.group(1)
-            exit(0)
-            return "database", regexp.match(file_name)
+            return "database", m.group(1)
 
 def fetch_lines_from_ftp_file(genome, directory, file_name):
     
