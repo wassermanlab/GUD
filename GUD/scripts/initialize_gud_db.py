@@ -352,6 +352,8 @@ def fetch_lines_from_ftp_file(genome, directory, file_name):
             f = BIO
         # For each line...
         for line in f:
+            print(line)
+            exit(0)
             yield line.decode("UTF-8").strip("\n")
 
 def handle_bytes(bytes):
