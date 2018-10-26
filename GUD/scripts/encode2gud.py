@@ -4,28 +4,19 @@ import os, sys, re
 import argparse
 import ConfigParser
 from datetime import date
+import getpass
 import pybedtools
 from sqlalchemy import create_engine
 from sqlalchemy.orm import mapper, scoped_session, sessionmaker
 from sqlalchemy_utils import database_exists
 import warnings
 
-# Append OnTarget module to path
-ontarget_path = os.path.join(os.path.dirname(__file__),
-    os.pardir, os.pardir, os.pardir)
-sys.path.append(ontarget_path)
-
-# Import from OnTarget
-from lib import parse_tsv_file
-from lib.GUD.ORM.dna_accessibility import DnaAccessibility
-from lib.GUD.ORM.histone_modification import HistoneModification
-from lib.GUD.ORM.tf_binding import TfBinding
-from lib.GUD.utils.bin_range import BinRange
-
-# Read configuration file
-config = ConfigParser.ConfigParser()
-config_file = os.path.join(ontarget_path, "config.ini")
-config.read(config_file)
+# Import from GUD module
+from GUD import GUDglobals
+from GUD.bin_range import BinRange
+from GUD.ORM.dna_accessibility import DnaAccessibility
+from GUD.ORM.histone_modification import HistoneModification
+from GUD.ORM.tf_binding import TfBinding
 
 #-------------#
 # Classes     #
@@ -39,43 +30,47 @@ class Model(object): pass
 
 def parse_args():
     """
-    This function parses arguments provided via command
-    line and returns an {argparse} object.
+    This function parses arguments provided via the command
+    line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="describe what the script does...")
+    parser = argparse.ArgumentParser(description="this script inserts accessibility, histone and tf data from ENCODE into GUD. arguments \"metadata\" and \"directory\" refer to the execution \"xargs -n 1 curl -O -L < file.txt\".")
 
-    parser.add_argument("genome", help="Genome assembly (e.g. \"mm10\")")
-    parser.add_argument("file", help="File containing the metadata (i.e. from \"xargs -n 1 curl -O -L < histone-modification.txt\")")
-    parser.add_argument("dir", help="Directory containing downloaded files")
+    parser.add_argument("genome", help="Genome assembly")
+    parser.add_argument("metadata", help="Metadata file")
+    parser.add_argument("directory", help="Downloads directory")
 
     feats = ["accessibility", "histone", "tf"]
-    parser.add_argument("feat_type", choices=feats, help="Type of genomic feature (i.e. %s)" % ", ".join(feats), metavar="feature")
+    parser.add_argument("feat_type", choices=feats, help="Type of genomic feature", metavar="feature_type")
 
     # Optional args
     parser.add_argument("--source", default="ENCODE", help="Source name (e.g. \"PMID:22955616\"; default = \"ENCODE\")")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=config.get("MySQL", "db"),
-        help="Database name (e.g. \"mm10\"; default from \"config.ini\" = %s)" % config.get("MySQL", "db"))
-    mysql_group.add_argument("-H", "--host", default=config.get("MySQL", "host"),
-        help="Host name (e.g. \"ontarget.cmmt.ubc.ca\"; default from \"config.ini\" = %s)" % config.get("MySQL", "host"))
-#    mysql_group.add_argument("-p", "--pass", default="", help="User pass")
-    mysql_group.add_argument("-P", "--port", default=config.get("MySQL", "port"),
-        help="User name (e.g. \"5506\"; default from \"config.ini\" = %s)" % config.get("MySQL", "port"))
-    mysql_group.add_argument("-u", "--user", default=config.get("MySQL", "user"),
-        help="User name (e.g. \"ontarget_r\"; default from \"config.ini\" = %s)" % config.get("MySQL", "user"))
+    mysql_group.add_argument("-d", "--db",
+        help="Database name (default = input genome assembly)")
+    mysql_group.add_argument("-H", "--host", default="localhost",
+        help="Host name (default = localhost)")
+    mysql_group.add_argument("-P", "--port", default=5506, type=int,
+        help="Port number (default = 5506)")
+    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
+        help="User name (default = current user)")
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    
+    # Set default
+    if args.db is None:
+        args.db = args.genome
 
-def insert_encode_to_gud(user, host, port, db, genome,
+    return args
+
+def insert_encode_to_gud_db(user, host, port, db, genome,
     file_name, dir_name, feat_type, source_name):
-    """
-    """
 
     # Initialize
     metadata = {}
+    chroms = list(map(str, range(1, 23))) + ["X", "Y", "M"]
     db_name = "mysql://{}:@{}:{}/{}".format(
         user, host, port, db)
     if not database_exists(db_name):
@@ -105,7 +100,7 @@ def insert_encode_to_gud(user, host, port, db, genome,
     mapper(Model, table.__table__)
 
     # For each line...
-    for line in parse_tsv_file(file_name):
+    for line in GUDglobals.parse_tsv_file(file_name):
 #        line = ['File accession', 'File format', 'Output type', 'Experiment accession', 'Assay',
 #                'Biosample term id', 'Biosample term name', 'Biosample type', 'Biosample organism',
 #                'Biosample treatments', 'Biosample treatments amount', 'Biosample treatments duration',
@@ -155,12 +150,12 @@ def insert_encode_to_gud(user, host, port, db, genome,
             if os.path.exists(file_name):
                 try:
                     # For each line...
-                    for line in parse_tsv_file(file_name, gz=True):
+                    for line in GUDglobals.parse_tsv_file(file_name, gz=True):
                         # Skip if not enough elements
                         if len(line) < 3: continue
                         # Ignore non-standard chroms, scaffolds, etc.
-                        m = re.search("^chr\w{1,2}$", line[0])
-                        if not m: continue
+                        m = re.search("^chr(\S+)$", line[0])
+                        if not m.group(1) in chroms: continue
                         # Skip if not start or end
                         if not line[1].isdigit(): continue
                         if not line[2].isdigit(): continue
@@ -175,27 +170,23 @@ def insert_encode_to_gud(user, host, port, db, genome,
             bed_obj = pybedtools.BedTool("\n".join(lines), from_string=True)
             # Sort and merge
             for chrom, start, end in bed_obj.sort().merge():
-                # Get bins
-                bins = BinRange().allBinsInRange(int(start), int(end))
-                # For each bin...
-                for bin in bins:
-                    # Create model
-                    model = Model()
-                    model.bin = bin
-                    model.chrom = chrom
-                    model.start = start
-                    model.end = end
-                    model.cell_or_tissue = cell_or_tissue
-                    model.experiment_type = experiment_type
-                    model.source_name = source_name
-                    model.date = today
-                    if feat_type == "histone":
-                        model.histone_type = experiment_target
-                    if feat_type == "tf":
-                        model.tf_name = experiment_target
-                    # Upsert model & commit
-                    session.merge(model)
-                    session.commit()
+                # Create model
+                model = Model()
+                model.bin = BinRange().binFromRange(start, end)
+                model.chrom = chrom
+                model.start = start
+                model.end = end
+                model.cell_or_tissue = cell_or_tissue
+                model.experiment_type = experiment_type
+                model.source_name = source_name
+                model.date = today
+                if feat_type == "histone":
+                    model.histone_type = experiment_target
+                if feat_type == "tf":
+                    model.tf_name = experiment_target
+                # Upsert model & commit
+                session.merge(model)
+                session.commit()
             # Empty cache
             pybedtools.cleanup()
 
@@ -208,7 +199,7 @@ if __name__ == "__main__":
     # Parse arguments
     args = parse_args()
 
-    # Insert ENCODE data to GUD
-    insert_encode_to_gud(args.user, args.host, args.port,
+    # Insert ENCODE data to GUD database
+    insert_encode_to_gud_db(args.user, args.host, args.port,
         args.db, args.genome, args.file, args.dir,
         args.feat_type, args.source)

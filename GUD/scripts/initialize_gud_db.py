@@ -59,8 +59,6 @@ def parse_args():
     return args
 
 def initialize_gud_db(user, host, port, db, genome):
-    """
-    """
 
     # Initialize
     chroms = list(map(str, range(1, 23))) + ["X", "Y", "M"]
@@ -307,11 +305,11 @@ def get_ftp_dir_and_file(genome, data_type):
     ftp = FTP("hgdownload.soe.ucsc.edu")
     ftp.login()
 
-    # Change into "genome" directory
+    # Change into "genome" folder
     try:
         ftp.cwd(os.path.join("goldenPath", genome))
     except:
-        raise ValueError("Cannot connect to FTP goldenPath site: %s" % genome)
+        raise ValueError("Cannot connect to FTP goldenPath folder: %s" % genome)
 
     # Fetch bigZips and database files
     if data_type == "chrom_size":
@@ -334,11 +332,11 @@ def fetch_lines_from_ftp_file(genome, directory, file_name):
     ftp.login()
     BIO = BytesIO()
 
-    # Change into "genome" directory
+    # Change into "genome" "directory" folder
     try:
         ftp.cwd(os.path.join("goldenPath", genome, directory))
     except:
-        raise ValueError("Cannot connect to FTP goldenPath site: %s/%s" % (genome, directory))
+        raise ValueError("Cannot connect to FTP goldenPath folder: %s/%s" % (genome, directory))
 
     # If valid file...
     if file_name in ftp.nlst():
