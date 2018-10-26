@@ -72,7 +72,7 @@ class Globals(object):
         """
 
         # For each line... #
-        for line in parse_file(file_name, gz):
+        for line in self.parse_file(file_name, gz):
             line = line.split(",")
             yield line
 
@@ -89,7 +89,7 @@ class Globals(object):
         """
 
         # For each line... #
-        for line in parse_file(file_name, gz):
+        for line in self.parse_file(file_name, gz):
             line = line.split("\t")
             yield line
 
@@ -109,7 +109,7 @@ class Globals(object):
         header = ""
         sequence = ""
         # For each line... #
-        for line in parse_file(file_name, gz):
+        for line in self.parse_file(file_name, gz):
             if len(line) == 0: continue
             if line.startswith("#"): continue
             if line.startswith(">"):
