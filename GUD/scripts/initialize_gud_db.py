@@ -118,11 +118,11 @@ def initialize_gud_db(user, host, port, db, genome):
             genome, directory, file_name):
             # Split line
             line = line.split("\t")
+            print(line)
+            exit(0)
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[1])
             if not m.group(1) in chroms: continue
-            print(line)
-            exit(0)
             # Get bin
             start = int(line[4])
             end = int(line[5])
