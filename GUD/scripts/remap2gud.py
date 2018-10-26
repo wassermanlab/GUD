@@ -130,4 +130,4 @@ if __name__ == "__main__":
 
     # Insert ReMap data to TF-binding table
     insert_remap_to_gud(args.user, args.host, args.port,
-        args.db, args.dir, args.source)
+        args.db, args.directory, args.source)

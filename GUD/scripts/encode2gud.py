@@ -67,7 +67,7 @@ def parse_args():
     return args
 
 def insert_encode_to_gud_db(user, host, port, db, genome,
-    file_name, dir_name, feat_type, source_name):
+    metadata_file, directory, feat_type, source_name):
 
     # Initialize
     metadata = {}
@@ -100,7 +100,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
     mapper(Model, table.__table__)
 
     # For each line...
-    for line in GUDglobals.parse_tsv_file(file_name):
+    for line in GUDglobals.parse_tsv_file(metadata_file):
 #        line = ['File accession', 'File format', 'Output type', 'Experiment accession', 'Assay',
 #                'Biosample term id', 'Biosample term name', 'Biosample type', 'Biosample organism',
 #                'Biosample treatments', 'Biosample treatments amount', 'Biosample treatments duration',
@@ -146,7 +146,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         # For each accession...
         for accession in sorted(metadata[(cell_or_tissue, experiment_type, experiment_target)]):                
             # If accession file exists
-            file_name = os.path.join(dir_name, "%s.bed.gz" % accession)
+            file_name = os.path.join(directory, "%s.bed.gz" % accession)
             if os.path.exists(file_name):
                 try:
                     # For each line...
@@ -201,5 +201,5 @@ if __name__ == "__main__":
 
     # Insert ENCODE data to GUD database
     insert_encode_to_gud_db(args.user, args.host, args.port,
-        args.db, args.genome, args.file, args.dir,
+        args.db, args.genome, args.metadata, args.directory,
         args.feat_type, args.source)
