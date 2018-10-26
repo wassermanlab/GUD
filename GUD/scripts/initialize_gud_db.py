@@ -63,6 +63,7 @@ def initialize_gud_db(user, host, port, db, genome):
     """
 
     # Initialize
+    chroms = list(map(str, range(1, 23))) + ["X", "Y", "M"]
     db_name = "mysql://{}:@{}:{}/{}".format(
         user, host, port, db)
     if not database_exists(db_name):
@@ -78,7 +79,6 @@ def initialize_gud_db(user, host, port, db, genome):
     if not engine.has_table("chrom_size"):
         # Initialize
         rows = []
-        chroms = list(map(str, range(1, 23))) + ["X", "Y", "M"]
         table = ChromSize()
         table.metadata.bind = engine
         # Create table
@@ -121,14 +121,16 @@ def initialize_gud_db(user, host, port, db, genome):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr\w{1,2}$", line[1])
-            if not m: continue
+            m = re.search("^chr(\S+)$", line[0])
+            if not m.group(1) in chroms: continue
+            # Get bin
             start = int(line[2])
             end = int(line[3])
+            bin = BinRange().binFromRange(start, end)
             # Add row
             rows.append(
                 {
-                    "bin": BinRange().binFromRange(start, end),
+                    "bin": bin,
                     "chrom": line[1],
                     "chromStart": start,
                     "chromEnd": end,
@@ -183,14 +185,16 @@ def initialize_gud_db(user, host, port, db, genome):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr\w{1,2}$", line[2])
-            if not m: continue
-            start = int(line[4])
-            end = int(line[5])
+            m = re.search("^chr(\S+)$", line[0])
+            if not m.group(1) in chroms: continue
+            # Get bin
+            start = int(line[2])
+            end = int(line[3])
+            bin = BinRange().binFromRange(start, end)
             # Add row
             rows.append(
                 {
-                    "bin": BinRange().binFromRange(start, end),
+                    "bin": bin,
                     "name": line[1],
                     "chrom": line[2],
                     "strand": line[3],
@@ -238,14 +242,16 @@ def initialize_gud_db(user, host, port, db, genome):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr\w{1,2}$", line[5])
-            if not m: continue
-            start = int(line[6])
-            end = int(line[7])
+            m = re.search("^chr(\S+)$", line[0])
+            if not m.group(1) in chroms: continue
+            # Get bin
+            start = int(line[2])
+            end = int(line[3])
+            bin = BinRange().binFromRange(start, end)
             # Add row
             rows.append(
                 {
-                    "bin": BinRange().binFromRange(start, end),
+                    "bin": bin,
                     "swScore": line[1],
 #                    "milliDiv": line[2],
 #                    "milliDel": line[3],
