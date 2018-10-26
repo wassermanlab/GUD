@@ -5,6 +5,7 @@ import argparse
 from binning import assign_bin
 import ConfigParser
 from datetime import date
+import getpass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import mapper, scoped_session, sessionmaker
 from sqlalchemy_utils import database_exists
@@ -29,7 +30,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts tf data from ReMap into GUD. \"directory\" refer to where \"*_TF_archive_all_macs2_*.tar.gz\" was uncompressed."")
+    parser = argparse.ArgumentParser(description="this script inserts tf data from ReMap into GUD. \"directory\" refer to where \"*_TF_archive_all_macs2_*.tar.gz\" was uncompressed.\"")
 
     parser.add_argument("directory", help="Downloads directory")
 
