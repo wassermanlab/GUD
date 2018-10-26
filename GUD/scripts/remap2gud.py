@@ -85,13 +85,14 @@ def insert_remap_to_gud(user, host, port, db,
         rows = []
         # Skip if not BED file
         if not file_name.endswith(".bed") and not file_name.endswith(".bed.gz"): continue
+        # If compressed file...
+        if file_name.endswith(".gz"): gz = True
+        else: gz = False
         # Get TF name
         m = re.search("^remap\d+\_(\S+)\_all_macs2", file_name)
         tf_name = m.group(1)
         # For each line...
-        print(os.path.join(directory, file_name))
-        exit(0)
-        for line in GUDglobals.parse_tsv_file(os.path.join(directory, file_name)):
+        for line in GUDglobals.parse_tsv_file(os.path.join(directory, file_name), gz=gz):
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[0])
             if not m.group(1) in GUDglobals.chroms: continue
