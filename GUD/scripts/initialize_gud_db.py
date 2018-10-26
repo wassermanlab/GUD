@@ -78,22 +78,21 @@ def initialize_gud_db(user, host, port, db, genome):
     if not engine.has_table("chrom_size"):
         # Initialize
         rows = []
+        chroms = list(map(str, range(1, 23))) + ["X", "Y", "M"]
         table = ChromSize()
         table.metadata.bind = engine
         # Create table
         table.metadata.create_all(engine)
         # Get UCSC FTP file
         file_name = get_ucsc_ftp_files(genome, "chrom_size")
-        print(file_name)
-        exit(0)
         # Download data
         for line in fetch_lines_from_ucsc_ftp_file(
             genome, file_name):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr\w{1,2}$", line[0])
-            if not m: continue
+            m = re.search("^chr(\S+)$", line[0])
+            if not m.group(1) in chroms: continue
             # Add row
             rows.append(
                 {
