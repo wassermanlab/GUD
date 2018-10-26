@@ -103,51 +103,51 @@ def initialize_gud_db(user, host, port, db, genome):
         # Insert rows to table
         engine.execute(table.__table__.insert(), rows)
     
-#    # Create conservation table
-#    if not engine.has_table("conservation"):
-#        # Initialize
-#        rows = []
-#        table = Conservation()
-#        table.metadata.bind = engine
-#        # Create table
-#        table.metadata.create_all(engine)
-#        # Get UCSC FTP file
-#        directory, file_name = get_ftp_dir_and_file(genome, "conservation")
-#        # Get source name
-#        source_name = re.search("^.+/(.+).txt.gz$", file_name)
-#        # Download data
-#        for line in fetch_lines_from_ftp_file(
-#            genome, directory, file_name):
-#            # Split line
-#            line = line.split("\t")
-#            # Ignore non-standard chroms, scaffolds, etc.
-#            m = re.search("^chr(\S+)$", line[0])
-#            if not m.group(1) in chroms: continue
-#            # Get bin
-#            start = int(line[2])
-#            end = int(line[3])
-#            bin = BinRange().binFromRange(start, end)
-#            # Add row
-#            rows.append(
-#                {
-#                    "bin": bin,
-#                    "chrom": line[1],
-#                    "chromStart": start,
-#                    "chromEnd": end,
-##                    "extFile": line[4],
-##                    "offset": line[5],
-#                    "score": line[6],
-#                    "source_name": source_name.group(1),
-#                    "date": today
-#                }
-#            )
-#            # Insert rows in bulks of 100,000
-#            if len(rows) == 100000:
-#                engine.execute(table.__table__.insert(), rows)
-#                # Clear rows
-#                rows = []
-#        # Insert remaining rows
-#        engine.execute(table.__table__.insert(), rows)
+    # Create conservation table
+    if not engine.has_table("conservation"):
+        # Initialize
+        rows = []
+        table = Conservation()
+        table.metadata.bind = engine
+        # Create table
+        table.metadata.create_all(engine)
+        # Get UCSC FTP file
+        directory, file_name = get_ftp_dir_and_file(genome, "conservation")
+        # Get source name
+        source_name = re.search("^.+/(.+).txt.gz$", file_name)
+        # Download data
+        for line in fetch_lines_from_ftp_file(
+            genome, directory, file_name):
+            # Split line
+            line = line.split("\t")
+            # Ignore non-standard chroms, scaffolds, etc.
+            m = re.search("^chr(\S+)$", line[1])
+            if not m.group(1) in chroms: continue
+            # Get bin
+            start = int(line[2])
+            end = int(line[3])
+            bin = BinRange().binFromRange(start, end)
+            # Add row
+            rows.append(
+                {
+                    "bin": bin,
+                    "chrom": line[1],
+                    "chromStart": start,
+                    "chromEnd": end,
+#                    "extFile": line[4],
+#                    "offset": line[5],
+                    "score": line[6],
+                    "source_name": source_name.group(1),
+                    "date": today
+                }
+            )
+            # Insert rows in bulks of 100,000
+            if len(rows) == 100000:
+                engine.execute(table.__table__.insert(), rows)
+                # Clear rows
+                rows = []
+        # Insert remaining rows
+        engine.execute(table.__table__.insert(), rows)
 
     # Create DNA accessibility table
     if not engine.has_table("dna_accessibility"):
@@ -183,7 +183,7 @@ def initialize_gud_db(user, host, port, db, genome):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[0])
+            m = re.search("^chr(\S+)$", line[2])
             if not m.group(1) in chroms: continue
             # Get bin
             start = int(line[2])
@@ -240,7 +240,7 @@ def initialize_gud_db(user, host, port, db, genome):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[0])
+            m = re.search("^chr(\S+)$", line[5])
             if not m.group(1) in chroms: continue
             # Get bin
             start = int(line[2])
@@ -352,8 +352,6 @@ def fetch_lines_from_ftp_file(genome, directory, file_name):
             f = BIO
         # For each line...
         for line in f:
-            print(line)
-            exit(0)
             yield line.decode("UTF-8").strip("\n")
 
 def handle_bytes(bytes):
