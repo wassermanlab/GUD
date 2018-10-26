@@ -172,7 +172,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             for chrom, start, end in bed_obj.sort().merge():
                 # Create model
                 model = Model()
-                model.bin = assign_bin(start, end)
+                model.bin = assign_bin(int(start), int(end))
                 model.chrom = chrom
                 model.start = start
                 model.end = end
