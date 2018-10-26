@@ -14,6 +14,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
 
 # Import from GUD module
+from GUD import GUDglobals
 from GUD.ORM.chrom_size import ChromSize
 from GUD.ORM.conservation import Conservation
 from GUD.ORM.dna_accessibility import DnaAccessibility
@@ -61,7 +62,6 @@ def parse_args():
 def initialize_gud_db(user, host, port, db, genome):
 
     # Initialize
-    chroms = list(map(str, range(1, 23))) + ["X", "Y", "M"]
     db_name = "mysql://{}:@{}:{}/{}".format(
         user, host, port, db)
     if not database_exists(db_name):
@@ -90,7 +90,7 @@ def initialize_gud_db(user, host, port, db, genome):
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[0])
-            if not m.group(1) in chroms: continue
+            if not m.group(1) in GUDglobals.chroms: continue
             # Add row
             rows.append(
                 {

@@ -21,6 +21,12 @@ class Globals(object):
     """
 
     #-------------#
+    # Definitions #
+    #-------------#
+
+    chroms = list(map(str, range(1, 23))) + ["X", "Y", "M"]
+
+    #-------------#
     # Parsers     #
     #-------------#
 

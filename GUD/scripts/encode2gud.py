@@ -2,7 +2,7 @@
 
 import os, sys, re
 import argparse
-import binning
+from binning import assign_bin
 import ConfigParser
 from datetime import date
 import getpass
@@ -71,7 +71,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
     # Initialize
     metadata = {}
-    chroms = list(map(str, range(1, 23))) + ["X", "Y", "M"]
     db_name = "mysql://{}:@{}:{}/{}".format(
         user, host, port, db)
     if not database_exists(db_name):
@@ -156,7 +155,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         if len(line) < 3: continue
                         # Ignore non-standard chroms, scaffolds, etc.
                         m = re.search("^chr(\S+)$", line[0])
-                        if not m.group(1) in chroms: continue
+                        if not m.group(1) in GUDglobals.chroms: continue
                         # Skip if not start or end
                         if not line[1].isdigit(): continue
                         if not line[2].isdigit(): continue
@@ -173,7 +172,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             for chrom, start, end in bed_obj.sort().merge():
                 # Create model
                 model = Model()
-                model.bin = BinRange().binFromRange(start, end)
+                model.bin = assign_bin(start, end)
                 model.chrom = chrom
                 model.start = start
                 model.end = end

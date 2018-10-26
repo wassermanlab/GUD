@@ -2,26 +2,16 @@
 
 import os, sys, re
 import argparse
+from binning import assign_bin
 import ConfigParser
 from datetime import date
 from sqlalchemy import create_engine
 from sqlalchemy.orm import mapper, scoped_session, sessionmaker
 from sqlalchemy_utils import database_exists
 
-# Append OnTarget module to path
-ontarget_path = os.path.join(os.path.dirname(__file__),
-    os.pardir, os.pardir, os.pardir)
-sys.path.append(ontarget_path)
-
-# Import from OnTarget
-from lib import parse_tsv_file
-from lib.GUD.ORM.tf_binding import TfBinding
-from lib.GUD.utils.bin_range import BinRange
-
-# Read configuration file
-config = ConfigParser.ConfigParser()
-config_file = os.path.join(ontarget_path, "config.ini")
-config.read(config_file)
+# Import from GUD module
+from GUD import GUDglobals
+from GUD.ORM.tf_binding import TfBinding
 
 #-------------#
 # Classes     #
@@ -62,11 +52,8 @@ def parse_args():
 
 def insert_remap_to_gud(user, host, port, db,
     directory, source_name):
-    """
-    """
 
     # Initialize
-    merged_models = []
     db_name = "mysql://{}:@{}:{}/{}".format(
         user, host, port, db)
     if not database_exists(db_name):
@@ -99,34 +86,32 @@ def insert_remap_to_gud(user, host, port, db,
         m = re.search("^remap\d+\_(\S+)\_all_macs2", file_name)
         tf_name = m.group(1)
         # For each line...
-        for line in parse_tsv_file(
+        for line in GUDglobals.parse_tsv_file(
             os.path.join(directory, file_name), gz=gz):
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr\w{1,2}$", line[0])
-            if not m: continue
+            m = re.search("^chr(\S+)$", line[0])
+            if not m.group(1) in GUDglobals.chroms: continue
             # Get bins
             start = int(line[1])
             end = int(line[2])
-            bins = BinRange().allBinsInRange(start, end)
+            bin = assign_bin(start, end)
             # Get sample
             m = re.search("^.+\..+\.(.+)$", line[3])
             cell_or_tissue = m.group(1)
-            # For each bin...
-            for bin in bins:
-                # Create model
-                model = Model()
-                model.bin = bin
-                model.chrom = line[0]
-                model.start = start
-                model.end = end
-                model.tf_name = tf_name
-                model.cell_or_tissue = cell_or_tissue
-                model.experiment_type = "ChIP-seq"
-                model.source_name = source_name
-                model.date = today
-                # Upsert model & commit
-                session.merge(model)
-                session.commit()
+            # Create model
+            model = Model()
+            model.bin = bin
+            model.chrom = line[0]
+            model.start = start
+            model.end = end
+            model.tf_name = tf_name
+            model.cell_or_tissue = cell_or_tissue
+            model.experiment_type = "ChIP-seq"
+            model.source_name = source_name
+            model.date = today
+            # Upsert model & commit
+            session.merge(model)
+            session.commit()
 
 #-------------#
 # Main        #
