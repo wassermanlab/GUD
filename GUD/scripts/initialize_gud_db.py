@@ -101,6 +101,8 @@ def initialize_gud_db(user, host, port, db, genome):
             )
         # Insert rows to table
         engine.execute(table.__table__.insert(), rows)
+    
+    exit(0)
 
     # Create conservation table
     if not engine.has_table("conservation"):
