@@ -99,6 +99,8 @@ def initialize_gud_db(user, host, port, db, genome):
                     "size": line[1]
                 }
             )
+        print(rows)
+        exit(0)
         # Insert rows to table
         engine.execute(table.__table__.insert(), rows)
     
