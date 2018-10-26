@@ -30,7 +30,7 @@ class Globals(object):
     # Parsers     #
     #-------------#
 
-    def parse_file(file_name, gz=False):
+    def parse_file(self, file_name, gz=False):
         """
         This function parses a file and yields lines one by one.
 
@@ -59,7 +59,7 @@ class Globals(object):
         else:
             raise ValueError("File %s does not exist!" % file_name)
 
-    def parse_csv_file(file_name, gz=False):
+    def parse_csv_file(self, file_name, gz=False):
         """
         This function parses a CSV file and yields lines one by one
         as a list.
@@ -72,11 +72,11 @@ class Globals(object):
         """
 
         # For each line... #
-        for line in GUDglobals.parse_file(file_name, gz):
+        for line in self.parse_file(file_name, gz):
             line = line.split(",")
             yield line
 
-    def parse_tsv_file(file_name, gz=False):
+    def parse_tsv_file(self, file_name, gz=False):
         """
         This function parses a TSV file and yields lines one by one
         as a list.
@@ -89,11 +89,11 @@ class Globals(object):
         """
 
         # For each line... #
-        for line in GUDglobals.parse_file(file_name, gz):
+        for line in self.parse_file(file_name, gz):
             line = line.split("\t")
             yield line
 
-    def parse_fasta_file(file_name, gz=False, clean=True):
+    def parse_fasta_file(self, file_name, gz=False, clean=True):
         """
         This function parses a FASTA file and yields sequences one
         by one as a list in the form [header, sequence].
@@ -109,7 +109,7 @@ class Globals(object):
         header = ""
         sequence = ""
         # For each line... #
-        for line in GUDglobals.parse_file(file_name, gz):
+        for line in self.parse_file(file_name, gz):
             if len(line) == 0: continue
             if line.startswith("#"): continue
             if line.startswith(">"):
@@ -130,7 +130,7 @@ class Globals(object):
     # Write       #
     #-------------#
 
-    def write(file_name=None, content=None):
+    def write(self, file_name=None, content=None):
         """
         This function writes {content} to a file or to stdout if no
         file is provided. Note that {content} will be appended at
