@@ -84,12 +84,10 @@ def initialize_gud_db(user, host, port, db, genome):
         # Create table
         table.metadata.create_all(engine)
         # Get UCSC FTP file
-        file_name = get_ucsc_ftp_files(genome, "chrom_size")
-        print(file_name)
-        exit(0)
+        directory, file_name = get_ftp_dir_and_file(genome, "chrom_size")
         # Download data
-        for line in fetch_lines_from_ucsc_ftp_file(
-            genome, file_name):
+        for line in fetch_lines_from_ftp_file(
+            genome, directory, file_name):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
@@ -118,12 +116,12 @@ def initialize_gud_db(user, host, port, db, genome):
         # Create table
         table.metadata.create_all(engine)
         # Get UCSC FTP file
-        file_name = get_ucsc_ftp_files(genome, "conservation")
+        directory, file_name = get_ftp_dir_and_file(genome, "conservation")
         # Get source name
         source_name = re.search("^.+/(.+).txt.gz$", file_name)
         # Download data
-        for line in fetch_lines_from_ucsc_ftp_file(
-            genome, file_name):
+        for line in fetch_lines_from_ftp_file(
+            genome, directory, file_name):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
@@ -180,10 +178,10 @@ def initialize_gud_db(user, host, port, db, genome):
         # Create table
         table.metadata.create_all(engine)
         # Get UCSC FTP file
-        file_name = get_ucsc_ftp_files(genome, "gene")
+        directory, file_name = get_ftp_dir_and_file(genome, "gene")
         # Download data
-        for line in fetch_lines_from_ucsc_ftp_file(
-            genome, file_name):
+        for line in fetch_lines_from_ftp_file(
+            genome, directory, file_name):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
@@ -235,10 +233,10 @@ def initialize_gud_db(user, host, port, db, genome):
         # Create table
         table.metadata.create_all(engine)
         # Get UCSC FTP file
-        file_name = get_ucsc_ftp_files(genome, "rmsk")
-        # Fetch lines from UCSC FTP file
-        for line in fetch_lines_from_ucsc_ftp_file(
-            genome, file_name):
+        directory, file_name = get_ftp_dir_and_file(genome, "rmsk")
+        # Download data
+        for line in fetch_lines_from_ftp_file(
+            genome, directory, file_name):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
@@ -301,7 +299,7 @@ def initialize_gud_db(user, host, port, db, genome):
 #        # TO BE DONE!!!
 #        # i.e. the FANTOM5 table!
 
-def get_ucsc_ftp_files(genome, data_type):
+def get_ftp_dir_and_file(genome, data_type):
 
     # Initialize
     ftp = FTP("hgdownload.soe.ucsc.edu")
@@ -315,17 +313,17 @@ def get_ucsc_ftp_files(genome, data_type):
 
     # Fetch bigZips and database files
     if data_type == "chrom_size":
-        return os.path.join("bigZips", "%s.chrom.sizes" % genome)
+        return "bigZips", "%s.chrom.sizes" % genome
     elif data_type == "gene":
-        return os.path.join("database", "refGene.txt.gz")
+        return "database", "refGene.txt.gz"
     elif data_type == "rmsk":
-        return os.path.join("database", "rmsk.txt.gz")
+        return "database", "rmsk.txt.gz"
     elif data_type == "conservation":
         regexp = re.compile("multiz\d+way.txt.gz$")
         for file_name in sorted(filter(regexp.search, ftp.nlst("database"))):
-            return file_name
+            return "database", file_name
 
-def fetch_lines_from_ucsc_ftp_file(genome, file_name):
+def fetch_lines_from_ftp_file(genome, directory, file_name):
     
     # Initialize
     global BIO
@@ -335,9 +333,9 @@ def fetch_lines_from_ucsc_ftp_file(genome, file_name):
 
     # Change into "genome" directory
     try:
-        ftp.cwd(os.path.join("goldenPath", genome))
+        ftp.cwd(os.path.join("goldenPath", genome, directory))
     except:
-        raise ValueError("Cannot connect to FTP goldenPath site: %s" % genome)
+        raise ValueError("Cannot connect to FTP goldenPath site: %s/%s" % (genome, directory))
 
     # If valid file...
     if file_name in ftp.nlst():
