@@ -85,6 +85,8 @@ def initialize_gud_db(user, host, port, db, genome):
         table.metadata.create_all(engine)
         # Get UCSC FTP file
         file_name = get_ucsc_ftp_files(genome, "chrom_size")
+        print(file_name)
+        exit(0)
         # Download data
         for line in fetch_lines_from_ucsc_ftp_file(
             genome, file_name):
