@@ -139,6 +139,8 @@ def initialize_gud_db(user, host, port, db, genome):
                     "date": today
                 }
             )
+            print(rows)
+            exit(0)
             # Insert rows in bulks of 100,000
             if len(rows) == 100000:
                 engine.execute(table.__table__.insert(), rows)
