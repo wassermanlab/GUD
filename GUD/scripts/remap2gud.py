@@ -90,6 +90,7 @@ def insert_remap_to_gud(user, host, port, db,
         tf_name = m.group(1)
         # For each line...
         for line in GUDglobals.parse_tsv_file(os.path.join(directory, file_name)):
+            print(line)
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[0])
             if not m.group(1) in GUDglobals.chroms: continue
