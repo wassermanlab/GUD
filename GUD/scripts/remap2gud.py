@@ -25,30 +25,35 @@ class Model(object): pass
 
 def parse_args():
     """
-    This function parses arguments provided via command
-    line and returns an {argparse} object.
+    This function parses arguments provided via the command
+    line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="describe what the script does...")
+    parser = argparse.ArgumentParser(description="this script inserts tf data from ReMap into GUD. \"directory\" refer to where \"*_TF_archive_all_macs2_*.tar.gz\" was uncompressed."")
 
-    parser.add_argument("dir", help="Directory containing downloaded files (i.e. one BED file per TF)")
+    parser.add_argument("directory", help="Downloads directory")
 
     # Optional args
     parser.add_argument("--source", default="ReMap", help="Source name (e.g. \"PMID:29126285\"; default = \"ReMap\")")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=config.get("MySQL", "db"),
-        help="Database name (e.g. \"mm10\"; default from \"config.ini\" = %s)" % config.get("MySQL", "db"))
-    mysql_group.add_argument("-H", "--host", default=config.get("MySQL", "host"),
-        help="Host name (e.g. \"ontarget.cmmt.ubc.ca\"; default from \"config.ini\" = %s)" % config.get("MySQL", "host"))
-#    mysql_group.add_argument("-p", "--pass", default="", help="User pass")
-    mysql_group.add_argument("-P", "--port", default=config.get("MySQL", "port"),
-        help="User name (e.g. \"5506\"; default from \"config.ini\" = %s)" % config.get("MySQL", "port"))
-    mysql_group.add_argument("-u", "--user", default=config.get("MySQL", "user"),
-        help="User name (e.g. \"ontarget_r\"; default from \"config.ini\" = %s)" % config.get("MySQL", "user"))
+    mysql_group.add_argument("-d", "--db",
+        help="Database name (default = input genome assembly)")
+    mysql_group.add_argument("-H", "--host", default="localhost",
+        help="Host name (default = localhost)")
+    mysql_group.add_argument("-P", "--port", default=5506, type=int,
+        help="Port number (default = 5506)")
+    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
+        help="User name (default = current user)")
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    
+    # Set default
+    if args.db is None:
+        args.db = args.genome
+
+    return args
 
 def insert_remap_to_gud(user, host, port, db,
     directory, source_name):
