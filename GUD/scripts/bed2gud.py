@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 import os, sys, re
 import argparse
@@ -68,7 +68,8 @@ def parse_args():
         raise ValueError("A histone type must be provided!")
 
     if args.feat_type == "tad" and not args.restriction_enzyme:
-        warnings.warn("\nA restriction enzyme was not provided...\n\tSetting \"restriction_enzyme\" field to \"Unknown\"...\n")
+        warnings.warn("\nA restriction enzyme was not provided...\n")
+        warnings.warn("\nSetting \"restriction_enzyme\" field to \"Unknown\"...\n")
         args.restriction_enzyme = "Unknown"
 
     if args.feat_type == "tf" and not args.tf_name:
@@ -80,9 +81,9 @@ def parse_args():
 
     return args
 
-def insert_bed_to_gud_db(user, host, port, db, file_name,
+def insert_bed_to_gud_db(user, host, port, db, bed_file,
     feat_type, cell_or_tissue, experiment_type, source_name,
-    histone_type, restriction_enzyme, tf_name):
+    histone_type=None, restriction_enzyme=None, tf_name=None):
 
     # Initialize
     lines = []
@@ -109,24 +110,32 @@ def insert_bed_to_gud_db(user, host, port, db, file_name,
     if feat_type == "histone":
         if not engine.has_table("histone_modification"):
             raise ValueError("GUD db does not have \"histone_modification\" table!")
+        if not histone_type:
+            raise ValueError("A histone type must be provided!")
         table = HistoneModification()
     if feat_type == "tad":
         if not engine.has_table("tad"):
             raise ValueError("GUD db does not have \"tad\" table!")
+        if not restriction_enzyme:
+            warnings.warn("\nA restriction enzyme was not provided...\n")
+            warnings.warn("\nSetting \"restriction_enzyme\" field to \"Unknown\"...\n")
+            restriction_enzyme = "Unknown"
         table = Tad()
     if feat_type == "tf":
         if not engine.has_table("tf_binding"):
             raise ValueError("GUD db does not have \"tf_binding\" table!")
+        if not tf_name:
+            raise ValueError("A TF name must be provided!")
         table = TfBinding()
     table.metadata.bind = engine
     table.metadata.create_all(engine)
     mapper(Model, table.__table__)
 
     # Get lines
-    if file_name.endswith(".gz"): gz = True
+    if bed_file.endswith(".gz"): gz = True
     else: gz = False
     # For each line...
-    for line in GUDglobals.parse_tsv_file(file_name, gz=gz):
+    for line in GUDglobals.parse_tsv_file(bed_file, gz=gz):
         # Skip if not enough elements
         if len(line) < 3: continue
         # Ignore non-standard chroms, scaffolds, etc.

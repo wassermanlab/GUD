@@ -17,7 +17,7 @@ __all__ = ["ORM"]
 class Globals(object):
     """
     This class contains functions designed to work through the
-    whole module.
+    entire module.
     """
 
     #-------------#

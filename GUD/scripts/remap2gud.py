@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 import os, sys, re
 import argparse
@@ -95,7 +95,7 @@ def insert_remap_to_gud_db(user, host, port, db,
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[0])
             if not m.group(1) in GUDglobals.chroms: continue
-            # Get bins
+            # Get bin
             start = int(line[1])
             end = int(line[2])
             bin = assign_bin(start, end)
