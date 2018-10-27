@@ -3,7 +3,6 @@
 import os, sys, re
 import argparse
 from binning import assign_bin
-import ConfigParser
 from datetime import date
 from ftplib import FTP
 import getpass
@@ -36,7 +35,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="describe what the script does...")
+    parser = argparse.ArgumentParser(description="this script initializes a GUD database for the given genome.")
 
     parser.add_argument("genome", help="Genome assembly")
     
@@ -52,9 +51,9 @@ def parse_args():
         help="User name (default = current user)")
 
     args = parser.parse_args()
-    
+
     # Set default
-    if args.db is None:
+    if not args.db:
         args.db = args.genome
 
     return args

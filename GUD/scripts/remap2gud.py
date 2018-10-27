@@ -3,7 +3,6 @@
 import os, sys, re
 import argparse
 from binning import assign_bin
-import ConfigParser
 from datetime import date
 import getpass
 from sqlalchemy import create_engine
@@ -30,7 +29,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts tf data from ReMap into GUD. \"directory\" refer to where \"*_TF_archive_all_macs2_*.tar.gz\" was uncompressed.\"")
+    parser = argparse.ArgumentParser(description="this script inserts tf data from ReMap into GUD. argument \"directory\" refers to where \"*_TF_archive_all_macs2_*.tar.gz\" was uncompressed.\"")
 
     parser.add_argument("directory", help="Downloads directory")
 
@@ -49,14 +48,14 @@ def parse_args():
         help="User name (default = current user)")
 
     args = parser.parse_args()
-    
+
     # Set default
-    if args.db is None:
+    if not args.db:
         args.db = args.genome
 
     return args
 
-def insert_remap_to_gud(user, host, port, db,
+def insert_remap_to_gud_db(user, host, port, db,
     directory, source_name):
 
     # Initialize
@@ -127,6 +126,6 @@ if __name__ == "__main__":
     # Parse arguments
     args = parse_args()
 
-    # Insert ReMap data to TF-binding table
-    insert_remap_to_gud(args.user, args.host, args.port,
+    # Insert ReMap data to GUD database
+    insert_remap_to_gud_db(args.user, args.host, args.port,
         args.db, args.directory, args.source)

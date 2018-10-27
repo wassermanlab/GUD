@@ -3,7 +3,6 @@
 import os, sys, re
 import argparse
 from binning import assign_bin
-import ConfigParser
 from datetime import date
 import getpass
 import pybedtools
@@ -35,7 +34,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts accessibility, histone and tf data from ENCODE into GUD. arguments \"metadata\" and \"directory\" refer to the execution \"xargs -n 1 curl -O -L < file.txt\".")
+    parser = argparse.ArgumentParser(description="this script inserts \"accessibility\", \"histone\" or \"tf\" data from ENCODE into GUD. arguments \"metadata\" and \"directory\" refer to the execution \"xargs -n 1 curl -O -L < file.txt\". genomic features include \"accessibility\", \"histone\" and \"tf\".")
 
     parser.add_argument("genome", help="Genome assembly")
     parser.add_argument("metadata", help="Metadata file")
@@ -59,9 +58,9 @@ def parse_args():
         help="User name (default = current user)")
 
     args = parser.parse_args()
-    
+
     # Set default
-    if args.db is None:
+    if not args.db:
         args.db = args.genome
 
     return args
@@ -161,7 +160,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         if not line[2].isdigit(): continue
                         # If start is smaller than end
                         if int(line[1]) < int(line[2]):
-                            lines.append("%s\t%s\t%s" % (line[0], line[1], line[2]))
+                            lines.append("\t".join(line[:3]))
                 except:
                     warnings.warn("\nCould not read file: \"%s\"\n\tSkipping file...\n" % file_name)
         # If lines...
