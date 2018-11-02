@@ -51,6 +51,8 @@ def parse_args():
     parser.add_argument("--histone", help="Histone type (e.g. \"H3K27ac\")")
     parser.add_argument("--enzyme", help="Restriction enzyme (e.g. \"HindIII\")")
     parser.add_argument("--tf-name", help="TF name (e.g. \"FOS\")")
+    parser.add_argument("--merge", action="store_true", 
+        help="Merge overlapping or \"book-ended\" features (default = False)")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
@@ -71,7 +73,7 @@ def parse_args():
     if args.feat_type == "tad" and not args.enzyme:
         warnings.warn("\nA restriction enzyme was not provided...\n")
         warnings.warn("\nSetting \"restriction_enzyme\" field to \"Unknown\"...\n")
-        args.restriction_enzyme = "Unknown"
+        args.enzyme = "Unknown"
 
     if args.feat_type == "tf" and not args.tf_name:
         raise ValueError("A TF name must be provided!")
@@ -80,7 +82,8 @@ def parse_args():
 
 def insert_bed_to_gud_db(user, host, port, db, bed_files,
     feat_type, cell_or_tissue, experiment_type, source_name,
-    histone_type=None, restriction_enzyme=None, tf_name=None):
+    histone_type=None, restriction_enzyme=None, tf_name=None
+    merge=False):
 
     # Initialize
     lines = []
@@ -150,8 +153,11 @@ def insert_bed_to_gud_db(user, host, port, db, bed_files,
     if lines:
         # Create BED object
         bed_obj = pybedtools.BedTool("\n".join(lines), from_string=True)
+        # If merge...
+        if merge:
+            bed_obj = bed_obj.sort().merge()
         # Sort BED object
-        for chrom, start, end in bed_obj.sort().merge():
+        for chrom, start, end in bed_obj.sort():
             # Create model
             model = Model()
             model.bin = assign_bin(int(start), int(end))
@@ -185,4 +191,4 @@ if __name__ == "__main__":
     insert_bed_to_gud_db(args.user, args.host, args.port,
         args.db, args.files, args.feat_type, args.sample,
         args.exp_type, args.source, args.histone,
-        args.enzyme, args.tf_name)
+        args.enzyme, args.tf_name, args.merge)
