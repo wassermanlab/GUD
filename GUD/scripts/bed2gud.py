@@ -82,7 +82,7 @@ def parse_args():
 
 def insert_bed_to_gud_db(user, host, port, db, bed_files,
     feat_type, cell_or_tissue, experiment_type, source_name,
-    histone_type=None, restriction_enzyme=None, tf_name=None
+    histone_type=None, restriction_enzyme=None, tf_name=None,
     merge=False):
 
     # Initialize
