@@ -65,10 +65,10 @@ def parse_args():
 
     args = parser.parse_args()
 
-    if args.feat_type == "histone" and not args.histone_type:
+    if args.feat_type == "histone" and not args.histone:
         raise ValueError("A histone type must be provided!")
 
-    if args.feat_type == "tad" and not args.restriction_enzyme:
+    if args.feat_type == "tad" and not args.enzyme:
         warnings.warn("\nA restriction enzyme was not provided...\n")
         warnings.warn("\nSetting \"restriction_enzyme\" field to \"Unknown\"...\n")
         args.restriction_enzyme = "Unknown"

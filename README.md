@@ -383,6 +383,45 @@ mysql> select count(*) from histone_modification;
 +----------+
 1 row in set (0.00 sec)
 
+mysql> select distinct(histone_type) from histone_modification;
++--------------+
+| histone_type |
++--------------+
+| H3K23me2     |
+| H3F3A        |
+| H4K8ac       |
+| H3K9me3      |
+| H3K4me3      |
+| H3K36me3     |
+| H4K91ac      |
+| H3K9ac       |
+| H3K27me3     |
+| H4K5ac       |
+| H3K27ac      |
+| H3K4me2      |
+| H3K79me2     |
+| H2AFZ        |
+| H3K79me1     |
+| H3K4me1      |
+| H3K9me1      |
+| H2AK9ac      |
+| H3K14ac      |
+| H2BK5ac      |
+| H3K18ac      |
+| H3K23ac      |
+| H3K4ac       |
+| H3K56ac      |
+| H2AK5ac      |
+| H3K9me2      |
+| H2BK12ac     |
+| H4K20me1     |
+| H2BK15ac     |
+| H2BK120ac    |
+| H2BK20ac     |
+| H3T11ph      |
++--------------+
+32 rows in set (6 min 49.15 sec)
+
 +----------+
 
 mysql> select count(*) from tad;
