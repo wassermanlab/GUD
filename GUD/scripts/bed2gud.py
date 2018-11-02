@@ -37,10 +37,11 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="this script inserts \"accessibility\", \"enhancer\", \"histone\", \"tad\" or \"tf\" data from input BED file into GUD. genomic features include \"accessibility\", \"enhancer\", \"histone\", \"tad\" and \"tf\".")
 
-    parser.add_argument("file", help="BED file containing the genomic features")
+    parser.add_argument("files", nargs="*", help="BED file(s)", metavar="file")
 
     feats = ["accessibility", "enhancer", "histone", "tad", "tf"]
-    parser.add_argument("feat_type", choices=feats, help="Type of genomic feature", metavar="feature_type")
+    parser.add_argument("feat_type", choices=feats, help="Type of genomic feature",
+        metavar="feature_type")
 
     parser.add_argument("sample", help="Sample name (e.g. \"lung fibroblasts\")")
     parser.add_argument("exp_type", help="Type of experiment (e.g. \"CAGE\")")

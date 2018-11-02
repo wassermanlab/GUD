@@ -117,7 +117,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         m = re.search("^(.+)-(human|mouse)$", line[12])
         if m: experiment_target = m.group(1)
         treatment = None
-        if len(line[9]) > 0 or len(line[9]) > 0 or len(line[9]) > 0:
+        if len(line[9]) > 0 or len(line[10]) > 0 or len(line[11]) > 0:
             treatment = "%s %s %s" % (line[9], line[10], line[11])
         assembly = line[37]
         status = line[40]
