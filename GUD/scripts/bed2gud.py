@@ -82,7 +82,7 @@ def parse_args():
 
     return args
 
-def insert_bed_to_gud_db(user, host, port, db, bed_file,
+def insert_bed_to_gud_db(user, host, port, db, bed_files,
     feat_type, cell_or_tissue, experiment_type, source_name,
     histone_type=None, restriction_enzyme=None, tf_name=None):
 
@@ -132,28 +132,30 @@ def insert_bed_to_gud_db(user, host, port, db, bed_file,
     table.metadata.create_all(engine)
     mapper(Model, table.__table__)
 
-    # Get lines
-    if bed_file.endswith(".gz"): gz = True
-    else: gz = False
-    # For each line...
-    for line in GUDglobals.parse_tsv_file(bed_file, gz=gz):
-        # Skip if not enough elements
-        if len(line) < 3: continue
-        # Ignore non-standard chroms, scaffolds, etc.
-        m = re.search("^chr(\S+)$", line[0])
-        if not m.group(1) in GUDglobals.chroms: continue
-        # Skip if not start or end
-        if not line[1].isdigit(): continue
-        if not line[2].isdigit(): continue
-        # If start is smaller than end
-        if int(line[1]) < int(line[2]):
-            lines.append("\t".join(line[:3]))
+    # For each BED file...
+    for bed_file in bed_files:
+        # Get lines
+        if bed_file.endswith(".gz"): gz = True
+        else: gz = False
+        # For each line...
+        for line in GUDglobals.parse_tsv_file(bed_file, gz=gz):
+            # Skip if not enough elements
+            if len(line) < 3: continue
+            # Ignore non-standard chroms, scaffolds, etc.
+            m = re.search("^chr(\S+)$", line[0])
+            if not m.group(1) in GUDglobals.chroms: continue
+            # Skip if not start or end
+            if not line[1].isdigit(): continue
+            if not line[2].isdigit(): continue
+            # If start is smaller than end
+            if int(line[1]) < int(line[2]):
+                lines.append("\t".join(line[:3]))
     # If lines...
     if lines:
         # Create BED object
         bed_obj = pybedtools.BedTool("\n".join(lines), from_string=True)
         # Sort BED object
-        for chrom, start, end in bed_obj.sort():
+        for chrom, start, end in bed_obj.sort().merge():
             # Create model
             model = Model()
             model.bin = assign_bin(int(start), int(end))
@@ -185,6 +187,6 @@ if __name__ == "__main__":
 
     # Insert BED file to GUD database
     insert_bed_to_gud_db(args.user, args.host, args.port,
-        args.db, args.file, args.feat_type, args.sample,
+        args.db, args.files, args.feat_type, args.sample,
         args.exp_type, args.source, args.histone,
         args.enzyme, args.tf_name)
