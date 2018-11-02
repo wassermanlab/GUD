@@ -428,9 +428,53 @@ mysql> select count(*) from tad;
 +----------+
 | count(*) |
 +----------+
-|        0 |
+|    74424 |
 +----------+
-1 row in set (0.04 sec)
+1 row in set (0.00 sec)
+
+mysql> select distinct(cell_or_tissue) from tad;
++----------------+
+| cell_or_tissue |
++----------------+
+| Liver          |
+| Thymus         |
+| H1-MSC         |
+| H1-ESC         |
+| H1-MES         |
+| H1-NPC         |
+| VentricleLeft  |
+| H1-TRO         |
+| Aorta          |
+| K562           |
+| HMEC           |
+| HUVEC          |
+| NHEK           |
+| G401           |
+| RPMI7951       |
+| AdrenalGland   |
+| PANC1          |
+| LNCaP          |
+| Lung           |
+| SKNMC          |
+| Bladder        |
+| Spleen         |
+| Cortex         |
+| Pancreas       |
+| VentricleRight |
+| Caki2          |
+| Muscle         |
+| SKNDZ          |
+| Bowel          |
+| GM12878        |
+| KBM7           |
+| IMR90          |
+| SKMEL5         |
+| A549           |
+| NCIH460        |
+| T470           |
+| SJCRH30        |
++----------------+
+37 rows in set (0.41 sec)
 
 +----------+
 
