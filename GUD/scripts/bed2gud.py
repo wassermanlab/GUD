@@ -54,10 +54,10 @@ def parse_args():
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db",
-        help="Database name (default = input genome assembly)")
+    mysql_group.add_argument("-d", "--db", default="hg19"
+        help="Database name (default = \"hg19\")")
     mysql_group.add_argument("-H", "--host", default="localhost",
-        help="Host name (default = localhost)")
+        help="Host name (default = \"localhost\")")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="Port number (default = 5506)")
     mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
@@ -75,10 +75,6 @@ def parse_args():
 
     if args.feat_type == "tf" and not args.tf_name:
         raise ValueError("A TF name must be provided!")
-    
-    # Set default
-    if not args.db:
-        args.db = args.genome
 
     return args
 
