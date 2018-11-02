@@ -54,7 +54,7 @@ def parse_args():
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default="hg19"
+    mysql_group.add_argument("-d", "--db", default="hg19",
         help="Database name (default = \"hg19\")")
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="Host name (default = \"localhost\")")
