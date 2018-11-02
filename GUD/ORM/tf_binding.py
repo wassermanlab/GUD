@@ -1,4 +1,4 @@
-from binning import containing_bins
+from binning import containing_bins, contained_bins 
 
 from sqlalchemy import (
     Column, Date, Index, PrimaryKeyConstraint, String
@@ -50,7 +50,7 @@ class TfBinding(Base):
         """
 
         if not bins and compute_bins:
-            bins = containing_bins(start, end)
+            bins = containing_bins(start, end) + contained_bins(start, end)
 
         q = session.query(cls).filter(
                 cls.chrom == chrom, cls.end > start, cls.start < end)

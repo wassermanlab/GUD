@@ -1,4 +1,4 @@
-import binning
+from binning import containing_bins, contained_bins 
 from Bio.SeqFeature import FeatureLocation
 
 from sqlalchemy import (
