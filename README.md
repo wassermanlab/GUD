@@ -1,3 +1,4 @@
+```
 mysql> show tables;
 +----------------------+
 | Tables_in_hg19       |
@@ -977,3 +978,4 @@ mysql> select distinct(tf_name) from tf_binding;
 | TET3     |
 +----------+
 485 rows in set (5 min 0.13 sec)
+```
