@@ -1,3 +1,21 @@
+
+# Genomic Universal Database
+
+> This is a database which centralizes and unifies genomic data in a universal manner for specific reference datasets.
+
+
+## Manifest
++ 
++ 
++
++ 
+
+
+## Gene representation
+![https://github.com/oriolfornes/GUD/blob/master/GUD-Gene.png]
+
+
+
 ```
 mysql> show tables;
 +----------------------+
