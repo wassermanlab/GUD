@@ -5,14 +5,18 @@
 
 
 ## Manifest
++ GUD/ORM - Object relational mapping classes
++ GUD/scripts - Scripts for upserting data into GUD
 + 
-+ 
-+
-+ 
+
 
 
 ## Gene representation
 ![](https://github.com/oriolfornes/GUD/blob/master/GUD-Gene.png)
+
+## Important Notes
++ Everything in GUD is zero-based open-bookend to keep a standard with BED format
++ 
 
 
 
