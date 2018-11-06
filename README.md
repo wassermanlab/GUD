@@ -16,7 +16,7 @@
 
 ## Important Notes
 + Everything in GUD is zero-based open-bookend to keep a standard with BED format
-+ 
++ Data currently within GUD found [here](https://docs.google.com/document/d/1Jjug_gvsTZk-E1L2sMa8AflUq3SW9RVPOIuNtsQjQZM/edit)
 
 
 
