@@ -81,7 +81,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         expire_on_commit=False)
     today = str(date.today())
 
-    # Initialize TF-binding table
+    # Initialize table
     if feat_type == "accessibility":
         if not engine.has_table("dna_accessibility"):
             raise ValueError("GUD db does not have \"dna_accessibility\" table!")

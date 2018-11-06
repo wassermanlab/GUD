@@ -13,7 +13,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 Base = declarative_base()
 
 class Gene(Base):
-
+    
     __tablename__ = "gene"
 
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
