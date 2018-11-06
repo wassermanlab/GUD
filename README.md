@@ -1,3 +1,25 @@
+
+# Genomic Universal Database
+
+> This is a database which centralizes and unifies genomic data in a universal manner for specific reference datasets.
+
+
+## Manifest
++ GUD/ORM - Object relational mapping classes
++ GUD/scripts - Scripts for upserting data into GUD
++ 
+
+
+
+## Gene representation
+![](https://github.com/oriolfornes/GUD/blob/master/GUD-Gene.png)
+
+## Important Notes
++ Everything in GUD is zero-based open-bookend to keep a standard with BED format
++ Data currently within GUD found [here](https://docs.google.com/document/d/1Jjug_gvsTZk-E1L2sMa8AflUq3SW9RVPOIuNtsQjQZM/edit)
+
+
+
 ```
 mysql> show tables;
 +----------------------+
