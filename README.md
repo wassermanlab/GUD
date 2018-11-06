@@ -12,7 +12,7 @@
 
 
 ## Gene representation
-![https://github.com/oriolfornes/GUD/blob/master/GUD-Gene.png]
+![](https://github.com/oriolfornes/GUD/blob/master/GUD-Gene.png)
 
 
 
