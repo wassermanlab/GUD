@@ -83,12 +83,14 @@ def insert_vista_to_gud_db(user, host, port, db, fasta_file,
         # Skip negative enhancers
         if "negative" in header: continue
         # Get chrom, start, end
-        print(header)
         m = re.search("(chr\w{2})\:(\d+)\-(\d+)", header)
         chrom = m.group(1)
-        start = m.group(2) # Remember: GUD is 0-based
-        end = m.group(3)
+        start = int(m.group(2)) # Remember: GUD is 0-based
+        end = int(m.group(3))
         print(chrom, start, end)
+        # Get samples
+        samples = re.findall("\|\s+(.+)\[\d+\/\d+\]")
+        print(samples)
         exit(0)
         # Sort BED object
         for chrom, start, end in bed_obj.sort():
