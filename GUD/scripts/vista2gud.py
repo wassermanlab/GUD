@@ -85,37 +85,26 @@ def insert_vista_to_gud_db(user, host, port, db, fasta_file,
         # Get chrom, start, end
         m = re.search("(chr\w{2})\:(\d+)\-(\d+)", header)
         chrom = m.group(1)
-        start = int(m.group(2)) # Remember: GUD is 0-based
+        start = int(m.group(2)) - 1 # VISTA coordinates are 1-based
         end = int(m.group(3))
-        print(chrom, start, end)
-        # Get samples
-        samples = []
+        # Create model
+        model = Model()
+        model.bin = assign_bin(int(start), int(end))
+        model.chrom = chrom
+        model.start = start
+        model.end = end
+        model.experiment_type = experiment_type
+        model.source_name = source_name
+        model.date = today
+        # For each field...
         for field in header.split("|"):
+            # Get sample
             m = re.search("\s*(.+)\[\d+\/\d+\]", field)
-            if m: samples.append(m.group(1))
-        print(samples)
-        exit(0)
-        # Sort BED object
-        for chrom, start, end in bed_obj.sort():
-            # Create model
-            model = Model()
-            model.bin = assign_bin(int(start), int(end))
-            model.chrom = chrom
-            model.start = start
-            model.end = end
-            model.cell_or_tissue = cell_or_tissue
-            model.experiment_type = experiment_type
-            model.source_name = source_name
-            model.date = today
-            if feat_type == "histone":
-                model.histone_type = histone_type
-            if feat_type == "tad":
-                model.restriction_enzyme = restriction_enzyme
-            if feat_type == "tf":
-                model.tf_name = tf_name
-            # Upsert model & commit
-            session.merge(model)
-            session.commit()
+            if m:
+                model.cell_or_tissue = m.group(1)
+                # Upsert model & commit
+                session.merge(model)
+                session.commit()
 
 #-------------#
 # Main        #
