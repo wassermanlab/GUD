@@ -33,7 +33,7 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="this script inserts \"VISTA\" enhancers into GUD.")
 
-    parser.add_argument("file", nargs="*", help="FASTA file", metavar="file")
+    parser.add_argument("file", help="FASTA file", metavar="file")
 
     # Optional args
     parser.add_argument("-e", "--exp-type", default="in vivo",
