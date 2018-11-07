@@ -78,9 +78,6 @@ def insert_vista_to_gud_db(user, host, port, db, fasta_file,
     table.metadata.create_all(engine)
     mapper(Model, table.__table__)
 
-    print(fasta_file)
-    exit(0)
-
     # For each header, sequence...
     for header, sequence in GUDglobals.parse_fasta_file(fasta_file):
         print(header)
