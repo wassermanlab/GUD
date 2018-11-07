@@ -9,7 +9,30 @@
 + GUD/scripts - Scripts for upserting data into GUD
 + 
 
+## Requirements
+```
+pip install Biopython
+pip install mysqlclient
+pip install interval-binning
+pip install sqlalchemy
+```
 
+## How to append GUD as submodule
+```
+MAIN_PROJECT_FOLDER/
+    LICENCE
+    README.md
+    .gitignore
+    PROJECT_FOLDER/
+        __init__.py
+        lib/
+        src/
+        GUD/
+```
+when inside `PROJECT_FOLDER` type:
+```
+git submodule add --force git@github.com:oriolfornes/GUD.git
+```
 
 ## Gene representation
 ![](https://github.com/oriolfornes/GUD/blob/master/GUD-Gene.png)

@@ -8,7 +8,7 @@ import warnings
 
 # Append GUD module to path
 module_path = os.path.join(os.path.dirname(__file__), os.pardir)
-sys.path.append(os.path.join(module_path))
+sys.path.append(os.path.join(module_path, os.pardir))
 
 # Import from GUD/OnTarget
 from GUD.ORM.chrom_size import ChromSize
