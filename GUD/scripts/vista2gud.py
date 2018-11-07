@@ -82,9 +82,8 @@ def insert_vista_to_gud_db(user, host, port, db, fasta_file,
     for header, sequence in GUDglobals.parse_fasta_file(fasta_file):
         # Skip negative enhancers
         if "negative" in header: continue
-        print(header)
         # Get chrom, start, end
-        m = re.search("(chr\w{2})\:(\d+)\-(\d+)", header)
+        m = re.search("(chr\w{1,2})\:(\d+)\-(\d+)", header)
         chrom = m.group(1)
         start = int(m.group(2)) - 1 # VISTA coordinates are 1-based
         end = int(m.group(3))
