@@ -81,7 +81,7 @@ def insert_vista_to_gud_db(user, host, port, db, fasta_file,
     # For each header, sequence...
     for header, sequence in GUDglobals.parse_fasta_file(fasta_file):
         # Skip negative enhancers
-        m = re.search("|\s+negative\s+|", header)
+        m = re.search("\|\s+negative\s+\|", header)
         if m: print("here")
         else: print("there")
         continue
