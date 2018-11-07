@@ -92,7 +92,7 @@ def insert_vista_to_gud_db(user, host, port, db, fasta_file,
         samples = []
         for field in header.split("|"):
             m = re.search("\s*(.+)\[\d+\/\d+\]", field)
-            samples.append(m.group(1))
+            if m: samples.append(m.group(1))
         print(samples)
         exit(0)
         # Sort BED object
