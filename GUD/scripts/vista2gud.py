@@ -81,12 +81,14 @@ def insert_vista_to_gud_db(user, host, port, db, fasta_file,
     # For each header, sequence...
     for header, sequence in GUDglobals.parse_fasta_file(fasta_file):
         # Skip negative enhancers
-        if "negative" in header: print("here")
-        else: print("there")
-        continue
+        if "negative" in header: continue
         # Get chrom, start, end
-        m = re.search("Human|chr16:86430087-86430726 | element 1 | positive  | neural tube[12/12] | hindbrain (rhombencephalon)[12/12] | limb[3/12] | cranial nerve[8/12]", header)
         print(header)
+        m = re.search("(chr\w{2})\:(\d+)\-(\d+)", header)
+        chrom = m.group(1)
+        start = m.group(2) # Remember: GUD is 0-based
+        end = m.group(3)
+        print(chrom, start, end)
         exit(0)
         # Sort BED object
         for chrom, start, end in bed_obj.sort():
