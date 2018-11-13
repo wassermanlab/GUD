@@ -59,22 +59,22 @@ class Globals(object):
         else:
             raise ValueError("File %s does not exist!" % file_name)
 
-#    def parse_csv_file(self, file_name, gz=False):
-#        """
-#        This function parses a CSV file and yields lines one by one
-#        as a list.
-#
-#        @input:
-#        file_name {str}
-#        gz {bool} use the gzip module
-#
-#        @return: {list}
-#        """
-#
-#        # For each line... #
-#        for line in self.parse_file(file_name, gz):
-#            line = line.split(",")
-#            yield line
+    def parse_csv_file(self, file_name, gz=False):
+        """
+        This function parses a CSV file and yields lines one by one
+        as a list.
+
+        @input:
+        file_name {str}
+        gz {bool} use the gzip module
+
+        @return: {list}
+        """
+
+        # For each line... #
+        for line in self.parse_file(file_name, gz):
+            line = line.split(",")
+            yield line
 
     def parse_tsv_file(self, file_name, gz=False):
         """
