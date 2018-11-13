@@ -13,7 +13,6 @@ import warnings
 
 # Import from GUD module
 from GUD import GUDglobals
-from GUD.bin_range import BinRange
 from GUD.ORM.dna_accessibility import DnaAccessibility
 from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.tf_binding import TfBinding

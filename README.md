@@ -372,29 +372,52 @@ mysql> select count(*) from enhancer;
 1 row in set (0.00 sec)
 
 mysql> select distinct(cell_or_tissue) from enhancer;
-+-----------------------------+
-| cell_or_tissue              |
-+-----------------------------+
-| Ntera2 embryonic stem cells |
-| A549                        |
-| MCF-7                       |
-| Jurkat                      |
-| CD4-positive T cells        |
-| AC16                        |
-| IMR90                       |
-| K562                        |
-| HeLa                        |
-| HCT-116                     |
-| Ramos                       |
-| LNCaP                       |
-| HUVEC                       |
-| B cells                     |
-| HAEC                        |
-| H1 embryonic stem cells     |
-| GM12878                     |
-| HeLa-S3                     |
-+-----------------------------+
-18 rows in set (7.98 sec)
++--------------------------------------+
+| cell_or_tissue                       |
++--------------------------------------+
+| Ntera2 embryonic stem cells          |
+| A549                                 |
+| MCF-7                                |
+| Jurkat                               |
+| CD4-positive T cells                 |
+| AC16                                 |
+| IMR90                                |
+| K562                                 |
+| HeLa                                 |
+| HCT-116                              |
+| Ramos                                |
+| LNCaP                                |
+| HUVEC                                |
+| B cells                              |
+| HAEC                                 |
+| H1 embryonic stem cells              |
+| GM12878                              |
+| HeLa-S3                              |
+| hindbrain (rhombencephalon)          |
+| heart                                |
+| branchial arch                       |
+| eye                                  |
+| facial mesenchyme                    |
+| limb                                 |
+| neural tube                          |
+| nose                                 |
+| forebrain                            |
+| somite                               |
+| cranial nerve                        |
+| midbrain (mesencephalon)             |
+| other                                |
+| ear                                  |
+| dorsal root ganglion                 |
+| tail                                 |
+| trigeminal V (ganglion, cranial)     |
+| blood vessels                        |
+| genital tubercle                     |
+| pancreas                             |
+| liver                                |
+| melanocytes                          |
+| mesenchyme derived from neural crest |
++--------------------------------------+
+41 rows in set (7.42 sec)
 
 mysql> select distinct(experiment_type) from enhancer;
 +-----------------+
@@ -404,8 +427,9 @@ mysql> select distinct(experiment_type) from enhancer;
 | PRO-seq         |
 | GRO-cap         |
 | 5'GRO           |
+| in vivo         |
 +-----------------+
-4 rows in set (3.06 sec)
+5 rows in set (1 min 30.13 sec)
 
 +----------+
 
@@ -422,51 +446,210 @@ mysql> select count(*) from gene;
 # temp number (upserting data)
 
 mysql> select count(*) from histone_modification;
-+----------+
-| count(*) |
-+----------+
-| 90689267 |
-+----------+
++-----------+
+| count(*)  |
++-----------+
+| 201916791 |
++-----------+
 1 row in set (0.00 sec)
 
 mysql> select distinct(histone_type) from histone_modification;
 +--------------+
 | histone_type |
 +--------------+
+| H3K4me3      |
+| H3K4me1      |
+| H3K27ac      |
+| H3K36me3     |
+| H3K9me3      |
 | H3K23me2     |
+| H3K27me3     |
 | H3F3A        |
 | H4K8ac       |
-| H3K9me3      |
-| H3K4me3      |
-| H3K36me3     |
+| H4K20me1     |
 | H4K91ac      |
 | H3K9ac       |
-| H3K27me3     |
-| H4K5ac       |
-| H3K27ac      |
 | H3K4me2      |
+| H4K5ac       |
 | H3K79me2     |
 | H2AFZ        |
+| H3K9me2      |
 | H3K79me1     |
-| H3K4me1      |
 | H3K9me1      |
 | H2AK9ac      |
 | H3K14ac      |
+| H3K56ac      |
 | H2BK5ac      |
 | H3K18ac      |
 | H3K23ac      |
 | H3K4ac       |
-| H3K56ac      |
 | H2AK5ac      |
-| H3K9me2      |
 | H2BK12ac     |
-| H4K20me1     |
 | H2BK15ac     |
 | H2BK120ac    |
 | H2BK20ac     |
 | H3T11ph      |
 +--------------+
-32 rows in set (6 min 49.15 sec)
+32 rows in set (17 min 59.88 sec)
+
+mysql> select distinct(cell_or_tissue) from histone_modification;
++------------------------------------------------------------------------+
+| cell_or_tissue                                                         |
++------------------------------------------------------------------------+
+| chorionic villus tissue                                                |
+| chorion tissue                                                         |
+| fibroblast of breast primary cell                                      |
+| luminal epithelial cell of mammary gland primary cell                  |
+| T-cell primary cell                                                    |
+| foreskin fibroblast primary cell                                       |
+| UCSF-4 stem cell                                                       |
+| H1-hESC stem cell                                                      |
+| foreskin melanocyte primary cell                                       |
+| germinal matrix tissue                                                 |
+| mammary stem cell stem cell                                            |
+| GM23248 cell line                                                      |
+| amnion tissue                                                          |
+| GM23338 induced pluripotent stem cell line                             |
+| breast epithelium tissue                                               |
+| foreskin keratinocyte primary cell                                     |
+| hepatocyte in vitro differentiated cells                               |
+| brain tissue                                                           |
+| SK-N-SH cell line                                                      |
+| heart left ventricle tissue                                            |
+| K562 cell line                                                         |
+| cerebellum tissue                                                      |
+| Peyer's patch tissue                                                   |
+| coronary artery tissue                                                 |
+| NCI-H929 cell line                                                     |
+| adrenal gland tissue                                                   |
+| ascending aorta tissue                                                 |
+| body of pancreas tissue                                                |
+| gastrocnemius medialis tissue                                          |
+| GM08714 cell line                                                      |
+| fibroblast of villous mesenchyme primary cell                          |
+| CD14-positive monocyte primary cell                                    |
+| AG04450 cell line                                                      |
+| SU-DHL-6 cell line                                                     |
+| large intestine tissue                                                 |
+| HUES6 stem cell                                                        |
+| Loucy cell line                                                        |
+| H9 stem cell                                                           |
+| iPS DF 19.11 induced pluripotent stem cell line                        |
+| common myeloid progenitor, CD34-positive primary cell                  |
+| NT2/D1 cell line                                                       |
+| B cell primary cell                                                    |
+| HeLa-S3 cell line                                                      |
+| DND-41 cell line                                                       |
+| endothelial cell of umbilical vein primary cell                        |
+| colonic mucosa tissue                                                  |
+| mesenchymal stem cell in vitro differentiated cells                    |
+| kidney epithelial cell primary cell                                    |
+| IMR-90 cell line                                                       |
+| lung tissue                                                            |
+| BJ cell line                                                           |
+| HepG2 cell line                                                        |
+| bronchial epithelial cell primary cell                                 |
+| esophagus muscularis mucosa tissue                                     |
+| caudate nucleus tissue                                                 |
+| HCT116 cell line                                                       |
+| Jurkat clone E61 cell line                                             |
+| A673 cell line                                                         |
+| endocrine pancreas tissue                                              |
+| cardiac mesoderm in vitro differentiated cells                         |
+| fibroblast of dermis primary cell                                      |
+| MM.1S cell line                                                        |
+| CD4-positive, alpha-beta memory T cell primary cell                    |
+| fibroblast of lung primary cell                                        |
+| CD8-positive, alpha-beta T cell primary cell                           |
+| H7-hESC stem cell                                                      |
+| ectodermal cell in vitro differentiated cells                          |
+| PC-9 cell line                                                         |
+| VCaP cell line                                                         |
+| RWPE1 cell line                                                        |
+| SK-N-MC cell line                                                      |
+| mammary epithelial cell primary cell                                   |
+| Caco-2 cell line                                                       |
+| NB4 cell line                                                          |
+| esophagus tissue                                                       |
+| MCF-7 cell line                                                        |
+| ES-I3 stem cell                                                        |
+| HUES64 stem cell                                                       |
+| cardiac muscle cell in vitro differentiated cells                      |
+| CD4-positive, alpha-beta T cell primary cell                           |
+| DOHH2 cell line                                                        |
+| GM12878 cell line                                                      |
+| Karpas-422 cell line                                                   |
+| OCI-LY7 cell line                                                      |
+| C4-2B cell line                                                        |
+| KMS-11 cell line                                                       |
+| Panc1 cell line                                                        |
+| gastroesophageal sphincter tissue                                      |
+| OCI-LY1 cell line                                                      |
+| ACC112 cell line                                                       |
+| esophagus squamous epithelium tissue                                   |
+| liver tissue                                                           |
+| fibroblast of the aortic adventitia primary cell                       |
+| LNCaP clone FGC cell line                                              |
+| HFF-Myc cell line                                                      |
+| GM12864 cell line                                                      |
+| OCI-LY3 cell line                                                      |
+| HUES48 stem cell                                                       |
+| PC-3 cell line                                                         |
+| A549 cell line                                                         |
+| GM12865 cell line                                                      |
+| cardiac fibroblast primary cell                                        |
+| iPS-18a induced pluripotent stem cell line                             |
+| RWPE2 cell line                                                        |
+| epithelial cell of proximal tubule primary cell                        |
+| cardiac muscle cell primary cell                                       |
+| GM06990 cell line                                                      |
+| brain microvascular endothelial cell primary cell                      |
+| HL-60 cell line                                                        |
+| AG09319 cell line                                                      |
+| keratinocyte primary cell                                              |
+| astrocyte of the spinal cord primary cell                              |
+| mesendoderm in vitro differentiated cells                              |
+| iPS DF 6.9 induced pluripotent stem cell line                          |
+| 22Rv1 cell line                                                        |
+| astrocyte of the cerebellum primary cell                               |
+| AG09309 cell line                                                      |
+| endodermal cell in vitro differentiated cells                          |
+| epithelial cell of prostate primary cell                               |
+| KOPT-K1 cell line                                                      |
+| CD8-positive, alpha-beta memory T cell primary cell                    |
+| layer of hippocampus tissue                                            |
+| iPS-20b induced pluripotent stem cell line                             |
+| kidney tissue                                                          |
+| astrocyte primary cell                                                 |
+| CD4-positive, CD25-positive, alpha-beta regulatory T cell primary cell |
+| cingulate gyrus tissue                                                 |
+| duodenal mucosa tissue                                                 |
+| Parathyroid adenoma tissue                                             |
+| WI38 cell line                                                         |
+| angular gyrus tissue                                                   |
+| WERI-Rb-1 cell line                                                    |
+| adipocyte in vitro differentiated cells                                |
+| BE2C cell line                                                         |
+| effector memory CD4-positive, alpha-beta T cell primary cell           |
+| iPS-18c induced pluripotent stem cell line                             |
+| HEK293 cell line                                                       |
+| mesodermal cell in vitro differentiated cells                          |
+| iPS-15b induced pluripotent stem cell line                             |
+| GM12875 cell line                                                      |
+| fibroblast of pulmonary artery primary cell                            |
+| heart right ventricle tissue                                           |
+| iPS-11a induced pluripotent stem cell line                             |
+| epithelial cell of esophagus primary cell                              |
+| fibroblast of mammary gland primary cell                               |
+| AG10803 cell line                                                      |
+| choroid plexus epithelial cell primary cell                            |
+| AG04449 cell line                                                      |
+| aorta tissue                                                           |
+| heart tissue                                                           |
+| T-helper 17 cell primary cell                                          |
+| adipose tissue tissue                                                  |
++------------------------------------------------------------------------+
+152 rows in set (34 min 54.65 sec)
 
 +----------+
 
