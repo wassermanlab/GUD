@@ -79,6 +79,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
     today = str(date.today())
     if matrix_file.endswith(".gz"): gz = True
     else: gz = False
+    samples = []
 
     # Initialize table
     if feat_type == "enhancer":
@@ -105,6 +106,13 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
 
     # For each line...
     for line in GUDglobals.parse_csv_file(matrix_file, gz):
+        # If no samples...
+        if len(samples) == 0:
+            line.pop(0)
+            for sample in line:
+                sample = sample.split(" : ")
+                print(len(sample))
+        exit(0)
 #        line = ['File accession', 'File format', 'Output type', 'Experiment accession', 'Assay',
 #                'Biosample term id', 'Biosample term name', 'Biosample type', 'Biosample organism',
 #                'Biosample treatments', 'Biosample treatments amount', 'Biosample treatments duration',
