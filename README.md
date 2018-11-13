@@ -445,6 +445,14 @@ mysql> select count(*) from gene;
 
 # temp number (upserting data)
 
+mysql> select count(*) from histone_modification;
++-----------+
+| count(*)  |
++-----------+
+| 202566780 |
++-----------+
+1 row in set (0.06 sec)
+
 mysql> select distinct(histone_type) from histone_modification;
 +--------------+
 | histone_type |
