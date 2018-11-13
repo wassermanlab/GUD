@@ -928,7 +928,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
         if len(samples) == 0:
             line.pop(0)
             for sample in line:
-                print(sample[2:-3])
+                print(sample[1:-2])
             exit(0)
 #        line = ['File accession', 'File format', 'Output type', 'Experiment accession', 'Assay',
 #                'Biosample term id', 'Biosample term name', 'Biosample type', 'Biosample organism',
