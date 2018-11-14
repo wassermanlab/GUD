@@ -104,7 +104,9 @@ def insert_vista_to_gud_db(user, host, port, db, fasta_file,
             # Get sample
             m = re.search("\s*(.+)\[\d+\/\d+\]", field)
             if m:
-                model.cell_or_tissue = m.group(1)
+                sample = m.group(1)
+                if sample == "other": sample = "n/a"
+                model.cell_or_tissue = sample
                 # Upsert model & commit
                 session.merge(model)
                 session.commit()
