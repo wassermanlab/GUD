@@ -33,7 +33,7 @@ class TSS(Base):
         ),
 
         Index("ix_tss", bin, chrom),
-        Index("ix_tss_name", name),
+        Index("ix_tss_gene", gene),
 
         {
             "mysql_engine": "MyISAM",
