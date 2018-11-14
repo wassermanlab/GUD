@@ -88,7 +88,7 @@ def initialize_gud_db(user, host, port, db, genome):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[0])
+            m = re.search("^chr(\w{1,2})$", line[0])
             if not m.group(1) in GUDglobals.chroms: continue
             # Add row
             rows.append(
@@ -118,7 +118,7 @@ def initialize_gud_db(user, host, port, db, genome):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[1])
+            m = re.search("^chr(\w{1,2})$", line[1])
             if not m.group(1) in GUDglobals.chroms: continue
             # Get bin
             start = int(line[2])
@@ -180,7 +180,7 @@ def initialize_gud_db(user, host, port, db, genome):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[2])
+            m = re.search("^chr(\w{1,2})$", line[2])
             if not m.group(1) in GUDglobals.chroms: continue
             # Get bin
             start = int(line[4])
@@ -237,7 +237,7 @@ def initialize_gud_db(user, host, port, db, genome):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[5])
+            m = re.search("^chr(\w{1,2})$", line[5])
             if not m.group(1) in GUDglobals.chroms: continue
             # Get bin
             start = int(line[6])

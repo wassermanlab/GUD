@@ -927,8 +927,32 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 original_sample_names.append(sample[1:-2])
         # ... Else...
         else:
-            coordinates = line.pop(0)
-            print(coordinates)
+            # Initialize
+            samples = {}
+            # Get chrom, start, end
+            m = re.search("(chr\S+)\:(\d+)\-(\d+)", line.pop(0))
+            chrom = m.group(1)
+            start = int(m.group(2))
+            end = int(m.group(3))
+            # Ignore non-standard chroms, scaffolds, etc.
+            m = re.search("^chr(\w{1,2})$", chrom)
+            if not m.group(1) in GUDglobals.chroms: continue
+            # Create model
+            model = Model()
+            model.bin = assign_bin(int(start), int(end))
+            model.chrom = chrom
+            model.start = start
+            model.end = end
+            model.experiment_type = "CAGE"
+            model.source_name = source_name
+            model.date = today
+            print(line[0])
+            exit(0)
+            # Upsert model & commit
+            session.merge(model)
+            session.commit()
+#            # Empty cache
+#            pybedtools.cleanup()
             exit(0)
 #        accession = line[0]
 #        experiment_type = line[4]

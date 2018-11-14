@@ -83,10 +83,13 @@ def insert_vista_to_gud_db(user, host, port, db, fasta_file,
         # Skip negative enhancers
         if "negative" in header: continue
         # Get chrom, start, end
-        m = re.search("(chr\w{1,2})\:(\d+)\-(\d+)", header)
+        m = re.search("(chr\S+)\:(\d+)\-(\d+)", header)
         chrom = m.group(1)
         start = int(m.group(2)) - 1 # VISTA coordinates are 1-based
         end = int(m.group(3))
+        # Ignore non-standard chroms, scaffolds, etc.
+        m = re.search("^chr(\w{1,2})$", chrom)
+        if not m.group(1) in GUDglobals.chroms: continue
         # Create model
         model = Model()
         model.bin = assign_bin(int(start), int(end))

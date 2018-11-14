@@ -152,7 +152,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         # Skip if not enough elements
                         if len(line) < 3: continue
                         # Ignore non-standard chroms, scaffolds, etc.
-                        m = re.search("^chr(\S+)$", line[0])
+                        m = re.search("^chr(\w{1,2})$", line[0])
                         if not m.group(1) in GUDglobals.chroms: continue
                         # Skip if not start or end
                         if not line[1].isdigit(): continue

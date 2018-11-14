@@ -93,7 +93,7 @@ def insert_remap_to_gud_db(user, host, port, db,
         # For each line...
         for line in GUDglobals.parse_tsv_file(os.path.join(directory, file_name), gz=gz):
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[0])
+            m = re.search("^chr(\w{1,2})$", line[0])
             if not m.group(1) in GUDglobals.chroms: continue
             # Get bin
             start = int(line[1])
