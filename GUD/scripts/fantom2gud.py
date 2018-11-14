@@ -957,76 +957,18 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                     if sample in grouped_sample_names:
                         samples.setdefault(grouped_sample_names[sample], [])
                         samples[grouped_sample_names[sample]].append(cages)
-                else: samples.setdefault(sample, cages)
-            print(len(samples))
-            exit(0)
-                    
-            # Upsert model & commit
-            session.merge(model)
-            session.commit()
-#            # Empty cache
-#            pybedtools.cleanup()
-            exit(0)
-#        accession = line[0]
-#        experiment_type = line[4]
-#        cell_or_tissue = "%s %s" % (line[6], line[7])
-#        experiment_target = None
-#        m = re.search("^(.+)-(human|mouse)$", line[12])
-#        if m: experiment_target = m.group(1)
-#        treatment = None
-#        if len(line[9]) > 0 or len(line[10]) > 0 or len(line[11]) > 0:
-#            treatment = "%s %s %s" % (line[9], line[10], line[11])
-#        assembly = line[37]
-#        status = line[40]
-#        audit = None
-#        if len(line[41]) > 0 or len(line[42]) > 0:
-#            audit = "%s|%s" % (line[41], line[42])
-#        # Skip treated samples
-#        if treatment:
-#            warnings.warn("\nSample (%s) received treatment: \"%s\"\n\tSkipping sample...\n" % (
-#                accession, treatment))
-#            continue
-##        # Warn audits
-##        if audit:
-##            warnings.warn("\nAudition for sample (%s) detected a problem: \"%s\"\n\tConsider skipping...\n" % (
-##                accession, audit))
-#        # This is a released sample!
-#        if assembly == genome and status == "released":
-#            metadata.setdefault((cell_or_tissue, experiment_type, experiment_target), [])
-#            metadata[(cell_or_tissue, experiment_type, experiment_target)].append(accession)
-#
-#    # For each cell/tissue, experiment and target...
-#    for cell_or_tissue, experiment_type, experiment_target in sorted(metadata):
-#        # Initialize
-#        lines = []
-#        # For each accession...
-#        for accession in sorted(metadata[(cell_or_tissue, experiment_type, experiment_target)]):                
-#
-#        # If lines...
-#        if lines:
-#            # Create BED object
-#            bed_obj = pybedtools.BedTool("\n".join(lines), from_string=True)
-#            # Sort and merge
-#            for chrom, start, end in bed_obj.sort().merge():
-#                # Create model
-#                model = Model()
-#                model.bin = assign_bin(int(start), int(end))
-#                model.chrom = chrom
-#                model.start = start
-#                model.end = end
-#                model.cell_or_tissue = cell_or_tissue
-#                model.experiment_type = experiment_type
-#                model.source_name = source_name
-#                model.date = today
-#                if feat_type == "histone":
-#                    model.histone_type = experiment_target
-#                if feat_type == "tf":
-#                    model.tf_name = experiment_target
-#                # Upsert model & commit
-#                session.merge(model)
-#                session.commit()
-#            # Empty cache
-#            pybedtools.cleanup()
+                else: samples.setdefault(sample, [cages])
+            # For each sample...
+            for sample in samples:
+                model.cell_or_tissue = sample
+                if feat_type == "enhancer":
+                    # Skip enhancers with 0 cages
+                    if sum(samples[sample]) == 0:
+                        continue
+                if feat_type == "tss": pass
+                # Upsert model & commit
+                session.merge(model)
+                session.commit()
 
 #-------------#
 # Main        #
