@@ -925,22 +925,10 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
         if len(original_sample_names) == 0:
             for sample in line[1:]:
                 original_sample_names.append(sample[1:-2])
-        print(original_sample_names)
-        exit(0)
         # ... Else...
         else:
             coordinates = line.pop(0)
-#        line = ['File accession', 'File format', 'Output type', 'Experiment accession', 'Assay',
-#                'Biosample term id', 'Biosample term name', 'Biosample type', 'Biosample organism',
-#                'Biosample treatments', 'Biosample treatments amount', 'Biosample treatments duration',
-#                'Experiment target', 'Library made from', 'Library depleted in', 'Library extraction method',
-#                'Library lysis method', 'Library crosslinking method', 'Library strand specific',
-#                'Experiment date released', 'Project', 'RBNS protein concentration', 'Library fragmentation method',
-#                'Library size range', 'Biological replicate(s)', 'Technical replicate', 'Read length',
-#                'Mapped read length', 'Run type', 'Paired end', 'Paired with', 'Derived from', 'Size',
-#                'Lab', 'md5sum', 'dbxrefs', 'File download URL', 'Assembly', 'Platform', 'Controlled by',
-#                'File Status', 'Audit WARNING', 'Audit INTERNAL_ACTION', 'Audit NOT_COMPLIANT', 'Audit ERROR']
-        print(line)
+        print(original_sample_names)
         exit(0)
 #        accession = line[0]
 #        experiment_type = line[4]
