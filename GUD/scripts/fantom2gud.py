@@ -990,7 +990,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 for curated_sample in grouped_sample_names:
                     n = re.search("(CNhs\d+)", curated_sample)
                     if m.group(1) == n.group(1):
-                        print("\"\": \"\"," % (sample, curated_sample))
+                        print("\"%s\": \"%s\"," % (sample, curated_sample))
                         break
             exit(0)
 #                # Initialize
