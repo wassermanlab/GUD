@@ -9,6 +9,7 @@ import pybedtools
 from sqlalchemy import create_engine
 from sqlalchemy.orm import mapper, scoped_session, sessionmaker
 from sqlalchemy_utils import database_exists
+from urllib2 import unquote
 import warnings
 
 # Import from GUD module
@@ -20,7 +21,7 @@ from GUD.ORM.tss import TSS
 # Definitions #
 #-------------#
 
-grouped_sample_names = {
+grouped_enhancer_sample_names = {
     "acantholytic squamous carcinoma cell line:HCC1806 : CNhs1184": "HCC1806",
     "acute lymphoblastic leukemia (B-ALL) cell line:BALL-1 : CNhs1125": "BALL-1",
     "acute lymphoblastic leukemia (B-ALL) cell line:NALM-6 : CNhs1128": "NALM-6",
@@ -831,6 +832,10 @@ grouped_sample_names = {
     "xeroderma pigentosum b cell line:XPL 17 : CNhs1181": "XPL 17",
 }
 
+grouped_tss_sample_names = {
+    
+}
+
 #-------------#
 # Classes     #
 #-------------#
@@ -977,7 +982,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             # If no samples...
             if len(original_sample_names) == 0:
                 for sample in line[1:]:
-                    original_sample_names.append(sample[1:-2])
+                    original_sample_names.append(unquote(sample))
             # ... Else...
             else: pass
             print(original_sample_names)
