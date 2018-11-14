@@ -928,8 +928,8 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
         # ... Else...
         else:
             coordinates = line.pop(0)
-        print(original_sample_names)
-        exit(0)
+            print(coordinates)
+            exit(0)
 #        accession = line[0]
 #        experiment_type = line[4]
 #        cell_or_tissue = "%s %s" % (line[6], line[7])
