@@ -14,7 +14,7 @@ import warnings
 # Import from GUD module
 from GUD import GUDglobals
 from GUD.ORM.enhancer import Enhancer
-#from GUD.ORM.tss import TSS
+from GUD.ORM.tss import Tss
 
 #-------------#
 # Definitions #

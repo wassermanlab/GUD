@@ -23,7 +23,7 @@ from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.repeat_mask import RepeatMask
 from GUD.ORM.tad import Tad
 from GUD.ORM.tf_binding import TfBinding
-#from GUD.ORM.tss import TSS
+from GUD.ORM.tss import TSS
 
 #-------------#
 # Functions   #
@@ -293,10 +293,14 @@ def initialize_gud_db(user, host, port, db, genome):
         # Create table
         table.metadata.create_all(engine)
 
-#    # Create TSS table
-#    if not engine.has_table("tss"):
-#        # TO BE DONE!!!
-#        # i.e. the FANTOM5 table!
+    # Create TF-binding table
+    if not engine.has_table("tss"):
+        # Initialize
+        rows = []
+        table = TSS()
+        table.metadata.bind = engine
+        # Create table
+        table.metadata.create_all(engine)
 
 def get_ftp_dir_and_file(genome, data_type):
 

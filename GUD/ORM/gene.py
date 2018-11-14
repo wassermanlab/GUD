@@ -13,7 +13,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 Base = declarative_base()
 
 class Gene(Base):
-    
+
     __tablename__ = "gene"
 
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
@@ -36,9 +36,6 @@ class Gene(Base):
 #    exonFrames = Column("exonFrames", mysql.LONGBLOB, nullable=False)
     source_name = Column("source_name", String(25), nullable=False)
     date = Column("date", Date(), nullable=True)
-
-    _exons = []
-    _coding_exons = []
 
     __table_args__ = (
 
