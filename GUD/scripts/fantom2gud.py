@@ -927,6 +927,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 original_sample_names.append(sample[1:-2])
         # ... Else...
         else:
+            print(line)
             # Initialize
             samples = {}
             # Get chrom, start, end
