@@ -20,819 +20,816 @@ from GUD.ORM.enhancer import Enhancer
 # Definitions #
 #-------------#
 
-#samples = {
-#    "Adipocyte - breast donor1 : CNhs11051": "adipocyte of breast",
-#    "Adipocyte - breast donor2 : CNhs11969": "adipocyte of breast",
-#    "Adipocyte - omental donor1 : CNhs11054": "omental adipocyte",
-#    "Adipocyte - omental donor2 : CNhs12067": "omental adipocyte",
-#    "Adipocyte - omental donor3 : CNhs12068": "omental adipocyte",
-#    "Adipocyte - perirenal donor1 : CNhs12069": "perirenal adipocyte",
-#    "Adipocyte - subcutaneous donor1 : CNhs12494": "subcutaneous adipocyte",
-#    "Adipocyte - subcutaneous donor2 : CNhs11371": "subcutaneous adipocyte",
-#    "Adipocyte - subcutaneous donor3 : CNhs12017": "subcutaneous adipocyte",
-#    "Alveolar Epithelial Cells donor1 : CNhs11325": "alveolar epithelial cells",
-#    "Alveolar Epithelial Cells donor2 : CNhs12084": "alveolar epithelial cells",
-#    "Amniotic Epithelial Cells donor1 : CNhs11341": "amniotic epithelial cells",
-#    "Amniotic Epithelial Cells donor3 : CNhs12125": "amniotic epithelial cells",
-#    "Anulus Pulposus Cell donor1 : CNhs10876": "anulus pulposus cells",
-#    "Anulus Pulposus Cell donor2 : CNhs12064": "anulus pulposus cells",
-#    "Astrocyte - cerebellum donor1 : CNhs11321": "astrocytes of cerebellum",
-#    "Astrocyte - cerebellum donor2 : CNhs12081": "astrocytes of cerebellum",
-#    "Astrocyte - cerebellum donor3 : CNhs12117": "astrocytes of cerebellum",
-#    "Astrocyte - cerebral cortex donor1 : CNhs10864": "astrocytes of cerebral cortex",
-#    "Astrocyte - cerebral cortex donor2 : CNhs11960": "astrocytes of cerebral cortex",
-#    "Astrocyte - cerebral cortex donor3 : CNhs12005": "astrocytes of cerebral cortex",
-#    "B lymphoblastoid cell line: GM12878 ENCODE biol_rep1 : CNhs12331": "GM12878",
-#    "B lymphoblastoid cell line: GM12878 ENCODE biol_rep2 : CNhs12332": "GM12878",
-#    "B lymphoblastoid cell line: GM12878 ENCODE biol_rep3 : CNhs12333": "GM12878",
-#    "Basophils donor3 : CNhs12575": "basophils",
-#    "Bronchial Epithelial Cell donor4 : CNhs12054": "bronchial epithelial cells",
-#    "Bronchial Epithelial Cell donor5 : CNhs12058": "bronchial epithelial cells",
-#    "Bronchial Epithelial Cell donor6 : CNhs12062": "bronchial epithelial cells",
-#    "Burkitt\'s lymphoma cell line:DAUDI : CNhs10739": "DAUDI",
-#    "Burkitt\'s lymphoma cell line:RAJI : CNhs11268": "RAJI",
-#    "CD14+ Monocytes donor1 : CNhs10852": "CD14-positive monocytes",
-#    "CD14+ Monocytes donor2 : CNhs11954": "CD14-positive monocytes",
-#    "CD14+ Monocytes donor3 : CNhs11997": "CD14-positive monocytes",
-#    "CD14+ monocyte derived endothelial progenitor cells donor1 : CNhs10858": "CD14-positive monocytes-derived endothelial progenitor cells",
-#    "CD14+ monocyte derived endothelial progenitor cells donor2 : CNhs11897": "CD14-positive monocytes-derived endothelial progenitor cells",
-#    "CD14+ monocyte derived endothelial progenitor cells donor3 : CNhs11904": "CD14-positive monocytes-derived endothelial progenitor cells",
-##    "CD14+ monocytes - mock treated donor1 : CNhs13468": "CD14-positive monocytes",
-##    "CD14+ monocytes - mock treated donor2 : CNhs13484": "CD14-positive monocytes",
-##    "CD14+ monocytes - mock treated donor3 : CNhs13491": "CD14-positive monocytes",
-#    "CD14+ monocytes - treated with B-glucan donor1 : CNhs13474"
-#    "CD14+ monocytes - treated with B-glucan donor2 : CNhs13489"
-#    "CD14+ monocytes - treated with B-glucan donor3 : CNhs13495"
-#
-##('"CD14+ monocytes - treated with B-glucan donor1', '')
-##('"CD14+ monocytes - treated with B-glucan donor2', '')
-##('"CD14+ monocytes - treated with B-glucan donor3', '')
-##('"CD14+ monocytes - treated with BCG donor1', '"CD14+ monocytes - treated with BCG donor1 : CNhs13465"')
-##('"CD14+ monocytes - treated with BCG donor2', '"CD14+ monocytes - treated with BCG donor2 : CNhs13475"')
-##('"CD14+ monocytes - treated with BCG donor3', '"CD14+ monocytes - treated with BCG donor3 : CNhs13543"')
-##('"CD14+ monocytes - treated with Candida donor1', '"CD14+ monocytes - treated with Candida donor1 : CNhs13473"')
-##('"CD14+ monocytes - treated with Candida donor2', '"CD14+ monocytes - treated with Candida donor2 : CNhs13488"')
-##('"CD14+ monocytes - treated with Candida donor3', '"CD14+ monocytes - treated with Candida donor3 : CNhs13494"')
-##('"CD14+ monocytes - treated with Cryptococcus donor1', '"CD14+ monocytes - treated with Cryptococcus donor1 : CNhs13472"')
-##('"CD14+ monocytes - treated with Cryptococcus donor2', '"CD14+ monocytes - treated with Cryptococcus donor2 : CNhs13487"')
-##('"CD14+ monocytes - treated with Cryptococcus donor3', '"CD14+ monocytes - treated with Cryptococcus donor3 : CNhs13546"')
-##('"CD14+ monocytes - treated with Group A streptococci donor1', '"CD14+ monocytes - treated with Group A streptococci donor1 : CNhs13469"')
-##('"CD14+ monocytes - treated with Group A streptococci donor2', '"CD14+ monocytes - treated with Group A streptococci donor2 : CNhs13532"')
-##('"CD14+ monocytes - treated with Group A streptococci donor3', '"CD14+ monocytes - treated with Group A streptococci donor3 : CNhs13492"')
-##('"CD14+ monocytes - treated with IFN + N-hexane donor1', '"CD14+ monocytes - treated with IFN + N-hexane donor1 : CNhs13466"')
-##('"CD14+ monocytes - treated with IFN + N-hexane donor2', '"CD14+ monocytes - treated with IFN + N-hexane donor2 : CNhs13476"')
-##('"CD14+ monocytes - treated with IFN + N-hexane donor3', '"CD14+ monocytes - treated with IFN + N-hexane donor3 : CNhs13490"')
-##('"CD14+ monocytes - treated with Salmonella donor1', '"CD14+ monocytes - treated with Salmonella donor1 : CNhs13471"')
-##('"CD14+ monocytes - treated with Salmonella donor2', '"CD14+ monocytes - treated with Salmonella donor2 : CNhs13485"')
-##('"CD14+ monocytes - treated with Salmonella donor3', '"CD14+ monocytes - treated with Salmonella donor3 : CNhs13493"')
-##('"CD14+ monocytes - treated with Trehalose dimycolate (TDM) donor1', '"CD14+ monocytes - treated with Trehalose dimycolate (TDM) donor1 : CNhs13467"')
-##('"CD14+ monocytes - treated with Trehalose dimycolate (TDM) donor2', '"CD14+ monocytes - treated with Trehalose dimycolate (TDM) donor2 : CNhs13483"')
-##('"CD14+ monocytes - treated with Trehalose dimycolate (TDM) donor3', '"CD14+ monocytes - treated with Trehalose dimycolate (TDM) donor3 : CNhs13544"')
-##('"CD14+ monocytes - treated with lipopolysaccharide donor1', '"CD14+ monocytes - treated with lipopolysaccharide donor1 : CNhs13470"')
-##('"CD14+ monocytes - treated with lipopolysaccharide donor2', '"CD14+ monocytes - treated with lipopolysaccharide donor2 : CNhs13533"')
-##('"CD14+ monocytes - treated with lipopolysaccharide donor3', '"CD14+ monocytes - treated with lipopolysaccharide donor3 : CNhs13545"')
-#('"CD14+CD16+ Monocytes donor1', '"CD14+CD16+ Monocytes donor1 : CNhs13541"')
-#('"CD14+CD16+ Monocytes donor2', '"CD14+CD16+ Monocytes donor2 : CNhs13208"')
-#('"CD14+CD16+ Monocytes donor3', '"CD14+CD16+ Monocytes donor3 : CNhs13549"')
-#('"CD14+CD16- Monocytes donor1', '"CD14+CD16- Monocytes donor1 : CNhs13224"')
-#('"CD14+CD16- Monocytes donor2', '"CD14+CD16- Monocytes donor2 : CNhs13216"')
-#('"CD14+CD16- Monocytes donor3', '"CD14+CD16- Monocytes donor3 : CNhs13540"')
-#('"CD14-CD16+ Monocytes donor2', '"CD14-CD16+ Monocytes donor2 : CNhs13207"')
-#('"CD14-CD16+ Monocytes donor3', '"CD14-CD16+ Monocytes donor3 : CNhs13548"')
-#('"CD19+ B Cells donor1', '"CD19+ B Cells donor1 : CNhs12343"')
-#('"CD19+ B Cells donor2', '"CD19+ B Cells donor2 : CNhs12352"')
-#('"CD19+ B Cells donor3', '"CD19+ B Cells donor3 : CNhs12354"')
-#('"CD34+ stem cells - adult bone marrow derived donor1 tech_rep1', '"CD34+ stem cells - adult bone marrow derived donor1 tech_rep1 : CNhs12588"')
-#('"CD4+ T Cells donor1', '"CD4+ T Cells donor1 : CNhs10853"')
-#('"CD4+ T Cells donor2', '"CD4+ T Cells donor2 : CNhs11955"')
-#('"CD4+ T Cells donor3', '"CD4+ T Cells donor3 : CNhs11998"')
-#('"CD4+CD25+CD45RA+ naive regulatory T cells donor3', '"CD4+CD25+CD45RA+ naive regulatory T cells donor3 : CNhs13513"')
-#('"CD4+CD25+CD45RA+ naive regulatory T cells expanded donor1', '"CD4+CD25+CD45RA+ naive regulatory T cells expanded donor1 : CNhs13203"')
-#('"CD4+CD25+CD45RA- memory regulatory T cells donor1', '"CD4+CD25+CD45RA- memory regulatory T cells donor1 : CNhs13195"')
-#('"CD4+CD25+CD45RA- memory regulatory T cells donor2', '"CD4+CD25+CD45RA- memory regulatory T cells donor2 : CNhs13206"')
-#('"CD4+CD25+CD45RA- memory regulatory T cells donor3', '"CD4+CD25+CD45RA- memory regulatory T cells donor3 : CNhs13538"')
-#('"CD4+CD25+CD45RA- memory regulatory T cells expanded donor1', '"CD4+CD25+CD45RA- memory regulatory T cells expanded donor1 : CNhs13204"')
-#('"CD4+CD25+CD45RA- memory regulatory T cells expanded donor2', '"CD4+CD25+CD45RA- memory regulatory T cells expanded donor2 : CNhs13811"')
-#('"CD4+CD25+CD45RA- memory regulatory T cells expanded donor3', '"CD4+CD25+CD45RA- memory regulatory T cells expanded donor3 : CNhs13812"')
-#('"CD4+CD25-CD45RA+ naive conventional T cells donor1', '"CD4+CD25-CD45RA+ naive conventional T cells donor1 : CNhs13223"')
-#('"CD4+CD25-CD45RA+ naive conventional T cells donor2', '"CD4+CD25-CD45RA+ naive conventional T cells donor2 : CNhs13205"')
-#('"CD4+CD25-CD45RA+ naive conventional T cells donor3', '"CD4+CD25-CD45RA+ naive conventional T cells donor3 : CNhs13512"')
-#('"CD4+CD25-CD45RA+ naive conventional T cells expanded donor1', '"CD4+CD25-CD45RA+ naive conventional T cells expanded donor1 : CNhs13202"')
-#('"CD4+CD25-CD45RA+ naive conventional T cells expanded donor2', '"CD4+CD25-CD45RA+ naive conventional T cells expanded donor2 : CNhs13813"')
-#('"CD4+CD25-CD45RA+ naive conventional T cells expanded donor3', '"CD4+CD25-CD45RA+ naive conventional T cells expanded donor3 : CNhs13814"')
-#('"CD4+CD25-CD45RA- memory conventional T cells donor3', '"CD4+CD25-CD45RA- memory conventional T cells donor3 : CNhs13539"')
-#('"CD4+CD25-CD45RA- memory conventional T cells expanded donor1', '"CD4+CD25-CD45RA- memory conventional T cells expanded donor1 : CNhs13215"')
-#('"CD8+ T Cells donor1', '"CD8+ T Cells donor1 : CNhs10854"')
-#('"CD8+ T Cells donor2', '"CD8+ T Cells donor2 : CNhs11956"')
-#('"CD8+ T Cells donor3', '"CD8+ T Cells donor3 : CNhs11999"')
-#('"Cardiac Myocyte donor1', '"Cardiac Myocyte donor1 : CNhs12341"')
-#('"Cardiac Myocyte donor2', '"Cardiac Myocyte donor2 : CNhs12350"')
-#('"Cardiac Myocyte donor3', '"Cardiac Myocyte donor3 : CNhs12571"')
-#('"Chondrocyte - de diff donor1', '"Chondrocyte - de diff donor1 : CNhs11923"')
-#('"Chondrocyte - de diff donor2', '"Chondrocyte - de diff donor2 : CNhs11372"')
-#('"Chondrocyte - de diff donor3', '"Chondrocyte - de diff donor3 : CNhs12020"')
-#('"Chondrocyte - re diff donor2', '"Chondrocyte - re diff donor2 : CNhs11373"')
-#('"Chondrocyte - re diff donor3', '"Chondrocyte - re diff donor3 : CNhs12021"')
-#('"Ciliary Epithelial Cells donor1', '"Ciliary Epithelial Cells donor1 : CNhs10871"')
-#('"Ciliary Epithelial Cells donor2', '"Ciliary Epithelial Cells donor2 : CNhs11966"')
-#('"Ciliary Epithelial Cells donor3', '"Ciliary Epithelial Cells donor3 : CNhs12009"')
-#('"Clontech Human Universal Reference Total RNA pool1', '"Clontech Human Universal Reference Total RNA pool1 : CNhs10608"')
-#('"Corneal Epithelial Cells donor1', '"Corneal Epithelial Cells donor1 : CNhs11336"')
-#('"Corneal Epithelial Cells donor3', '"Corneal Epithelial Cells donor3 : CNhs12123"')
-#('"Dendritic Cells - monocyte immature derived donor1 tech_rep1', '"Dendritic Cells - monocyte immature derived donor1 tech_rep1 : CNhs10855"')
-#('"Dendritic Cells - monocyte immature derived donor1 tech_rep2', '"Dendritic Cells - monocyte immature derived donor1 tech_rep2 : CNhs11062"')
-#('"Dendritic Cells - monocyte immature derived donor3', '"Dendritic Cells - monocyte immature derived donor3 : CNhs12000"')
-#('"Dendritic Cells - plasmacytoid donor1', '"Dendritic Cells - plasmacytoid donor1 : CNhs10857"')
-#('"Endothelial Cells - Aortic donor0', '"Endothelial Cells - Aortic donor0 : CNhs10837"')
-#('"Endothelial Cells - Aortic donor1', '"Endothelial Cells - Aortic donor1 : CNhs12495"')
-#('"Endothelial Cells - Aortic donor2', '"Endothelial Cells - Aortic donor2 : CNhs11375"')
-#('"Endothelial Cells - Aortic donor3', '"Endothelial Cells - Aortic donor3 : CNhs12022"')
-#('"Endothelial Cells - Artery donor1', '"Endothelial Cells - Artery donor1 : CNhs12496"')
-#('"Endothelial Cells - Artery donor2', '"Endothelial Cells - Artery donor2 : CNhs11977"')
-#('"Endothelial Cells - Artery donor3', '"Endothelial Cells - Artery donor3 : CNhs12023"')
-#('"Endothelial Cells - Lymphatic donor1', '"Endothelial Cells - Lymphatic donor1 : CNhs10865"')
-#('"Endothelial Cells - Lymphatic donor2', '"Endothelial Cells - Lymphatic donor2 : CNhs11901"')
-#('"Endothelial Cells - Lymphatic donor3', '"Endothelial Cells - Lymphatic donor3 : CNhs11906"')
-#('"Endothelial Cells - Microvascular donor1', '"Endothelial Cells - Microvascular donor1 : CNhs11925"')
-#('"Endothelial Cells - Microvascular donor2', '"Endothelial Cells - Microvascular donor2 : CNhs11376"')
-#('"Endothelial Cells - Microvascular donor3', '"Endothelial Cells - Microvascular donor3 : CNhs12024"')
-#('"Endothelial Cells - Thoracic donor1', '"Endothelial Cells - Thoracic donor1 : CNhs11926"')
-#('"Endothelial Cells - Thoracic donor2', '"Endothelial Cells - Thoracic donor2 : CNhs11978"')
-#('"Endothelial Cells - Umbilical vein donor1', '"Endothelial Cells - Umbilical vein donor1 : CNhs10872"')
-#('"Endothelial Cells - Umbilical vein donor2', '"Endothelial Cells - Umbilical vein donor2 : CNhs11967"')
-#('"Endothelial Cells - Umbilical vein donor3', '"Endothelial Cells - Umbilical vein donor3 : CNhs12010"')
-#('"Endothelial Cells - Vein donor1', '"Endothelial Cells - Vein donor1 : CNhs12497"')
-#('"Endothelial Cells - Vein donor2', '"Endothelial Cells - Vein donor2 : CNhs11377"')
-#('"Endothelial Cells - Vein donor3', '"Endothelial Cells - Vein donor3 : CNhs12026"')
-#('"Esophageal Epithelial Cells donor1', '"Esophageal Epithelial Cells donor1 : CNhs11323"')
-#('"Ewing\'s sarcoma cell line:Hs 863.T', '"Ewing\'s sarcoma cell line:Hs 863.T : CNhs11836"')
-#('"Fibroblast - Aortic Adventitial donor1', '"Fibroblast - Aortic Adventitial donor1 : CNhs10874"')
-#('"Fibroblast - Aortic Adventitial donor3', '"Fibroblast - Aortic Adventitial donor3 : CNhs12011"')
-#('"Fibroblast - Cardiac donor1', '"Fibroblast - Cardiac donor1 : CNhs12498"')
-#('"Fibroblast - Cardiac donor2', '"Fibroblast - Cardiac donor2 : CNhs11378"')
-#('"Fibroblast - Cardiac donor3', '"Fibroblast - Cardiac donor3 : CNhs12027"')
-#('"Fibroblast - Cardiac donor4', '"Fibroblast - Cardiac donor4 : CNhs11909"')
-#('"Fibroblast - Cardiac donor5', '"Fibroblast - Cardiac donor5 : CNhs12057"')
-#('"Fibroblast - Cardiac donor6', '"Fibroblast - Cardiac donor6 : CNhs12061"')
-#('"Fibroblast - Choroid Plexus donor1', '"Fibroblast - Choroid Plexus donor1 : CNhs11319"')
-#('"Fibroblast - Choroid Plexus donor2', '"Fibroblast - Choroid Plexus donor2 : CNhs12344"')
-#('"Fibroblast - Conjunctival donor1', '"Fibroblast - Conjunctival donor1 : CNhs11339"')
-#('"Fibroblast - Dermal donor1', '"Fibroblast - Dermal donor1 : CNhs12499"')
-#('"Fibroblast - Dermal donor2', '"Fibroblast - Dermal donor2 : CNhs11379"')
-#('"Fibroblast - Dermal donor3', '"Fibroblast - Dermal donor3 : CNhs12028"')
-#('"Fibroblast - Dermal donor4', '"Fibroblast - Dermal donor4 : CNhs12052"')
-#('"Fibroblast - Dermal donor5', '"Fibroblast - Dermal donor5 : CNhs12055"')
-#('"Fibroblast - Dermal donor6', '"Fibroblast - Dermal donor6 : CNhs12059"')
-#('"Fibroblast - Gingival donor1', '"Fibroblast - Gingival donor1 : CNhs10866"')
-#('"Fibroblast - Gingival donor2', '"Fibroblast - Gingival donor2 : CNhs11961"')
-#('"Fibroblast - Gingival donor3', '"Fibroblast - Gingival donor3 : CNhs12006"')
-#('"Fibroblast - Gingival donor4 (GFH2)', '"Fibroblast - Gingival donor4 (GFH2) : CNhs10848"')
-#('"Fibroblast - Gingival donor5 (GFH3)', '"Fibroblast - Gingival donor5 (GFH3) : CNhs11952"')
-#('"Fibroblast - Lymphatic donor1', '"Fibroblast - Lymphatic donor1 : CNhs11322"')
-#('"Fibroblast - Lymphatic donor3', '"Fibroblast - Lymphatic donor3 : CNhs12118"')
-#('"Fibroblast - Periodontal Ligament donor1', '"Fibroblast - Periodontal Ligament donor1 : CNhs10867"')
-#('"Fibroblast - Periodontal Ligament donor2', '"Fibroblast - Periodontal Ligament donor2 : CNhs11962"')
-#('"Fibroblast - Periodontal Ligament donor3', '"Fibroblast - Periodontal Ligament donor3 : CNhs11907"')
-#('"Fibroblast - Periodontal Ligament donor4 (PL29)', '"Fibroblast - Periodontal Ligament donor4 (PL29) : CNhs12493"')
-#('"Fibroblast - Periodontal Ligament donor5 (PL30)', '"Fibroblast - Periodontal Ligament donor5 (PL30) : CNhs11953"')
-#('"Fibroblast - Periodontal Ligament donor6 (PLH3)', '"Fibroblast - Periodontal Ligament donor6 (PLH3) : CNhs11996"')
-#('"Fibroblast - Pulmonary Artery donor1', '"Fibroblast - Pulmonary Artery donor1 : CNhs10878"')
-#('"Fibroblast - skin dystrophia myotonica donor1', '"Fibroblast - skin dystrophia myotonica donor1 : CNhs11353"')
-#('"Fibroblast - skin dystrophia myotonica donor2', '"Fibroblast - skin dystrophia myotonica donor2 : CNhs11354"')
-#('"Fibroblast - skin dystrophia myotonica donor3', '"Fibroblast - skin dystrophia myotonica donor3 : CNhs11913"')
-#('"Fibroblast - skin normal donor1', '"Fibroblast - skin normal donor1 : CNhs11351"')
-#('"Fibroblast - skin normal donor2', '"Fibroblast - skin normal donor2 : CNhs11914"')
-#('"Fibroblast - skin spinal muscular atrophy donor1', '"Fibroblast - skin spinal muscular atrophy donor1 : CNhs11074"')
-#('"Fibroblast - skin spinal muscular atrophy donor2', '"Fibroblast - skin spinal muscular atrophy donor2 : CNhs11911"')
-#('"Fibroblast - skin spinal muscular atrophy donor3', '"Fibroblast - skin spinal muscular atrophy donor3 : CNhs11912"')
-#('"Fibroblast - skin walker warburg donor1', '"Fibroblast - skin walker warburg donor1 : CNhs11352"')
-#('"Gingival epithelial cells donor1 (GEA11)', '"Gingival epithelial cells donor1 (GEA11) : CNhs11061"')
-#('"Gingival epithelial cells donor2 (GEA14)', '"Gingival epithelial cells donor2 (GEA14) : CNhs11896"')
-#('"Gingival epithelial cells donor3 (GEA15)', '"Gingival epithelial cells donor3 (GEA15) : CNhs11903"')
-#('"Hair Follicle Dermal Papilla Cells donor1', '"Hair Follicle Dermal Papilla Cells donor1 : CNhs12501"')
-#('"Hair Follicle Dermal Papilla Cells donor2', '"Hair Follicle Dermal Papilla Cells donor2 : CNhs11979"')
-#('"Hair Follicle Dermal Papilla Cells donor3', '"Hair Follicle Dermal Papilla Cells donor3 : CNhs12030"')
-#('"Hair Follicle Outer Root Sheath Cells donor1', '"Hair Follicle Outer Root Sheath Cells donor1 : CNhs12339"')
-#('"Hair Follicle Outer Root Sheath Cells donor2', '"Hair Follicle Outer Root Sheath Cells donor2 : CNhs12347"')
-##('"Hep-2 cells mock treated biol_rep1', '"Hep-2 cells mock treated biol_rep1 : CNhs13479"')
-##('"Hep-2 cells mock treated biol_rep2', '"Hep-2 cells mock treated biol_rep2 : CNhs13500"')
-##('"Hep-2 cells mock treated biol_rep3', '"Hep-2 cells mock treated biol_rep3 : CNhs13501"')
-##('"Hep-2 cells treated with Streptococci strain 5448 biol_rep1', '"Hep-2 cells treated with Streptococci strain 5448 biol_rep1 : CNhs13477"')
-##('"Hep-2 cells treated with Streptococci strain 5448 biol_rep2', '"Hep-2 cells treated with Streptococci strain 5448 biol_rep2 : CNhs13496"')
-##('"Hep-2 cells treated with Streptococci strain 5448 biol_rep3', '"Hep-2 cells treated with Streptococci strain 5448 biol_rep3 : CNhs13497"')
-##('"Hep-2 cells treated with Streptococci strain JRS4 biol_rep1', '"Hep-2 cells treated with Streptococci strain JRS4 biol_rep1 : CNhs13478"')
-##('"Hep-2 cells treated with Streptococci strain JRS4 biol_rep2', '"Hep-2 cells treated with Streptococci strain JRS4 biol_rep2 : CNhs13498"')
-##('"Hep-2 cells treated with Streptococci strain JRS4 biol_rep3', '"Hep-2 cells treated with Streptococci strain JRS4 biol_rep3 : CNhs13499"')
-#('"Hepatic Sinusoidal Endothelial Cells donor1', '"Hepatic Sinusoidal Endothelial Cells donor1 : CNhs12075"')
-#('"Hepatic Sinusoidal Endothelial Cells donor2', '"Hepatic Sinusoidal Endothelial Cells donor2 : CNhs12092"')
-#('"Hepatic Stellate Cells (lipocyte) donor1', '"Hepatic Stellate Cells (lipocyte) donor1 : CNhs11335"')
-#('"Hepatic Stellate Cells (lipocyte) donor2', '"Hepatic Stellate Cells (lipocyte) donor2 : CNhs12093"')
-#('"Hepatocyte donor1', '"Hepatocyte donor1 : CNhs12340"')
-#('"Hepatocyte donor2', '"Hepatocyte donor2 : CNhs12349"')
-#('"Hepatocyte donor3', '"Hepatocyte donor3 : CNhs12626"')
-#('"Hodgkin\'s lymphoma cell line:HD-Mar2', '"Hodgkin\'s lymphoma cell line:HD-Mar2 : CNhs11715"')
-#('"Intestinal epithelial cells (polarized) donor1', '"Intestinal epithelial cells (polarized) donor1 : CNhs10875"')
-#('"Iris Pigment Epithelial Cells donor1', '"Iris Pigment Epithelial Cells donor1 : CNhs12596"')
-#('"Keratinocyte - epidermal donor1', '"Keratinocyte - epidermal donor1 : CNhs11064"')
-#('"Keratinocyte - epidermal donor2', '"Keratinocyte - epidermal donor2 : CNhs11381"')
-#('"Keratinocyte - epidermal donor3', '"Keratinocyte - epidermal donor3 : CNhs12031"')
-#('"Keratinocyte - oral donor1', '"Keratinocyte - oral donor1 : CNhs10879"')
-#('"Keratocytes donor1', '"Keratocytes donor1 : CNhs11337"')
-#('"Keratocytes donor2', '"Keratocytes donor2 : CNhs12095"')
-#('"Lens Epithelial Cells donor1', '"Lens Epithelial Cells donor1 : CNhs12342"')
-#('"Lens Epithelial Cells donor2', '"Lens Epithelial Cells donor2 : CNhs12568"')
-#('"Lens Epithelial Cells donor3', '"Lens Epithelial Cells donor3 : CNhs12572"')
-#('"Macrophage - monocyte derived donor1', '"Macrophage - monocyte derived donor1 : CNhs10861"')
-#('"Macrophage - monocyte derived donor2', '"Macrophage - monocyte derived donor2 : CNhs11899"')
-#('"Macrophage - monocyte derived donor3', '"Macrophage - monocyte derived donor3 : CNhs12003"')
-#('"Mallassez-derived cells donor2', '"Mallassez-derived cells donor2 : CNhs13550"')
-#('"Mallassez-derived cells donor3', '"Mallassez-derived cells donor3 : CNhs13551"')
-#('"Mammary Epithelial Cell donor1', '"Mammary Epithelial Cell donor1 : CNhs11077"')
-#('"Mammary Epithelial Cell donor2', '"Mammary Epithelial Cell donor2 : CNhs11382"')
-#('"Mammary Epithelial Cell donor3', '"Mammary Epithelial Cell donor3 : CNhs12032"')
-#('"Mast cell - stimulated donor1', '"Mast cell - stimulated donor1 : CNhs11073"')
-#('"Mast cell donor1', '"Mast cell donor1 : CNhs12566"')
-#('"Mast cell donor2', '"Mast cell donor2 : CNhs12594"')
-#('"Mast cell donor3', '"Mast cell donor3 : CNhs12593"')
-#('"Mast cell donor4', '"Mast cell donor4 : CNhs12592"')
-#('"Melanocyte - dark donor3', '"Melanocyte - dark donor3 : CNhs12570"')
-#('"Melanocyte - light donor1', '"Melanocyte - light donor1 : CNhs11303"')
-#('"Melanocyte - light donor2', '"Melanocyte - light donor2 : CNhs11383"')
-#('"Melanocyte - light donor3', '"Melanocyte - light donor3 : CNhs12033"')
-#('"Meningeal Cells donor1', '"Meningeal Cells donor1 : CNhs11320"')
-#('"Meningeal Cells donor2', '"Meningeal Cells donor2 : CNhs12080"')
-#('"Meningeal Cells donor3', '"Meningeal Cells donor3 : CNhs12731"')
-#('"Mesenchymal Stem Cells - Wharton\'s Jelly donor1', '"Mesenchymal Stem Cells - Wharton\'s Jelly donor1 : CNhs11057"')
-#('"Mesenchymal Stem Cells - adipose donor1', '"Mesenchymal Stem Cells - adipose donor1 : CNhs11345"')
-#('"Mesenchymal Stem Cells - adipose donor3', '"Mesenchymal Stem Cells - adipose donor3 : CNhs12922"')
-#('"Mesenchymal Stem Cells - amniotic membrane donor1', '"Mesenchymal Stem Cells - amniotic membrane donor1 : CNhs11349"')
-#('"Mesenchymal Stem Cells - amniotic membrane donor2', '"Mesenchymal Stem Cells - amniotic membrane donor2 : CNhs12104"')
-#('"Mesenchymal Stem Cells - bone marrow donor1', '"Mesenchymal Stem Cells - bone marrow donor1 : CNhs11344"')
-#('"Mesenchymal Stem Cells - bone marrow donor2', '"Mesenchymal Stem Cells - bone marrow donor2 : CNhs12100"')
-#('"Mesenchymal Stem Cells - bone marrow donor3', '"Mesenchymal Stem Cells - bone marrow donor3 : CNhs12126"')
-#('"Mesenchymal Stem Cells - hepatic donor2', '"Mesenchymal Stem Cells - hepatic donor2 : CNhs12730"')
-#('"Mesenchymal Stem Cells - umbilical donor1', '"Mesenchymal Stem Cells - umbilical donor1 : CNhs11347"')
-#('"Mesenchymal Stem Cells - umbilical donor3', '"Mesenchymal Stem Cells - umbilical donor3 : CNhs12127"')
-#('"Mesenchymal stem cells - adipose donor0', '"Mesenchymal stem cells - adipose donor0 : CNhs10844"')
-#('"Mesenchymal stem cells - hepatic donor0', '"Mesenchymal stem cells - hepatic donor0 : CNhs10845"')
-#('"Mesenchymal stem cells - umbilical donor0', '"Mesenchymal stem cells - umbilical donor0 : CNhs12492"')
-#('"Mesothelial Cells donor1', '"Mesothelial Cells donor1 : CNhs10850"')
-#('"Mesothelial Cells donor3', '"Mesothelial Cells donor3 : CNhs12012"')
-#('"Multipotent Cord Blood Unrestricted Somatic Stem Cells donor1', '"Multipotent Cord Blood Unrestricted Somatic Stem Cells donor1 : CNhs11350"')
-#('"Multipotent Cord Blood Unrestricted Somatic Stem Cells donor2', '"Multipotent Cord Blood Unrestricted Somatic Stem Cells donor2 : CNhs12105"')
-#('"Myoblast donor1', '"Myoblast donor1 : CNhs10870"')
-#('"Myoblast donor2', '"Myoblast donor2 : CNhs11965"')
-#('"Myoblast donor3', '"Myoblast donor3 : CNhs11908"')
-#('"NK T cell leukemia cell line:KHYG-1', '"NK T cell leukemia cell line:KHYG-1 : CNhs11867"')
-#('"Natural Killer Cells donor1', '"Natural Killer Cells donor1 : CNhs10859"')
-#('"Natural Killer Cells donor2', '"Natural Killer Cells donor2 : CNhs11957"')
-#('"Natural Killer Cells donor3', '"Natural Killer Cells donor3 : CNhs12001"')
-#('"Neural stem cells donor1', '"Neural stem cells donor1 : CNhs11063"')
-#('"Neural stem cells donor2', '"Neural stem cells donor2 : CNhs11384"')
-#('"Neurons donor1', '"Neurons donor1 : CNhs12338"')
-#('"Neurons donor2', '"Neurons donor2 : CNhs12726"')
-#('"Neurons donor3', '"Neurons donor3 : CNhs13815"')
-#('"Neutrophils donor1', '"Neutrophils donor1 : CNhs10862"')
-#('"Neutrophils donor2', '"Neutrophils donor2 : CNhs11959"')
-#('"Neutrophils donor3', '"Neutrophils donor3 : CNhs11905"')
-#('"Nucleus Pulposus Cell donor1', '"Nucleus Pulposus Cell donor1 : CNhs10881"')
-#('"Nucleus Pulposus Cell donor2', '"Nucleus Pulposus Cell donor2 : CNhs12019"')
-#('"Nucleus Pulposus Cell donor3', '"Nucleus Pulposus Cell donor3 : CNhs12063"')
-#('"Olfactory epithelial cells donor1', '"Olfactory epithelial cells donor1 : CNhs13816"')
-#('"Olfactory epithelial cells donor2', '"Olfactory epithelial cells donor2 : CNhs13817"')
-#('"Olfactory epithelial cells donor3', '"Olfactory epithelial cells donor3 : CNhs13818"')
-#('"Olfactory epithelial cells donor4', '"Olfactory epithelial cells donor4 : CNhs13819"')
-#('"Osteoblast - differentiated donor1', '"Osteoblast - differentiated donor1 : CNhs11311"')
-#('"Osteoblast - differentiated donor2', '"Osteoblast - differentiated donor2 : CNhs11980"')
-#('"Osteoblast - differentiated donor3', '"Osteoblast - differentiated donor3 : CNhs12035"')
-#('"Osteoblast donor2', '"Osteoblast donor2 : CNhs11385"')
-#('"Osteoblast donor3', '"Osteoblast donor3 : CNhs12036"')
-#('"Pancreatic stromal cells donor1', '"Pancreatic stromal cells donor1 : CNhs10877"')
-#('"Pericytes donor1', '"Pericytes donor1 : CNhs11317"')
-#('"Pericytes donor2', '"Pericytes donor2 : CNhs12079"')
-#('"Peripheral Blood Mononuclear Cells donor1', '"Peripheral Blood Mononuclear Cells donor1 : CNhs10860"')
-#('"Peripheral Blood Mononuclear Cells donor2', '"Peripheral Blood Mononuclear Cells donor2 : CNhs11958"')
-#('"Peripheral Blood Mononuclear Cells donor3', '"Peripheral Blood Mononuclear Cells donor3 : CNhs12002"')
-#('"Placental Epithelial Cells donor1', '"Placental Epithelial Cells donor1 : CNhs11079"')
-#('"Placental Epithelial Cells donor2', '"Placental Epithelial Cells donor2 : CNhs11386"')
-#('"Placental Epithelial Cells donor3', '"Placental Epithelial Cells donor3 : CNhs12037"')
-#('"Preadipocyte - breast donor1', '"Preadipocyte - breast donor1 : CNhs11052"')
-#('"Preadipocyte - breast donor2', '"Preadipocyte - breast donor2 : CNhs11971"')
-#('"Preadipocyte - omental donor1', '"Preadipocyte - omental donor1 : CNhs11065"')
-#('"Preadipocyte - omental donor2', '"Preadipocyte - omental donor2 : CNhs11902"')
-#('"Preadipocyte - omental donor3', '"Preadipocyte - omental donor3 : CNhs12013"')
-#('"Preadipocyte - perirenal donor1', '"Preadipocyte - perirenal donor1 : CNhs12065"')
-#('"Preadipocyte - subcutaneous donor2', '"Preadipocyte - subcutaneous donor2 : CNhs11981"')
-#('"Preadipocyte - subcutaneous donor3', '"Preadipocyte - subcutaneous donor3 : CNhs12038"')
-#('"Preadipocyte - visceral donor1', '"Preadipocyte - visceral donor1 : CNhs11082"')
-#('"Preadipocyte - visceral donor2', '"Preadipocyte - visceral donor2 : CNhs11982"')
-#('"Preadipocyte - visceral donor3', '"Preadipocyte - visceral donor3 : CNhs12039"')
-#('"Prostate Epithelial Cells (polarized) donor1', '"Prostate Epithelial Cells (polarized) donor1 : CNhs10882"')
-#('"Prostate Epithelial Cells donor2', '"Prostate Epithelial Cells donor2 : CNhs11972"')
-#('"Prostate Epithelial Cells donor3', '"Prostate Epithelial Cells donor3 : CNhs12014"')
-#('"Prostate Stromal Cells donor1', '"Prostate Stromal Cells donor1 : CNhs10883"')
-#('"Prostate Stromal Cells donor2', '"Prostate Stromal Cells donor2 : CNhs11973"')
-#('"Prostate Stromal Cells donor3', '"Prostate Stromal Cells donor3 : CNhs12015"')
-#('"Renal Cortical Epithelial Cells donor1', '"Renal Cortical Epithelial Cells donor1 : CNhs11331"')
-#('"Renal Cortical Epithelial Cells donor2', '"Renal Cortical Epithelial Cells donor2 : CNhs12728"')
-#('"Renal Epithelial Cells donor1', '"Renal Epithelial Cells donor1 : CNhs11332"')
-#('"Renal Epithelial Cells donor2', '"Renal Epithelial Cells donor2 : CNhs12088"')
-#('"Renal Epithelial Cells donor3', '"Renal Epithelial Cells donor3 : CNhs12732"')
-#('"Renal Glomerular Endothelial Cells donor1', '"Renal Glomerular Endothelial Cells donor1 : CNhs12074"')
-#('"Renal Glomerular Endothelial Cells donor2', '"Renal Glomerular Endothelial Cells donor2 : CNhs12086"')
-#('"Renal Glomerular Endothelial Cells donor3', '"Renal Glomerular Endothelial Cells donor3 : CNhs12624"')
-#('"Renal Glomerular Endothelial Cells donor4', '"Renal Glomerular Endothelial Cells donor4 : CNhs13080"')
-#('"Renal Mesangial Cells donor1', '"Renal Mesangial Cells donor1 : CNhs11333"')
-#('"Renal Mesangial Cells donor3', '"Renal Mesangial Cells donor3 : CNhs12121"')
-#('"Renal Proximal Tubular Epithelial Cell donor1', '"Renal Proximal Tubular Epithelial Cell donor1 : CNhs11330"')
-#('"Renal Proximal Tubular Epithelial Cell donor2', '"Renal Proximal Tubular Epithelial Cell donor2 : CNhs12087"')
-#('"Renal Proximal Tubular Epithelial Cell donor3', '"Renal Proximal Tubular Epithelial Cell donor3 : CNhs12120"')
-#('"Reticulocytes biol_ rep1', '"Reticulocytes biol_ rep1 : CNhs13552"')
-#('"Reticulocytes biol_ rep2', '"Reticulocytes biol_ rep2 : CNhs13553"')
-#('"Retinal Pigment Epithelial Cells donor0', '"Retinal Pigment Epithelial Cells donor0 : CNhs10842"')
-#('"Retinal Pigment Epithelial Cells donor1', '"Retinal Pigment Epithelial Cells donor1 : CNhs11338"')
-#('"Retinal Pigment Epithelial Cells donor3', '"Retinal Pigment Epithelial Cells donor3 : CNhs12733"')
-#('"SABiosciences XpressRef Human Universal Total RNA pool1', '"SABiosciences XpressRef Human Universal Total RNA pool1 : CNhs10610"')
-#('"Sebocyte donor1', '"Sebocyte donor1 : CNhs10847"')
-#('"Sebocyte donor2', '"Sebocyte donor2 : CNhs11951"')
-#('"Sertoli Cells donor1', '"Sertoli Cells donor1 : CNhs10851"')
-#('"Skeletal Muscle Cells donor1', '"Skeletal Muscle Cells donor1 : CNhs11083"')
-#('"Skeletal Muscle Cells donor4', '"Skeletal Muscle Cells donor4 : CNhs12053"')
-#('"Skeletal Muscle Cells donor5', '"Skeletal Muscle Cells donor5 : CNhs12056"')
-#('"Skeletal Muscle Cells donor6', '"Skeletal Muscle Cells donor6 : CNhs12060"')
-#('"Skeletal Muscle Satellite Cells donor1', '"Skeletal Muscle Satellite Cells donor1 : CNhs10869"')
-#('"Skeletal Muscle Satellite Cells donor2', '"Skeletal Muscle Satellite Cells donor2 : CNhs11964"')
-#('"Skeletal Muscle Satellite Cells donor3', '"Skeletal Muscle Satellite Cells donor3 : CNhs12008"')
-#('"Skeletal muscle cells differentiated into Myotubes - multinucleated donor1', '"Skeletal muscle cells differentiated into Myotubes - multinucleated donor1 : CNhs11084"')
-#('"Small Airway Epithelial Cells donor1', '"Small Airway Epithelial Cells donor1 : CNhs10884"')
-#('"Small Airway Epithelial Cells donor2', '"Small Airway Epithelial Cells donor2 : CNhs11975"')
-#('"Small Airway Epithelial Cells donor3', '"Small Airway Epithelial Cells donor3 : CNhs12016"')
-#('"Smooth Muscle Cells - Aortic donor0', '"Smooth Muscle Cells - Aortic donor0 : CNhs10838"')
-#('"Smooth Muscle Cells - Aortic donor1', '"Smooth Muscle Cells - Aortic donor1 : CNhs11085"')
-#('"Smooth Muscle Cells - Aortic donor2', '"Smooth Muscle Cells - Aortic donor2 : CNhs11305"')
-#('"Smooth Muscle Cells - Aortic donor3', '"Smooth Muscle Cells - Aortic donor3 : CNhs11309"')
-#('"Smooth Muscle Cells - Brachiocephalic donor1', '"Smooth Muscle Cells - Brachiocephalic donor1 : CNhs11086"')
-#('"Smooth Muscle Cells - Brachiocephalic donor3', '"Smooth Muscle Cells - Brachiocephalic donor3 : CNhs12043"')
-#('"Smooth Muscle Cells - Brain Vascular donor1', '"Smooth Muscle Cells - Brain Vascular donor1 : CNhs10863"')
-#('"Smooth Muscle Cells - Brain Vascular donor2', '"Smooth Muscle Cells - Brain Vascular donor2 : CNhs11900"')
-#('"Smooth Muscle Cells - Brain Vascular donor3', '"Smooth Muscle Cells - Brain Vascular donor3 : CNhs12004"')
-#('"Smooth Muscle Cells - Bronchial donor1', '"Smooth Muscle Cells - Bronchial donor1 : CNhs11328"')
-#('"Smooth Muscle Cells - Bronchial donor2', '"Smooth Muscle Cells - Bronchial donor2 : CNhs12348"')
-#('"Smooth Muscle Cells - Carotid donor1', '"Smooth Muscle Cells - Carotid donor1 : CNhs11087"')
-#('"Smooth Muscle Cells - Carotid donor3', '"Smooth Muscle Cells - Carotid donor3 : CNhs12044"')
-#('"Smooth Muscle Cells - Colonic donor1', '"Smooth Muscle Cells - Colonic donor1 : CNhs10868"')
-#('"Smooth Muscle Cells - Colonic donor2', '"Smooth Muscle Cells - Colonic donor2 : CNhs11963"')
-#('"Smooth Muscle Cells - Colonic donor3', '"Smooth Muscle Cells - Colonic donor3 : CNhs12007"')
-#('"Smooth Muscle Cells - Coronary Artery donor1', '"Smooth Muscle Cells - Coronary Artery donor1 : CNhs11088"')
-#('"Smooth Muscle Cells - Coronary Artery donor2', '"Smooth Muscle Cells - Coronary Artery donor2 : CNhs11987"')
-#('"Smooth Muscle Cells - Coronary Artery donor3', '"Smooth Muscle Cells - Coronary Artery donor3 : CNhs12045"')
-#('"Smooth Muscle Cells - Esophageal donor1', '"Smooth Muscle Cells - Esophageal donor1 : CNhs11324"')
-#('"Smooth Muscle Cells - Internal Thoracic Artery donor2', '"Smooth Muscle Cells - Internal Thoracic Artery donor2 : CNhs11988"')
-#('"Smooth Muscle Cells - Internal Thoracic Artery donor3', '"Smooth Muscle Cells - Internal Thoracic Artery donor3 : CNhs12046"')
-#('"Smooth Muscle Cells - Prostate donor1', '"Smooth Muscle Cells - Prostate donor1 : CNhs11920"')
-#('"Smooth Muscle Cells - Prostate donor2', '"Smooth Muscle Cells - Prostate donor2 : CNhs11976"')
-#('"Smooth Muscle Cells - Pulmonary Artery donor2', '"Smooth Muscle Cells - Pulmonary Artery donor2 : CNhs11989"')
-#('"Smooth Muscle Cells - Subclavian Artery donor1', '"Smooth Muscle Cells - Subclavian Artery donor1 : CNhs11090"')
-#('"Smooth Muscle Cells - Subclavian Artery donor2', '"Smooth Muscle Cells - Subclavian Artery donor2 : CNhs11990"')
-#('"Smooth Muscle Cells - Subclavian Artery donor3', '"Smooth Muscle Cells - Subclavian Artery donor3 : CNhs12048"')
-#('"Smooth Muscle Cells - Tracheal donor1', '"Smooth Muscle Cells - Tracheal donor1 : CNhs11329"')
-#('"Smooth Muscle Cells - Tracheal donor3', '"Smooth Muscle Cells - Tracheal donor3 : CNhs12894"')
-#('"Smooth Muscle Cells - Umbilical Artery donor1', '"Smooth Muscle Cells - Umbilical Artery donor1 : CNhs11091"')
-#('"Smooth Muscle Cells - Umbilical Artery donor2', '"Smooth Muscle Cells - Umbilical Artery donor2 : CNhs11991"')
-#('"Smooth Muscle Cells - Umbilical Artery donor3', '"Smooth Muscle Cells - Umbilical Artery donor3 : CNhs12049"')
-#('"Smooth Muscle Cells - Umbilical Vein donor1', '"Smooth Muscle Cells - Umbilical Vein donor1 : CNhs12597"')
-#('"Smooth Muscle Cells - Umbilical Vein donor2', '"Smooth Muscle Cells - Umbilical Vein donor2 : CNhs12569"')
-#('"Smooth Muscle Cells - Umbilical artery donor0', '"Smooth Muscle Cells - Umbilical artery donor0 : CNhs10839"')
-#('"Smooth Muscle Cells - Uterine donor3', '"Smooth Muscle Cells - Uterine donor3 : CNhs11927"')
-#('"Synoviocyte donor2', '"Synoviocyte donor2 : CNhs11992"')
-#('"Synoviocyte donor3', '"Synoviocyte donor3 : CNhs12050"')
-#('"Trabecular Meshwork Cells donor1', '"Trabecular Meshwork Cells donor1 : CNhs11340"')
-#('"Trabecular Meshwork Cells donor3', '"Trabecular Meshwork Cells donor3 : CNhs12124"')
-#('"Tracheal Epithelial Cells donor1', '"Tracheal Epithelial Cells donor1 : CNhs11092"')
-#('"Tracheal Epithelial Cells donor2', '"Tracheal Epithelial Cells donor2 : CNhs11993"')
-#('"Tracheal Epithelial Cells donor3', '"Tracheal Epithelial Cells donor3 : CNhs12051"')
-#('"Universal RNA - Human Normal Tissues Biochain pool1', '"Universal RNA - Human Normal Tissues Biochain pool1 : CNhs10612"')
-#('"Urothelial Cells donor1', '"Urothelial Cells donor1 : CNhs11334"')
-#('"Urothelial Cells donor2', '"Urothelial Cells donor2 : CNhs12091"')
-#('"Urothelial Cells donor3', '"Urothelial Cells donor3 : CNhs12122"')
-#('"Urothelial cells donor0', '"Urothelial cells donor0 : CNhs10843"')
-#('"Whole blood (ribopure) donor090309 donation1', '"Whole blood (ribopure) donor090309 donation1 : CNhs11675"')
-#('"Whole blood (ribopure) donor090309 donation2', '"Whole blood (ribopure) donor090309 donation2 : CNhs11671"')
-#('"Whole blood (ribopure) donor090309 donation3', '"Whole blood (ribopure) donor090309 donation3 : CNhs11948"')
-#('"Whole blood (ribopure) donor090325 donation1', '"Whole blood (ribopure) donor090325 donation1 : CNhs11075"')
-#('"Whole blood (ribopure) donor090325 donation2', '"Whole blood (ribopure) donor090325 donation2 : CNhs11076"')
-#('"Whole blood (ribopure) donor090612 donation1', '"Whole blood (ribopure) donor090612 donation1 : CNhs11672"')
-#('"Whole blood (ribopure) donor090612 donation2', '"Whole blood (ribopure) donor090612 donation2 : CNhs11673"')
-#('"Whole blood (ribopure) donor090612 donation3', '"Whole blood (ribopure) donor090612 donation3 : CNhs11949"')
-#('"Wilms\' tumor cell line:G-401', '"Wilms\' tumor cell line:G-401 : CNhs11892"')
-#('"Wilms\' tumor cell line:HFWT', '"Wilms\' tumor cell line:HFWT : CNhs11728"')
-#('"acantholytic squamous carcinoma cell line:HCC1806', '"acantholytic squamous carcinoma cell line:HCC1806 : CNhs11844"')
-#('"acute lymphoblastic leukemia (B-ALL) cell line:BALL-1', '"acute lymphoblastic leukemia (B-ALL) cell line:BALL-1 : CNhs11251"')
-#('"acute lymphoblastic leukemia (B-ALL) cell line:NALM-6', '"acute lymphoblastic leukemia (B-ALL) cell line:NALM-6 : CNhs11282"')
-#('"acute lymphoblastic leukemia (T-ALL) cell line:HPB-ALL', '"acute lymphoblastic leukemia (T-ALL) cell line:HPB-ALL : CNhs10746"')
-#('"acute lymphoblastic leukemia (T-ALL) cell line:Jurkat', '"acute lymphoblastic leukemia (T-ALL) cell line:Jurkat : CNhs11253"')
-#('"acute myeloid leukemia (FAB M0) cell line:KG-1', '"acute myeloid leukemia (FAB M0) cell line:KG-1 : CNhs13053"')
-#('"acute myeloid leukemia (FAB M1) cell line:HYT-1', '"acute myeloid leukemia (FAB M1) cell line:HYT-1 : CNhs13054"')
-#('"acute myeloid leukemia (FAB M2) cell line:Kasumi-1', '"acute myeloid leukemia (FAB M2) cell line:Kasumi-1 : CNhs13502"')
-#('"acute myeloid leukemia (FAB M2) cell line:Kasumi-6', '"acute myeloid leukemia (FAB M2) cell line:Kasumi-6 : CNhs13052"')
-#('"acute myeloid leukemia (FAB M2) cell line:NKM-1', '"acute myeloid leukemia (FAB M2) cell line:NKM-1 : CNhs11864"')
-#('"acute myeloid leukemia (FAB M3) cell line:HL60', '"acute myeloid leukemia (FAB M3) cell line:HL60 : CNhs13055"')
-#('"acute myeloid leukemia (FAB M4) cell line:FKH-1', '"acute myeloid leukemia (FAB M4) cell line:FKH-1 : CNhs13503"')
-#('"acute myeloid leukemia (FAB M4) cell line:HNT-34', '"acute myeloid leukemia (FAB M4) cell line:HNT-34 : CNhs13504"')
-#('"acute myeloid leukemia (FAB M4eo) cell line:EoL-1', '"acute myeloid leukemia (FAB M4eo) cell line:EoL-1 : CNhs13056"')
-#('"acute myeloid leukemia (FAB M4eo) cell line:EoL-3', '"acute myeloid leukemia (FAB M4eo) cell line:EoL-3 : CNhs13057"')
-#('"acute myeloid leukemia (FAB M5) cell line:NOMO-1', '"acute myeloid leukemia (FAB M5) cell line:NOMO-1 : CNhs13050"')
-#('"acute myeloid leukemia (FAB M5) cell line:P31/FUJ', '"acute myeloid leukemia (FAB M5) cell line:P31/FUJ : CNhs13051"')
-#('"acute myeloid leukemia (FAB M5) cell line:THP-1 (fresh)', '"acute myeloid leukemia (FAB M5) cell line:THP-1 (fresh) : CNhs10722"')
-#('"acute myeloid leukemia (FAB M5) cell line:THP-1 (revived)', '"acute myeloid leukemia (FAB M5) cell line:THP-1 (revived) : CNhs10723"')
-#('"acute myeloid leukemia (FAB M5) cell line:THP-1 (thawed)', '"acute myeloid leukemia (FAB M5) cell line:THP-1 (thawed) : CNhs10724"')
-#('"acute myeloid leukemia (FAB M5) cell line:U-937 DE-4', '"acute myeloid leukemia (FAB M5) cell line:U-937 DE-4 : CNhs13058"')
-#('"acute myeloid leukemia (FAB M6) cell line:EEB', '"acute myeloid leukemia (FAB M6) cell line:EEB : CNhs13059"')
-#('"acute myeloid leukemia (FAB M6) cell line:F-36E', '"acute myeloid leukemia (FAB M6) cell line:F-36E : CNhs13060"')
-#('"acute myeloid leukemia (FAB M6) cell line:F-36P', '"acute myeloid leukemia (FAB M6) cell line:F-36P : CNhs13505"')
-#('"acute myeloid leukemia (FAB M7) cell line:M-MOK', '"acute myeloid leukemia (FAB M7) cell line:M-MOK : CNhs13049"')
-#('"acute myeloid leukemia (FAB M7) cell line:MKPL-1', '"acute myeloid leukemia (FAB M7) cell line:MKPL-1 : CNhs11888"')
-#('"adenocarcinoma cell line:IM95m', '"adenocarcinoma cell line:IM95m : CNhs11882"')
-#('"adipose tissue adult pool1', '"adipose tissue adult pool1 : CNhs10615"')
-#('"adrenal cortex adenocarcinoma cell line:SW-13', '"adrenal cortex adenocarcinoma cell line:SW-13 : CNhs11893"')
-#('"adult T-cell leukemia cell line:ATN-1', '"adult T-cell leukemia cell line:ATN-1 : CNhs10738"')
-#('"alveolar cell carcinoma cell line:SW 1573', '"alveolar cell carcinoma cell line:SW 1573 : CNhs11838"')
-#('"amniotic membrane cells donor1', '"amniotic membrane cells donor1 : CNhs12502"')
-#('"amniotic membrane cells donor2', '"amniotic membrane cells donor2 : CNhs12503"')
-#('"amniotic membrane cells donor3', '"amniotic membrane cells donor3 : CNhs12379"')
-#('"amygdala - adult donor10196', '"amygdala - adult donor10196 : CNhs13793"')
-#('"amygdala adult donor10252', '"amygdala adult donor10252 : CNhs12311"')
-#('"anaplastic carcinoma cell line:8305C', '"anaplastic carcinoma cell line:8305C : CNhs10745"')
-#('"anaplastic large cell lymphoma cell line:Ki-JK', '"anaplastic large cell lymphoma cell line:Ki-JK : CNhs11881"')
-#('"anaplastic squamous cell carcinoma cell line:RPMI 2650', '"anaplastic squamous cell carcinoma cell line:RPMI 2650 : CNhs11889"')
-#('"aorta adult pool1', '"aorta adult pool1 : CNhs11760"')
-#('"appendix adult', '"appendix adult : CNhs12842"')
-#('"argyrophil small cell carcinoma cell line:TC-YIK', '"argyrophil small cell carcinoma cell line:TC-YIK : CNhs11725"')
-#('"astrocytoma cell line:TM-31', '"astrocytoma cell line:TM-31 : CNhs10742"')
-#('"b cell line:RPMI1788', '"b cell line:RPMI1788 : CNhs10744"')
-#('"basal cell carcinoma cell line:TE 354.T', '"basal cell carcinoma cell line:TE 354.T : CNhs11932"')
-#('"bile duct carcinoma cell line:HuCCT1', '"bile duct carcinoma cell line:HuCCT1 : CNhs10750"')
-#('"bile duct carcinoma cell line:TFK-1', '"bile duct carcinoma cell line:TFK-1 : CNhs11265"')
-#('"biphenotypic B myelomonocytic leukemia cell line:MV-4-11', '"biphenotypic B myelomonocytic leukemia cell line:MV-4-11 : CNhs11845"')
-#('"bladder adult pool1', '"bladder adult pool1 : CNhs10616"')
-#('"blood adult pool1', '"blood adult pool1 : CNhs11761"')
-#('"bone marrow stromal cell line:StromaNKtert', '"bone marrow stromal cell line:StromaNKtert : CNhs11931"')
-#('"brain adult donor1', '"brain adult donor1 : CNhs11796"')
-#('"brain adult pool1', '"brain adult pool1 : CNhs10617"')
-#('"brain fetal pool1', '"brain fetal pool1 : CNhs11797"')
-#('"breast adult donor1', '"breast adult donor1 : CNhs11792"')
-#('"breast carcinoma cell line:MCF7', '"breast carcinoma cell line:MCF7 : CNhs11943"')
-#('"breast carcinoma cell line:MDA-MB-453', '"breast carcinoma cell line:MDA-MB-453 : CNhs10736"')
-#('"bronchial squamous cell carcinoma cell line:KNS-62', '"bronchial squamous cell carcinoma cell line:KNS-62 : CNhs11862"')
-#('"bronchioalveolar carcinoma cell line:NCI-H358', '"bronchioalveolar carcinoma cell line:NCI-H358 : CNhs11840"')
-#('"bronchogenic carcinoma cell line:ChaGo-K-1', '"bronchogenic carcinoma cell line:ChaGo-K-1 : CNhs11841"')
-#('"carcinoid cell line:NCI-H1770', '"carcinoid cell line:NCI-H1770 : CNhs11834"')
-#('"carcinoid cell line:SK-PN-DW', '"carcinoid cell line:SK-PN-DW : CNhs11846"')
-#('"carcinosarcoma cell line:JHUCS-1', '"carcinosarcoma cell line:JHUCS-1 : CNhs11747"')
-#('"caudate nucleus - adult donor10196', '"caudate nucleus - adult donor10196 : CNhs13802"')
-#('"caudate nucleus adult donor10252', '"caudate nucleus adult donor10252 : CNhs12321"')
-#('"cerebellum - adult donor10196', '"cerebellum - adult donor10196 : CNhs13799"')
-#('"cerebellum adult donor10252', '"cerebellum adult donor10252 : CNhs12323"')
-#('"cerebellum adult pool1', '"cerebellum adult pool1 : CNhs11795"')
-#('"cerebral meninges adult', '"cerebral meninges adult : CNhs12840"')
-#('"cervical cancer cell line:D98-AH2', '"cervical cancer cell line:D98-AH2 : CNhs11288"')
-#('"cervical cancer cell line:ME-180', '"cervical cancer cell line:ME-180 : CNhs11289"')
-#('"cervix adult pool1', '"cervix adult pool1 : CNhs10618"')
-#('"cholangiocellular carcinoma cell line:HuH-28', '"cholangiocellular carcinoma cell line:HuH-28 : CNhs11283"')
-#('"choriocarcinoma  cell line:T3M-3', '"choriocarcinoma  cell line:T3M-3 : CNhs11820"')
-#('"choriocarcinoma cell line:BeWo', '"choriocarcinoma cell line:BeWo : CNhs10740"')
-#('"choriocarcinoma cell line:SCH', '"choriocarcinoma cell line:SCH : CNhs11875"')
-#('"chorionic membrane cells donor1', '"chorionic membrane cells donor1 : CNhs12504"')
-#('"chorionic membrane cells donor2', '"chorionic membrane cells donor2 : CNhs12506"')
-#('"chorionic membrane cells donor3', '"chorionic membrane cells donor3 : CNhs12380"')
-#('"chronic lymphocytic leukemia (T-CLL) cell line:SKW-3', '"chronic lymphocytic leukemia (T-CLL) cell line:SKW-3 : CNhs11714"')
-#('"chronic myeloblastic leukemia (CML) cell line:KCL-22', '"chronic myeloblastic leukemia (CML) cell line:KCL-22 : CNhs11886"')
-#('"chronic myelogenous leukemia (CML) cell line:MEG-A2', '"chronic myelogenous leukemia (CML) cell line:MEG-A2 : CNhs11865"')
-#('"chronic myelogenous leukemia cell line:K562', '"chronic myelogenous leukemia cell line:K562 : CNhs11250"')
-#('"chronic myelogenous leukemia cell line:K562 ENCODE biol_rep1', '"chronic myelogenous leukemia cell line:K562 ENCODE biol_rep1 : CNhs12334"')
-#('"chronic myelogenous leukemia cell line:K562 ENCODE biol_rep2', '"chronic myelogenous leukemia cell line:K562 ENCODE biol_rep2 : CNhs12335"')
-#('"chronic myelogenous leukemia cell line:K562 ENCODE biol_rep3', '"chronic myelogenous leukemia cell line:K562 ENCODE biol_rep3 : CNhs12336"')
-#('"chronic myelogenous leukemia cell line:KU812', '"chronic myelogenous leukemia cell line:KU812 : CNhs10727"')
-#('"clear cell carcinoma cell line:JHOC-5', '"clear cell carcinoma cell line:JHOC-5 : CNhs11745"')
-#('"clear cell carcinoma cell line:TEN', '"clear cell carcinoma cell line:TEN : CNhs11930"')
-#('"colon adult donor1', '"colon adult donor1 : CNhs11794"')
-#('"colon adult pool1', '"colon adult pool1 : CNhs10619"')
-#('"colon carcinoma cell line:CACO-2', '"colon carcinoma cell line:CACO-2 : CNhs11280"')
-#('"colon carcinoma cell line:COLO-320', '"colon carcinoma cell line:COLO-320 : CNhs10737"')
-#('"colon fetal donor1', '"colon fetal donor1 : CNhs11780"')
-#('"cord blood derived cell line:COBL-a 24h infection', '"cord blood derived cell line:COBL-a 24h infection : CNhs11050"')
-#('"cord blood derived cell line:COBL-a 24h infection(-C)', '"cord blood derived cell line:COBL-a 24h infection(-C) : CNhs11049"')
-#('"cord blood derived cell line:COBL-a untreated', '"cord blood derived cell line:COBL-a untreated : CNhs11045"')
-#('"corpus callosum adult pool1', '"corpus callosum adult pool1 : CNhs10649"')
-#('"diaphragm fetal donor1', '"diaphragm fetal donor1 : CNhs11779"')
-#('"diencephalon adult', '"diencephalon adult : CNhs12610"')
-#('"diffuse large B-cell lymphoma cell line:CTB-1', '"diffuse large B-cell lymphoma cell line:CTB-1 : CNhs11741"')
-#('"ductal cell carcinoma cell line:KLM-1', '"ductal cell carcinoma cell line:KLM-1 : CNhs11100"')
-#('"ductal cell carcinoma cell line:MIA Paca2', '"ductal cell carcinoma cell line:MIA Paca2 : CNhs11259"')
-#('"ductus deferens adult', '"ductus deferens adult : CNhs12846"')
-#('"duodenum fetal donor1 tech_rep1', '"duodenum fetal donor1 tech_rep1 : CNhs11781"')
-#('"duodenum fetal donor1 tech_rep2', '"duodenum fetal donor1 tech_rep2 : CNhs12996"')
-#('"dura mater adult donor1', '"dura mater adult donor1 : CNhs10648"')
-#('"embryonic kidney cell line: HEK293/SLAM infection 24hr', '"embryonic kidney cell line: HEK293/SLAM infection 24hr : CNhs11047"')
-#('"embryonic kidney cell line: HEK293/SLAM untreated', '"embryonic kidney cell line: HEK293/SLAM untreated : CNhs11046"')
-#('"embryonic pancreas cell line:1B2C6', '"embryonic pancreas cell line:1B2C6 : CNhs11731"')
-#('"embryonic pancreas cell line:1C3D3', '"embryonic pancreas cell line:1C3D3 : CNhs11732"')
-#('"embryonic pancreas cell line:1C3IKEI', '"embryonic pancreas cell line:1C3IKEI : CNhs11733"')
-#('"embryonic pancreas cell line:2C6', '"embryonic pancreas cell line:2C6 : CNhs11814"')
-#('"endometrial carcinoma cell line:OMC-2', '"endometrial carcinoma cell line:OMC-2 : CNhs11266"')
-#('"endometrial stromal sarcoma cell line:OMC-9', '"endometrial stromal sarcoma cell line:OMC-9 : CNhs11249"')
-#('"endometrioid adenocarcinoma cell line:JHUEM-1', '"endometrioid adenocarcinoma cell line:JHUEM-1 : CNhs11748"')
-#('"epidermoid carcinoma  cell line:A431', '"epidermoid carcinoma  cell line:A431 : CNhs10743"')
-#('"epidermoid carcinoma cell line:Ca Ski', '"epidermoid carcinoma cell line:Ca Ski : CNhs10748"')
-#('"epididymis adult', '"epididymis adult : CNhs12847"')
-#('"epithelioid sarcoma cell line:HS-ES-1', '"epithelioid sarcoma cell line:HS-ES-1 : CNhs11247"')
-#('"epitheloid carcinoma cell line: HelaS3 ENCODE biol_rep1', '"epitheloid carcinoma cell line: HelaS3 ENCODE biol_rep1 : CNhs12325"')
-#('"epitheloid carcinoma cell line: HelaS3 ENCODE biol_rep2', '"epitheloid carcinoma cell line: HelaS3 ENCODE biol_rep2 : CNhs12326"')
-#('"epitheloid carcinoma cell line: HelaS3 ENCODE biol_rep3', '"epitheloid carcinoma cell line: HelaS3 ENCODE biol_rep3 : CNhs12327"')
-#('"esophagus adult pool1', '"esophagus adult pool1 : CNhs10620"')
-#('"extraskeletal myxoid chondrosarcoma cell line:H-EMC-SS', '"extraskeletal myxoid chondrosarcoma cell line:H-EMC-SS : CNhs10728"')
-#('"eye fetal donor1', '"eye fetal donor1 : CNhs11762"')
-#('"fibrosarcoma cell line:HT-1080', '"fibrosarcoma cell line:HT-1080 : CNhs11860"')
-#('"fibrous histiocytoma cell line:GCT TIB-223', '"fibrous histiocytoma cell line:GCT TIB-223 : CNhs11842"')
-#('"frontal lobe adult pool1', '"frontal lobe adult pool1 : CNhs10647"')
-#('"gall bladder adult', '"gall bladder adult : CNhs12848"')
-#('"gall bladder carcinoma cell line:TGBC14TKB', '"gall bladder carcinoma cell line:TGBC14TKB : CNhs11256"')
-#('"gall bladder carcinoma cell line:TGBC2TKB', '"gall bladder carcinoma cell line:TGBC2TKB : CNhs10733"')
-#('"gastric adenocarcinoma cell line:MKN1', '"gastric adenocarcinoma cell line:MKN1 : CNhs11737"')
-#('"gastric adenocarcinoma cell line:MKN45', '"gastric adenocarcinoma cell line:MKN45 : CNhs11819"')
-#('"gastric cancer cell line:AZ521', '"gastric cancer cell line:AZ521 : CNhs11286"')
-#('"gastrointestinal carcinoma cell line:ECC12', '"gastrointestinal carcinoma cell line:ECC12 : CNhs11738"')
-#('"giant cell carcinoma cell line:LU65', '"giant cell carcinoma cell line:LU65 : CNhs11274"')
-#('"giant cell carcinoma cell line:Lu99B', '"giant cell carcinoma cell line:Lu99B : CNhs10751"')
-#('"glassy cell carcinoma cell line:HOKUG', '"glassy cell carcinoma cell line:HOKUG : CNhs11824"')
-#('"glioblastoma cell line:A172', '"glioblastoma cell line:A172 : CNhs11185"')
-#('"glioblastoma cell line:A172 tech_rep2', '"glioblastoma cell line:A172 tech_rep2 : CNhs11248"')
-#('"glioblastoma cell line:T98G', '"glioblastoma cell line:T98G : CNhs11272"')
-#('"glioma cell line:GI-1', '"glioma cell line:GI-1 : CNhs10731"')
-#('"globus pallidus - adult donor10196', '"globus pallidus - adult donor10196 : CNhs13801"')
-#('"globus pallidus adult donor10252', '"globus pallidus adult donor10252 : CNhs12319"')
-#('"granulosa cell tumor cell line:KGN', '"granulosa cell tumor cell line:KGN : CNhs11740"')
-#('"hairy cell leukemia cell line:Mo', '"hairy cell leukemia cell line:Mo : CNhs11843"')
-#('"heart - mitral valve adult', '"heart - mitral valve adult : CNhs12855"')
-#('"heart - pulmonic valve adult', '"heart - pulmonic valve adult : CNhs12856"')
-#('"heart - tricuspid valve adult', '"heart - tricuspid valve adult : CNhs12857"')
-#('"heart adult diseased donor1', '"heart adult diseased donor1 : CNhs11758"')
-#('"heart adult diseased post-infarction donor1', '"heart adult diseased post-infarction donor1 : CNhs11757"')
-#('"heart adult pool1', '"heart adult pool1 : CNhs10621"')
-#('"heart fetal pool1', '"heart fetal pool1 : CNhs10653"')
-#('"hepatic mesenchymal tumor cell line:LI90', '"hepatic mesenchymal tumor cell line:LI90 : CNhs11868"')
-#('"hepatoblastoma cell line:HuH-6', '"hepatoblastoma cell line:HuH-6 : CNhs11742"')
-#('"hepatocellular carcinoma cell line: HepG2 ENCODE biol_rep1', '"hepatocellular carcinoma cell line: HepG2 ENCODE biol_rep1 : CNhs12328"')
-#('"hepatocellular carcinoma cell line: HepG2 ENCODE biol_rep2', '"hepatocellular carcinoma cell line: HepG2 ENCODE biol_rep2 : CNhs12329"')
-#('"hepatocellular carcinoma cell line: HepG2 ENCODE biol_rep3', '"hepatocellular carcinoma cell line: HepG2 ENCODE biol_rep3 : CNhs12330"')
-#('"hepatoma cell line:Li-7', '"hepatoma cell line:Li-7 : CNhs11271"')
-#('"hereditary spherocytic anemia cell line:WIL2-NS', '"hereditary spherocytic anemia cell line:WIL2-NS : CNhs11891"')
-#('"hippocampus - adult donor10196', '"hippocampus - adult donor10196 : CNhs13795"')
-#('"hippocampus adult donor10252', '"hippocampus adult donor10252 : CNhs12312"')
-#('"immature langerhans cells donor1', '"immature langerhans cells donor1 : CNhs13537"')
-#('"immature langerhans cells donor2', '"immature langerhans cells donor2 : CNhs13480"')
-#('"insula adult pool1', '"insula adult pool1 : CNhs10646"')
-#('"keratoacanthoma cell line:HKA-1', '"keratoacanthoma cell line:HKA-1 : CNhs11880"')
-#('"kidney adult pool1', '"kidney adult pool1 : CNhs10622"')
-#('"kidney fetal pool1', '"kidney fetal pool1 : CNhs10652"')
-#('"large cell lung carcinoma cell line:IA-LM', '"large cell lung carcinoma cell line:IA-LM : CNhs11277"')
-#('"large cell lung carcinoma cell line:NCI-H460', '"large cell lung carcinoma cell line:NCI-H460 : CNhs12806"')
-#('"large cell non-keratinizing squamous carcinoma cell line:SKG-II-SF', '"large cell non-keratinizing squamous carcinoma cell line:SKG-II-SF : CNhs11825"')
-#('"left atrium adult donor1', '"left atrium adult donor1 : CNhs11790"')
-#('"left ventricle adult donor1', '"left ventricle adult donor1 : CNhs11789"')
-#('"leiomyoblastoma  cell line:G-402', '"leiomyoblastoma  cell line:G-402 : CNhs11848"')
-#('"leiomyoma cell line:10964C', '"leiomyoma cell line:10964C : CNhs11722"')
-#('"leiomyoma cell line:15242A', '"leiomyoma cell line:15242A : CNhs11723"')
-#('"leiomyoma cell line:15425', '"leiomyoma cell line:15425 : CNhs11724"')
-#('"lens epithelial cell line:SRA 01/04', '"lens epithelial cell line:SRA 01/04 : CNhs11750"')
-#('"leukemia chronic megakaryoblastic  cell line:MEG-01', '"leukemia chronic megakaryoblastic  cell line:MEG-01 : CNhs11859"')
-#('"liposarcoma  cell line:KMLS-1', '"liposarcoma  cell line:KMLS-1 : CNhs11870"')
-#('"liposarcoma  cell line:SW 872', '"liposarcoma  cell line:SW 872 : CNhs11851"')
-#('"liver adult pool1', '"liver adult pool1 : CNhs10624"')
-#('"liver fetal pool1', '"liver fetal pool1 : CNhs11798"')
-#('"locus coeruleus - adult donor10196', '"locus coeruleus - adult donor10196 : CNhs13808"')
-#('"locus coeruleus adult donor10252', '"locus coeruleus adult donor10252 : CNhs12322"')
-#('"lung adenocarcinoma cell line:A549', '"lung adenocarcinoma cell line:A549 : CNhs11275"')
-#('"lung adenocarcinoma cell line:PC-14', '"lung adenocarcinoma cell line:PC-14 : CNhs10726"')
-#('"lung adult pool1', '"lung adult pool1 : CNhs10625"')
-#('"lung fetal donor1', '"lung fetal donor1 : CNhs11680"')
-#('"lung right lower lobe adult donor1', '"lung right lower lobe adult donor1 : CNhs11786"')
-#('"lymph node adult donor1', '"lymph node adult donor1 : CNhs11788"')
-#('"lymphangiectasia cell line:DS-1', '"lymphangiectasia cell line:DS-1 : CNhs11852"')
-#('"lymphoma malignant hairy B-cell cell line:MLMA', '"lymphoma malignant hairy B-cell cell line:MLMA : CNhs11935"')
-#('"malignant trichilemmal cyst cell line:DJM-1', '"malignant trichilemmal cyst cell line:DJM-1 : CNhs10730"')
-#('"maxillary sinus tumor cell line:HSQ-89', '"maxillary sinus tumor cell line:HSQ-89 : CNhs10732"')
-#('"medial frontal gyrus - adult donor10196', '"medial frontal gyrus - adult donor10196 : CNhs13796"')
-#('"medial temporal gyrus - adult donor10196', '"medial temporal gyrus - adult donor10196 : CNhs13809"')
-#('"medial temporal gyrus adult donor10252', '"medial temporal gyrus adult donor10252 : CNhs12310"')
-#('"medulla oblongata - adult donor10196', '"medulla oblongata - adult donor10196 : CNhs13800"')
-#('"medulla oblongata adult donor10252', '"medulla oblongata adult donor10252 : CNhs12315"')
-#('"medulla oblongata adult pool1', '"medulla oblongata adult pool1 : CNhs10645"')
-#('"medulloblastoma  cell line:D283 Med', '"medulloblastoma  cell line:D283 Med : CNhs12805"')
-#('"medulloblastoma  cell line:ONS-76', '"medulloblastoma  cell line:ONS-76 : CNhs11861"')
-#('"melanoma cell line:COLO 679', '"melanoma cell line:COLO 679 : CNhs11281"')
-#('"melanoma cell line:G-361', '"melanoma cell line:G-361 : CNhs11254"')
-#('"meningioma cell line:HKBMM', '"meningioma cell line:HKBMM : CNhs11945"')
-#('"merkel cell carcinoma cell line:MKL-1', '"merkel cell carcinoma cell line:MKL-1 : CNhs12838"')
-#('"merkel cell carcinoma cell line:MS-1', '"merkel cell carcinoma cell line:MS-1 : CNhs12839"')
-#('"mesenchymal precursor cell - adipose donor1', '"mesenchymal precursor cell - adipose donor1 : CNhs12363"')
-#('"mesenchymal precursor cell - adipose donor2', '"mesenchymal precursor cell - adipose donor2 : CNhs12364"')
-#('"mesenchymal precursor cell - adipose donor3', '"mesenchymal precursor cell - adipose donor3 : CNhs12365"')
-#('"mesenchymal precursor cell - bone marrow donor1', '"mesenchymal precursor cell - bone marrow donor1 : CNhs12366"')
-#('"mesenchymal precursor cell - bone marrow donor2', '"mesenchymal precursor cell - bone marrow donor2 : CNhs12367"')
-#('"mesenchymal precursor cell - bone marrow donor3', '"mesenchymal precursor cell - bone marrow donor3 : CNhs13098"')
-#('"mesenchymal precursor cell - cardiac donor1', '"mesenchymal precursor cell - cardiac donor1 : CNhs12368"')
-#('"mesenchymal precursor cell - cardiac donor2', '"mesenchymal precursor cell - cardiac donor2 : CNhs12369"')
-#('"mesenchymal precursor cell - cardiac donor3', '"mesenchymal precursor cell - cardiac donor3 : CNhs12370"')
-#('"mesenchymal precursor cell - cardiac donor4', '"mesenchymal precursor cell - cardiac donor4 : CNhs12371"')
-#('"mesenchymal precursor cell - ovarian cancer left ovary donor1', '"mesenchymal precursor cell - ovarian cancer left ovary donor1 : CNhs12372"')
-#('"mesenchymal precursor cell - ovarian cancer left ovary donor2', '"mesenchymal precursor cell - ovarian cancer left ovary donor2 : CNhs13092"')
-#('"mesenchymal precursor cell - ovarian cancer left ovary donor3', '"mesenchymal precursor cell - ovarian cancer left ovary donor3 : CNhs12376"')
-#('"mesenchymal precursor cell - ovarian cancer left ovary donor4', '"mesenchymal precursor cell - ovarian cancer left ovary donor4 : CNhs13094"')
-#('"mesenchymal precursor cell - ovarian cancer metastasis donor1', '"mesenchymal precursor cell - ovarian cancer metastasis donor1 : CNhs12374"')
-#('"mesenchymal precursor cell - ovarian cancer metastasis donor2', '"mesenchymal precursor cell - ovarian cancer metastasis donor2 : CNhs13093"')
-#('"mesenchymal precursor cell - ovarian cancer metastasis donor3', '"mesenchymal precursor cell - ovarian cancer metastasis donor3 : CNhs12378"')
-#('"mesenchymal precursor cell - ovarian cancer metastasis donor4', '"mesenchymal precursor cell - ovarian cancer metastasis donor4 : CNhs13097"')
-#('"mesenchymal precursor cell - ovarian cancer right ovary donor1', '"mesenchymal precursor cell - ovarian cancer right ovary donor1 : CNhs12373"')
-#('"mesenchymal precursor cell - ovarian cancer right ovary donor2', '"mesenchymal precursor cell - ovarian cancer right ovary donor2 : CNhs12375"')
-#('"mesenchymal precursor cell - ovarian cancer right ovary donor3 (SOC-57-02)', '"mesenchymal precursor cell - ovarian cancer right ovary donor3 (SOC-57-02) : CNhs12377"')
-#('"mesenchymal precursor cell - ovarian cancer right ovary donor3 (SOC-57-02-G)', '"mesenchymal precursor cell - ovarian cancer right ovary donor3 (SOC-57-02-G) : CNhs13507"')
-#('"mesenchymal precursor cell - ovarian cancer right ovary donor4', '"mesenchymal precursor cell - ovarian cancer right ovary donor4 : CNhs13096"')
-#('"mesenchymal stem cell line:Hu5/E18', '"mesenchymal stem cell line:Hu5/E18 : CNhs11718"')
-#('"mesothelioma cell line:ACC-MESO-1', '"mesothelioma cell line:ACC-MESO-1 : CNhs11263"')
-#('"mesothelioma cell line:ACC-MESO-4', '"mesothelioma cell line:ACC-MESO-4 : CNhs11264"')
-#('"mesothelioma cell line:Mero-25', '"mesothelioma cell line:Mero-25 : CNhs13066"')
-#('"mesothelioma cell line:Mero-41', '"mesothelioma cell line:Mero-41 : CNhs13067"')
-#('"mesothelioma cell line:Mero-48a', '"mesothelioma cell line:Mero-48a : CNhs13068"')
-#('"mesothelioma cell line:Mero-82', '"mesothelioma cell line:Mero-82 : CNhs13069"')
-#('"mesothelioma cell line:Mero-83', '"mesothelioma cell line:Mero-83 : CNhs13070"')
-#('"mesothelioma cell line:Mero-84', '"mesothelioma cell line:Mero-84 : CNhs13072"')
-#('"mesothelioma cell line:Mero-95', '"mesothelioma cell line:Mero-95 : CNhs13073"')
-#('"mesothelioma cell line:NCI-H2052', '"mesothelioma cell line:NCI-H2052 : CNhs13063"')
-#('"mesothelioma cell line:NCI-H226', '"mesothelioma cell line:NCI-H226 : CNhs13062"')
-#('"mesothelioma cell line:NCI-H2452', '"mesothelioma cell line:NCI-H2452 : CNhs13064"')
-#('"mesothelioma cell line:NCI-H28', '"mesothelioma cell line:NCI-H28 : CNhs13061"')
-#('"mesothelioma cell line:No36', '"mesothelioma cell line:No36 : CNhs13074"')
-#('"mesothelioma cell line:ONE58', '"mesothelioma cell line:ONE58 : CNhs13075"')
-#('"middle temporal gyrus donor10252', '"middle temporal gyrus donor10252 : CNhs12316"')
-#('"migratory langerhans cells donor1', '"migratory langerhans cells donor1 : CNhs13535"')
-#('"migratory langerhans cells donor2', '"migratory langerhans cells donor2 : CNhs13536"')
-#('"migratory langerhans cells donor3', '"migratory langerhans cells donor3 : CNhs13547"')
-#('"mixed mullerian tumor cell line:HTMMT', '"mixed mullerian tumor cell line:HTMMT : CNhs11944"')
-#('"mucinous adenocarcinoma cell line:JHOM-1', '"mucinous adenocarcinoma cell line:JHOM-1 : CNhs11752"')
-#('"mucinous cystadenocarcinoma  cell line:MCAS', '"mucinous cystadenocarcinoma  cell line:MCAS : CNhs11873"')
-#('"mycosis fungoides T cell lymphoma cell line:HuT 102 TIB-162', '"mycosis fungoides T cell lymphoma cell line:HuT 102 TIB-162 : CNhs11858"')
-#('"myelodysplastic syndrome cell line:SKM-1', '"myelodysplastic syndrome cell line:SKM-1 : CNhs11934"')
-#('"myeloma cell line:PCM6', '"myeloma cell line:PCM6 : CNhs11258"')
-#('"myxofibrosarcoma cell line:MFH-ino', '"myxofibrosarcoma cell line:MFH-ino : CNhs11729"')
-#('"myxofibrosarcoma cell line:NMFH-1', '"myxofibrosarcoma cell line:NMFH-1 : CNhs11821"')
-#('"nasal epithelial cells donor1 tech_rep1', '"nasal epithelial cells donor1 tech_rep1 : CNhs12589"')
-#('"nasal epithelial cells donor2', '"nasal epithelial cells donor2 : CNhs12574"')
-#('"neuroblastoma cell line:CHP-134', '"neuroblastoma cell line:CHP-134 : CNhs11276"')
-#('"neuroblastoma cell line:NB-1', '"neuroblastoma cell line:NB-1 : CNhs11284"')
-#('"neuroblastoma cell line:NBsusSR', '"neuroblastoma cell line:NBsusSR : CNhs11818"')
-#('"neuroblastoma cell line:NH-12', '"neuroblastoma cell line:NH-12 : CNhs11811"')
-#('"neuroectodermal tumor  cell line:TASK1', '"neuroectodermal tumor  cell line:TASK1 : CNhs11866"')
-#('"neuroectodermal tumor cell line:FU-RPNT-1', '"neuroectodermal tumor cell line:FU-RPNT-1 : CNhs11744"')
-#('"neuroectodermal tumor cell line:FU-RPNT-2', '"neuroectodermal tumor cell line:FU-RPNT-2 : CNhs11753"')
-#('"neuroepithelioma cell line:SK-N-MC', '"neuroepithelioma cell line:SK-N-MC : CNhs11853"')
-#('"neurofibroma cell line:Hs 53.T', '"neurofibroma cell line:Hs 53.T : CNhs11854"')
-#('"non T non B acute lymphoblastic leukemia (ALL) cell line:P30/OHK', '"non T non B acute lymphoblastic leukemia (ALL) cell line:P30/OHK : CNhs10747"')
-#('"normal embryonic palatal mesenchymal cell line:HEPM', '"normal embryonic palatal mesenchymal cell line:HEPM : CNhs11894"')
-#('"normal intestinal epithelial cell line:FHs 74 Int', '"normal intestinal epithelial cell line:FHs 74 Int : CNhs11950"')
-#('"nucleus accumbens adult pool1', '"nucleus accumbens adult pool1 : CNhs10644"')
-#('"occipital cortex - adult donor10196', '"occipital cortex - adult donor10196 : CNhs13798"')
-#('"occipital cortex adult donor10252', '"occipital cortex adult donor10252 : CNhs12320"')
-#('"occipital lobe adult donor1', '"occipital lobe adult donor1 : CNhs11787"')
-#('"occipital lobe fetal donor1', '"occipital lobe fetal donor1 : CNhs11784"')
-#('"occipital pole adult pool1', '"occipital pole adult pool1 : CNhs10643"')
-#('"olfactory region adult', '"olfactory region adult : CNhs12611"')
-#('"optic nerve donor1', '"optic nerve donor1 : CNhs13449"')
-#('"oral squamous cell carcinoma cell line:Ca9-22', '"oral squamous cell carcinoma cell line:Ca9-22 : CNhs10752"')
-#('"oral squamous cell carcinoma cell line:HO-1-u-1', '"oral squamous cell carcinoma cell line:HO-1-u-1 : CNhs11287"')
-#('"oral squamous cell carcinoma cell line:HSC-3', '"oral squamous cell carcinoma cell line:HSC-3 : CNhs11717"')
-#('"oral squamous cell carcinoma cell line:SAS', '"oral squamous cell carcinoma cell line:SAS : CNhs11810"')
-#('"osteoclastoma cell line:Hs 706.T', '"osteoclastoma cell line:Hs 706.T : CNhs11835"')
-#('"osteosarcoma cell line:143B/TK^(-)neo^(R)', '"osteosarcoma cell line:143B/TK^(-)neo^(R) : CNhs11279"')
-#('"osteosarcoma cell line:HS-Os-1', '"osteosarcoma cell line:HS-Os-1 : CNhs11290"')
-#('"ovary adult pool1', '"ovary adult pool1 : CNhs10626"')
-#('"pagetoid sarcoma cell line:Hs 925.T', '"pagetoid sarcoma cell line:Hs 925.T : CNhs11856"')
-#('"pancreas adult donor1', '"pancreas adult donor1 : CNhs11756"')
-#('"pancreatic carcinoma cell line:NOR-P1', '"pancreatic carcinoma cell line:NOR-P1 : CNhs11832"')
-#('"papillary adenocarcinoma cell line:8505C', '"papillary adenocarcinoma cell line:8505C : CNhs11716"')
-#('"papillotubular adenocarcinoma cell line:TGBC18TKB', '"papillotubular adenocarcinoma cell line:TGBC18TKB : CNhs10734"')
-#('"paracentral gyrus adult pool1', '"paracentral gyrus adult pool1 : CNhs10642"')
-#('"parietal lobe - adult donor10196', '"parietal lobe - adult donor10196 : CNhs13797"')
-#('"parietal lobe adult donor10252', '"parietal lobe adult donor10252 : CNhs12317"')
-#('"parietal lobe adult pool1', '"parietal lobe adult pool1 : CNhs10641"')
-#('"parietal lobe fetal donor1', '"parietal lobe fetal donor1 : CNhs11782"')
-#('"parotid gland adult', '"parotid gland adult : CNhs12849"')
-#('"penis adult', '"penis adult : CNhs12850"')
-#('"peripheral neuroectodermal tumor cell line:KU-SN', '"peripheral neuroectodermal tumor cell line:KU-SN : CNhs11830"')
-#('"pharyngeal carcinoma cell line:Detroit 562', '"pharyngeal carcinoma cell line:Detroit 562 : CNhs11849"')
-#('"pineal gland - adult donor10196', '"pineal gland - adult donor10196 : CNhs13804"')
-#('"pineal gland adult donor10252', '"pineal gland adult donor10252 : CNhs12228"')
-#('"pituitary gland - adult donor10196', '"pituitary gland - adult donor10196 : CNhs13805"')
-#('"pituitary gland adult donor10252', '"pituitary gland adult donor10252 : CNhs12229"')
-#('"placenta adult pool1', '"placenta adult pool1 : CNhs10627"')
-#('"plasma cell leukemia cell line:ARH-77', '"plasma cell leukemia cell line:ARH-77 : CNhs12807"')
-#('"pleomorphic hepatocellular carcinoma cell line:SNU-387', '"pleomorphic hepatocellular carcinoma cell line:SNU-387 : CNhs11933"')
-#('"pons adult pool1', '"pons adult pool1 : CNhs10640"')
-#('"postcentral gyrus adult pool1', '"postcentral gyrus adult pool1 : CNhs10638"')
-#('"prostate adult pool1', '"prostate adult pool1 : CNhs10628"')
-#('"prostate cancer cell line:DU145', '"prostate cancer cell line:DU145 : CNhs11260"')
-#('"prostate cancer cell line:PC-3', '"prostate cancer cell line:PC-3 : CNhs11243"')
-#('"putamen adult donor10196', '"putamen adult donor10196 : CNhs12324"')
-#('"rectal cancer cell line:TT1TKB', '"rectal cancer cell line:TT1TKB : CNhs11255"')
-#('"rectum fetal donor1', '"rectum fetal donor1 : CNhs11777"')
-#('"renal cell carcinoma cell line:OS-RC-2', '"renal cell carcinoma cell line:OS-RC-2 : CNhs10729"')
-#('"renal cell carcinoma cell line:TUHR10TKB', '"renal cell carcinoma cell line:TUHR10TKB : CNhs11257"')
-#('"retina adult pool1', '"retina adult pool1 : CNhs10636"')
-#('"retinoblastoma cell line:Y79', '"retinoblastoma cell line:Y79 : CNhs11267"')
-#('"rhabdomyosarcoma cell line:KYM-1', '"rhabdomyosarcoma cell line:KYM-1 : CNhs11877"')
-#('"rhabdomyosarcoma cell line:RMS-YM', '"rhabdomyosarcoma cell line:RMS-YM : CNhs11269"')
-#('"sacrococcigeal teratoma cell line:HTST', '"sacrococcigeal teratoma cell line:HTST : CNhs11829"')
-#('"salivary acinar cells donor1', '"salivary acinar cells donor1 : CNhs12810"')
-#('"salivary acinar cells donor2', '"salivary acinar cells donor2 : CNhs12811"')
-#('"salivary acinar cells donor3', '"salivary acinar cells donor3 : CNhs12812"')
-#('"salivary gland adult pool1', '"salivary gland adult pool1 : CNhs11677"')
-#('"schwannoma cell line:HS-PSS', '"schwannoma cell line:HS-PSS : CNhs11183"')
-#('"schwannoma cell line:HS-PSS tech_rep2', '"schwannoma cell line:HS-PSS tech_rep2 : CNhs11245"')
-#('"seminal vesicle adult', '"seminal vesicle adult : CNhs12851"')
-#('"serous adenocarcinoma cell line:JHOS-2', '"serous adenocarcinoma cell line:JHOS-2 : CNhs11746"')
-#('"serous adenocarcinoma cell line:SK-OV-3-R after co-culture with SOC-57-02-G biol_rep1', '"serous adenocarcinoma cell line:SK-OV-3-R after co-culture with SOC-57-02-G biol_rep1 : CNhs13508"')
-#('"serous adenocarcinoma cell line:SK-OV-3-R biol_rep1', '"serous adenocarcinoma cell line:SK-OV-3-R biol_rep1 : CNhs13099"')
-#('"serous cystadenocarcinoma cell line:HTOA', '"serous cystadenocarcinoma cell line:HTOA : CNhs11827"')
-#('"signet ring carcinoma cell line:Kato III', '"signet ring carcinoma cell line:Kato III : CNhs10753"')
-#('"signet ring carcinoma cell line:NUGC-4', '"signet ring carcinoma cell line:NUGC-4 : CNhs11270"')
-#('"skeletal muscle - soleus muscle donor1', '"skeletal muscle - soleus muscle donor1 : CNhs13454"')
-#('"skeletal muscle adult pool1', '"skeletal muscle adult pool1 : CNhs10629"')
-#('"skeletal muscle fetal donor1', '"skeletal muscle fetal donor1 : CNhs11776"')
-#('"skin fetal donor1', '"skin fetal donor1 : CNhs11774"')
-#('"small cell cervical cancer cell line:HCSC-1', '"small cell cervical cancer cell line:HCSC-1 : CNhs11885"')
-#('"small cell gastrointestinal carcinoma cell line:ECC10', '"small cell gastrointestinal carcinoma cell line:ECC10 : CNhs11736"')
-#('"small cell lung carcinoma cell line:DMS 144', '"small cell lung carcinoma cell line:DMS 144 : CNhs12808"')
-#('"small cell lung carcinoma cell line:LK-2', '"small cell lung carcinoma cell line:LK-2 : CNhs11285"')
-#('"small cell lung carcinoma cell line:NCI-H82', '"small cell lung carcinoma cell line:NCI-H82 : CNhs12809"')
-#('"small cell lung carcinoma cell line:WA-hT', '"small cell lung carcinoma cell line:WA-hT : CNhs11812"')
-#('"small intestine adult pool1', '"small intestine adult pool1 : CNhs10630"')
-#('"small intestine fetal donor1', '"small intestine fetal donor1 : CNhs11773"')
-#('"small-cell gastrointestinal carcinoma cell line:ECC4', '"small-cell gastrointestinal carcinoma cell line:ECC4 : CNhs11734"')
-#('"smooth muscle adult pool1', '"smooth muscle adult pool1 : CNhs11755"')
-#('"somatostatinoma cell line:QGP-1', '"somatostatinoma cell line:QGP-1 : CNhs11869"')
-#('"spinal cord - adult donor10196', '"spinal cord - adult donor10196 : CNhs13807"')
-#('"spinal cord adult donor10252', '"spinal cord adult donor10252 : CNhs12227"')
-#('"spinal cord fetal donor1', '"spinal cord fetal donor1 : CNhs11764"')
-#('"spindle cell sarcoma cell line:Hs 132.T', '"spindle cell sarcoma cell line:Hs 132.T : CNhs11857"')
-#('"spleen adult pool1', '"spleen adult pool1 : CNhs10631"')
-#('"spleen fetal pool1', '"spleen fetal pool1 : CNhs10651"')
-#('"splenic lymphoma with villous lymphocytes cell line:SLVL', '"splenic lymphoma with villous lymphocytes cell line:SLVL : CNhs10741"')
-#('"squamous cell carcinoma cell line:EC-GI-10', '"squamous cell carcinoma cell line:EC-GI-10 : CNhs11252"')
-#('"squamous cell carcinoma cell line:T3M-5', '"squamous cell carcinoma cell line:T3M-5 : CNhs11739"')
-#('"squamous cell lung carcinoma cell line:EBC-1', '"squamous cell lung carcinoma cell line:EBC-1 : CNhs11273"')
-#('"stomach fetal donor1', '"stomach fetal donor1 : CNhs11771"')
-#('"submaxillary gland adult', '"submaxillary gland adult : CNhs12852"')
-#('"substantia nigra adult donor10252', '"substantia nigra adult donor10252 : CNhs12318"')
-#('"synovial sarcoma cell line:HS-SY-II', '"synovial sarcoma cell line:HS-SY-II : CNhs11244"')
-#('"temporal lobe adult pool1', '"temporal lobe adult pool1 : CNhs10637"')
-#('"temporal lobe fetal donor1 tech_rep1', '"temporal lobe fetal donor1 tech_rep1 : CNhs11772"')
-#('"temporal lobe fetal donor1 tech_rep2', '"temporal lobe fetal donor1 tech_rep2 : CNhs12997"')
-#('"tenocyte donor1', '"tenocyte donor1 : CNhs12639"')
-#('"tenocyte donor2', '"tenocyte donor2 : CNhs12640"')
-#('"tenocyte donor3', '"tenocyte donor3 : CNhs12641"')
-#('"teratocarcinoma  cell line:PA-1', '"teratocarcinoma  cell line:PA-1 : CNhs11890"')
-#('"teratocarcinoma cell line:NCC-IT-A3', '"teratocarcinoma cell line:NCC-IT-A3 : CNhs11878"')
-#('"teratocarcinoma cell line:NCR-G1', '"teratocarcinoma cell line:NCR-G1 : CNhs11884"')
-#('"testicular germ cell embryonal carcinoma cell line:ITO-II', '"testicular germ cell embryonal carcinoma cell line:ITO-II : CNhs11876"')
-#('"testicular germ cell embryonal carcinoma cell line:NEC14', '"testicular germ cell embryonal carcinoma cell line:NEC14 : CNhs12351"')
-#('"testicular germ cell embryonal carcinoma cell line:NEC15', '"testicular germ cell embryonal carcinoma cell line:NEC15 : CNhs12362"')
-#('"testicular germ cell embryonal carcinoma cell line:NEC8', '"testicular germ cell embryonal carcinoma cell line:NEC8 : CNhs11726"')
-#('"testis adult pool1', '"testis adult pool1 : CNhs10632"')
-#('"testis adult pool2', '"testis adult pool2 : CNhs12998"')
-#('"thalamus - adult donor10196', '"thalamus - adult donor10196 : CNhs13794"')
-#('"thalamus adult donor10252', '"thalamus adult donor10252 : CNhs12314"')
-#('"throat adult', '"throat adult : CNhs12858"')
-#('"throat fetal donor1', '"throat fetal donor1 : CNhs11770"')
-#('"thymus adult pool1', '"thymus adult pool1 : CNhs10633"')
-#('"thymus fetal pool1', '"thymus fetal pool1 : CNhs10650"')
-#('"thyroid adult pool1', '"thyroid adult pool1 : CNhs10634"')
-#('"thyroid carcinoma cell line:TCO-1', '"thyroid carcinoma cell line:TCO-1 : CNhs11872"')
-#('"thyroid fetal donor1', '"thyroid fetal donor1 : CNhs11769"')
-#('"tongue adult', '"tongue adult : CNhs12853"')
-#('"tongue fetal donor1', '"tongue fetal donor1 : CNhs11768"')
-#('"tonsil adult pool1', '"tonsil adult pool1 : CNhs10654"')
-#('"trachea adult pool1', '"trachea adult pool1 : CNhs10635"')
-#('"trachea fetal donor1', '"trachea fetal donor1 : CNhs11766"')
-#('"transitional-cell carcinoma cell line:5637', '"transitional-cell carcinoma cell line:5637 : CNhs10735"')
-#('"transitional-cell carcinoma cell line:JMSU1', '"transitional-cell carcinoma cell line:JMSU1 : CNhs11261"')
-#('"tridermal teratoma cell line:HGRT', '"tridermal teratoma cell line:HGRT : CNhs11828"')
-#('"tubular adenocarcinoma cell line:SUIT-2', '"tubular adenocarcinoma cell line:SUIT-2 : CNhs11883"')
-#('"umbilical cord fetal donor1', '"umbilical cord fetal donor1 : CNhs11765"')
-#('"uterus adult pool1', '"uterus adult pool1 : CNhs11676"')
-#('"uterus fetal donor1', '"uterus fetal donor1 : CNhs11763"')
-#('"vagina adult', '"vagina adult : CNhs12854"')
-#('"vein adult', '"vein adult : CNhs12844"')
-#('"xeroderma pigentosum b cell line:XPL 17', '"xeroderma pigentosum b cell line:XPL 17 : CNhs11813"')
+sample_names = {
+    "acantholytic squamous carcinoma cell line:HCC1806 : CNhs1184": "HCC1806",
+    "acute lymphoblastic leukemia (B-ALL) cell line:BALL-1 : CNhs1125": "BALL-1",
+    "acute lymphoblastic leukemia (B-ALL) cell line:NALM-6 : CNhs1128": "NALM-6",
+    "acute lymphoblastic leukemia (T-ALL) cell line:HPB-ALL : CNhs1074": "HPB-ALL",
+    "acute lymphoblastic leukemia (T-ALL) cell line:Jurkat : CNhs1125": "Jurkat",
+    "acute myeloid leukemia (FAB M0) cell line:KG-1 : CNhs1305": "KG-1",
+    "acute myeloid leukemia (FAB M1) cell line:HYT-1 : CNhs1305": "HYT-1",
+    "acute myeloid leukemia (FAB M2) cell line:Kasumi-1 : CNhs1350": "Kasumi-1",
+    "acute myeloid leukemia (FAB M2) cell line:Kasumi-6 : CNhs1305": "Kasumi-6",
+    "acute myeloid leukemia (FAB M2) cell line:NKM-1 : CNhs1186": "NKM-1",
+    "acute myeloid leukemia (FAB M3) cell line:HL60 : CNhs1305": "HL60",
+    "acute myeloid leukemia (FAB M4) cell line:FKH-1 : CNhs1350": "FKH-1",
+    "acute myeloid leukemia (FAB M4) cell line:HNT-34 : CNhs1350": "HNT-34",
+    "acute myeloid leukemia (FAB M4eo) cell line:EoL-1 : CNhs1305": "EoL-1",
+    "acute myeloid leukemia (FAB M4eo) cell line:EoL-3 : CNhs1305": "EoL-3",
+    "acute myeloid leukemia (FAB M5) cell line:NOMO-1 : CNhs1305": "NOMO-1",
+    "acute myeloid leukemia (FAB M5) cell line:P31/FUJ : CNhs1305": "P31/FUJ",
+    "acute myeloid leukemia (FAB M5) cell line:THP-1 (fresh) : CNhs1072": "THP-1",
+#    "acute myeloid leukemia (FAB M5) cell line:THP-1 (revived) : CNhs1072": "THP-1",
+#    "acute myeloid leukemia (FAB M5) cell line:THP-1 (thawed) : CNhs1072": "THP-1",
+    "acute myeloid leukemia (FAB M5) cell line:U-937 DE-4 : CNhs1305": "U-937 DE-4",
+    "acute myeloid leukemia (FAB M6) cell line:EEB : CNhs1305": "EEB",
+    "acute myeloid leukemia (FAB M6) cell line:F-36E : CNhs1306": "F-36E",
+    "acute myeloid leukemia (FAB M6) cell line:F-36P : CNhs1350": "F-36P",
+    "acute myeloid leukemia (FAB M7) cell line:MKPL-1 : CNhs1188": "MKPL-1",
+    "acute myeloid leukemia (FAB M7) cell line:M-MOK : CNhs1304": "M-MOK",
+    "adenocarcinoma cell line:IM95m : CNhs1188": "IM95m",
+    "Adipocyte - breast donor1 : CNhs1105": "adipocyte (breast)",
+    "Adipocyte - breast donor2 : CNhs1196": "adipocyte (breast)",
+    "Adipocyte - omental donor1 : CNhs1105": "adipocyte (omentum)",
+    "Adipocyte - omental donor2 : CNhs1206": "adipocyte (omentum)",
+    "Adipocyte - omental donor3 : CNhs1206": "adipocyte (omentum)",
+    "Adipocyte - perirenal donor1 : CNhs1206": "adipocyte (perirenal)",
+    "Adipocyte - subcutaneous donor1 : CNhs1249": "adipocyte (subcutaneous)",
+    "Adipocyte - subcutaneous donor2 : CNhs1137": "adipocyte (subcutaneous)",
+    "Adipocyte - subcutaneous donor3 : CNhs1201": "adipocyte (subcutaneous)",
+    "adipose tissue adult pool1 : CNhs1061": "adipose tissue",
+    "adrenal cortex adenocarcinoma cell line:SW-13 : CNhs1189": "SW-13",
+    "adult T-cell leukemia cell line:ATN-1 : CNhs1073": "ATN-1",
+    "alveolar cell carcinoma cell line:SW 1573 : CNhs1183": "SW 1573",
+    "Alveolar Epithelial Cells donor1 : CNhs1132": "epithelial cells (alveolus)",
+    "Alveolar Epithelial Cells donor2 : CNhs1208": "epithelial cells (alveolus)",
+    "Amniotic Epithelial Cells donor1 : CNhs1134": "epithelial cells (amniotic membrane)",
+    "Amniotic Epithelial Cells donor3 : CNhs1212": "epithelial cells (amniotic membrane)",
+    "amniotic membrane cells donor1 : CNhs1250": "amniotic membrane cells",
+    "amniotic membrane cells donor2 : CNhs1250": "amniotic membrane cells",
+    "amniotic membrane cells donor3 : CNhs1237": "amniotic membrane cells",
+    "amygdala - adult donor10196 : CNhs1379": "amygdala",
+    "amygdala adult donor10252 : CNhs1231": "amygdala",
+    "anaplastic carcinoma cell line:8305C : CNhs1074": "8305C",
+    "anaplastic large cell lymphoma cell line:Ki-JK : CNhs1188": "Ki-JK",
+    "anaplastic squamous cell carcinoma cell line:RPMI 2650 : CNhs1188": "RPMI 2650",
+    "Anulus Pulposus Cell donor1 : CNhs1087": "anulus pulposus cells",
+    "Anulus Pulposus Cell donor2 : CNhs1206": "anulus pulposus cells",
+    "aorta adult pool1 : CNhs1176": "aorta",
+    "appendix adult : CNhs1284": "appendix",
+    "argyrophil small cell carcinoma cell line:TC-YIK : CNhs1172": "TC-YIK",
+    "Astrocyte - cerebellum donor1 : CNhs1132": "astrocytes (cerebellum)",
+    "Astrocyte - cerebellum donor2 : CNhs1208": "astrocytes (cerebellum)",
+    "Astrocyte - cerebellum donor3 : CNhs1211": "astrocytes (cerebellum)",
+    "Astrocyte - cerebral cortex donor1 : CNhs1086": "astrocytes (cerebral cortex)",
+    "Astrocyte - cerebral cortex donor2 : CNhs1196": "astrocytes (cerebral cortex)",
+    "Astrocyte - cerebral cortex donor3 : CNhs1200": "astrocytes (cerebral cortex)",
+    "astrocytoma cell line:TM-31 : CNhs1074": "TM-31",
+    "basal cell carcinoma cell line:TE 354.T : CNhs1193": "TE 354.T",
+    "Basophils donor3 : CNhs1257": "basophils",
+    "b cell line:RPMI1788 : CNhs1074": "RPMI1788",
+    "bile duct carcinoma cell line:HuCCT1 : CNhs1075": "HuCCT1",
+    "bile duct carcinoma cell line:TFK-1 : CNhs1126": "TFK-1",
+    "biphenotypic B myelomonocytic leukemia cell line:MV-4-11 : CNhs1184": "MV-4-11",
+    "bladder adult pool1 : CNhs1061": "bladder",
+    "blood adult pool1 : CNhs1176": "blood",
+    "B lymphoblastoid cell line: GM12878 ENCODE biol_rep1 : CNhs1233": "GM12878",
+    "B lymphoblastoid cell line: GM12878 ENCODE biol_rep2 : CNhs1233": "GM12878",
+    "B lymphoblastoid cell line: GM12878 ENCODE biol_rep3 : CNhs1233": "GM12878",
+    "bone marrow stromal cell line:StromaNKtert : CNhs1193": "StromaNKtert",
+    "brain adult donor1 : CNhs1179": "brain",
+    "brain adult pool1 : CNhs1061": "brain",
+    "brain fetal pool1 : CNhs1179": "brain (fetal)",
+    "breast adult donor1 : CNhs1179": "breast",
+    "breast carcinoma cell line:MCF7 : CNhs1194": "MCF-7",
+    "breast carcinoma cell line:MDA-MB-453 : CNhs1073": "MDA-MB-453",
+    "Bronchial Epithelial Cell donor4 : CNhs1205": "epithelial cells (bronchi)",
+    "Bronchial Epithelial Cell donor5 : CNhs1205": "epithelial cells (bronchi)",
+    "Bronchial Epithelial Cell donor6 : CNhs1206": "epithelial cells (bronchi)",
+    "bronchial squamous cell carcinoma cell line:KNS-62 : CNhs1186": "KNS-62",
+    "bronchioalveolar carcinoma cell line:NCI-H358 : CNhs1184": "NCI-H358",
+    "bronchogenic carcinoma cell line:ChaGo-K-1 : CNhs1184": "ChaGo-K-1",
+    "Burkitt's lymphoma cell line:DAUDI : CNhs1073": "DAUDI",
+    "Burkitt's lymphoma cell line:RAJI : CNhs1126": "RAJI",
+    "carcinoid cell line:NCI-H1770 : CNhs1183": "NCI-H1770",
+    "carcinoid cell line:SK-PN-DW : CNhs1184": "SK-PN-DW",
+    "carcinosarcoma cell line:JHUCS-1 : CNhs1174": "JHUCS-1",
+    "Cardiac Myocyte donor1 : CNhs1234": "myocytes (heart)",
+    "Cardiac Myocyte donor2 : CNhs1235": "myocytes (heart)",
+    "Cardiac Myocyte donor3 : CNhs1257": "myocytes (heart)",
+    "caudate nucleus - adult donor10196 : CNhs1380": "caudate nucleus",
+    "caudate nucleus adult donor10252 : CNhs1232": "caudate nucleus",
+    "CD14+CD16- Monocytes donor1 : CNhs1322": "monocytes (CD14-positive CD16-negative)",
+    "CD14+CD16+ Monocytes donor1 : CNhs1354": "monocytes (CD14-positive CD16-positive)",
+    "CD14-CD16+ Monocytes donor2 : CNhs1320": "monocytes (CD14-negative CD16-positive)",
+    "CD14+CD16+ Monocytes donor2 : CNhs1320": "monocytes (CD14-positive CD16-positive)",
+    "CD14+CD16- Monocytes donor2 : CNhs1321": "monocytes (CD14-positive CD16-negative)",
+    "CD14-CD16+ Monocytes donor3 : CNhs1354": "monocytes (CD14-negative CD16-positive)",
+    "CD14+CD16- Monocytes donor3 : CNhs1354": "monocytes (CD14-positive CD16-negative)",
+    "CD14+CD16+ Monocytes donor3 : CNhs1354": "monocytes (CD14-positive CD16-positive)",
+    "CD14+ monocyte derived endothelial progenitor cells donor1 : CNhs1085": "endothelial progenitor cells (derived from CD14-positive monocytes)",
+    "CD14+ monocyte derived endothelial progenitor cells donor2 : CNhs1189": "endothelial progenitor cells (derived from CD14-positive monocytes)",
+    "CD14+ monocyte derived endothelial progenitor cells donor3 : CNhs1190": "endothelial progenitor cells (derived from CD14-positive monocytes)",
+    "CD14+ Monocytes donor1 : CNhs1085": "monocytes (CD14-positive)",
+    "CD14+ Monocytes donor2 : CNhs1195": "monocytes (CD14-positive)",
+    "CD14+ Monocytes donor3 : CNhs1199": "monocytes (CD14-positive)",
+#    "CD14+ monocytes - mock treated donor1 : CNhs1346": "CD14-positive monocytes",
+#    "CD14+ monocytes - mock treated donor2 : CNhs1348": "CD14-positive monocytes",
+#    "CD14+ monocytes - mock treated donor3 : CNhs1349": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with BCG donor1 : CNhs1346": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with BCG donor2 : CNhs1347": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with BCG donor3 : CNhs1354": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with B-glucan donor1 : CNhs1347": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with B-glucan donor2 : CNhs1348": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with B-glucan donor3 : CNhs1349": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Candida donor1 : CNhs1347": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Candida donor2 : CNhs1348": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Candida donor3 : CNhs1349": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Cryptococcus donor1 : CNhs1347": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Cryptococcus donor2 : CNhs1348": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Cryptococcus donor3 : CNhs1354": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Group A streptococci donor1 : CNhs1346": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Group A streptococci donor2 : CNhs1353": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Group A streptococci donor3 : CNhs1349": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with IFN + N-hexane donor1 : CNhs1346": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with IFN + N-hexane donor2 : CNhs1347": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with IFN + N-hexane donor3 : CNhs1349": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with lipopolysaccharide donor1 : CNhs1347": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with lipopolysaccharide donor2 : CNhs1353": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with lipopolysaccharide donor3 : CNhs1354": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Salmonella donor1 : CNhs1347": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Salmonella donor2 : CNhs1348": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Salmonella donor3 : CNhs1349": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Trehalose dimycolate (TDM) donor1 : CNhs1346": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Trehalose dimycolate (TDM) donor2 : CNhs1348": "CD14-positive monocytes",
+#    "CD14+ monocytes - treated with Trehalose dimycolate (TDM) donor3 : CNhs1354": "CD14-positive monocytes",
+    "CD19+ B Cells donor1 : CNhs1234": "B cells (CD19-positive)",
+    "CD19+ B Cells donor2 : CNhs1235": "B cells (CD19-positive)",
+    "CD19+ B Cells donor3 : CNhs1235": "B cells (CD19-positive)",
+    "CD34+ stem cells - adult bone marrow derived donor1 tech_rep1 : CNhs1258": "CD34-positive stem cells (derived from bone marrow)",
+    "CD4+CD25-CD45RA- memory conventional T cells donor3 : CNhs1353": "T cells (CD4-positive CD25-negative CD45RA-negative memory conventional)",
+#    "CD4+CD25-CD45RA- memory conventional T cells expanded donor1 : CNhs1321": "CD4-positive CD25-negative CD45RA-negative memory conventional T cells",
+    "CD4+CD25+CD45RA- memory regulatory T cells donor1 : CNhs1319": "T cells (CD4-positive CD25-positive CD45RA-negative memory regulatory)",
+    "CD4+CD25+CD45RA- memory regulatory T cells donor2 : CNhs1320": "T cells (CD4-positive CD25-positive CD45RA-negative memory regulatory)",
+    "CD4+CD25+CD45RA- memory regulatory T cells donor3 : CNhs1353": "T cells (CD4-positive CD25-positive CD45RA-negative memory regulatory)",
+#    "CD4+CD25+CD45RA- memory regulatory T cells expanded donor1 : CNhs1320": "CD4-positive CD25-negative CD45RA-negative memory regulatory T cells",
+#    "CD4+CD25+CD45RA- memory regulatory T cells expanded donor2 : CNhs1381": "CD4-positive CD25-negative CD45RA-negative memory regulatory T cells",
+#    "CD4+CD25+CD45RA- memory regulatory T cells expanded donor3 : CNhs1381": "CD4-positive CD25-negative CD45RA-negative memory regulatory T cells",
+    "CD4+CD25-CD45RA+ naive conventional T cells donor1 : CNhs1322": "T cells (CD4-positive CD25-negative CD45RA-positive naive conventional)",
+    "CD4+CD25-CD45RA+ naive conventional T cells donor2 : CNhs1320": "T cells (CD4-positive CD25-negative CD45RA-positive naive conventional)",
+    "CD4+CD25-CD45RA+ naive conventional T cells donor3 : CNhs1351": "T cells (CD4-positive CD25-negative CD45RA-positive naive conventional)",
+#    "CD4+CD25-CD45RA+ naive conventional T cells expanded donor1 : CNhs1320": "CD4-positive CD25-negative CD45RA-positive naive conventional T cells",
+#    "CD4+CD25-CD45RA+ naive conventional T cells expanded donor2 : CNhs1381": "CD4-positive CD25-negative CD45RA-positive naive conventional T cells",
+#    "CD4+CD25-CD45RA+ naive conventional T cells expanded donor3 : CNhs1381": "CD4-positive CD25-negative CD45RA-positive naive conventional T cells",
+    "CD4+CD25+CD45RA+ naive regulatory T cells donor3 : CNhs1351": "T cells (CD4-positive CD25-positive CD45RA-positive naive regulatory)",
+#    "CD4+CD25+CD45RA+ naive regulatory T cells expanded donor1 : CNhs1320": "CD4-positive CD25-positive CD45RA-positive naive regulatory T cells",
+    "CD4+ T Cells donor1 : CNhs1085": "T cells (CD4-positive)",
+    "CD4+ T Cells donor2 : CNhs1195": "T cells (CD4-positive)",
+    "CD4+ T Cells donor3 : CNhs1199": "T cells (CD4-positive)",
+    "CD8+ T Cells donor1 : CNhs1085": "T cells (CD8-positive)",
+    "CD8+ T Cells donor2 : CNhs1195": "T cells (CD8-positive)",
+    "CD8+ T Cells donor3 : CNhs1199": "T cells (CD8-positive)",
+    "cerebellum - adult donor10196 : CNhs1379": "cerebellum",
+    "cerebellum adult donor10252 : CNhs1232": "cerebellum",
+    "cerebellum adult pool1 : CNhs1179": "cerebellum",
+    "cerebral meninges adult : CNhs1284": "meninges (brain)",
+    "cervical cancer cell line:D98-AH2 : CNhs1128": "D98-AH2",
+    "cervical cancer cell line:ME-180 : CNhs1128": "ME-180",
+    "cervix adult pool1 : CNhs1061": "cervix",
+    "cholangiocellular carcinoma cell line:HuH-28 : CNhs1128": "HuH-28",
+#    "Chondrocyte - de diff donor1 : CNhs1192": ,
+#    "Chondrocyte - de diff donor2 : CNhs1137": ,
+#    "Chondrocyte - de diff donor3 : CNhs1202": ,
+#    "Chondrocyte - re diff donor2 : CNhs1137": ,
+#    "Chondrocyte - re diff donor3 : CNhs1202": ,
+    "choriocarcinoma cell line:BeWo : CNhs1074": "BeWo",
+    "choriocarcinoma cell line:SCH : CNhs1187": "SCH",
+    "choriocarcinoma  cell line:T3M-3 : CNhs1182": "T3M-3",
+    "chorionic membrane cells donor1 : CNhs1250": "chorionic membrane cells",
+    "chorionic membrane cells donor2 : CNhs1250": "chorionic membrane cells",
+    "chorionic membrane cells donor3 : CNhs1238": "chorionic membrane cells",
+    "chronic lymphocytic leukemia (T-CLL) cell line:SKW-3 : CNhs1171": "SKW-3",
+    "chronic myeloblastic leukemia (CML) cell line:KCL-22 : CNhs1188": "KCL-22",
+    "chronic myelogenous leukemia cell line:K562 : CNhs1125": "K562",
+    "chronic myelogenous leukemia cell line:K562 ENCODE biol_rep1 : CNhs1233": "K562",
+    "chronic myelogenous leukemia cell line:K562 ENCODE biol_rep2 : CNhs1233": "K562",
+    "chronic myelogenous leukemia cell line:K562 ENCODE biol_rep3 : CNhs1233": "K562",
+    "chronic myelogenous leukemia cell line:KU812 : CNhs1072": "KU812",
+    "chronic myelogenous leukemia (CML) cell line:MEG-A2 : CNhs1186": "MEG-A2",
+    "Ciliary Epithelial Cells donor1 : CNhs1087": "ciliary epithelial cells",
+    "Ciliary Epithelial Cells donor2 : CNhs1196": "ciliary epithelial cells",
+    "Ciliary Epithelial Cells donor3 : CNhs1200": "ciliary epithelial cells",
+    "clear cell carcinoma cell line:JHOC-5 : CNhs1174": "JHOC-5",
+    "clear cell carcinoma cell line:TEN : CNhs1193": "TEN",
+#    "Clontech Human Universal Reference Total RNA pool1 : CNhs1060": ,
+    "colon adult donor1 : CNhs1179": "colon",
+    "colon adult pool1 : CNhs1061": "colon",
+    "colon carcinoma cell line:CACO-2 : CNhs1128": "CACO-2",
+    "colon carcinoma cell line:COLO-320 : CNhs1073": "COLO-320",
+    "colon fetal donor1 : CNhs1178": "colon (fetal)",
+#    "cord blood derived cell line:COBL-a 24h infection(-C) : CNhs1104": ,
+#    "cord blood derived cell line:COBL-a 24h infection : CNhs1105": ,
+    "cord blood derived cell line:COBL-a untreated : CNhs1104": "COBL-a",
+    "Corneal Epithelial Cells donor1 : CNhs1133": "epithelial cells (cornea)",
+    "Corneal Epithelial Cells donor3 : CNhs1212": "epithelial cells (cornea)",
+    "corpus callosum adult pool1 : CNhs1064": "corpus callosum",
+    "Dendritic Cells - monocyte immature derived donor1 tech_rep1 : CNhs1085": "dendritic cells (derived from immature monocytes)",
+    "Dendritic Cells - monocyte immature derived donor1 tech_rep2 : CNhs1106": "dendritic cells (derived from immature monocytes)",
+    "Dendritic Cells - monocyte immature derived donor3 : CNhs1200": "dendritic cells (derived from immature monocytes)",
+    "Dendritic Cells - plasmacytoid donor1 : CNhs1085": "plasmacytoid dendritic cells",
+    "diaphragm fetal donor1 : CNhs1177": "diaphragm (fetal)",
+    "diencephalon adult : CNhs1261": "diencephalon",
+    "diffuse large B-cell lymphoma cell line:CTB-1 : CNhs1174": "CTB-1",
+    "ductal cell carcinoma cell line:KLM-1 : CNhs1110": "KLM-1",
+    "ductal cell carcinoma cell line:MIA Paca2 : CNhs1125": "MIA Paca2",
+    "ductus deferens adult : CNhs1284": "ductus deferens",
+    "duodenum fetal donor1 tech_rep1 : CNhs1178": "duodenum (fetal)",
+    "duodenum fetal donor1 tech_rep2 : CNhs1299": "duodenum (fetal)",
+    "dura mater adult donor1 : CNhs1064": "dura mater",
+#    "embryonic kidney cell line: HEK293/SLAM infection 24hr : CNhs1104": "HEK293/SLAM",
+    "embryonic kidney cell line: HEK293/SLAM untreated : CNhs1104": "HEK293/SLAM",
+    "embryonic pancreas cell line:1B2C6 : CNhs1173": "1B2C6",
+    "embryonic pancreas cell line:1C3D3 : CNhs1173": "1C3D3",
+    "embryonic pancreas cell line:1C3IKEI : CNhs1173": "1C3IKEI",
+    "embryonic pancreas cell line:2C6 : CNhs1181": "2C6",
+    "endometrial carcinoma cell line:OMC-2 : CNhs1126": "OMC-2",
+    "endometrial stromal sarcoma cell line:OMC-9 : CNhs1124": "OMC-9",
+    "endometrioid adenocarcinoma cell line:JHUEM-1 : CNhs1174": "JHUEM-1",
+    "Endothelial Cells - Aortic donor0 : CNhs1083": "endothelial cells (aorta)",
+    "Endothelial Cells - Aortic donor1 : CNhs1249": "endothelial cells (aorta)",
+    "Endothelial Cells - Aortic donor2 : CNhs1137": "endothelial cells (aorta)",
+    "Endothelial Cells - Aortic donor3 : CNhs1202": "endothelial cells (aorta)",
+    "Endothelial Cells - Artery donor1 : CNhs1249": "endothelial cells (artery)",
+    "Endothelial Cells - Artery donor2 : CNhs1197": "endothelial cells (artery)",
+    "Endothelial Cells - Artery donor3 : CNhs1202": "endothelial cells (artery)",
+    "Endothelial Cells - Lymphatic donor1 : CNhs1086": "endothelial cells (lymph node)",
+    "Endothelial Cells - Lymphatic donor2 : CNhs1190": "endothelial cells (lymph node)",
+    "Endothelial Cells - Lymphatic donor3 : CNhs1190": "endothelial cells (lymph )",
+    "Endothelial Cells - Microvascular donor1 : CNhs1192": "endothelial cells (microvasculature)",
+    "Endothelial Cells - Microvascular donor2 : CNhs1137": "endothelial cells (microvasculature)",
+    "Endothelial Cells - Microvascular donor3 : CNhs1202": "endothelial cells (microvasculature)",
+    "Endothelial Cells - Thoracic donor1 : CNhs1192": "endothelial cells (thorax)",
+    "Endothelial Cells - Thoracic donor2 : CNhs1197": "endothelial cells (thorax)",
+    "Endothelial Cells - Umbilical vein donor1 : CNhs1087": "endothelial cells (umbilical vein)",
+    "Endothelial Cells - Umbilical vein donor2 : CNhs1196": "endothelial cells (umbilical vein)",
+    "Endothelial Cells - Umbilical vein donor3 : CNhs1201": "endothelial cells (umbilical vein)",
+    "Endothelial Cells - Vein donor1 : CNhs1249": "endothelial cells (vein)",
+    "Endothelial Cells - Vein donor2 : CNhs1137": "endothelial cells (vein)",
+    "Endothelial Cells - Vein donor3 : CNhs1202": "endothelial cells (vein)",
+    "epidermoid carcinoma  cell line:A431 : CNhs1074": "A431",
+    "epidermoid carcinoma cell line:Ca Ski : CNhs1074": "Ca Ski",
+    "epididymis adult : CNhs1284": "epididymis",
+    "epithelioid sarcoma cell line:HS-ES-1 : CNhs1124": "HS-ES-1",
+    "epitheloid carcinoma cell line: HelaS3 ENCODE biol_rep1 : CNhs1232": "HeLa-S3",
+    "epitheloid carcinoma cell line: HelaS3 ENCODE biol_rep2 : CNhs1232": "HeLa-S3",
+    "epitheloid carcinoma cell line: HelaS3 ENCODE biol_rep3 : CNhs1232": "HeLa-S3",
+    "Esophageal Epithelial Cells donor1 : CNhs1132": "epithelial cells (esophagus)",
+    "esophagus adult pool1 : CNhs1062": "esophagus",
+    "Ewing's sarcoma cell line:Hs 863.T : CNhs1183": "Hs 863.T",
+    "extraskeletal myxoid chondrosarcoma cell line:H-EMC-SS : CNhs1072": "H-EMC-SS",
+    "eye fetal donor1 : CNhs1176": "eye (fetal)",
+    "Fibroblast - Aortic Adventitial donor1 : CNhs1087": "fibroblast (aortic adventitia)",
+    "Fibroblast - Aortic Adventitial donor3 : CNhs1201": "fibroblast (aortic adventitia)",
+    "Fibroblast - Cardiac donor1 : CNhs1249": "fibroblast (heart)",
+    "Fibroblast - Cardiac donor2 : CNhs1137": "fibroblast (heart)",
+    "Fibroblast - Cardiac donor3 : CNhs1202": "fibroblast (heart)",
+    "Fibroblast - Cardiac donor4 : CNhs1190": "fibroblast (heart)",
+    "Fibroblast - Cardiac donor5 : CNhs1205": "fibroblast (heart)",
+    "Fibroblast - Cardiac donor6 : CNhs1206": "fibroblast (heart)",
+    "Fibroblast - Choroid Plexus donor1 : CNhs1131": "fibroblast (choroid plexus)",
+    "Fibroblast - Choroid Plexus donor2 : CNhs1234": "fibroblast (choroid plexus)",
+    "Fibroblast - Conjunctival donor1 : CNhs1133": "fibroblast (conjunctiva)",
+    "Fibroblast - Dermal donor1 : CNhs1249": "fibroblast (dermis)",
+    "Fibroblast - Dermal donor2 : CNhs1137": "fibroblast (dermis)",
+    "Fibroblast - Dermal donor3 : CNhs1202": "fibroblast (dermis)",
+    "Fibroblast - Dermal donor4 : CNhs1205": "fibroblast (dermis)",
+    "Fibroblast - Dermal donor5 : CNhs1205": "fibroblast (dermis)",
+    "Fibroblast - Dermal donor6 : CNhs1205": "fibroblast (dermis)",
+    "Fibroblast - Gingival donor1 : CNhs1086": "fibroblast (gingiva)",
+    "Fibroblast - Gingival donor2 : CNhs1196": "fibroblast (gingiva)",
+    "Fibroblast - Gingival donor3 : CNhs1200": "fibroblast (gingiva)",
+    "Fibroblast - Gingival donor4 (GFH2) : CNhs1084": "fibroblast (gingiva)",
+    "Fibroblast - Gingival donor5 (GFH3) : CNhs1195": "fibroblast (gingiva)",
+    "Fibroblast - Lymphatic donor1 : CNhs1132": "fibroblast (lymph node)",
+    "Fibroblast - Lymphatic donor3 : CNhs1211": "fibroblast (lymph node)",
+    "Fibroblast - Periodontal Ligament donor1 : CNhs1086": "fibroblast (periodontal ligament)",
+    "Fibroblast - Periodontal Ligament donor2 : CNhs1196": "fibroblast (periodontal ligament)",
+    "Fibroblast - Periodontal Ligament donor3 : CNhs1190": "fibroblast (periodontal ligament)",
+    "Fibroblast - Periodontal Ligament donor4 (PL29) : CNhs1249": "fibroblast (periodontal ligament)",
+    "Fibroblast - Periodontal Ligament donor5 (PL30) : CNhs1195": "fibroblast (periodontal ligament)",
+    "Fibroblast - Periodontal Ligament donor6 (PLH3) : CNhs1199": "fibroblast (periodontal ligament)",
+    "Fibroblast - Pulmonary Artery donor1 : CNhs1087": "fibroblast (pulmonary artery)",
+#    "Fibroblast - skin dystrophia myotonica donor1 : CNhs1135": "fibroblast (skin of patient with dystrophia myotonica)",
+#    "Fibroblast - skin dystrophia myotonica donor2 : CNhs1135": "fibroblast (skin of patient with dystrophia myotonica)",
+#    "Fibroblast - skin dystrophia myotonica donor3 : CNhs1191": "fibroblast (skin of patient with dystrophia myotonica)",
+    "Fibroblast - skin normal donor1 : CNhs1135": "fibroblast (skin)",
+    "Fibroblast - skin normal donor2 : CNhs1191": "fibroblast (skin)",
+#    "Fibroblast - skin spinal muscular atrophy donor1 : CNhs1107": "fibroblast (skin of patient with spinal muscular atrophy)",
+#    "Fibroblast - skin spinal muscular atrophy donor2 : CNhs1191": "fibroblast (skin of patient with spinal muscular atrophy)",
+#    "Fibroblast - skin spinal muscular atrophy donor3 : CNhs1191": "fibroblast (skin of patient with spinal muscular atrophy)",
+#    "Fibroblast - skin walker warburg donor1 : CNhs1135": "fibroblast (skin of patient with Walker-Warburg syndrome)",
+    "fibrosarcoma cell line:HT-1080 : CNhs1186": "HT-1080",
+    "fibrous histiocytoma cell line:GCT TIB-223 : CNhs1184": "GCT TIB-223",
+    "frontal lobe adult pool1 : CNhs1064": "frontal lobe",
+    "gall bladder adult : CNhs1284": "gall bladder",
+    "gall bladder carcinoma cell line:TGBC14TKB : CNhs1125": "TGBC14TKB",
+    "gall bladder carcinoma cell line:TGBC2TKB : CNhs1073": "TGBC2TKB",
+    "gastric adenocarcinoma cell line:MKN1 : CNhs1173": "MKN1",
+    "gastric adenocarcinoma cell line:MKN45 : CNhs1181": "MKN45",
+    "gastric cancer cell line:AZ521 : CNhs1128": "AZ521",
+    "gastrointestinal carcinoma cell line:ECC12 : CNhs1173": "ECC12",
+    "giant cell carcinoma cell line:LU65 : CNhs1127": "LU65",
+    "giant cell carcinoma cell line:Lu99B : CNhs1075": "Lu99B",
+    "Gingival epithelial cells donor1 (GEA11) : CNhs1106": "epithelial cells (gingiva)",
+    "Gingival epithelial cells donor2 (GEA14) : CNhs1189": "epithelial cells (gingiva)",
+    "Gingival epithelial cells donor3 (GEA15) : CNhs1190": "epithelial cells (gingiva)",
+    "glassy cell carcinoma cell line:HOKUG : CNhs1182": "HOKUG",
+    "glioblastoma cell line:A172 : CNhs1118": "A172",
+    "glioblastoma cell line:A172 tech_rep2 : CNhs1124": "A172",
+    "glioblastoma cell line:T98G : CNhs1127": "T98G",
+    "glioma cell line:GI-1 : CNhs1073": "GI-1",
+    "globus pallidus - adult donor10196 : CNhs1380": "globus pallidus",
+    "globus pallidus adult donor10252 : CNhs1231": "globus pallidus",
+    "granulosa cell tumor cell line:KGN : CNhs1174": "KGN",
+    "Hair Follicle Dermal Papilla Cells donor1 : CNhs1250": "hair follicle dermal papilla cells",
+    "Hair Follicle Dermal Papilla Cells donor2 : CNhs1197": "hair follicle dermal papilla cells",
+    "Hair Follicle Dermal Papilla Cells donor3 : CNhs1203": "hair follicle dermal papilla cells",
+    "Hair Follicle Outer Root Sheath Cells donor1 : CNhs1233": "hair follicle outer root sheath cells",
+    "Hair Follicle Outer Root Sheath Cells donor2 : CNhs1234": "hair follicle outer root sheath cells",
+    "hairy cell leukemia cell line:Mo : CNhs1184": "Mo",
+#    "heart adult diseased donor1 : CNhs1175": "heart from diseased patient",
+#    "heart adult diseased post-infarction donor1 : CNhs1175": "heart from diseased patient (post-infarction)",
+    "heart adult pool1 : CNhs1062": "heart",
+    "heart fetal pool1 : CNhs1065": "heart (fetal)",
+    "heart - mitral valve adult : CNhs1285": "mitral valve",
+    "heart - pulmonic valve adult : CNhs1285": "pulmonic valve",
+    "heart - tricuspid valve adult : CNhs1285": "tricuspid valve",
+    "Hep-2 cells mock treated biol_rep1 : CNhs1347": "HEp-2",
+    "Hep-2 cells mock treated biol_rep2 : CNhs1350": "HEp-2",
+    "Hep-2 cells mock treated biol_rep3 : CNhs1350": "HEp-2",
+#    "Hep-2 cells treated with Streptococci strain 5448 biol_rep1 : CNhs1347": "Hep-2",
+#    "Hep-2 cells treated with Streptococci strain 5448 biol_rep2 : CNhs1349": "Hep-2",
+#    "Hep-2 cells treated with Streptococci strain 5448 biol_rep3 : CNhs1349": "Hep-2",
+#    "Hep-2 cells treated with Streptococci strain JRS4 biol_rep1 : CNhs1347": "Hep-2",
+#    "Hep-2 cells treated with Streptococci strain JRS4 biol_rep2 : CNhs1349": "Hep-2",
+#    "Hep-2 cells treated with Streptococci strain JRS4 biol_rep3 : CNhs1349": "Hep-2",
+    "hepatic mesenchymal tumor cell line:LI90 : CNhs1186": "LI90",
+    "Hepatic Sinusoidal Endothelial Cells donor1 : CNhs1207": "endothelial cells (liver sinusoid)",
+    "Hepatic Sinusoidal Endothelial Cells donor2 : CNhs1209": "endothelial cells (liver sinusoid)",
+    "Hepatic Stellate Cells (lipocyte) donor1 : CNhs1133": "hepatic stellate cells",
+    "Hepatic Stellate Cells (lipocyte) donor2 : CNhs1209": "hepatic stellate cells",
+    "hepatoblastoma cell line:HuH-6 : CNhs1174": "HuH-6",
+    "hepatocellular carcinoma cell line: HepG2 ENCODE biol_rep1 : CNhs1232": "HepG2",
+    "hepatocellular carcinoma cell line: HepG2 ENCODE biol_rep2 : CNhs1232": "HepG2",
+    "hepatocellular carcinoma cell line: HepG2 ENCODE biol_rep3 : CNhs1233": "HepG2",
+    "Hepatocyte donor1 : CNhs1234": "hepatocytes",
+    "Hepatocyte donor2 : CNhs1234": "hepatocytes",
+    "Hepatocyte donor3 : CNhs1262": "hepatocytes",
+    "hepatoma cell line:Li-7 : CNhs1127": "Li-7",
+    "hereditary spherocytic anemia cell line:WIL2-NS : CNhs1189": "WIL2-NS",
+    "hippocampus - adult donor10196 : CNhs1379": "hippocampus",
+    "hippocampus adult donor10252 : CNhs1231": "hippocampus",
+    "Hodgkin's lymphoma cell line:HD-Mar2 : CNhs1171": "HD-Mar2",
+    "immature langerhans cells donor1 : CNhs1353": "langerhans cells (immature)",
+    "immature langerhans cells donor2 : CNhs1348": "langerhans cells (immature)",
+    "insula adult pool1 : CNhs1064": "insula",
+    "Intestinal epithelial cells (polarized) donor1 : CNhs1087": "epithelial cells (intestine)",
+    "Iris Pigment Epithelial Cells donor1 : CNhs1259": "iris pigment epithelium",
+    "Keratinocyte - epidermal donor1 : CNhs1106": "keratinocytes (epidermis)",
+    "Keratinocyte - epidermal donor2 : CNhs1138": "keratinocytes (epidermis)",
+    "Keratinocyte - epidermal donor3 : CNhs1203": "keratinocytes (epidermis)",
+    "Keratinocyte - oral donor1 : CNhs1087": "keratinocytes (oral)",
+    "keratoacanthoma cell line:HKA-1 : CNhs1188": "HKA-1",
+    "Keratocytes donor1 : CNhs1133": "keratocytes",
+    "Keratocytes donor2 : CNhs1209": "keratocytes",
+    "kidney adult pool1 : CNhs1062": "kidney",
+    "kidney fetal pool1 : CNhs1065": "kidney (fetal)",
+    "large cell lung carcinoma cell line:IA-LM : CNhs1127": "IA-LM",
+    "large cell lung carcinoma cell line:NCI-H460 : CNhs1280": "NCI-H460",
+    "large cell non-keratinizing squamous carcinoma cell line:SKG-II-SF : CNhs1182": "SKG-II-SF",
+    "left atrium adult donor1 : CNhs1179": "left atrium",
+    "left ventricle adult donor1 : CNhs1178": "left ventricle",
+    "leiomyoblastoma  cell line:G-402 : CNhs1184": "G-402",
+    "leiomyoma cell line:10964C : CNhs1172": "10964C",
+    "leiomyoma cell line:15242A : CNhs1172": "15242A",
+    "leiomyoma cell line:15425 : CNhs1172": "15425",
+    "lens epithelial cell line:SRA 01/04 : CNhs1175": "SRA 01/04",
+    "Lens Epithelial Cells donor1 : CNhs1234": "epithelial cells (lens)",
+    "Lens Epithelial Cells donor2 : CNhs1256": "epithelial cells (lens)",
+    "Lens Epithelial Cells donor3 : CNhs1257": "epithelial cells (lens)",
+    "leukemia chronic megakaryoblastic  cell line:MEG-01 : CNhs1185": "MEG-01",
+    "liposarcoma  cell line:KMLS-1 : CNhs1187": "KMLS-1",
+    "liposarcoma  cell line:SW 872 : CNhs1185": "SW 872",
+    "liver adult pool1 : CNhs1062": "liver",
+    "liver fetal pool1 : CNhs1179": "liver (fetal)",
+    "locus coeruleus - adult donor10196 : CNhs1380": "locus coeruleus",
+    "locus coeruleus adult donor10252 : CNhs1232": "locus coeruleus",
+    "lung adenocarcinoma cell line:A549 : CNhs1127": "A549",
+    "lung adenocarcinoma cell line:PC-14 : CNhs1072": "PC-14",
+    "lung adult pool1 : CNhs1062": "lung",
+    "lung fetal donor1 : CNhs1168": "lung (fetal)",
+    "lung right lower lobe adult donor1 : CNhs1178": "lung (right lower lobe)",
+    "lymphangiectasia cell line:DS-1 : CNhs1185": "DS-1",
+    "lymph node adult donor1 : CNhs1178": "lymph node",
+    "lymphoma malignant hairy B-cell cell line:MLMA : CNhs1193": "MLMA",
+    "Macrophage - monocyte derived donor1 : CNhs1086": "macrophages (derived from monocytes)",
+    "Macrophage - monocyte derived donor2 : CNhs1189": "macrophages (derived from monocytes)",
+    "Macrophage - monocyte derived donor3 : CNhs1200": "macrophages (derived from monocytes)",
+    "malignant trichilemmal cyst cell line:DJM-1 : CNhs1073": "DJM-1",
+#    "Mallassez-derived cells donor2 : CNhs1355": "mallassez epithelial cells",
+#    "Mallassez-derived cells donor3 : CNhs1355": "mallassez epithelial cells",
+    "Mammary Epithelial Cell donor1 : CNhs1107": "epithelial cells (breast)",
+    "Mammary Epithelial Cell donor2 : CNhs1138": "epithelial cells (breast)",
+    "Mammary Epithelial Cell donor3 : CNhs1203": "epithelial cells (breast)",
+    "Mast cell donor1 : CNhs1256": "mast cells",
+    "Mast cell donor2 : CNhs1259": "mast cells",
+    "Mast cell donor3 : CNhs1259": "mast cells",
+    "Mast cell donor4 : CNhs1259": "mast cells",
+#    "Mast cell - stimulated donor1 : CNhs1107": "mast cells",
+    "maxillary sinus tumor cell line:HSQ-89 : CNhs1073": "HSQ-89",
+    "medial frontal gyrus - adult donor10196 : CNhs1379": "medial frontal gyrus",
+    "medial temporal gyrus - adult donor10196 : CNhs1380": "medial temporal gyrus",
+    "medial temporal gyrus adult donor10252 : CNhs1231": "medial temporal gyrus",
+    "medulla oblongata - adult donor10196 : CNhs1380": "medulla oblongata",
+    "medulla oblongata adult donor10252 : CNhs1231": "medulla oblongata",
+    "medulla oblongata adult pool1 : CNhs1064": "medulla oblongata",
+    "medulloblastoma  cell line:D283 Med : CNhs1280": "D283 Med",
+    "medulloblastoma  cell line:ONS-76 : CNhs1186": "ONS-76",
+    "Melanocyte - dark donor3 : CNhs1257": "melanocytes (dark donor)",
+    "Melanocyte - light donor1 : CNhs1130": "melanocytes (light donor)",
+    "Melanocyte - light donor2 : CNhs1138": "melanocytes (light donor)",
+    "Melanocyte - light donor3 : CNhs1203": "melanocytes (light donor)",
+    "melanoma cell line:COLO 679 : CNhs1128": "COLO 679",
+    "melanoma cell line:G-361 : CNhs1125": "G-361",
+    "Meningeal Cells donor1 : CNhs1132": "meningeal cells",
+    "Meningeal Cells donor2 : CNhs1208": "meningeal cells",
+    "Meningeal Cells donor3 : CNhs1273": "meningeal cells",
+    "meningioma cell line:HKBMM : CNhs1194": "HKBMM",
+    "merkel cell carcinoma cell line:MKL-1 : CNhs1283": "MKL-1",
+    "merkel cell carcinoma cell line:MS-1 : CNhs1283": "MS-1",
+    "mesenchymal precursor cell - adipose donor1 : CNhs1236": "mesenchymal precursor cells (adipose tissue)",
+    "mesenchymal precursor cell - adipose donor2 : CNhs1236": "mesenchymal precursor cells (adipose tissue)",
+    "mesenchymal precursor cell - adipose donor3 : CNhs1236": "mesenchymal precursor cells (adipose tissue)",
+    "mesenchymal precursor cell - bone marrow donor1 : CNhs1236": "mesenchymal precursor cells (bone marrow)",
+    "mesenchymal precursor cell - bone marrow donor2 : CNhs1236": "mesenchymal precursor cells (bone marrow)",
+    "mesenchymal precursor cell - bone marrow donor3 : CNhs1309": "mesenchymal precursor cells (bone marrow)",
+    "mesenchymal precursor cell - cardiac donor1 : CNhs1236": "mesenchymal precursor cells (heart)",
+    "mesenchymal precursor cell - cardiac donor2 : CNhs1236": "mesenchymal precursor cells (heart)",
+    "mesenchymal precursor cell - cardiac donor3 : CNhs1237": "mesenchymal precursor cells (heart)",
+    "mesenchymal precursor cell - cardiac donor4 : CNhs1237": "mesenchymal precursor cells (heart)",
+#    "mesenchymal precursor cell - ovarian cancer left ovary donor1 : CNhs1237": "mesenchymal precursor cells of left ovarian cancer",
+#    "mesenchymal precursor cell - ovarian cancer left ovary donor2 : CNhs1309": "mesenchymal precursor cells of left ovarian cancer",
+#    "mesenchymal precursor cell - ovarian cancer left ovary donor3 : CNhs1237": "mesenchymal precursor cells of left ovarian cancer",
+#    "mesenchymal precursor cell - ovarian cancer left ovary donor4 : CNhs1309": "mesenchymal precursor cells of left ovarian cancer",
+#    "mesenchymal precursor cell - ovarian cancer metastasis donor1 : CNhs1237": "mesenchymal precursor cells of ovarian cancer metastasis",
+#    "mesenchymal precursor cell - ovarian cancer metastasis donor2 : CNhs1309": "mesenchymal precursor cells of ovarian cancer metastasis",
+#    "mesenchymal precursor cell - ovarian cancer metastasis donor3 : CNhs1237": "mesenchymal precursor cells of ovarian cancer metastasis",
+#    "mesenchymal precursor cell - ovarian cancer metastasis donor4 : CNhs1309": "mesenchymal precursor cells of ovarian cancer metastasis",
+#    "mesenchymal precursor cell - ovarian cancer right ovary donor1 : CNhs1237": "mesenchymal precursor cells of right ovarian cancer",
+#    "mesenchymal precursor cell - ovarian cancer right ovary donor2 : CNhs1237": "mesenchymal precursor cells of right ovarian cancer",
+#    "mesenchymal precursor cell - ovarian cancer right ovary donor3 (SOC-57-02) : CNhs1237": "mesenchymal precursor cells of right ovarian cancer",
+#    "mesenchymal precursor cell - ovarian cancer right ovary donor3 (SOC-57-02-G) : CNhs1350": "mesenchymal precursor cells of right ovarian cancer",
+#    "mesenchymal precursor cell - ovarian cancer right ovary donor4 : CNhs1309": "mesenchymal precursor cells of right ovarian cancer",
+    "mesenchymal stem cell line:Hu5/E18 : CNhs1171": "Hu5/E18",
+    "Mesenchymal stem cells - adipose donor0 : CNhs1084": "mesenchymal stem cells (adipose tissue)",
+    "Mesenchymal Stem Cells - adipose donor1 : CNhs1134": "mesenchymal stem cells (adipose tissue)",
+    "Mesenchymal Stem Cells - adipose donor3 : CNhs1292": "mesenchymal stem cells (adipose tissue)",
+    "Mesenchymal Stem Cells - amniotic membrane donor1 : CNhs1134": "mesenchymal stem cells (amniotic membrane)",
+    "Mesenchymal Stem Cells - amniotic membrane donor2 : CNhs1210": "mesenchymal stem cells (amniotic membrane)",
+    "Mesenchymal Stem Cells - bone marrow donor1 : CNhs1134": "mesenchymal stem cells (bone marrow)",
+    "Mesenchymal Stem Cells - bone marrow donor2 : CNhs1210": "mesenchymal stem cells (bone marrow)",
+    "Mesenchymal Stem Cells - bone marrow donor3 : CNhs1212": "mesenchymal stem cells (bone marrow)",
+    "Mesenchymal stem cells - hepatic donor0 : CNhs1084": "mesenchymal stem cells (liver)",
+    "Mesenchymal Stem Cells - hepatic donor2 : CNhs1273": "mesenchymal stem cells (liver)",
+    "Mesenchymal stem cells - umbilical donor0 : CNhs1249": "mesenchymal stem cells (umbilical cord)",
+    "Mesenchymal Stem Cells - umbilical donor1 : CNhs1134": "mesenchymal stem cells (umbilical cord)",
+    "Mesenchymal Stem Cells - umbilical donor3 : CNhs1212": "mesenchymal stem cells (umbilical cord)",
+#    "Mesenchymal Stem Cells - Wharton's Jelly donor1 : CNhs1105": "mesenchymal stem cells from Wharton's Jelly patient",
+    "Mesothelial Cells donor1 : CNhs1085": "mesothelial cells",
+    "Mesothelial Cells donor3 : CNhs1201": "mesothelial cells",
+    "mesothelioma cell line:ACC-MESO-1 : CNhs1126": "ACC-MESO-1",
+    "mesothelioma cell line:ACC-MESO-4 : CNhs1126": "ACC-MESO-4",
+    "mesothelioma cell line:Mero-25 : CNhs1306": "Mero-25",
+    "mesothelioma cell line:Mero-41 : CNhs1306": "Mero-41",
+    "mesothelioma cell line:Mero-48a : CNhs1306": "Mero-48a",
+    "mesothelioma cell line:Mero-82 : CNhs1306": "Mero-82",
+    "mesothelioma cell line:Mero-83 : CNhs1307": "Mero-83",
+    "mesothelioma cell line:Mero-84 : CNhs1307": "Mero-84",
+    "mesothelioma cell line:Mero-95 : CNhs1307": "Mero-95",
+    "mesothelioma cell line:NCI-H2052 : CNhs1306": "NCI-H2052",
+    "mesothelioma cell line:NCI-H226 : CNhs1306": "NCI-H226",
+    "mesothelioma cell line:NCI-H2452 : CNhs1306": "NCI-H2452",
+    "mesothelioma cell line:NCI-H28 : CNhs1306": "NCI-H28",
+    "mesothelioma cell line:No36 : CNhs1307": "No36",
+    "mesothelioma cell line:ONE58 : CNhs1307": "ONE58",
+    "middle temporal gyrus donor10252 : CNhs1231": "middle temporal gyrus",
+    "migratory langerhans cells donor1 : CNhs1353": "langerhans cells (migratory)",
+    "migratory langerhans cells donor2 : CNhs1353": "langerhans cells (migratory)",
+    "migratory langerhans cells donor3 : CNhs1354": "langerhans cells (migratory)",
+    "mixed mullerian tumor cell line:HTMMT : CNhs1194": "HTMMT",
+    "mucinous adenocarcinoma cell line:JHOM-1 : CNhs1175": "JHOM-1",
+    "mucinous cystadenocarcinoma  cell line:MCAS : CNhs1187": "MCAS",
+    "Multipotent Cord Blood Unrestricted Somatic Stem Cells donor1 : CNhs1135": "multipotent stem cells (umbilical cord blood)",
+    "Multipotent Cord Blood Unrestricted Somatic Stem Cells donor2 : CNhs1210": "multipotent stem cells (umbilical cord blood)",
+    "mycosis fungoides T cell lymphoma cell line:HuT 102 TIB-162 : CNhs1185": "HuT 102 TIB-162",
+    "myelodysplastic syndrome cell line:SKM-1 : CNhs1193": "SKM-1",
+    "myeloma cell line:PCM6 : CNhs1125": "PCM6",
+    "Myoblast donor1 : CNhs1087": "myoblasts",
+    "Myoblast donor2 : CNhs1196": "myoblasts",
+    "Myoblast donor3 : CNhs1190": "myoblasts",
+    "myxofibrosarcoma cell line:MFH-ino : CNhs1172": "MFH-ino",
+    "myxofibrosarcoma cell line:NMFH-1 : CNhs1182": "NMFH-1",
+    "nasal epithelial cells donor1 tech_rep1 : CNhs1258": "epithelial cells (nasal)",
+    "nasal epithelial cells donor2 : CNhs1257": "epithelial cells (nasal)",
+    "Natural Killer Cells donor1 : CNhs1085": "natural killer cells",
+    "Natural Killer Cells donor2 : CNhs1195": "natural killer cells",
+    "Natural Killer Cells donor3 : CNhs1200": "natural killer cells",
+    "Neural stem cells donor1 : CNhs1106": "neural stem cells",
+    "Neural stem cells donor2 : CNhs1138": "neural stem cells",
+    "neuroblastoma cell line:CHP-134 : CNhs1127": "CHP-134",
+    "neuroblastoma cell line:NB-1 : CNhs1128": "NB-1",
+    "neuroblastoma cell line:NBsusSR : CNhs1181": "NBsusSR",
+    "neuroblastoma cell line:NH-12 : CNhs1181": "NH-12",
+    "neuroectodermal tumor cell line:FU-RPNT-1 : CNhs1174": "FU-RPNT-1",
+    "neuroectodermal tumor cell line:FU-RPNT-2 : CNhs1175": "FU-RPNT-2",
+    "neuroectodermal tumor  cell line:TASK1 : CNhs1186": "TASK1",
+    "neuroepithelioma cell line:SK-N-MC : CNhs1185": "SK-N-MC",
+    "neurofibroma cell line:Hs 53.T : CNhs1185": "Hs 53.T",
+    "Neurons donor1 : CNhs1233": "neurons",
+    "Neurons donor2 : CNhs1272": "neurons",
+    "Neurons donor3 : CNhs1381": "neurons",
+    "Neutrophils donor1 : CNhs1086": "neutrophils",
+    "Neutrophils donor2 : CNhs1195": "neutrophils",
+    "Neutrophils donor3 : CNhs1190": "neutrophils",
+    "NK T cell leukemia cell line:KHYG-1 : CNhs1186": "KHYG-1",
+    "non T non B acute lymphoblastic leukemia (ALL) cell line:P30/OHK : CNhs1074": "P30/OHK",
+    "normal embryonic palatal mesenchymal cell line:HEPM : CNhs1189": "HEPM",
+    "normal intestinal epithelial cell line:FHs 74 Int : CNhs1195": "FHs 74 Int",
+    "nucleus accumbens adult pool1 : CNhs1064": "nucleus accumbens",
+    "Nucleus Pulposus Cell donor1 : CNhs1088": "nucleus pulposus cells",
+    "Nucleus Pulposus Cell donor2 : CNhs1201": "nucleus pulposus cells",
+    "Nucleus Pulposus Cell donor3 : CNhs1206": "nucleus pulposus cells",
+    "occipital cortex - adult donor10196 : CNhs1379": "occipital cortex",
+    "occipital cortex adult donor10252 : CNhs1232": "occipital cortex",
+    "occipital lobe adult donor1 : CNhs1178": "occipital lobe",
+    "occipital lobe fetal donor1 : CNhs1178": "occipital lobe (fetal)",
+    "occipital pole adult pool1 : CNhs1064": "occipital pole",
+    "Olfactory epithelial cells donor1 : CNhs1381": "olfactory epithelium",
+    "Olfactory epithelial cells donor2 : CNhs1381": "olfactory epithelium",
+    "Olfactory epithelial cells donor3 : CNhs1381": "olfactory epithelium",
+    "Olfactory epithelial cells donor4 : CNhs1381": "olfactory epithelium",
+    "olfactory region adult : CNhs1261": "olfactory region",
+    "optic nerve donor1 : CNhs1344": "optic nerve",
+    "oral squamous cell carcinoma cell line:Ca9-22 : CNhs1075": "Ca9-22",
+    "oral squamous cell carcinoma cell line:HO-1-u-1 : CNhs1128": "HO-1-u-1",
+    "oral squamous cell carcinoma cell line:HSC-3 : CNhs1171": "HSC-3",
+    "oral squamous cell carcinoma cell line:SAS : CNhs1181": "SAS",
+    "Osteoblast - differentiated donor1 : CNhs1131": "osteoblasts (differentiated)",
+    "Osteoblast - differentiated donor2 : CNhs1198": "osteoblasts (differentiated)",
+    "Osteoblast - differentiated donor3 : CNhs1203": "osteoblasts (differentiated)",
+    "Osteoblast donor2 : CNhs1138": "osteoblasts",
+    "Osteoblast donor3 : CNhs1203": "osteoblasts",
+    "osteoclastoma cell line:Hs 706.T : CNhs1183": "Hs 706.T",
+    "osteosarcoma cell line:143B/TK^(-)neo^(R) : CNhs1127": "143B/TK^(-)neo^(R)",
+    "osteosarcoma cell line:HS-Os-1 : CNhs1129": "HS-Os-1",
+    "ovary adult pool1 : CNhs1062": "ovary",
+    "pagetoid sarcoma cell line:Hs 925.T : CNhs1185": "Hs 925.T",
+    "pancreas adult donor1 : CNhs1175": "pancreas",
+    "pancreatic carcinoma cell line:NOR-P1 : CNhs1183": "NOR-P1",
+    "Pancreatic stromal cells donor1 : CNhs1087": "stromal cells (pancreas)",
+    "papillary adenocarcinoma cell line:8505C : CNhs1171": "8505C",
+    "papillotubular adenocarcinoma cell line:TGBC18TKB : CNhs1073": "TGBC18TKB",
+    "paracentral gyrus adult pool1 : CNhs1064": "paracentral gyrus",
+    "parietal lobe - adult donor10196 : CNhs1379": "parietal lobe",
+    "parietal lobe adult donor10252 : CNhs1231": "parietal lobe",
+    "parietal lobe adult pool1 : CNhs1064": "parietal lobe",
+    "parietal lobe fetal donor1 : CNhs1178": "parietal lobe (fetal)",
+    "parotid gland adult : CNhs1284": "parotid gland",
+    "penis adult : CNhs1285": "penis",
+    "Pericytes donor1 : CNhs1131": "pericytes",
+    "Pericytes donor2 : CNhs1207": "pericytes",
+    "Peripheral Blood Mononuclear Cells donor1 : CNhs1086": "peripheral blood mononuclear cells",
+    "Peripheral Blood Mononuclear Cells donor2 : CNhs1195": "peripheral blood mononuclear cells",
+    "Peripheral Blood Mononuclear Cells donor3 : CNhs1200": "peripheral blood mononuclear cells",
+    "peripheral neuroectodermal tumor cell line:KU-SN : CNhs1183": "KU-SN",
+    "pharyngeal carcinoma cell line:Detroit 562 : CNhs1184": "Detroit 562",
+    "pineal gland - adult donor10196 : CNhs1380": "pineal gland",
+    "pineal gland adult donor10252 : CNhs1222": "pineal gland",
+    "pituitary gland - adult donor10196 : CNhs1380": "pituitary gland",
+    "pituitary gland adult donor10252 : CNhs1222": "pituitary gland",
+    "placenta adult pool1 : CNhs1062": "placenta",
+    "Placental Epithelial Cells donor1 : CNhs1107": "epithelial cells (placenta)",
+    "Placental Epithelial Cells donor2 : CNhs1138": "epithelial cells (placenta)",
+    "Placental Epithelial Cells donor3 : CNhs1203": "epithelial cells (placenta)",
+    "plasma cell leukemia cell line:ARH-77 : CNhs1280": "ARH-77",
+    "pleomorphic hepatocellular carcinoma cell line:SNU-387 : CNhs1193": "SNU-387",
+    "pons adult pool1 : CNhs1064": "pons",
+    "postcentral gyrus adult pool1 : CNhs1063": "postcentral gyrus",
+    "Preadipocyte - breast donor1 : CNhs1105": "preadipocytes (breast)",
+    "Preadipocyte - breast donor2 : CNhs1197": "preadipocytes (breast)",
+    "Preadipocyte - omental donor1 : CNhs1106": "preadipocytes (omentum)",
+    "Preadipocyte - omental donor2 : CNhs1190": "preadipocytes (omentum)",
+    "Preadipocyte - omental donor3 : CNhs1201": "preadipocytes (omentum)",
+    "Preadipocyte - perirenal donor1 : CNhs1206": "preadipocytes (perirenal)",
+    "Preadipocyte - subcutaneous donor2 : CNhs1198": "preadipocytes (subcutaneous)",
+    "Preadipocyte - subcutaneous donor3 : CNhs1203": "preadipocytes (subcutaneous)",
+    "Preadipocyte - visceral donor1 : CNhs1108": "preadipocytes (viscera)",
+    "Preadipocyte - visceral donor2 : CNhs1198": "preadipocytes (viscera)",
+    "Preadipocyte - visceral donor3 : CNhs1203": "preadipocytes (viscera)",
+    "prostate adult pool1 : CNhs1062": "prostate",
+    "prostate cancer cell line:DU145 : CNhs1126": "DU145",
+    "prostate cancer cell line:PC-3 : CNhs1124": "PC-3",
+    "Prostate Epithelial Cells donor2 : CNhs1197": "epithelial cells (prostate)",
+    "Prostate Epithelial Cells donor3 : CNhs1201": "epithelial cells (prostate)",
+#    "Prostate Epithelial Cells (polarized) donor1 : CNhs1088": "epithelial cells (prostate)",
+    "Prostate Stromal Cells donor1 : CNhs1088": "stromal cells (prostate)",
+    "Prostate Stromal Cells donor2 : CNhs1197": "stromal cells (prostate)",
+    "Prostate Stromal Cells donor3 : CNhs1201": "stromal cells (prostate)",
+    "putamen adult donor10196 : CNhs1232": "putamen",
+    "rectal cancer cell line:TT1TKB : CNhs1125": "TT1TKB",
+    "rectum fetal donor1 : CNhs1177": "rectum (fetal)",
+    "renal cell carcinoma cell line:OS-RC-2 : CNhs1072": "OS-RC-2",
+    "renal cell carcinoma cell line:TUHR10TKB : CNhs1125": "TUHR10TKB",
+    "Renal Cortical Epithelial Cells donor1 : CNhs1133": "epithelial cells (renal cortex)",
+    "Renal Cortical Epithelial Cells donor2 : CNhs1272": "epithelial cells (renal cortex)",
+    "Renal Epithelial Cells donor1 : CNhs1133": "epithelial cells (renal)",
+    "Renal Epithelial Cells donor2 : CNhs1208": "epithelial cells (renal)",
+    "Renal Epithelial Cells donor3 : CNhs1273": "epithelial cells (renal)",
+    "Renal Glomerular Endothelial Cells donor1 : CNhs1207": "endothelial cells (renal glomerulus)",
+    "Renal Glomerular Endothelial Cells donor2 : CNhs1208": "endothelial cells (renal glomerulus)",
+    "Renal Glomerular Endothelial Cells donor3 : CNhs1262": "endothelial cells (renal glomerulus)",
+    "Renal Glomerular Endothelial Cells donor4 : CNhs1308": "endothelial cells (renal glomerulus)",
+    "Renal Mesangial Cells donor1 : CNhs1133": "mesangial cells",
+    "Renal Mesangial Cells donor3 : CNhs1212": "mesangial cells",
+    "Renal Proximal Tubular Epithelial Cell donor1 : CNhs1133": "epithelial cell (renal proximal tubule)",
+    "Renal Proximal Tubular Epithelial Cell donor2 : CNhs1208": "epithelial cell (renal proximal tubule)",
+    "Renal Proximal Tubular Epithelial Cell donor3 : CNhs1212": "epithelial cell (renal proximal tubule)",
+    "Reticulocytes biol_ rep1 : CNhs1355": "reticulocytes",
+    "Reticulocytes biol_ rep2 : CNhs1355": "reticulocytes",
+    "retina adult pool1 : CNhs1063": "retina",
+    "Retinal Pigment Epithelial Cells donor0 : CNhs1084": "retinal pigment epithelium",
+    "Retinal Pigment Epithelial Cells donor1 : CNhs1133": "retinal pigment epithelium",
+    "Retinal Pigment Epithelial Cells donor3 : CNhs1273": "retinal pigment epithelium",
+    "retinoblastoma cell line:Y79 : CNhs1126": "Y79",
+    "rhabdomyosarcoma cell line:KYM-1 : CNhs1187": "KYM-1",
+    "rhabdomyosarcoma cell line:RMS-YM : CNhs1126": "RMS-YM",
+#    "SABiosciences XpressRef Human Universal Total RNA pool1 : CNhs1061": ,
+    "sacrococcigeal teratoma cell line:HTST : CNhs1182": "HTST",
+    "salivary acinar cells donor1 : CNhs1281": "acinar cells (salivary)",
+    "salivary acinar cells donor2 : CNhs1281": "acinar cells (salivary)",
+    "salivary acinar cells donor3 : CNhs1281": "acinar cells (salivary)",
+    "salivary gland adult pool1 : CNhs1167": "salivary gland",
+    "schwannoma cell line:HS-PSS : CNhs1118": "HS-PSS",
+    "schwannoma cell line:HS-PSS tech_rep2 : CNhs1124": "HS-PSS",
+    "Sebocyte donor1 : CNhs1084": "sebocytes",
+    "Sebocyte donor2 : CNhs1195": "sebocytes",
+    "seminal vesicle adult : CNhs1285": "seminal vesicle",
+    "serous adenocarcinoma cell line:JHOS-2 : CNhs1174": "JHOS-2",
+#    "serous adenocarcinoma cell line:SK-OV-3-R after co-culture with SOC-57-02-G biol_rep1 : CNhs1350": "SK-OV-3-R",
+    "serous adenocarcinoma cell line:SK-OV-3-R biol_rep1 : CNhs1309": "SK-OV-3-R",
+    "serous cystadenocarcinoma cell line:HTOA : CNhs1182": "HTOA",
+    "Sertoli Cells donor1 : CNhs1085": "Sertoli cells",
+    "signet ring carcinoma cell line:Kato III : CNhs1075": "Kato III",
+    "signet ring carcinoma cell line:NUGC-4 : CNhs1127": "NUGC-4",
+    "skeletal muscle adult pool1 : CNhs1062": "skeletal muscle",
+    "Skeletal muscle cells differentiated into Myotubes - multinucleated donor1 : CNhs1108": "myotubes (differentiated from skeletal muscle cells)",
+    "Skeletal Muscle Cells donor1 : CNhs1108": "skeletal muscle cells",
+    "Skeletal Muscle Cells donor4 : CNhs1205": "skeletal muscle cells",
+    "Skeletal Muscle Cells donor5 : CNhs1205": "skeletal muscle cells",
+    "Skeletal Muscle Cells donor6 : CNhs1206": "skeletal muscle cells",
+    "skeletal muscle fetal donor1 : CNhs1177": "skeletal muscle (fetal)",
+    "Skeletal Muscle Satellite Cells donor1 : CNhs1086": "skeletal muscle satellite cells",
+    "Skeletal Muscle Satellite Cells donor2 : CNhs1196": "skeletal muscle satellite cells",
+    "Skeletal Muscle Satellite Cells donor3 : CNhs1200": "skeletal muscle satellite cells",
+    "skeletal muscle - soleus muscle donor1 : CNhs1345": "skeletal muscle (soleus)",
+    "skin fetal donor1 : CNhs1177": "skin (fetal)",
+    "Small Airway Epithelial Cells donor1 : CNhs1088": "epithelial cells (small airways)",
+    "Small Airway Epithelial Cells donor2 : CNhs1197": "epithelial cells (small airways)",
+    "Small Airway Epithelial Cells donor3 : CNhs1201": "epithelial cells (small airways)",
+    "small cell cervical cancer cell line:HCSC-1 : CNhs1188": "HCSC-1",
+    "small cell gastrointestinal carcinoma cell line:ECC10 : CNhs1173": "ECC10",
+    "small-cell gastrointestinal carcinoma cell line:ECC4 : CNhs1173": "ECC4",
+    "small cell lung carcinoma cell line:DMS 144 : CNhs1280": "DMS 144",
+    "small cell lung carcinoma cell line:LK-2 : CNhs1128": "LK-2",
+    "small cell lung carcinoma cell line:NCI-H82 : CNhs1280": "NCI-H82",
+    "small cell lung carcinoma cell line:WA-hT : CNhs1181": "WA-hT",
+    "small intestine adult pool1 : CNhs1063": "small intestine",
+    "small intestine fetal donor1 : CNhs1177": "small intestine (fetal)",
+    "smooth muscle adult pool1 : CNhs1175": "smooth muscle",
+    "Smooth Muscle Cells - Aortic donor0 : CNhs1083": "smooth muscle cells (aorta)",
+    "Smooth Muscle Cells - Aortic donor1 : CNhs1108": "smooth muscle cells (aorta)",
+    "Smooth Muscle Cells - Aortic donor2 : CNhs1130": "smooth muscle cells (aorta)",
+    "Smooth Muscle Cells - Aortic donor3 : CNhs1130": "smooth muscle cells (aorta)",
+    "Smooth Muscle Cells - Brachiocephalic donor1 : CNhs1108": "smooth muscle cells (brachiocephalic artery)",
+    "Smooth Muscle Cells - Brachiocephalic donor3 : CNhs1204": "smooth muscle cells (brachiocephalic artery)",
+    "Smooth Muscle Cells - Brain Vascular donor1 : CNhs1086": "smooth muscle cells (brain vasculature)",
+    "Smooth Muscle Cells - Brain Vascular donor2 : CNhs1190": "smooth muscle cells (brain vasculature)",
+    "Smooth Muscle Cells - Brain Vascular donor3 : CNhs1200": "smooth muscle cells (brain vasculature)",
+    "Smooth Muscle Cells - Bronchial donor1 : CNhs1132": "smooth muscle cells (bronchi)",
+    "Smooth Muscle Cells - Bronchial donor2 : CNhs1234": "smooth muscle cells (bronchi)",
+    "Smooth Muscle Cells - Carotid donor1 : CNhs1108": "smooth muscle cells (carotid)",
+    "Smooth Muscle Cells - Carotid donor3 : CNhs1204": "smooth muscle cells (carotid)",
+    "Smooth Muscle Cells - Colonic donor1 : CNhs1086": "smooth muscle cells (colon)",
+    "Smooth Muscle Cells - Colonic donor2 : CNhs1196": "smooth muscle cells (colon)",
+    "Smooth Muscle Cells - Colonic donor3 : CNhs1200": "smooth muscle cells (colon)",
+    "Smooth Muscle Cells - Coronary Artery donor1 : CNhs1108": "smooth muscle cells (coronary artery)",
+    "Smooth Muscle Cells - Coronary Artery donor2 : CNhs1198": "smooth muscle cells (coronary artery)",
+    "Smooth Muscle Cells - Coronary Artery donor3 : CNhs1204": "smooth muscle cells (coronary artery)",
+    "Smooth Muscle Cells - Esophageal donor1 : CNhs1132": "smooth muscle cells (esophagus)",
+    "Smooth Muscle Cells - Internal Thoracic Artery donor2 : CNhs1198": "smooth muscle cells (internal thoracic artery)",
+    "Smooth Muscle Cells - Internal Thoracic Artery donor3 : CNhs1204": "smooth muscle cells (internal thoracic artery)",
+    "Smooth Muscle Cells - Prostate donor1 : CNhs1192": "smooth muscle cells (prostate)",
+    "Smooth Muscle Cells - Prostate donor2 : CNhs1197": "smooth muscle cells (prostate)",
+    "Smooth Muscle Cells - Pulmonary Artery donor2 : CNhs1198": "smooth muscle cells (pulmonary artery)",
+    "Smooth Muscle Cells - Subclavian Artery donor1 : CNhs1109": "smooth muscle cells (subclavian artery)",
+    "Smooth Muscle Cells - Subclavian Artery donor2 : CNhs1199": "smooth muscle cells (subclavian artery)",
+    "Smooth Muscle Cells - Subclavian Artery donor3 : CNhs1204": "smooth muscle cells (subclavian artery)",
+    "Smooth Muscle Cells - Tracheal donor1 : CNhs1132": "smooth muscle cells (trachea)",
+    "Smooth Muscle Cells - Tracheal donor3 : CNhs1289": "smooth muscle cells (trachea)",
+    "Smooth Muscle Cells - Umbilical artery donor0 : CNhs1083": "smooth muscle cells (umbilical artery)",
+    "Smooth Muscle Cells - Umbilical Artery donor1 : CNhs1109": "smooth muscle cells (umbilical artery)",
+    "Smooth Muscle Cells - Umbilical Artery donor2 : CNhs1199": "smooth muscle cells (umbilical artery)",
+    "Smooth Muscle Cells - Umbilical Artery donor3 : CNhs1204": "smooth muscle cells (umbilical artery)",
+    "Smooth Muscle Cells - Umbilical Vein donor1 : CNhs1259": "smooth muscle cells (umbilical vein)",
+    "Smooth Muscle Cells - Umbilical Vein donor2 : CNhs1256": "smooth muscle cells (umbilical vein)",
+    "Smooth Muscle Cells - Uterine donor3 : CNhs1192": "smooth muscle cells (uterus)",
+    "somatostatinoma cell line:QGP-1 : CNhs1186": "QGP-1",
+    "spinal cord - adult donor10196 : CNhs1380": "spinal cord",
+    "spinal cord adult donor10252 : CNhs1222": "spinal cord",
+    "spinal cord fetal donor1 : CNhs1176": "spinal cord (fetal)",
+    "spindle cell sarcoma cell line:Hs 132.T : CNhs1185": "Hs 132.T",
+    "spleen adult pool1 : CNhs1063": "spleen",
+    "spleen fetal pool1 : CNhs1065": "spleen (fetal)",
+    "splenic lymphoma with villous lymphocytes cell line:SLVL : CNhs1074": "SLVL",
+    "squamous cell carcinoma cell line:EC-GI-10 : CNhs1125": "EC-GI-10",
+    "squamous cell carcinoma cell line:T3M-5 : CNhs1173": "T3M-5",
+    "squamous cell lung carcinoma cell line:EBC-1 : CNhs1127": "EBC-1",
+    "stomach fetal donor1 : CNhs1177": "stomach (fetal)",
+    "submaxillary gland adult : CNhs1285": "submaxillary gland",
+    "substantia nigra adult donor10252 : CNhs1231": "substantia nigra",
+    "synovial sarcoma cell line:HS-SY-II : CNhs1124": "HS-SY-II",
+    "Synoviocyte donor2 : CNhs1199": "synoviocytes",
+    "Synoviocyte donor3 : CNhs1205": "synoviocytes",
+    "temporal lobe adult pool1 : CNhs1063": "temporal lobe",
+    "temporal lobe fetal donor1 tech_rep1 : CNhs1177": "temporal lobe (fetal)",
+    "temporal lobe fetal donor1 tech_rep2 : CNhs1299": "temporal lobe (fetal)",
+    "tenocyte donor1 : CNhs1263": "tenocytes",
+    "tenocyte donor2 : CNhs1264": "tenocytes",
+    "tenocyte donor3 : CNhs1264": "tenocytes",
+    "teratocarcinoma cell line:NCC-IT-A3 : CNhs1187": "NCC-IT-A3",
+    "teratocarcinoma cell line:NCR-G1 : CNhs1188": "NCR-G1",
+    "teratocarcinoma  cell line:PA-1 : CNhs1189": "PA-1",
+    "testicular germ cell embryonal carcinoma cell line:ITO-II : CNhs1187": "ITO-II",
+    "testicular germ cell embryonal carcinoma cell line:NEC14 : CNhs1235": "NEC14",
+    "testicular germ cell embryonal carcinoma cell line:NEC15 : CNhs1236": "NEC15",
+    "testicular germ cell embryonal carcinoma cell line:NEC8 : CNhs1172": "NEC8",
+    "testis adult pool1 : CNhs1063": "testis",
+    "testis adult pool2 : CNhs1299": "testis",
+    "thalamus - adult donor10196 : CNhs1379": "thalamus",
+    "thalamus adult donor10252 : CNhs1231": "thalamus",
+    "throat adult : CNhs1285": "throat",
+    "throat fetal donor1 : CNhs1177": "throat (fetal)",
+    "thymus adult pool1 : CNhs1063": "thymus",
+    "thymus fetal pool1 : CNhs1065": "thymus (fetal)",
+    "thyroid adult pool1 : CNhs1063": "thyroid",
+    "thyroid carcinoma cell line:TCO-1 : CNhs1187": "TCO-1",
+    "thyroid fetal donor1 : CNhs1176": "thyroid (fetal)",
+    "tongue adult : CNhs1285": "tongue",
+    "tongue fetal donor1 : CNhs1176": "tongue (fetal)",
+    "tonsil adult pool1 : CNhs1065": "tonsils",
+    "Trabecular Meshwork Cells donor1 : CNhs1134": "trabecular meshwork cells",
+    "Trabecular Meshwork Cells donor3 : CNhs1212": "trabecular meshwork cells",
+    "trachea adult pool1 : CNhs1063": "trachea",
+    "trachea fetal donor1 : CNhs1176": "trachea (fetal)",
+    "Tracheal Epithelial Cells donor1 : CNhs1109": "epithelial cells (trachea)",
+    "Tracheal Epithelial Cells donor2 : CNhs1199": "epithelial cells (trachea)",
+    "Tracheal Epithelial Cells donor3 : CNhs1205": "epithelial cells (trachea)",
+    "transitional-cell carcinoma cell line:5637 : CNhs1073": "5637",
+    "transitional-cell carcinoma cell line:JMSU1 : CNhs1126": "JMSU1",
+    "tridermal teratoma cell line:HGRT : CNhs1182": "HGRT",
+    "tubular adenocarcinoma cell line:SUIT-2 : CNhs1188": "SUIT-2",
+    "umbilical cord fetal donor1 : CNhs1176": "umbilical cord (fetal)",
+#    "Universal RNA - Human Normal Tissues Biochain pool1 : CNhs1061": ,
+    "Urothelial cells donor0 : CNhs1084": "urothelial cells",
+    "Urothelial Cells donor1 : CNhs1133": "urothelial cells",
+    "Urothelial Cells donor2 : CNhs1209": "urothelial cells",
+    "Urothelial Cells donor3 : CNhs1212": "urothelial cells",
+    "uterus adult pool1 : CNhs1167": "uterus",
+    "uterus fetal donor1 : CNhs1176": "uterus (fetal)",
+    "vagina adult : CNhs1285": "vagina",
+    "vein adult : CNhs1284": "vein",
+#    "Whole blood (ribopure) donor090309 donation1 : CNhs1167": "blood (ribopure)",
+#    "Whole blood (ribopure) donor090309 donation2 : CNhs1167": "blood (ribopure)",
+#    "Whole blood (ribopure) donor090309 donation3 : CNhs1194": "blood (ribopure)",
+#    "Whole blood (ribopure) donor090325 donation1 : CNhs1107": "blood (ribopure)",
+#    "Whole blood (ribopure) donor090325 donation2 : CNhs1107": "blood (ribopure)",
+#    "Whole blood (ribopure) donor090612 donation1 : CNhs1167": "blood (ribopure)",
+#    "Whole blood (ribopure) donor090612 donation2 : CNhs1167": "blood (ribopure)",
+#    "Whole blood (ribopure) donor090612 donation3 : CNhs1194": "blood (ribopure)",
+    "Wilms' tumor cell line:G-401 : CNhs1189": "G-401",
+    "Wilms' tumor cell line:HFWT : CNhs1172": "HFWT",
+    "xeroderma pigentosum b cell line:XPL 17 : CNhs1181": "XPL 17",
+}
 
 #-------------#
 # Classes     #
@@ -859,6 +856,7 @@ def parse_args():
 
     # Optional args
     parser.add_argument("-b", "--bed", help="BED file of features on which to focus (e.g. \"robust_enhancers.bed\")")
+    parser.add_argument("-o", "--original", action="store_true", help="Keep original sample names (default = False)")
     parser.add_argument("--source", default="FANTOM", help="Source name (e.g. \"PMID:24670763\" for TSSs or \"PMID:24670764\" for enhancers; default = \"FANTOM\")")
 
     # MySQL args
@@ -881,10 +879,10 @@ def parse_args():
     return args
 
 def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
-    feat_type, source_name, bed_file=None):
+    feat_type, source_name, bed_file=None, original=False):
 
     # Initialize
-    metadata = {}
+    original_sample_names = []
     db_name = "mysql://{}:@{}:{}/{}".format(
         user, host, port, db)
     if not database_exists(db_name):
@@ -897,7 +895,6 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
     today = str(date.today())
     if matrix_file.endswith(".gz"): gz = True
     else: gz = False
-    samples = []
 
     # Initialize table
     if feat_type == "enhancer":
@@ -925,11 +922,14 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
     # For each line...
     for line in GUDglobals.parse_csv_file(matrix_file, gz):
         # If no samples...
-        if len(samples) == 0:
-            line.pop(0)
-            for sample in line:
-                print(sample[1:-2])
-            exit(0)
+        if len(original_sample_names) == 0:
+            for sample in line[1:]:
+                original_sample_names.append(sample[1:-2])
+        print(original_sample_names)
+        exit(0)
+        # ... Else...
+        else:
+            coordinates = line.pop(0)
 #        line = ['File accession', 'File format', 'Output type', 'Experiment accession', 'Assay',
 #                'Biosample term id', 'Biosample term name', 'Biosample type', 'Biosample organism',
 #                'Biosample treatments', 'Biosample treatments amount', 'Biosample treatments duration',
@@ -1014,4 +1014,5 @@ if __name__ == "__main__":
 
     # Insert FANTOM data to GUD database
     insert_fantom_to_gud_db(args.user, args.host, args.port,
-        args.db, args.matrix, args.feat_type, args.source, args.bed)
+        args.db, args.matrix, args.feat_type, args.source,
+        args.bed, args.original)
