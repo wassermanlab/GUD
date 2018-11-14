@@ -20,7 +20,7 @@ from GUD.ORM.enhancer import Enhancer
 # Definitions #
 #-------------#
 
-sample_names = {
+grouped_sample_names = {
     "acantholytic squamous carcinoma cell line:HCC1806 : CNhs1184": "HCC1806",
     "acute lymphoblastic leukemia (B-ALL) cell line:BALL-1 : CNhs1125": "BALL-1",
     "acute lymphoblastic leukemia (B-ALL) cell line:NALM-6 : CNhs1128": "NALM-6",
@@ -856,7 +856,7 @@ def parse_args():
 
     # Optional args
     parser.add_argument("-b", "--bed", help="BED file of features on which to focus (e.g. \"robust_enhancers.bed\")")
-    parser.add_argument("-o", "--original", action="store_true", help="Keep original sample names (default = False)")
+    parser.add_argument("-g", "--group", action="store_true", help="Group FANTOM samples (default = False)")
     parser.add_argument("--source", default="FANTOM", help="Source name (e.g. \"PMID:24670763\" for TSSs or \"PMID:24670764\" for enhancers; default = \"FANTOM\")")
 
     # MySQL args
@@ -879,7 +879,7 @@ def parse_args():
     return args
 
 def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
-    feat_type, source_name, bed_file=None, original=False):
+    feat_type, source_name, bed_file=None, group=False):
 
     # Initialize
     original_sample_names = []
@@ -947,8 +947,19 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             model.experiment_type = "CAGE"
             model.source_name = source_name
             model.date = today
-            print(line[0])
+            # For each sample...
+            for i in range(len(line)):
+                # Initialize
+                cages = float(line[i])
+                sample = original_sample_names[i]
+                # Group samples
+                if group and sample in grouped_sample_names:
+                    samples.setdefault(grouped_sample_names[sample], [])
+                    samples[grouped_sample_names[sample]].append(cages)
+                else: samples.setdefault(sample, cages)
+            print(samples)
             exit(0)
+                    
             # Upsert model & commit
             session.merge(model)
             session.commit()
@@ -1028,4 +1039,4 @@ if __name__ == "__main__":
     # Insert FANTOM data to GUD database
     insert_fantom_to_gud_db(args.user, args.host, args.port,
         args.db, args.matrix, args.feat_type, args.source,
-        args.bed, args.original)
+        args.bed, args.group)
