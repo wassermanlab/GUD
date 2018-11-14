@@ -981,7 +981,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             if line[0].startswith("#"): continue
             # If no samples...
             if len(original_sample_names) == 0:
-                for sample in line[6:]:
+                for sample in line[7:]:
                     original_sample_names.append(unquote(sample))
             # ... Else...
             else: pass
