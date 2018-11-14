@@ -21,7 +21,7 @@ from GUD.ORM.tss import TSS
 # Definitions #
 #-------------#
 
-grouped_enhancer_sample_names = {
+grouped_sample_names = {
     "acantholytic squamous carcinoma cell line:HCC1806 : CNhs1184": "HCC1806",
     "acute lymphoblastic leukemia (B-ALL) cell line:BALL-1 : CNhs1125": "BALL-1",
     "acute lymphoblastic leukemia (B-ALL) cell line:NALM-6 : CNhs1128": "NALM-6",
@@ -985,7 +985,13 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                     original_sample_names.append(unquote(sample))
             # ... Else...
             else: pass
-            print(original_sample_names)
+            for sample in original_sample_names:
+                m = re.search("(CNhs\d+)", sample)
+                for curated_sample in grouped_sample_names:
+                    n = re.search("(CNhs\d+)", curated_sample)
+                    if m.group(1) == n.group(1):
+                        print("\"\": \"\"," % (sample, curated_sample))
+                        break
             exit(0)
 #                # Initialize
 #                samples = {}
