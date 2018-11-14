@@ -958,7 +958,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                         samples.setdefault(grouped_sample_names[sample], [])
                         samples[grouped_sample_names[sample]].append(cages)
                 else: samples.setdefault(sample, cages)
-            print(samples)
+            print(len(samples))
             exit(0)
                     
             # Upsert model & commit
