@@ -953,9 +953,10 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 cages = float(line[i])
                 sample = original_sample_names[i]
                 # Group samples
-                if group and sample in grouped_sample_names:
-                    samples.setdefault(grouped_sample_names[sample], [])
-                    samples[grouped_sample_names[sample]].append(cages)
+                if group:
+                    if sample in grouped_sample_names:
+                        samples.setdefault(grouped_sample_names[sample], [])
+                        samples[grouped_sample_names[sample]].append(cages)
                 else: samples.setdefault(sample, cages)
             print(samples)
             exit(0)
