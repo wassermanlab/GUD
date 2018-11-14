@@ -14,7 +14,7 @@ import warnings
 # Import from GUD module
 from GUD import GUDglobals
 from GUD.ORM.enhancer import Enhancer
-from GUD.ORM.tss import Tss
+from GUD.ORM.tss import TSS
 
 #-------------#
 # Definitions #
@@ -901,10 +901,10 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
         if not engine.has_table("enhancer"):
             raise ValueError("GUD db does not have \"enhancer\" table!")
         table = Enhancer()
-#    if feat_type == "tss":
-#        if not engine.has_table("tss"):
-#            raise ValueError("GUD db does not have \"tss\" table!")
-#        table = Tss()
+    if feat_type == "tss":
+        if not engine.has_table("tss"):
+            raise ValueError("GUD db does not have \"tss\" table!")
+        table = TSS()
     table.metadata.bind = engine
     table.metadata.create_all(engine)
     mapper(Model, table.__table__)
@@ -919,55 +919,108 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             except:
                 warnings.warn("\nCould not read file: \"%s\"\n\tSkipping file...\n" % file_name)
 
-    # For each line...
-    for line in GUDglobals.parse_csv_file(matrix_file, gz):
-        # If no samples...
-        if len(original_sample_names) == 0:
-            for sample in line[1:]:
-                original_sample_names.append(sample[1:-2])
-        # ... Else...
-        else:
-            # Initialize
-            samples = {}
-            # Get chrom, start, end
-            m = re.search("(chr\S+)\:(\d+)\-(\d+)", line.pop(0))
-            chrom = m.group(1)
-            start = int(m.group(2))
-            end = int(m.group(3))
-            # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\w{1,2})$", chrom)
-            if not m.group(1) in GUDglobals.chroms: continue
-            # Create model
-            model = Model()
-            model.bin = assign_bin(int(start), int(end))
-            model.chrom = chrom
-            model.start = start
-            model.end = end
-            model.experiment_type = "CAGE"
-            model.source_name = source_name
-            model.date = today
-            # For each sample...
-            for i in range(len(line)):
+    
+    if feat_type == "enhancer":
+        # For each line...
+        for line in GUDglobals.parse_csv_file(matrix_file, gz):
+            # If no samples...
+            if len(original_sample_names) == 0:
+                for sample in line[1:]:
+                    original_sample_names.append(sample[1:-2])
+            # ... Else...
+            else:
                 # Initialize
-                cages = float(line[i])
-                sample = original_sample_names[i]
-                # Group samples
-                if group:
-                    if sample in grouped_sample_names:
-                        samples.setdefault(grouped_sample_names[sample], [])
-                        samples[grouped_sample_names[sample]].append(cages)
-                else: samples.setdefault(sample, [cages])
-            # For each sample...
-            for sample in samples:
-                model.cell_or_tissue = sample
-                if feat_type == "enhancer":
+                samples = {}
+                # Get chrom, start, end
+                m = re.search("(chr\S+)\:(\d+)\-(\d+)", line.pop(0))
+                chrom = m.group(1)
+                start = int(m.group(2))
+                end = int(m.group(3))
+                # Ignore non-standard chroms, scaffolds, etc.
+                m = re.search("^chr(\w{1,2})$", chrom)
+                if not m.group(1) in GUDglobals.chroms: continue
+                # Create model
+                model = Model()
+                model.bin = assign_bin(int(start), int(end))
+                model.chrom = chrom
+                model.start = start
+                model.end = end
+                model.experiment_type = "CAGE"
+                model.source_name = source_name
+                model.date = today
+                # For each sample...
+                for i in range(len(line)):
+                    # Initialize
+                    cages = float(line[i])
+                    sample = original_sample_names[i]
+                    # Group samples
+                    if group:
+                        if sample in grouped_sample_names:
+                            samples.setdefault(grouped_sample_names[sample], [])
+                            samples[grouped_sample_names[sample]].append(cages)
+                    else: samples.setdefault(sample, [cages])
+                # For each sample...
+                for sample in samples:
+                    model.cell_or_tissue = sample
                     # Skip enhancers with 0 cages
                     if sum(samples[sample]) == 0:
                         continue
-                if feat_type == "tss": pass
-                # Upsert model & commit
-                session.merge(model)
-                session.commit()
+                    # Upsert model & commit
+                    session.merge(model)
+                    session.commit()
+
+    if feat_type == "tss":
+        # For each line...
+        for line in GUDglobals.parse_tsv_file(matrix_file, gz):
+            # Skip comments
+            if line[0].startswith("#"): continue
+            # If no samples...
+            if len(original_sample_names) == 0:
+                for sample in line[1:]:
+                    original_sample_names.append(sample[1:-2])
+            # ... Else...
+            else: pass
+            print(original_sample_names)
+            exit(0)
+#                # Initialize
+#                samples = {}
+#                # Get chrom, start, end
+#                m = re.search("(chr\S+)\:(\d+)\-(\d+)", line.pop(0))
+#                chrom = m.group(1)
+#                start = int(m.group(2))
+#                end = int(m.group(3))
+#                # Ignore non-standard chroms, scaffolds, etc.
+#                m = re.search("^chr(\w{1,2})$", chrom)
+#                if not m.group(1) in GUDglobals.chroms: continue
+#                # Create model
+#                model = Model()
+#                model.bin = assign_bin(int(start), int(end))
+#                model.chrom = chrom
+#                model.start = start
+#                model.end = end
+#                model.experiment_type = "CAGE"
+#                model.source_name = source_name
+#                model.date = today
+#                # For each sample...
+#                for i in range(len(line)):
+#                    # Initialize
+#                    cages = float(line[i])
+#                    sample = original_sample_names[i]
+#                    # Group samples
+#                    if group:
+#                        if sample in grouped_sample_names:
+#                            samples.setdefault(grouped_sample_names[sample], [])
+#                            samples[grouped_sample_names[sample]].append(cages)
+#                    else: samples.setdefault(sample, [cages])
+#                # For each sample...
+#                for sample in samples:
+#                    model.cell_or_tissue = sample
+#                    # Skip enhancers with 0 cages
+#                    if sum(samples[sample]) == 0:
+#                        continue
+#                    # Upsert model & commit
+#                    session.merge(model)
+#                    session.commit()
 
 #-------------#
 # Main        #
