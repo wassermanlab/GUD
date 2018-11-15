@@ -892,7 +892,11 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             model.source_name = source_name
             model.date = today
             if feat_type == "tss":
-                pass
+                model.gene = "n/a"
+                model.id = "n/a"
+                if n:
+                    model.gene = n.group(2)
+                    model.id = n.group(1)
             # For each sample...
             for i in range(counts_start_at, len(line)):
                 # Initialize
@@ -912,6 +916,8 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 # Skip enhancers with 0 cages
                 if sum(samples[sample]) == 0:
                     continue
+                if feat_type == "tss":
+                    model.tpm = ",".join(samples[sample])
                 # Upsert model & commit
                 session.merge(model)
                 session.commit()

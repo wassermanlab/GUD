@@ -16,7 +16,7 @@ class TSS(Base):
     __tablename__ = "tss"
 
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    gene = Column("gene", String(25))
+    gene = Column("gene", String(75))
     id = Column("id", Integer)
     chrom = Column("chrom", String(5), nullable=False)
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
@@ -30,8 +30,7 @@ class TSS(Base):
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            gene, id, chrom, start, end, strand,
-            cell_or_tissue, source_name
+            chrom, start, end, strand, cell_or_tissue, source_name
         ),
 
         Index("ix_tss", bin, chrom),
