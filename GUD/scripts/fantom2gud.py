@@ -865,7 +865,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             for sample in line[counts_start_at:]:
                 fantom_sample_names.append(unquote(sample))
         # ... Else...
-        elif "chr" in line[0]:
+        elif line[0].startswith("chr") or line[0].startswith("\"chr"):
             # Initialize
             samples = {}
             # Get chrom, start, end
