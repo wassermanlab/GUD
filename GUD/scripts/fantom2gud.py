@@ -774,7 +774,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts \"enhancer\" or \"tss\" data from FANATOM into GUD. download \"http://slidebase.binf.ku.dk/human_enhancers/presets/serve/hg19_permissive_enhancers_expression_rle_tpm.csv.gz\" and \"\" for enhancer and tss data, respectively.")
+    parser = argparse.ArgumentParser(description="this script inserts \"enhancer\" or \"tss\" data from FANTOM into GUD. download \"hg19_permissive_enhancers_expression_rle_tpm.csv.gz\" and \"hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz\" for enhancer and tss data, respectively.")
 
     parser.add_argument("matrix", help="Expression (TPM/RLE normalized) matrix across all FANTOM libraries")
 
@@ -809,6 +809,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
     feat_type, source_name, bed_file=None, keep=False):
 
     # Initialize
+    coordinates = set()
     fantom_sample_names = []
     db_name = "mysql://{}:@{}:{}/{}".format(
         user, host, port, db)
@@ -843,6 +844,9 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             try:
                 # Create BED object
                 bed_obj = pybedtools.BedTool(bed_file)
+                # Sort BED object
+                for chrom, start, end in bed_obj.sort():
+                    coordinates.add((chrom, int(start), int(end)))
             except:
                 warnings.warn("\nCould not read file: \"%s\"\n\tSkipping file...\n" % file_name)
 
@@ -873,6 +877,8 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             chrom = m.group(1)
             start = int(m.group(2))
             end = int(m.group(3))
+            # Skip coordiantes
+            if (chrom, start, end) in coordinates: continue
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\w{1,2})$", chrom)
             if not m.group(1) in GUDglobals.chroms: continue
@@ -906,69 +912,9 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 # Skip enhancers with 0 cages
                 if sum(samples[sample]) == 0:
                     continue
-#                # Upsert model & commit
-#                session.merge(model)
-#                session.commit()
-
-#    if feat_type == "tss":
-#        # For each line...
-#        for line in GUDglobals.parse_tsv_file(matrix_file, gz):
-#            # Skip comments
-#            if line[0].startswith("#"): continue
-#            # If no samples...
-#            if len(original_sample_names) == 0:
-#                for sample in line[7:]:
-#                    original_sample_names.append()
-#            # ... Else...
-#            else: pass
-#            for sample in original_sample_names:
-#                m = re.search("(CNhs\d+)", sample)
-#                for curated_sample in grouped_sample_names:
-#                    n = re.search("(CNhs\d+)", curated_sample)
-#                    print(n.group(1))
-#                    continue
-#                    if int(m.group(1)) == int(n.group(1)):
-#                        print("\"%s\": \"%s\"," % (sample, curated_sample))
-#                exit(0)
-#                # Initialize
-#                samples = {}
-#                # Get chrom, start, end
-#                m = re.search("(chr\S+)\:(\d+)\-(\d+)", line.pop(0))
-#                chrom = m.group(1)
-#                start = int(m.group(2))
-#                end = int(m.group(3))
-#                # Ignore non-standard chroms, scaffolds, etc.
-#                m = re.search("^chr(\w{1,2})$", chrom)
-#                if not m.group(1) in GUDglobals.chroms: continue
-#                # Create model
-#                model = Model()
-#                model.bin = assign_bin(int(start), int(end))
-#                model.chrom = chrom
-#                model.start = start
-#                model.end = end
-#                model.experiment_type = "CAGE"
-#                model.source_name = source_name
-#                model.date = today
-#                # For each sample...
-#                for i in range(len(line)):
-#                    # Initialize
-#                    cages = float(line[i])
-#                    sample = original_sample_names[i]
-#                    # Group samples
-#                    if group:
-#                        if sample in grouped_sample_names:
-#                            samples.setdefault(grouped_sample_names[sample], [])
-#                            samples[grouped_sample_names[sample]].append(cages)
-#                    else: samples.setdefault(sample, [cages])
-#                # For each sample...
-#                for sample in samples:
-#                    model.cell_or_tissue = sample
-#                    # Skip enhancers with 0 cages
-#                    if sum(samples[sample]) == 0:
-#                        continue
-#                    # Upsert model & commit
-#                    session.merge(model)
-#                    session.commit()
+                # Upsert model & commit
+                session.merge(model)
+                session.commit()
 
 #-------------#
 # Main        #

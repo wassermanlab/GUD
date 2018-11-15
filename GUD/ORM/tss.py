@@ -30,7 +30,8 @@ class TSS(Base):
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            gene, id, chrom, start, end, strand, source_name
+            gene, id, chrom, start, end, strand,
+            cell_or_tissue, source_name
         ),
 
         Index("ix_tss", bin, chrom),
