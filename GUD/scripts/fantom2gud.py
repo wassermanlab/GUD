@@ -854,6 +854,8 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
         lines = GUDglobals.parse_tsv_file(matrix_file, gz)
         counts_start_at = 7
     for line in lines:
+        # Skip comments
+        if line[0].startswith("#"): continue
         # If no samples...
         if len(fantom_sample_names) == 0:
             for sample in line[counts_start_at:]:
