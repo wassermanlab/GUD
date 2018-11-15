@@ -861,14 +861,15 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             for sample in line[counts_start_at:]:
                 fantom_sample_names.append(unquote(sample))
         # ... Else...
-        else:
+        elif line[0].startswith("chr"):
             # Initialize
             samples = {}
             # Get chrom, start, end
-            m = re.search("(chr\S+)\:(\d+)\-(\d+)", line.pop(0))
-            if not m: continue
-            print(line[:7])
-            exit(0)
+            if feat_type == "enhancer":
+                m = re.search("(chr\S+)\:(\d+)\-(\d+)", line[0])
+            if feat_type == "tss":
+                m = re.search("(chr\S+)\:(\d+)\.\.(\d+),(\S)", line[0])
+                n = re.search("p(\d+)@(\w+)", line[1])
             chrom = m.group(1)
             start = int(m.group(2))
             end = int(m.group(3))
@@ -884,18 +885,21 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             model.experiment_type = "CAGE"
             model.source_name = source_name
             model.date = today
+            if feat_type == "tss":
+                pass
             # For each sample...
-            for i in range(len(line)):
+            for i in range(counts_start_at, len(line)):
                 # Initialize
                 cages = float(line[i])
+                sample = fantom_sample_names[i - counts_start_at]
                 # Keep original sample names
-                original_sample_names[i]
                 if keep:
+                    samples.setdefault(sample, [cages])
+                else:
                     m = re.search("(CNhs\d+)", sample)
-                    if sample in grouped_sample_names:
-                        samples.setdefault(grouped_sample_names[sample], [])
-                        samples[grouped_sample_names[sample]].append(cages)
-                else: samples.setdefault(sample, [cages])
+                    if m.group(1) in sample_names:
+                        samples.setdefault(sample_names[m.group(1)], [])
+                        samples[sample_names[m.group(1)]].append(cages)
             # For each sample...
             for sample in samples:
                 model.cell_or_tissue = sample
