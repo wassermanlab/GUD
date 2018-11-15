@@ -862,6 +862,8 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 fantom_sample_names.append(unquote(sample))
         # ... Else...
         else:
+            print(line[:7])
+            exit(0)
             # Initialize
             samples = {}
             # Get chrom, start, end
@@ -902,9 +904,6 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
 #                # Upsert model & commit
 #                session.merge(model)
 #                session.commit()
-        for sample in sorted(fantom_sample_names):
-            print(sample)
-        exit(0)
 
 #    if feat_type == "tss":
 #        # For each line...
