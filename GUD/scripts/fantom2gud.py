@@ -862,12 +862,13 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 fantom_sample_names.append(unquote(sample))
         # ... Else...
         else:
-            print(line[:7])
-            exit(0)
             # Initialize
             samples = {}
             # Get chrom, start, end
             m = re.search("(chr\S+)\:(\d+)\-(\d+)", line.pop(0))
+            if not m: continue
+            print(line[:7])
+            exit(0)
             chrom = m.group(1)
             start = int(m.group(2))
             end = int(m.group(3))
