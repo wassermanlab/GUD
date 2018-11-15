@@ -877,6 +877,8 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             chrom = m.group(1)
             start = int(m.group(2))
             end = int(m.group(3))
+            if feat_type == "tss":
+                strand = m.group(4)
             # Skip coordiantes
             if (chrom, start, end) in coordinates: continue
             # Ignore non-standard chroms, scaffolds, etc.
@@ -894,7 +896,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             if feat_type == "tss":
                 model.gene = "n/a"
                 model.id = 0
-                model.strand = m.group(4)
+                model.strand = strand
                 if n:
                     model.gene = n.group(2)
                     model.id = n.group(1)
