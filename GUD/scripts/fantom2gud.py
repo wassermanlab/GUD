@@ -882,8 +882,6 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\w{1,2})$", chrom)
             if not m.group(1) in GUDglobals.chroms: continue
-            print("here")
-            exit(0)
             # Create model
             model = Model()
             model.bin = assign_bin(int(start), int(end))
