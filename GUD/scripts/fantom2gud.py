@@ -900,7 +900,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             # For each sample...
             for i in range(counts_start_at, len(line)):
                 # Initialize
-                cages = float(line[i])
+                cages = float("%.3f" % line[i])
                 sample = fantom_sample_names[i - counts_start_at]
                 # Keep original sample names
                 if keep:
