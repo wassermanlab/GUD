@@ -16,7 +16,7 @@ class TSS(Base):
     __tablename__ = "tss"
 
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    gene = Column("gene", String(75))
+    gene = Column("gene", String(25))
     id = Column("id", Integer)
     chrom = Column("chrom", String(5), nullable=False)
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
