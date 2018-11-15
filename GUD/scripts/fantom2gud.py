@@ -910,6 +910,8 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                     if m.group(1) in sample_names:
                         samples.setdefault(sample_names[m.group(1)], [])
                         samples[sample_names[m.group(1)]].append(cages)
+            print(samples)
+            exit(0)
             # For each sample...
             for sample in samples:
                 model.cell_or_tissue = sample
