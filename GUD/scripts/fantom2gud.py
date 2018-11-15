@@ -900,16 +900,16 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             # For each sample...
             for i in range(counts_start_at, len(line)):
                 # Initialize
-                cages = float("%.3f" % line[i])
+                cages = "%.3f" % line[i]
                 sample = fantom_sample_names[i - counts_start_at]
                 # Keep original sample names
                 if keep:
-                    samples.setdefault(sample, [cages])
+                    samples.setdefault(sample, [float(cages)])
                 else:
                     m = re.search("(CNhs\d+)", sample)
                     if m.group(1) in sample_names:
                         samples.setdefault(sample_names[m.group(1)], [])
-                        samples[sample_names[m.group(1)]].append(cages)
+                        samples[sample_names[m.group(1)]].append(float(cages))
             print(samples)
             exit(0)
             # For each sample...
