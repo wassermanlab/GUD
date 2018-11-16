@@ -838,7 +838,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
         table = TSS()
     table.metadata.bind = engine
     table.metadata.create_all(engine)
-    mapper(Model, table.__table__)
+#    mapper(Model, table.__table__)
 
     # If BED file...
     if bed_file:
