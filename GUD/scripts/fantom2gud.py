@@ -7,10 +7,8 @@ from datetime import date
 import getpass
 import pybedtools
 from sqlalchemy import create_engine
-#from sqlalchemy.orm import mapper, scoped_session, sessionmaker
-from sqlalchemy.orm import scoped_session, sessionmaker
-#from sqlalchemy_utils import database_exists
-from sqlalchemy_utils import create_database, database_exists
+from sqlalchemy.orm import mapper, scoped_session, sessionmaker
+from sqlalchemy_utils import database_exists
 from urllib2 import unquote
 import warnings
 
@@ -811,7 +809,6 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
     feat_type, source_name, bed_file=None, keep=False):
 
     # Initialize
-    rows = set()
     coordinates = set()
     fantom_sample_names = []
     db_name = "mysql://{}:@{}:{}/{}".format(
@@ -838,7 +835,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
         table = TSS()
     table.metadata.bind = engine
     table.metadata.create_all(engine)
-#    mapper(Model, table.__table__)
+    mapper(Model, table.__table__)
 
     # If BED file...
     if bed_file:
@@ -924,19 +921,9 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                     continue
                 if feat_type == "tss":
                     model.tpm = ",".join(map(str, samples[sample]))
-#                # Upsert model & commit
-#                session.merge(model)
-#                session.commit()
-                # Add row
-                rows.add(model.__dict__)
-                # Insert rows in bulks of 100,000
-                if len(rows) == 100000:
-                    engine.execute(table.__table__.insert(), rows)
-                    # Clear rows
-                    rows = set()
-    # Insert remaining rows
-    engine.execute(table.__table__.insert(), rows)
-                
+                # Upsert model & commit
+                session.merge(model)
+                session.commit()
 
 #-------------#
 # Main        #
