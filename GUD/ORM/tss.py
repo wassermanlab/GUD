@@ -35,6 +35,7 @@ class TSS(Base):
 
         Index("ix_tss", bin, chrom),
         Index("ix_tss_gene", gene),
+        Index("ix_tss_gene_id", gene, id),
         Index("ix_tss_cell_or_tissue", cell_or_tissue),
 
         {
