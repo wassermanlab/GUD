@@ -811,7 +811,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
     feat_type, source_name, bed_file=None, keep=False):
 
     # Initialize
-    rows = []
+    rows = set()
     coordinates = set()
     fantom_sample_names = []
     db_name = "mysql://{}:@{}:{}/{}".format(
@@ -928,14 +928,12 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
 #                session.merge(model)
 #                session.commit()
                 # Add row
-                rows.append(model.__dict__)
-                print(rows)
-                exit(0)
+                rows.add(model.__dict__)
                 # Insert rows in bulks of 100,000
                 if len(rows) == 100000:
                     engine.execute(table.__table__.insert(), rows)
                     # Clear rows
-                    rows = []
+                    rows = set()
     # Insert remaining rows
     engine.execute(table.__table__.insert(), rows)
                 
