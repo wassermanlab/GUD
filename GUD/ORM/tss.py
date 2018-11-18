@@ -24,7 +24,7 @@ class TSS(Base):
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
     strand = Column("strand", mysql.CHAR(1), nullable=False)
     cell_or_tissue = Column("cell_or_tissue", String(225), nullable=False)
-    tpm = Column("tpm", ARRAY(Float), nullable=False)
+    tpm = Column("tpm", ARRAY(Integer), nullable=False)
     source_name = Column("source_name", String(25), nullable=False)
     date = Column("date", Date(), nullable=True)
 
