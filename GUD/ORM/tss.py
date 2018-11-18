@@ -2,8 +2,8 @@ from binning import containing_bins, contained_bins
 from Bio.SeqFeature import FeatureLocation
 
 from sqlalchemy import (
-    Column, Date, Enum, Index, Integer,
-    PrimaryKeyConstraint, String
+    Array, Column, Date, Enum, Float, Index,
+    Integer, PrimaryKeyConstraint, String
 )
 
 from sqlalchemy.dialects import mysql
@@ -23,7 +23,8 @@ class TSS(Base):
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
     strand = Column("strand", mysql.CHAR(1), nullable=False)
     cell_or_tissue = Column("cell_or_tissue", String(225), nullable=False)
-    tpm = Column("tpm", mysql.LONGBLOB, nullable=False)
+    Column(Array(String))
+    tpm = Column("tpm", Array(String), nullable=False)
     source_name = Column("source_name", String(25), nullable=False)
     date = Column("date", Date(), nullable=True)
 

@@ -920,7 +920,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 if sum(samples[sample]) == 0:
                     continue
                 if feat_type == "tss":
-                    model.tpm = ",".join(map(str, samples[sample]))
+                    model.tpm = samples[sample]
                 # Upsert model & commit
                 session.merge(model)
                 session.commit()
