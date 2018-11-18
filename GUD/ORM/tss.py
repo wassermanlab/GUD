@@ -9,10 +9,6 @@ from sqlalchemy import (
 from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
 
-print(dir(types))
-print(dir(mysql))
-exit(0)
-
 Base = declarative_base()
 
 class TSS(Base):
@@ -27,14 +23,15 @@ class TSS(Base):
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
     strand = Column("strand", mysql.CHAR(1), nullable=False)
     cell_or_tissue = Column("cell_or_tissue", String(225), nullable=False)
-    tpm = Column("tpm", ARRAY(Integer), nullable=False)
+    id2 = Column("id2", Integer, nullable=False)
+    tpm = Column("tpm", Float, nullable=False)
     source_name = Column("source_name", String(25), nullable=False)
     date = Column("date", Date(), nullable=True)
 
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            chrom, start, end, strand, cell_or_tissue, source_name
+            chrom, start, end, strand, cell_or_tissue, id2, source_name
         ),
 
         Index("ix_tss", bin, chrom),

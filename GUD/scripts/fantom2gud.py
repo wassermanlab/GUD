@@ -916,14 +916,20 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             # For each sample...
             for sample in samples:
                 model.cell_or_tissue = sample
-                # Skip enhancers with 0 cages
-                if sum(samples[sample]) == 0:
-                    continue
+                if feat_type == "enhancer":
+                    # Skip enhancers with 0 cages
+                    if sum(samples[sample]) == 0:
+                        continue
+                    # Upsert model & commit
+                    session.merge(model)
+                    session.commit()
                 if feat_type == "tss":
                     model.tpm = samples[sample]
-                # Upsert model & commit
-                session.merge(model)
-                session.commit()
+                    # For each id...
+                    for i in range(1, len(model.tpm) + 1)
+                    # Upsert model & commit
+                    
+                
 
 #-------------#
 # Main        #
