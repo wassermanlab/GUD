@@ -10,6 +10,7 @@ from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
 
 print(dir(types))
+print(dir(mysql))
 exit(0)
 
 Base = declarative_base()
