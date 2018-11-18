@@ -3,12 +3,14 @@ from Bio.SeqFeature import FeatureLocation
 
 from sqlalchemy import (
     Column, Date, Enum, Float, Index,
-    Integer, PrimaryKeyConstraint, String
+    Integer, PrimaryKeyConstraint, String, types
 )
 
-from sqlalchemy.types import ARRAY
 from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
+
+print(dir(types))
+exit(0)
 
 Base = declarative_base()
 
