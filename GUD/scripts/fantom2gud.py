@@ -925,7 +925,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                     session.commit()
                 if feat_type == "tss":
                     # For each id...
-                    for i in range(len(model.tpm)):
+                    for i in range(len(samples[sample])):
                         model.id2 = i + 1
                         model.tpm = samples[sample][i]
                         # Upsert model & commit
