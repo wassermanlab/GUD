@@ -924,12 +924,13 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                     session.merge(model)
                     session.commit()
                 if feat_type == "tss":
-                    model.tpm = samples[sample]
                     # For each id...
-                    for i in range(1, len(model.tpm) + 1)
-                    # Upsert model & commit
-                    
-                
+                    for i in range(len(model.tpm)):
+                        model.id2 = i + 1
+                        model.tpm = samples[sample][i]
+                        # Upsert model & commit
+                        session.merge(model)
+                        session.commit()
 
 #-------------#
 # Main        #
