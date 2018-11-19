@@ -99,6 +99,19 @@ class TSS(Base):
         return q.all()
 
     @classmethod
+    def select_by_sample(cls, session, sample=[], min_tpm=0.0):
+        """
+        Query objects by sample with a minimum tpm.
+        """
+
+        q = session.query(cls).filter(cls.tpm >= min_tpm)
+
+        if sample:
+            q = q.filter(cls.cell_or_tissue.in_(sample))
+
+        return q.all()
+
+    @classmethod
     def feature_exists(cls, session, chrom, start, end, strand,
         cell_or_tissue, replicate, experiment_type, source_name): 
         """

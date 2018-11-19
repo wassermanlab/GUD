@@ -38,6 +38,17 @@ end = 100211911
 #repeat_classes = "LINE,SINE,LTR".split(",")
 gene = "PYROXD2"
 tss = 2
+samples = [
+    "endothelial cells (aorta)",
+    "endothelial cells (artery)",
+    "endothelial cells (lymph node)",
+    "endothelial cells (microvasculature)",
+    "endothelial cells (thorax)",
+    "endothelial cells (umbilical vein)",
+    "endothelial cells (vein)",
+    "endothelial cells (liver sinusoid)",
+    "endothelial cells (renal glomerulus)"
+]
 
 # Get all bins overlapping range
 bins = set(containing_bins(start, end) + contained_bins(start, end))
@@ -95,4 +106,8 @@ for t in feats: print(t)
 
 feats = TSS.select_by_gene_tss(session, gene, tss)
 print("\n%s (%s):" % (gene, tss))
+for t in feats: print(t)
+
+feats = TSS.select_by_sample(session, sample=samples, min_tpm=10.0)
+print("\nTSSs in endothelial cells:" % (gene, tss))
 for t in feats: print(t)
