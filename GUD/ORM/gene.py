@@ -169,7 +169,8 @@ class Gene(Base):
         return q.all()
 
     def __str__(self):
-        return "{}\t{}\t{}\t{}\t0\t{}".format(self.chrom, self.txStart, self.txEnd, self.name2, self.strand)
+        return "{}\t{}\t{}\t{}\t0\t{}".format(self.chrom, self.txStart,
+            self.txEnd, self.name2, self.strand)
 
     def __repr__(self):
         return "<Gene(name={}, name2={}, chrom={}, txStart={}, txEnd={}, strand={}, source={}, date={})>".format(
