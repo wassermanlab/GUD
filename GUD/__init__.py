@@ -3,8 +3,9 @@ Genomic Universal Database (GUD) module
 """
 
 __author__ = "Oriol Fornes"
-__credits__ = ["Oriol Fornes", "Phillip A. Richmond", "David J. Arenillas",
-    "Rachelle A. Farkas", "Michelle Kang", "Wyeth W. Wasserman"]
+__credits__ = ["Oriol Fornes", "Phillip A. Richmond", "Tamar V. Av-Shalom",
+    "David J. Arenillas", "Rachelle A. Farkas", "Michelle Kang", 
+    "Wyeth W. Wasserman"]
 __email__ = "oriol@cmmt.ubc.ca"
 __organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
 __version__ = "0.0.1"
