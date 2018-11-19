@@ -72,11 +72,13 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
     today = str(date.today())
 
     # Initialize table
-    if not engine.has_table("short_tandem_repeat"):
-        raise ValueError("GUD db does not have \"short_tandem_repeat\" table!")
     table = ShortTandemRepeat()
     table.metadata.bind = engine
-    table.metadata.create_all(engine)
+    # if not engine.has_table("short_tandem_repeat"):
+    try:
+        table.metadata.create_all(engine)
+    except:
+        raise ValueError("Cannot create \"short_tandem_repeat\" table!")
     mapper(Model, table.__table__)
 
     # parse table 
