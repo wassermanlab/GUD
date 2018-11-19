@@ -47,6 +47,78 @@ class TSS(Base):
         }
     )
 
+    @classmethod
+    def select_by_bin_range(cls, session, chrom, start, end,
+        sample=[], bins=[], compute_bins=False):
+        """
+        Query objects by chromosomal range using the binning system to
+        speed up range searches. If bins are provided, use the given bins.
+        If bins are NOT provided AND compute_bins is set to True, then
+        compute the bins. Otherwise, perform the range query without the use
+        of bins.
+        """
+
+        if not bins and compute_bins:
+            bins = set(containing_bins(start, end) + contained_bins(start, end))
+
+        q = session.query(cls).filter(
+                cls.chrom == chrom, cls.end > start, cls.start < end)
+
+        if bins:
+            q = q.filter(cls.bin.in_((list(bins))))
+
+        if sample:
+            q = q.filter(cls.cell_or_tissue.in_(sample))
+
+        return q.all()
+
+    @classmethod
+    def select_by_gene(cls, session, gene, sample=[]):
+        """
+        Query objects by gene.
+        """
+
+        q = session.query(cls).filter(cls.gene == gene)
+
+        if sample:
+            q = q.filter(cls.cell_or_tissue.in_(sample))
+
+        return q.all()
+
+    @classmethod
+    def select_by_gene_tss(cls, session, gene, tss, sample=[]):
+        """
+        Query objects by gene tss.
+        """
+
+        q = session.query(cls).filter(cls.gene == gene,
+            cls.tss == tss)
+
+        if sample:
+            q = q.filter(cls.cell_or_tissue.in_(sample))
+
+        return q.all()
+
+    @classmethod
+    def feature_exists(cls, session, chrom, start, end, strand,
+        cell_or_tissue, replicate, experiment_type, source_name): 
+        """
+        Returns whether a feature exists in the database.
+        """
+
+        q = session.query(cls).filter(
+                cls.chrom == chrom,
+                cls.start == start,
+                cls.end == end,
+                cls.strand == strand,
+                cls.cell_or_tissue == cell_or_tissue,
+                cls.replicate == replicate,
+                cls.experiment_type == experiment_type,
+                cls.source_name == source_name
+            )
+
+        return session.query(q.exists()).scalar()
+    
     def __str__(self):
         return "{}\t{}\t{}\t{} ({})\t{}\t{}\t{} ({})".format(self.chrom,
             self.start, self.end, self.gene, self.tss, self.strand, self.tpm,

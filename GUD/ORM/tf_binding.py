@@ -50,13 +50,13 @@ class TfBinding(Base):
         """
 
         if not bins and compute_bins:
-            bins = containing_bins(start, end) + contained_bins(start, end)
+            bins = set(containing_bins(start, end) + contained_bins(start, end))
 
         q = session.query(cls).filter(
                 cls.chrom == chrom, cls.end > start, cls.start < end)
 
         if bins:
-            q = q.filter(cls.bin.in_(bins))
+            q = q.filter(cls.bin.in_(list(bins)))
 
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))

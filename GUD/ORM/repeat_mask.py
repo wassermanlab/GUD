@@ -87,13 +87,13 @@ class RepeatMask(Base):
         """
 
         if not bins and compute_bins:
-            bins = containing_bins(start, end) + contained_bins(start, end)
+            bins = set(containing_bins(start, end) + contained_bins(start, end))
 
         q = session.query(cls).filter(
                 cls.chrom == chrom, cls.end > start, cls.start < end)
 
         if bins:
-            q = q.filter(cls.bin.in_(bins))
+            q = q.filter(cls.bin.in_(list(bins)))
 
         if repeat_classes:
             q = q.filter(cls.repClass.in_(repeat_classes))
