@@ -106,7 +106,8 @@ class TSS(Base):
         Query objects by sample with a minimum tpm.
         """
 
-        q = session.query(cls).group_by(cls.chrom, cls.start, cls.end, cls.strand)
+        q = session.query(func.avg(cls.tpm)).group_by(
+            cls.chrom, cls.start, cls.end, cls.strand)
 
         print(q.all())
         exit(0)
@@ -114,7 +115,19 @@ class TSS(Base):
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
 
+        q = q.query()
+
         return q.all()
+
+
+        station_data = dbsession.query(func.hour(cls.last_update),
+                                        func.avg(cls.available_bikes),
+                                        func.avg(cls.available_bike_stands)) \
+            .filter(cls.station_id == station_id,
+                    func.weekday(cls.last_update) == weekday) \
+            .group_by(func.hour(cls.last_update)) \
+            .all()
+
 
     @classmethod
     def feature_exists(cls, session, chrom, start, end, strand,
@@ -135,7 +148,7 @@ class TSS(Base):
             )
 
         return session.query(q.exists()).scalar()
-    
+
     def __str__(self):
         return "{}\t{}\t{}\t{} ({})\t{}\t{} ({}%)\t{} ({})".format(self.chrom,
             self.start, self.end, self.gene, self.tss, self.strand, self.tpm,
