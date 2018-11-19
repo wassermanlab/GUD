@@ -107,7 +107,7 @@ class TSS(Base):
         """
 
         q = session.query(cls.gene, cls.tss, cls.chrom, cls.start,
-            cls.end, cls.strand, cls.experiment, cls.source, cls.date,
+            cls.end, cls.strand, cls.experiment_type, cls.source, cls.date,
             func.avg(cls.tpm), func.sum(cls.percent_tpm)).group_by(
             cls.chrom, cls.start, cls.end, cls.strand)
 
@@ -158,4 +158,4 @@ class TSS(Base):
 
     def __repr__(self):
         return "<TSS(gene={}, tss={}, chrom={}, start={}, end={}, strand={}, sample={}, replicate={}, tpm={}, percent_tpm={}, experiment={}, source={}, date={})>".format(
-            self.gene, self.tss, self.chrom, self.start, self.end, self.strand, self.cell_or_tissue, self.replicate, self.tpm, self.percent_tpm, self.experiment, self.source_name, self.date)
+            self.gene, self.tss, self.chrom, self.start, self.end, self.strand, self.cell_or_tissue, self.replicate, self.tpm, self.percent_tpm, self.experiment_type, self.source_name, self.date)
