@@ -106,11 +106,10 @@ class TSS(Base):
         Query objects by sample with a minimum tpm.
         """
 
-        q = session.query(func.avg(cls.tpm).label("avg"))
+        q = session.query(func.avg(cls.tpm).label("avg")).group_by.(cls.chrom, cls.start, cls.end, cls.strand).filter(cls.tpm >= min_tpm)
+
         print(q.all())
         exit(0)
-
-        q = session.query(cls).filter(cls.tpm >= min_tpm)
 
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
