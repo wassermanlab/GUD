@@ -111,13 +111,11 @@ class TSS(Base):
             cls.date, func.avg(cls.tpm), func.sum(cls.percent_tpm)).group_by(
             cls.chrom, cls.start, cls.end, cls.strand)
 
-        print(q.all())
-        exit(0)
-
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
 
-        q = q.query()
+        print(q.all())
+        exit(0)
 
         return q.all()
 
