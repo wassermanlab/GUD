@@ -25,6 +25,7 @@ class TSS(Base):
     cell_or_tissue = Column("cell_or_tissue", String(225), nullable=False)
     replicate = Column("replicate", Integer, nullable=False)
     tpm = Column("tpm", Float, nullable=False)
+    percent_tpm = Column("percent_tpm", Float, nullable=False)
     experiment_type = Column("experiment_type", String(25), nullable=False)
     source_name = Column("source_name", String(25), nullable=False)
     date = Column("date", Date(), nullable=True)
@@ -132,10 +133,10 @@ class TSS(Base):
         return session.query(q.exists()).scalar()
     
     def __str__(self):
-        return "{}\t{}\t{}\t{} ({})\t{}\t{}\t{} ({})".format(self.chrom,
+        return "{}\t{}\t{}\t{} ({})\t{}\t{} ({}%)\t{} ({})".format(self.chrom,
             self.start, self.end, self.gene, self.tss, self.strand, self.tpm,
-            self.cell_or_tissue, self.replicate)
+            self.percent_tpm, self.cell_or_tissue, self.replicate)
 
     def __repr__(self):
-        return "<TSS(gene={}, tss={}, chrom={}, start={}, end={}, strand={}, sample={}, replicate={}, tpm={}, experiment={}, source={}, date={})>".format(
-            self.gene, self.tss, self.chrom, self.start, self.end, self.strand, self.cell_or_tissue, self.replicate, self.tpm, self.experiment, self.source_name, self.date)
+        return "<TSS(gene={}, tss={}, chrom={}, start={}, end={}, strand={}, sample={}, replicate={}, tpm={}, percent_tpm={}, experiment={}, source={}, date={})>".format(
+            self.gene, self.tss, self.chrom, self.start, self.end, self.strand, self.cell_or_tissue, self.replicate, self.tpm, self.percent_tpm, self.experiment, self.source_name, self.date)

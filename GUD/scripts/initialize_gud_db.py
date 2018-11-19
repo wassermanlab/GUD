@@ -16,14 +16,14 @@ from sqlalchemy_utils import create_database, database_exists
 from GUD import GUDglobals
 from GUD.ORM.chrom_size import ChromSize
 from GUD.ORM.conservation import Conservation
-from GUD.ORM.dna_accessibility import DnaAccessibility
-from GUD.ORM.enhancer import Enhancer
+#from GUD.ORM.dna_accessibility import DnaAccessibility
+#from GUD.ORM.enhancer import Enhancer
 from GUD.ORM.gene import Gene
-from GUD.ORM.histone_modification import HistoneModification
+#from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.repeat_mask import RepeatMask
-from GUD.ORM.tad import Tad
-from GUD.ORM.tf_binding import TfBinding
-from GUD.ORM.tss import TSS
+#from GUD.ORM.tad import Tad
+#from GUD.ORM.tf_binding import TfBinding
+#from GUD.ORM.tss import TSS
 
 #-------------#
 # Functions   #
@@ -38,7 +38,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="this script initializes a GUD database for the given genome.")
 
     parser.add_argument("genome", help="Genome assembly")
-    
+
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db",
@@ -71,7 +71,7 @@ def initialize_gud_db(user, host, port, db, genome):
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
     today = str(date.today())
-    
+
     # Create chrom sizes table
     if not engine.has_table("chrom_size"):
         # Initialize
@@ -99,7 +99,7 @@ def initialize_gud_db(user, host, port, db, genome):
             )
         # Insert rows to table
         engine.execute(table.__table__.insert(), rows)
-    
+
     # Create conservation table
     if not engine.has_table("conservation"):
         # Initialize
@@ -146,23 +146,23 @@ def initialize_gud_db(user, host, port, db, genome):
         # Insert remaining rows
         engine.execute(table.__table__.insert(), rows)
 
-    # Create DNA accessibility table
-    if not engine.has_table("dna_accessibility"):
-        # Initialize
-        rows = []
-        table = DnaAccessibility()
-        table.metadata.bind = engine
-        # Create table
-        table.metadata.create_all(engine)
-
-    # Create enhancers table
-    if not engine.has_table("enhancer"):
-        # Initialize
-        rows = []
-        table = Enhancer()
-        table.metadata.bind = engine
-        # Create table
-        table.metadata.create_all(engine)
+#    # Create DNA accessibility table
+#    if not engine.has_table("dna_accessibility"):
+#        # Initialize
+#        rows = []
+#        table = DnaAccessibility()
+#        table.metadata.bind = engine
+#        # Create table
+#        table.metadata.create_all(engine)
+#
+#    # Create enhancers table
+#    if not engine.has_table("enhancer"):
+#        # Initialize
+#        rows = []
+#        table = Enhancer()
+#        table.metadata.bind = engine
+#        # Create table
+#        table.metadata.create_all(engine)
 
     # Create gene table
     if not engine.has_table("gene"):
@@ -212,14 +212,14 @@ def initialize_gud_db(user, host, port, db, genome):
         # Insert rows
         engine.execute(table.__table__.insert(), rows)
 
-    # Create histone marks table
-    if not engine.has_table("histone_modification"):
-        # Initialize
-        rows = []
-        table = HistoneModification()
-        table.metadata.bind = engine
-        # Create table
-        table.metadata.create_all(engine)
+#    # Create histone marks table
+#    if not engine.has_table("histone_modification"):
+#        # Initialize
+#        rows = []
+#        table = HistoneModification()
+#        table.metadata.bind = engine
+#        # Create table
+#        table.metadata.create_all(engine)
 
     # Create repeat mask table
     if not engine.has_table("rmsk"):
@@ -275,32 +275,32 @@ def initialize_gud_db(user, host, port, db, genome):
         # Insert remaining rows
         engine.execute(table.__table__.insert(), rows)            
 
-    # Create TAD table
-    if not engine.has_table("tad"):
-        # Initialize
-        rows = []
-        table = Tad()
-        table.metadata.bind = engine
-        # Create table
-        table.metadata.create_all(engine)
-
-    # Create TF-binding table
-    if not engine.has_table("tf_binding"):
-        # Initialize
-        rows = []
-        table = TfBinding()
-        table.metadata.bind = engine
-        # Create table
-        table.metadata.create_all(engine)
-
-    # Create TF-binding table
-    if not engine.has_table("tss"):
-        # Initialize
-        rows = []
-        table = TSS()
-        table.metadata.bind = engine
-        # Create table
-        table.metadata.create_all(engine)
+#    # Create TAD table
+#    if not engine.has_table("tad"):
+#        # Initialize
+#        rows = []
+#        table = Tad()
+#        table.metadata.bind = engine
+#        # Create table
+#        table.metadata.create_all(engine)
+#
+#    # Create TF-binding table
+#    if not engine.has_table("tf_binding"):
+#        # Initialize
+#        rows = []
+#        table = TfBinding()
+#        table.metadata.bind = engine
+#        # Create table
+#        table.metadata.create_all(engine)
+#
+#    # Create TF-binding table
+#    if not engine.has_table("tss"):
+#        # Initialize
+#        rows = []
+#        table = TSS()
+#        table.metadata.bind = engine
+#        # Create table
+#        table.metadata.create_all(engine)
 
 def get_ftp_dir_and_file(genome, data_type):
 

@@ -100,9 +100,13 @@ def insert_bed_to_gud_db(user, host, port, db, bed_files,
 
     # Initialize table
     if feat_type == "accessibility":
-        if not engine.has_table("dna_accessibility"):
-            raise ValueError("GUD db does not have \"dna_accessibility\" table!")
         table = DnaAccessibility()
+        if not engine.has_table("dna_accessibility"):
+            try:
+                table.metadata.bind = engine
+                table.metadata.create_all(engine)
+            except:
+                raise ValueError("Cannot create \"dna_accessibility\" table!")
     if feat_type == "enhancer":
         if not engine.has_table("enhancer"):
             raise ValueError("GUD db does not have \"enhancer\" table!")
@@ -127,8 +131,6 @@ def insert_bed_to_gud_db(user, host, port, db, bed_files,
         if not tf_name:
             raise ValueError("A TF name must be provided!")
         table = TfBinding()
-    table.metadata.bind = engine
-    table.metadata.create_all(engine)
     mapper(Model, table.__table__)
 
     # For each BED file...

@@ -826,13 +826,15 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
 
     # Initialize table
     if feat_type == "enhancer":
-        if not engine.has_table("enhancer"):
-            raise ValueError("GUD db does not have \"enhancer\" table!")
+#        if not engine.has_table("enhancer"):
+#            raise ValueError("GUD db does not have \"enhancer\" table!")
         table = Enhancer()
     if feat_type == "tss":
-        if not engine.has_table("tss"):
-            raise ValueError("GUD db does not have \"tss\" table!")
+#        if not engine.has_table("tss"):
+#            raise ValueError("GUD db does not have \"tss\" table!")
         table = TSS()
+    print(dir(table))
+    exit(0)
     table.metadata.bind = engine
     table.metadata.create_all(engine)
     mapper(Model, table.__table__)
@@ -868,6 +870,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
         elif line[0].startswith("chr") or line[0].startswith("\"chr"):
             # Initialize
             samples = {}
+            total_cages = 0.0
             # Get chrom, start, end
             if feat_type == "enhancer":
                 m = re.search("(chr\S+)\:(\d+)\-(\d+)", line[0])
@@ -908,11 +911,13 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 # Keep original sample names
                 if keep:
                     samples.setdefault(sample, [float(cages)])
+                    total_cages += float(cages)
                 else:
                     m = re.search("(CNhs\d+)", sample)
                     if m.group(1) in sample_names:
                         samples.setdefault(sample_names[m.group(1)], [])
                         samples[sample_names[m.group(1)]].append(float(cages))
+                        total_cages += float(cages)
             # For each sample...
             for sample in samples:
                 model.cell_or_tissue = sample
@@ -928,6 +933,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                     for i in range(len(samples[sample])):
                         model.replicate = i + 1
                         model.tpm = samples[sample][i]
+                        model.percent_tpm = samples[sample][i] / total_cages
                         # Upsert model & commit
                         session.merge(model)
                         session.commit()
