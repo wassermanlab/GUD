@@ -37,7 +37,7 @@ end = 100211911
 #histone_types = "H3K4me1,H3K4me2,H3K4me3,H3K9ac,H3K9me1,H3K9me3,H3K27ac,H3K27me3".split(",")
 #repeat_classes = "LINE,SINE,LTR".split(",")
 gene = "PYROXD2"
-tss = 2
+tss = "2"
 
 # Get all bins overlapping range
 bins = set(containing_bins(start, end) + contained_bins(start, end))

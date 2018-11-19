@@ -91,8 +91,7 @@ class TSS(Base):
         Query objects by gene tss.
         """
 
-        q = session.query(cls).filter(cls.gene == gene,
-            cls.tss == tss)
+        q = session.query(cls).filter(cls.gene == gene, cls.tss == tss)
 
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
