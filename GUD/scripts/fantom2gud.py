@@ -833,7 +833,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
 #        if not engine.has_table("tss"):
 #            raise ValueError("GUD db does not have \"tss\" table!")
         table = TSS()
-    print(dir(table))
+    print(table.__tablename__)
     exit(0)
     table.metadata.bind = engine
     table.metadata.create_all(engine)
