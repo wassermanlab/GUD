@@ -106,7 +106,7 @@ class TSS(Base):
         Query objects by sample with a minimum tpm.
         """
 
-        q = session.query(func.avg(cls.tpm).label("avg")).group_by.(cls.chrom, cls.start, cls.end, cls.strand).filter(cls.tpm >= min_tpm)
+        q = session.query(cls).group_by(cls.chrom, cls.start, cls.end, cls.strand)
 
         print(q.all())
         exit(0)
