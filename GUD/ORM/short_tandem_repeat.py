@@ -13,9 +13,9 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 Base = declarative_base()
 
-
 class ShortTandemRepeat(Base):
-    __tablename__ = 'short_tandem_repeat'
+
+    __tablename__ = "short_tandem_repeat"
 
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
     chrom = Column("chrom", String(30), nullable=False)
@@ -43,8 +43,8 @@ class ShortTandemRepeat(Base):
     )
 
     @classmethod
-    def select_by_range(cls, session, chrom, start, end, bins=[], 
-    compute_bins=False): 
+    def select_by_bin_range(cls, session, chrom, start, end,
+        bins=[], compute_bins=False):
         """
         Query objects by chromosomal range using the binning system to
         speed up range searches. If bins are provided, use the given bins.
@@ -54,13 +54,13 @@ class ShortTandemRepeat(Base):
         """
 
         if not bins and compute_bins:
-            bins = containing_bins(start, end) + contained_bins(start, end)
+            bins = set(containing_bins(start, end) + contained_bins(start, end))
+
+        q = session.query(cls).filter(
+                cls.chrom == chrom, cls.end > start, cls.start < end)
 
         if bins:
-            q = session.query(cls).filter(cls.bin.in_(bins))
-        
-        q = q.filter(
-                cls.chrom == chrom, cls.start >= start, cls.end <= end)
+            q = q.filter(cls.bin.in_((list(bins))))
 
         return q.all()
 

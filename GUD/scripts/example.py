@@ -31,23 +31,21 @@ except:
     raise ValueError("Cannot connect to GUD: %s" % "hg19")
 
 # Initialize
+# hg19::chr10:103953269-104037909
 chrom = "chr10"
-start = 100106388
-end = 100211911
+start = 103953268
+end = 104037909
 #histone_types = "H3K4me1,H3K4me2,H3K4me3,H3K9ac,H3K9me1,H3K9me3,H3K27ac,H3K27me3".split(",")
 #repeat_classes = "LINE,SINE,LTR".split(",")
-gene = "PYROXD2"
+gene = "PITX3"
 tss = 2
 samples = [
-    "endothelial cells (aorta)",
-    "endothelial cells (artery)",
-    "endothelial cells (lymph node)",
-    "endothelial cells (microvasculature)",
-    "endothelial cells (thorax)",
-    "endothelial cells (umbilical vein)",
-    "endothelial cells (vein)",
-    "endothelial cells (liver sinusoid)",
-    "endothelial cells (renal glomerulus)"
+    "skeletal muscle",
+    "myotubes (differentiated from skeletal muscle cells)",
+    "skeletal muscle cells",
+    "skeletal muscle (fetal)",
+    "skeletal muscle satellite cells",
+    "skeletal muscle (soleus)",
 ]
 
 # Get all bins overlapping range
@@ -104,10 +102,10 @@ feats = TSS.select_by_gene(session, gene)
 print("\n%s:" % gene)
 for t in feats: print(t)
 
-feats = TSS.select_by_gene_tss(session, gene, tss)
+feats = TSS.select_by_tss(session, gene, tss)
 print("\n%s (%s):" % (gene, tss))
 for t in feats: print(t)
 
 feats = TSS.select_by_sample(session, sample=samples, min_tpm=10.0)
-print("\nTSSs in endothelial cells:")
+print("\nTSSs in skeletal muscle:")
 for t in feats: print(t)

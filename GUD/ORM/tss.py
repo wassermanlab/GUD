@@ -8,6 +8,7 @@ from sqlalchemy import (
 
 from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import func
 
 Base = declarative_base()
 
@@ -87,7 +88,7 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_gene_tss(cls, session, gene, tss, sample=[]):
+    def select_by_tss(cls, session, gene, tss, sample=[]):
         """
         Query objects by gene tss.
         """
@@ -104,6 +105,10 @@ class TSS(Base):
         """
         Query objects by sample with a minimum tpm.
         """
+
+        q = session.query(func.avg(cls.tpm).label("avg"))
+        print(q.all())
+        exit(0)
 
         q = session.query(cls).filter(cls.tpm >= min_tpm)
 
