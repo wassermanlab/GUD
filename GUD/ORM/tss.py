@@ -107,8 +107,8 @@ class TSS(Base):
         """
 
         q = session.query(cls.gene, cls.tss, cls.chrom, cls.start,
-            cls.end, cls.strand, cls.experiment_type, cls.source, cls.date,
-            func.avg(cls.tpm), func.sum(cls.percent_tpm)).group_by(
+            cls.end, cls.strand, cls.experiment_type, cls.source_name,
+            cls.date, func.avg(cls.tpm), func.sum(cls.percent_tpm)).group_by(
             cls.chrom, cls.start, cls.end, cls.strand)
 
         print(q.all())
@@ -120,16 +120,6 @@ class TSS(Base):
         q = q.query()
 
         return q.all()
-
-
-        station_data = dbsession.query(func.hour(cls.last_update),
-                                        func.avg(cls.available_bikes),
-                                        func.avg(cls.available_bike_stands)) \
-            .filter(cls.station_id == station_id,
-                    func.weekday(cls.last_update) == weekday) \
-            .group_by(func.hour(cls.last_update)) \
-            .all()
-
 
     @classmethod
     def feature_exists(cls, session, chrom, start, end, strand,
