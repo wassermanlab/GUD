@@ -42,6 +42,28 @@ class ShortTandemRepeat(Base):
         }
     )
 
+    @classmethod
+    def select_by_range(cls, session, chrom, start, end, bins=[], 
+    compute_bins=False): 
+        """
+        Query objects by chromosomal range using the binning system to
+        speed up range searches. If bins are provided, use the given bins.
+        If bins are NOT provided AND compute_bins is set to True, then
+        compute the bins. Otherwise, perform the range query without the use
+        of bins.
+        """
+
+        if not bins and compute_bins:
+            bins = containing_bins(start, end) + contained_bins(start, end)
+
+        if bins:
+            q = session.query(cls).filter(cls.bin.in_(bins))
+        
+        q = q.filter(
+                cls.chrom == chrom, cls.start >= start, cls.end <= end)
+
+        return q.all()
+
     def __str__(self):
         return "{}\t{}\t{}\t{}\t{}".format(
             self.chrom, self.start, self.end, self.length, self.motif)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# mysql -u ontarget_w --database tamar_test
 import os, sys, re
 import argparse
 from binning import assign_bin
