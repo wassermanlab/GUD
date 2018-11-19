@@ -931,7 +931,9 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                     for i in range(len(samples[sample])):
                         model.replicate = i + 1
                         model.tpm = samples[sample][i]
-                        model.percent_tpm = "%.3f" % samples[sample][i] * 100 / total_cages
+                        try:
+                            model.percent_tpm = "%.3f" % samples[sample][i] * 100 / total_cages
+                        except: model.percent_tpm = "%.3f" % float(0)
                         # Upsert model & commit
                         session.merge(model)
                         session.commit()
