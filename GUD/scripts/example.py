@@ -37,7 +37,7 @@ end = 100211911
 #histone_types = "H3K4me1,H3K4me2,H3K4me3,H3K9ac,H3K9me1,H3K9me3,H3K27ac,H3K27me3".split(",")
 #repeat_classes = "LINE,SINE,LTR".split(",")
 gene = "PYROXD2"
-tss = "2"
+tss = 2
 
 # Get all bins overlapping range
 bins = set(containing_bins(start, end) + contained_bins(start, end))
@@ -84,15 +84,15 @@ print(bins)
 #print("\nTF-Binding:")
 #for tf in tf_binding: print(tf)
 
-tss = TSS.select_by_bin_range(session, chrom, start, end,
+feats = TSS.select_by_bin_range(session, chrom, start, end,
     bins=list(bins))
 print("\nTSS:")
-for t in tss: print(t)
+for t in feats: print(t)
 
-tss = TSS.select_by_gene(session, gene)
+feats = TSS.select_by_gene(session, gene)
 print("\n%s:" % gene)
-for t in tss: print(t)
+for t in feats: print(t)
 
-tss = TSS.select_by_gene_tss(session, gene, tss)
+feats = TSS.select_by_gene_tss(session, gene, tss)
 print("\n%s (%s):" % (gene, tss))
-for t in tss: print(t)
+for t in feats: print(t)
