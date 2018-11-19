@@ -34,7 +34,7 @@ class ShortTandemRepeat(Base):
         ),
 
         Index("ix_str", bin, chrom),
-        Index("ix_str_pathogenicity", pathogenicity)
+        Index("ix_str_pathogenicity", pathogenicity),
 
         {
             "mysql_engine": "MyISAM",

@@ -33,8 +33,6 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="this script inserts short tandem repeat location information")
 
-    parser.add_argument("genome", help="Genome assembly")
-    parser.add_argument("metadata", help="Metadata file")
     parser.add_argument("bed_file", help="gangSTR bed file")
 
     # Optional args
@@ -59,8 +57,7 @@ def parse_args():
 
     return args
 
-def insert_str_to_gud_db(user, host, port, db, genome,
-    metadata_file, bed_file, source_name):
+def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
 
     # Initialize
     metadata = {}
@@ -104,9 +101,8 @@ def insert_str_to_gud_db(user, host, port, db, genome,
             model.pathogenicity   = pathogenicity
             model.date = today
 
-            session.add(model)
-    session.flush()
-    session.commit()
+            session.merge(model)
+            session.commit()
 
 #-------------#
 # Main        #
@@ -118,5 +114,5 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Insert ENCODE data to GUD database
-    insert_str_to_gud_db(args.user, args.host, args.port, args.db, args.genome,
-    args.metadata_file, args.bed_file, args.source_name)
+    insert_str_to_gud_db(args.user, args.host, args.port, args.db,
+     args.bed_file, args.source_name)
