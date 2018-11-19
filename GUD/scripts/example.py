@@ -109,5 +109,5 @@ print("\n%s (%s):" % (gene, tss))
 for t in feats: print(t)
 
 feats = TSS.select_by_sample(session, sample=samples, min_tpm=10.0)
-print("\nTSSs in endothelial cells:" % (gene, tss))
+print("\nTSSs in endothelial cells:")
 for t in feats: print(t)
