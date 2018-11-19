@@ -826,17 +826,15 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
 
     # Initialize table
     if feat_type == "enhancer":
-#        if not engine.has_table("enhancer"):
-#            raise ValueError("GUD db does not have \"enhancer\" table!")
         table = Enhancer()
     if feat_type == "tss":
-#        if not engine.has_table("tss"):
-#            raise ValueError("GUD db does not have \"tss\" table!")
         table = TSS()
-    print(table.__tablename__)
-    exit(0)
-    table.metadata.bind = engine
-    table.metadata.create_all(engine)
+    if not engine.has_table(table.__tablename__):
+        try:
+            table.metadata.bind = engine
+            table.metadata.create_all(engine)
+        except:
+            raise ValueError("Cannot create table: %s" % table.__tablename__)
     mapper(Model, table.__table__)
 
     # If BED file...

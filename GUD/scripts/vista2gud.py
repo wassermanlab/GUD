@@ -71,11 +71,13 @@ def insert_vista_to_gud_db(user, host, port, db, fasta_file,
     today = str(date.today())
 
     # Initialize enhancer table
-    if not engine.has_table("enhancer"):
-        raise ValueError("GUD db does not have \"enhancer\" table!")
     table = Enhancer()
-    table.metadata.bind = engine
-    table.metadata.create_all(engine)
+    if not engine.has_table("enhancer"):
+        try:
+            table.metadata.bind = engine
+            table.metadata.create_all(engine)
+        except:
+            raise ValueError("Cannot create table: enhancer")
     mapper(Model, table.__table__)
 
     # For each header, sequence...

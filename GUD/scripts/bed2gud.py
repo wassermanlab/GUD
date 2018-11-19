@@ -101,36 +101,28 @@ def insert_bed_to_gud_db(user, host, port, db, bed_files,
     # Initialize table
     if feat_type == "accessibility":
         table = DnaAccessibility()
-        if not engine.has_table("dna_accessibility"):
-            try:
-                table.metadata.bind = engine
-                table.metadata.create_all(engine)
-            except:
-                raise ValueError("Cannot create \"dna_accessibility\" table!")
     if feat_type == "enhancer":
-        if not engine.has_table("enhancer"):
-            raise ValueError("GUD db does not have \"enhancer\" table!")
         table = Enhancer()
     if feat_type == "histone":
-        if not engine.has_table("histone_modification"):
-            raise ValueError("GUD db does not have \"histone_modification\" table!")
         if not histone_type:
             raise ValueError("A histone type must be provided!")
         table = HistoneModification()
     if feat_type == "tad":
-        if not engine.has_table("tad"):
-            raise ValueError("GUD db does not have \"tad\" table!")
         if not restriction_enzyme:
             warnings.warn("\nA restriction enzyme was not provided...\n")
             warnings.warn("\nSetting \"restriction_enzyme\" field to \"Unknown\"...\n")
             restriction_enzyme = "Unknown"
         table = Tad()
     if feat_type == "tf":
-        if not engine.has_table("tf_binding"):
-            raise ValueError("GUD db does not have \"tf_binding\" table!")
         if not tf_name:
             raise ValueError("A TF name must be provided!")
         table = TfBinding()
+    if not engine.has_table(table.__tablename__):
+        try:
+            table.metadata.bind = engine
+            table.metadata.create_all(engine)
+        except:
+            raise ValueError("Cannot create table: %s" % table.__tablename__)
     mapper(Model, table.__table__)
 
     # For each BED file...

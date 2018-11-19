@@ -82,19 +82,17 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
     # Initialize table
     if feat_type == "accessibility":
-        if not engine.has_table("dna_accessibility"):
-            raise ValueError("GUD db does not have \"dna_accessibility\" table!")
         table = DnaAccessibility()
     if feat_type == "histone":
-        if not engine.has_table("histone_modification"):
-            raise ValueError("GUD db does not have \"histone_modification\" table!")
         table = HistoneModification()
     if feat_type == "tf":
-        if not engine.has_table("tf_binding"):
-            raise ValueError("GUD db does not have \"tf_binding\" table!")
         table = TfBinding()
-    table.metadata.bind = engine
-    table.metadata.create_all(engine)
+    if not engine.has_table(table.__tablename__):
+        try:
+            table.metadata.bind = engine
+            table.metadata.create_all(engine)
+        except:
+            raise ValueError("Cannot create table: %s" % table.__tablename__)
     mapper(Model, table.__table__)
 
     # For each line...

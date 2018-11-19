@@ -71,11 +71,13 @@ def insert_remap_to_gud_db(user, host, port, db,
     today = str(date.today())
 
     # Initialize TF-binding table
-    if not engine.has_table("tf_binding"):
-        raise ValueError("GUD db does not have \"tf_binding\" table!")
     table = TfBinding()
-    table.metadata.bind = engine
-    table.metadata.create_all(engine)
+    if not engine.has_table("tf_binding"):
+        try:
+            table.metadata.bind = engine
+            table.metadata.create_all(engine)
+        except:
+            raise ValueError("Cannot create table: tf_binding")
     mapper(Model, table.__table__)
 
     # For each file... #
