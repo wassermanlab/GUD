@@ -2,7 +2,7 @@ from binning import containing_bins, contained_bins
 from Bio.SeqFeature import FeatureLocation
 
 from sqlalchemy import (
-    Column, Index, Integer,
+    Column, Date, Index, Integer,
     PrimaryKeyConstraint, String
 )
 

@@ -12,7 +12,6 @@ import warnings
 
 # Import from GUD module
 from GUD import GUDglobals
-from GUD.bin_range import BinRange
 from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 
 #-------------#
@@ -115,4 +114,4 @@ if __name__ == "__main__":
 
     # Insert ENCODE data to GUD database
     insert_str_to_gud_db(args.user, args.host, args.port, args.db,
-     args.bed_file, args.source_name)
+     args.bed_file, args.source)
