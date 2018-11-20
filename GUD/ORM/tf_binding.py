@@ -83,12 +83,11 @@ class TfBinding(Base):
         return session.query(q.exists()).scalar()
         
     def __str__(self):
-        return "{}\t{}\t{}\t{}|{}|{}".format(self.chrom, self.start,
+        return "{}\t{}\t{}\t{}|{}|{}|{}".format(self.chrom, self.start,
             self.end, self.tf_name, self.cell_or_tissue,
-            self.source_name)
+            self.experiment_type, self.source_name)
 
     def __repr__(self):
-        return "<TFBinding(chrom={}, start={}, end={}, name={}, sample={}, experiment={}, source={}, date={})>".format(
+        return "<TFBinding(chrom={}, start={}, end={}, name={}, sample={}, experiment={}, source={})>".format(
             self.chrom, self.start, self.end, self.tf_name,
-            self.cell_or_tissue, self.experiment_type, self.source_name,
-            self.date)
+            self.cell_or_tissue, self.experiment_type, self.source_name)

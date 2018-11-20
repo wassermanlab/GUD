@@ -129,11 +129,10 @@ class Tad(Base):
 
     def __str__(self):
         return "{}\t{}\t{}\t{}|{}|{}|{}".format(self.chrom, self.start,
-            self.end, self.experiment_type, self.cell_or_tissue,
-            self.source_name, self.restriction_enzyme)
+            self.end, self.cell_or_tissue, self.experiment_type,
+            self.restriction_enzyme, self.source_name)
 
     def __repr__(self):
-        return "<Tad(chrom={}, start={}, end={}, sample={}, experiment={}, enzyme={}, source={}, date={})>".format(
+        return "<Tad(chrom={}, start={}, end={}, sample={}, experiment={}, enzyme={}, source={})>".format(
             self.chrom, self.start, self.end, self.cell_or_tissue,
-            self.experiment_type, self.restriction_enzyme,
-            self.source_name, self.date)
+            self.experiment_type, self.restriction_enzyme, self.source_name)

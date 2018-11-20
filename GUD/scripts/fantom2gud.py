@@ -923,8 +923,8 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 if sum(samples[sample]) == 0: continue
                 if feat_type == "tss":
                     model.tpm = ",".join(map(str, samples[sample])) + ","
-                    model.avg_tpm = "%.3f" % float(sum(samples[sample]) / len(samples[sample]))
-                    model.percent_tpm = "%.3f" % float(sum(samples[sample]) * 100 / total_cages)
+#                    model.avg_tpm = "%.3f" % float(sum(samples[sample]) / len(samples[sample]))
+#                    model.percent_tpm = "%.3f" % float(sum(samples[sample]) * 100 / total_cages)
                 # Upsert model & commit
                 session.merge(model)
                 session.commit()

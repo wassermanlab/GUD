@@ -172,6 +172,7 @@ class Gene(Base):
         return "{}\t{}\t{}\t{}\t0\t{}".format(self.chrom, self.txStart,
             self.txEnd, self.name2, self.strand)
 
+    # Have to fix so it returns more stuff...
     def __repr__(self):
-        return "<Gene(name={}, name2={}, chrom={}, txStart={}, txEnd={}, strand={}, source={}, date={})>".format(
-            self.name, self.name2, self.chrom, self.txStart, self.txEnd, self.strand, self.source_name, self.date)
+        return "<Gene(name={}, name2={}, chrom={}, txStart={}, txEnd={}, strand={}, source={})>".format(
+            self.name, self.name2, self.chrom, self.txStart, self.txEnd, self.strand, self.source_name)

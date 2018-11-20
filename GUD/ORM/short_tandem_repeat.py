@@ -18,19 +18,21 @@ class ShortTandemRepeat(Base):
     __tablename__ = "short_tandem_repeat"
 
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    chrom = Column("chrom", String(30), nullable=False)
+    chrom = Column("chrom", String(5), nullable=False)
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
+    strand = Column("strand", mysql.CHAR(1), nullable=False)
     length = Column("length", mysql.INTEGER(unsigned=True), nullable=False)
     motif = Column("motif", String(5), nullable=False)
     pathogenicity = Column("pathogenicity", mysql.INTEGER(
         unsigned=False), nullable=False)
+    source_name = Column("source_name", String(25), nullable=False)
     date = Column("date", Date(), nullable=True)
 
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            chrom, start, end
+            chrom, start, end, strand, source_name
         ),
 
         Index("ix_str", bin, chrom),

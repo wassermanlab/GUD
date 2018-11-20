@@ -82,10 +82,10 @@ class DnaAccessibility(Base):
 
     def __str__(self):
         return "{}\t{}\t{}\t{}|{}|{}".format(self.chrom, self.start,
-            self.end, self.experiment_type, self.cell_or_tissue,
+            self.end, self.cell_or_tissue, self.experiment_type,
             self.source_name)
 
     def __repr__(self):
-        return "<DnaAccessibility(chrom={}, start={}, end={}, sample={}, experiment={}, source={}, date={})>".format(
+        return "<DnaAccessibility(chrom={}, start={}, end={}, sample={}, experiment={}, source={})>".format(
             self.chrom, self.start, self.end, self.cell_or_tissue,
             self.experiment_type, self.source_name, self.date)

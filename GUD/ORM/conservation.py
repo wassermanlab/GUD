@@ -83,6 +83,5 @@ class Conservation(Base):
             self.end, self.score)
 
     def __repr__(self):
-        return "<Conservation(chrom={}, start={}, end={}, score={}, source={}, date={})>".format(
-            self.chrom, self.start, self.end, self.score, self.source_name,
-            self.date)
+        return "<Conservation(chrom={}, start={}, end={}, score={}, source={})>".format(
+            self.chrom, self.start, self.end, self.score, self.source_name)
