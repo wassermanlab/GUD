@@ -102,7 +102,7 @@ class TSS(Base):
 
     @classmethod
     def select_by_sample(cls, session, sample=[],
-        min_tpm=0.0, min_percent_tpm=0.0):
+        min_tpm=0.0, min_perc_tpm=0.0):
         """
         Query objects by sample with a minimum tpm.
         """
@@ -110,7 +110,7 @@ class TSS(Base):
         q = session.query(cls.gene, cls.tss, cls.chrom, cls.start,
             cls.end, cls.strand, cls.experiment_type, cls.source_name,
             cls.date, func.avg(cls.tpm).label("avg_tpm") >= min_tpm,
-            func.sum(cls.percent_tpm).label("sum_per_tpm") >= min_percent_tpm).group_by(
+            func.sum(cls.percent_tpm).label("sum_perc_tpm") >= min_percent_tpm).group_by(
             cls.chrom, cls.start, cls.end, cls.strand)
 
         if sample:
