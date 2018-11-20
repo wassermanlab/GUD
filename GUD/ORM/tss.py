@@ -123,30 +123,22 @@ class TSS(Base):
         import re
 
         # Initialize
+        tss = []
         float_regexp = re.compile("\d+\.\d+")
 
-        q = session.query(cls).group_by(cls.gene, cls.tss,
-            cls.chrom, cls.start, cls.end, cls.strand)
-        
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-
-        for feat in q:
-            print(feat)
-            print("//")
-        exit(0)
+        q = cls.select_by_sample(session, sample=sample)
 
         # For each feat...
         for feat in q:
             print(feat)
-            exit(0)
+            print("//")
+            continue
             tpms = map(float, re.findall(float_regexp, feat.tpm))
             # If enough TPMs...
             if sum(tpms) / len(tpms) > avg_tpm:
                 tss.append((feat.gene, feat.tss))
-
-        
-
+        exit(0)
+                
         q = q.query(cls.cell_or_tissue.in_(sample))
 
         q = session.query(cls, func.avg(cls.tpm).label("avg_tpm"),
