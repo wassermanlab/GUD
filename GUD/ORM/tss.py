@@ -101,13 +101,28 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_sample(cls, session, sample=[],
-        avg_tpm_thresh=0.0, sum_perc_tpm_thresh=0.0):
+    def select_by_sample(cls, session, sample=[]):
         """
-        Query objects by sample with a min. tpm average and total
-        percentage.
+        Query objects by sample.
         """
 
+        q = session.query(cls)
+        
+        if sample:
+            q = q.filter(cls.cell_or_tissue.in_(sample))
+
+        return q.all()
+
+    def select_differentially_expressed_in_sample(cls, session, sample=[],
+        avg_tpm=0.0, perc_tpm=0.0):
+        """
+        Query objects in sample with a min. avg. expression that are
+        differentially expressed.
+        """
+
+        feats = self.select_by_sample(session, sample=sample)
+
+        exit(0)
         q = session.query(cls, func.avg(cls.tpm).label("avg_tpm"),
             func.sum(cls.percent_tpm).label("sum_perc_tpm")).group_by(
             cls.gene, cls.tss, cls.chrom, cls.start, cls.end, cls.strand).having(
@@ -120,8 +135,6 @@ class TSS(Base):
         q = q
         print(q.all())
         exit(0)
-
-        return q.all()
 
     @classmethod
     def feature_exists(cls, session, chrom, start, end, strand,
