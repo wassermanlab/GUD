@@ -111,10 +111,8 @@ class TSS(Base):
             cls.end, cls.strand, cls.experiment_type, cls.source_name,
             cls.date, func.avg(cls.tpm).label("avg_tpm"),
             func.sum(cls.percent_tpm).label("sum_perc_tpm")).group_by(
-            cls.chrom, cls.start, cls.end, cls.strand)
-
-        print(dir(q))
-        exit(0)
+            cls.chrom, cls.start, cls.end, cls.strand).having(
+            func.avg(cls.tpm) >= min_tpm, func.sum(cls.percent_tpm) >= min_perc_tpm)
 
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
