@@ -34,7 +34,7 @@ class TSS(Base):
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            chrom, start, end, strand, cell_or_tissue, replicate,
+            chrom, start, end, strand, cell_or_tissue,
             experiment_type, source_name
         ),
 
