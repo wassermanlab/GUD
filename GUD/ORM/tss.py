@@ -102,9 +102,10 @@ class TSS(Base):
 
     @classmethod
     def select_by_sample(cls, session, sample=[],
-        avg_min_tpm=0.0, min_sum_perc_tpm=0.0):
+        avg_tpm_thresh=0.0, sum_perc_tpm_thresh=0.0):
         """
-        Query objects by sample with a minimum tpm.
+        Query objects by sample with a min. tpm average and total
+        percentage.
         """
 
         q = session.query(cls.gene, cls.tss, cls.chrom, cls.start,
@@ -112,8 +113,8 @@ class TSS(Base):
             cls.date, func.avg(cls.tpm).label("avg_tpm"),
             func.sum(cls.percent_tpm).label("sum_perc_tpm")).group_by(
             cls.chrom, cls.start, cls.end, cls.strand).having(
-            func.avg(cls.tpm) >= min_avg_tpm).having(
-            func.sum(cls.percent_tpm) >= min_sum_perc_tpm)
+            func.avg(cls.tpm) >= avg_tpm_thresh).having(
+            func.sum(cls.percent_tpm) >= sum_perc_tpm_thresh)
 
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
