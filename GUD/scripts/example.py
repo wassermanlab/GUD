@@ -105,7 +105,12 @@ print(bins)
 #feats = TSS.select_by_tss(session, gene, tss)
 #print("\n%s (%s):" % (gene, tss))
 #for t in feats: print(t)
+#
+#feats = TSS.select_by_sample(session, sample=samples)
+#print("\nTSSs in skeletal muscle:")
+#for t in feats: print(t)
 
-feats = TSS.select_by_sample(session, sample=samples)
-print("\nTSSs in skeletal muscle:")
+feats = TSS.select_by_differential_expression(session,
+    sample=samples, avg_tpm=10.0, perc_tpm=33.33)
+print("\nDE TSSs in skeletal muscle:")
 for t in feats: print(t)
