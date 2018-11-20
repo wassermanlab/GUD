@@ -106,6 +106,6 @@ print(bins)
 #print("\n%s (%s):" % (gene, tss))
 #for t in feats: print(t)
 
-feats = TSS.select_by_sample(session, sample=samples, min_tpm=10.0, min_perc_tpm=0.0)
+feats = TSS.select_by_sample(session, sample=samples, min_tpm=10.0, min_perc_tpm=50.0)
 print("\nTSSs in skeletal muscle:")
 for t in feats: print(t)
