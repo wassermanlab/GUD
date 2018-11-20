@@ -108,9 +108,7 @@ class TSS(Base):
         percentage.
         """
 
-        q = session.query(cls.gene, cls.tss, cls.chrom, cls.start,
-            cls.end, cls.strand, cls.experiment_type, cls.source_name,
-            cls.date, func.avg(cls.tpm).label("avg_tpm"),
+        q = session.query(cls, func.avg(cls.tpm).label("avg_tpm"),
             func.sum(cls.percent_tpm).label("sum_perc_tpm")).group_by(
             cls.chrom, cls.start, cls.end, cls.strand).having(
             func.avg(cls.tpm) >= avg_tpm_thresh).having(
