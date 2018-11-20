@@ -123,21 +123,25 @@ class TSS(Base):
         import re
 
         # Initialize
-        tss = []
         float_regexp = re.compile("\d+\.\d+")
 
-        # Get feats in sample
-        feats = cls.select_by_sample(session, sample=sample)
+        q = cls.select_by_sample(session, sample=sample).group_by(
+            cls.gene, cls.tss, cls.chrom, cls.start, cls.end, cls.strand
+        )
 
         # For each feat...
-        for feat in feats:
+        for feat in q:
+            print(feat)
+            exit(0)
             tpms = map(float, re.findall(float_regexp, feat.tpm))
             # If enough TPMs...
             if sum(tpms) / len(tpms) > avg_tpm:
                 tss.append((feat.gene, feat.tss))
 
-        print(tss)
-        exit(0)
+        
+
+        q = q.query(cls.cell_or_tissue.in_(sample))
+
         q = session.query(cls, func.avg(cls.tpm).label("avg_tpm"),
             func.sum(cls.percent_tpm).label("sum_perc_tpm")).group_by(
             cls.gene, cls.tss, cls.chrom, cls.start, cls.end, cls.strand).having(
