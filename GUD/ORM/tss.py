@@ -133,7 +133,7 @@ class TSS(Base):
 
         for feat in q:
             print(feat)
-        exit(0)
+            exit(0)
 
         # For each feat...
         for feat in q:
