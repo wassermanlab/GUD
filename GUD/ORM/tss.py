@@ -109,10 +109,9 @@ class TSS(Base):
 
         q = session.query(cls.gene, cls.tss, cls.chrom, cls.start,
             cls.end, cls.strand, cls.experiment_type, cls.source_name,
-            cls.date, func.avg(cls.tpm).label("avg_tpm"),
-            func.sum(cls.percent_tpm).label("sum_percent_tpm")).group_by(
-            cls.chrom, cls.start, cls.end, cls.strand).having(cls.avg_tpm >= min_tpm,
-            cls.sum_percent_tpm >= min_percent_tpm)
+            cls.date, func.avg(cls.tpm).label("avg_tpm") >= min_tpm,
+            func.sum(cls.percent_tpm).label("sum_percent_tpm") >= min_percent_tpm).group_by(
+            cls.chrom, cls.start, cls.end, cls.strand)
 
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
