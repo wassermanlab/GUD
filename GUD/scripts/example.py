@@ -93,18 +93,18 @@ print(bins)
 #print("\nTF-Binding:")
 #for tf in tf_binding: print(tf)
 
-feats = TSS.select_by_bin_range(session, chrom, start, end,
-    bins=list(bins))
-print("\nTSS:")
-for t in feats: print(t)
-
-feats = TSS.select_by_gene(session, gene)
-print("\n%s:" % gene)
-for t in feats: print(t)
-
-feats = TSS.select_by_tss(session, gene, tss)
-print("\n%s (%s):" % (gene, tss))
-for t in feats: print(t)
+#feats = TSS.select_by_bin_range(session, chrom, start, end,
+#    bins=list(bins))
+#print("\nTSS:")
+#for t in feats: print(t)
+#
+#feats = TSS.select_by_gene(session, gene)
+#print("\n%s:" % gene)
+#for t in feats: print(t)
+#
+#feats = TSS.select_by_tss(session, gene, tss)
+#print("\n%s (%s):" % (gene, tss))
+#for t in feats: print(t)
 
 feats = TSS.select_by_sample(session, sample=samples, min_tpm=10.0, min_perc_tpm=0.0)
 print("\nTSSs in skeletal muscle:")
