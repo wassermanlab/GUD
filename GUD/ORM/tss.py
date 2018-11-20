@@ -113,14 +113,28 @@ class TSS(Base):
 
         return q.all()
 
-    def select_differentially_expressed_in_sample(cls, session, sample=[],
+    def select_by_differential_expression(cls, session, sample=[],
         avg_tpm=0.0, perc_tpm=0.0):
         """
-        Query objects in sample with a min. avg. expression that are
-        differentially expressed.
+        Query objects differentially expressed in sample.
         """
 
+        import re
+
+        # Initialize
+        filtered_feats = []
+        float_regexp = re.compile("\d+\.\d+")
+
+        # Get feats in sample
         feats = self.select_by_sample(session, sample=sample)
+
+        # For each feat...
+        for feat in feats:
+            cages = re.findall(float_regexp, feat.tpm)
+            print(cages)
+            cages = map(float, re.findall(float_regexp, feat.tpm))
+            print(cages)
+            exit(0)
 
         exit(0)
         q = session.query(cls, func.avg(cls.tpm).label("avg_tpm"),
