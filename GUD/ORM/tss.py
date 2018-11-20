@@ -157,7 +157,7 @@ class TSS(Base):
         return session.query(q.exists()).scalar()
 
     def __str__(self):
-        return "{}\t{}\t{}\t{} ({})\t{}\t{} ({}%)\t{}".format(self.chrom,
+        return "{}\t{}\t{}\t{} ({})\t{}\t{}\t{}".format(self.chrom,
             self.start, self.end, self.gene, self.tss, self.strand,
             self.tpm, self.cell_or_tissue)
 
