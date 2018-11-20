@@ -134,7 +134,7 @@ class TSS(Base):
             tpms = map(float, re.findall(float_regexp, feat.tpm))
             # If enough TPMs...
             if sum(tpms) / len(tpms) > avg_tpm:
-                tss.append((feat.gene, gene.tss))
+                tss.append((feat.gene, feat.tss))
 
         print(tss)
         exit(0)
