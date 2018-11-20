@@ -123,7 +123,7 @@ class TSS(Base):
         import re
 
         # Initialize
-        filtered_feats = []
+        tss = []
         float_regexp = re.compile("\d+\.\d+")
 
         # Get feats in sample
@@ -131,12 +131,12 @@ class TSS(Base):
 
         # For each feat...
         for feat in feats:
-            cages = re.findall(float_regexp, feat.tpm)
-            print(cages)
-            cages = map(float, re.findall(float_regexp, feat.tpm))
-            print(cages)
-            exit(0)
+            tpms = map(float, re.findall(float_regexp, feat.tpm))
+            # If enough TPMs...
+            if sum(tpms) / len(tpms) > avg_tpm:
+                tss.append((feat.gene, gene.tss))
 
+        print(tss)
         exit(0)
         q = session.query(cls, func.avg(cls.tpm).label("avg_tpm"),
             func.sum(cls.percent_tpm).label("sum_perc_tpm")).group_by(

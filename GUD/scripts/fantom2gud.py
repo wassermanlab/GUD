@@ -868,7 +868,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
         elif line[0].startswith("chr") or line[0].startswith("\"chr"):
             # Initialize
             samples = {}
-            total_cages = 0.0
+            total_tpms = 0.0
             # Get chrom, start, end
             if feat_type == "enhancer":
                 m = re.search("(chr\S+)\:(\d+)\-(\d+)", line[0])
@@ -904,27 +904,27 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             # For each sample...
             for i in range(counts_start_at, len(line)):
                 # Initialize
-                cages = "%.3f" % float(line[i])
+                tpm = "%.3f" % float(line[i])
                 sample = fantom_sample_names[i - counts_start_at]
                 # Keep original sample names
                 if keep:
-                    samples.setdefault(sample, [float(cages)])
-                    total_cages += float(cages)
+                    samples.setdefault(sample, [float(tpm)])
+                    total_tpms += float(tpm)
                 else:
                     m = re.search("(CNhs\d+)", sample)
                     if m.group(1) in sample_names:
                         samples.setdefault(sample_names[m.group(1)], [])
-                        samples[sample_names[m.group(1)]].append(float(cages))
-                        total_cages += float(cages)
+                        samples[sample_names[m.group(1)]].append(float(tpm))
+                        total_tpms += float(tpm)
             # For each sample...
             for sample in samples:
                 model.cell_or_tissue = sample
-                # Skip enhancers with 0 cages
+                # Skip enhancers with 0 tpm
                 if sum(samples[sample]) == 0: continue
                 if feat_type == "tss":
                     model.tpm = ",".join(map(str, samples[sample])) + ","
 #                    model.avg_tpm = "%.3f" % float(sum(samples[sample]) / len(samples[sample]))
-#                    model.percent_tpm = "%.3f" % float(sum(samples[sample]) * 100 / total_cages)
+#                    model.percent_tpm = "%.3f" % float(sum(samples[sample]) * 100 / total_tpms)
                 # Upsert model & commit
                 session.merge(model)
                 session.commit()
