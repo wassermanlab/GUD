@@ -126,7 +126,7 @@ class TSS(Base):
         float_regexp = re.compile("\d+\.\d+")
 
         # Get feats in sample
-        feats = self.select_by_sample(session, sample=sample)
+        feats = cls.select_by_sample(session, sample=sample)
 
         # For each feat...
         for feat in feats:
