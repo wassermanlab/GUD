@@ -125,9 +125,15 @@ class TSS(Base):
         # Initialize
         float_regexp = re.compile("\d+\.\d+")
 
-        q = cls.select_by_sample(session, sample=sample).group_by(
-            cls.gene, cls.tss, cls.chrom, cls.start, cls.end, cls.strand
-        )
+        q = session.query(cls).group_by(cls.gene, cls.tss,
+            cls.chrom, cls.start, cls.end, cls.strand
+        
+        if sample:
+            q = q.filter(cls.cell_or_tissue.in_(sample))
+
+        for feat in q:
+            print(feat)
+        exit(0)
 
         # For each feat...
         for feat in q:
