@@ -101,19 +101,23 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_sample(cls, session, sample=[], min_tpm=0.0):
+    def select_by_sample(cls, session, sample=[],
+        min_tpm=0.0, min_percent_tpm=0.0):
         """
         Query objects by sample with a minimum tpm.
         """
 
         q = session.query(cls.gene, cls.tss, cls.chrom, cls.start,
             cls.end, cls.strand, cls.experiment_type, cls.source_name,
-            cls.date, func.avg(cls.tpm), func.sum(cls.percent_tpm)).group_by(
-            cls.chrom, cls.start, cls.end, cls.strand)
+            cls.date, func.avg(cls.tpm).label("avg_tpm"),
+            func.sum(cls.percent_tpm).label("sum_percent_tpm")).group_by(
+            cls.chrom, cls.start, cls.end, cls.strand).having(avg_tpm >= min_tpm,
+            sum_percent_tpm >= min_percent_tpm)
 
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
 
+        q = q
         print(q.all())
         exit(0)
 
