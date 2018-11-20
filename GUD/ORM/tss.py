@@ -113,6 +113,7 @@ class TSS(Base):
 
         return q.all()
 
+    @classmethod
     def select_by_differential_expression(cls, session, sample=[],
         avg_tpm=0.0, perc_tpm=0.0):
         """
