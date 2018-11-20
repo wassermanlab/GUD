@@ -919,26 +919,15 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             # For each sample...
             for sample in samples:
                 model.cell_or_tissue = sample
-                if feat_type == "enhancer":
-                    # Skip enhancers with 0 cages
-                    if sum(samples[sample]) == 0:
-                        continue
-                    # Upsert model & commit
-                    session.merge(model)
-                    session.commit()
+                # Skip enhancers with 0 cages
+                if sum(samples[sample]) == 0: continue
                 if feat_type == "tss":
-                    # For each id...
-                    for i in range(len(samples[sample])):
-                        model.replicate = i + 1
-                        model.tpm = samples[sample][i]
-                        try:
-                            percent_tpm = "%.3f" % float(samples[sample][i] * 100 / total_cages)
-                        except:
-                            percent_tpm = "%.3f" % float(0)
-                        model.percent_tpm = percent_tpm
-                        # Upsert model & commit
-                        session.merge(model)
-                        session.commit()
+                    model.tpm = ",".join(samples[sample]) + ","
+                    model.avg_tpm = "%.3f" % float(sum(samples[sample]) / len(samples[sample]))
+                    model.percent_tpm = "%.3f" % float(samples[sample][i] * 100 / total_cages)
+                # Upsert model & commit
+                session.merge(model)
+                session.commit()
 
 #-------------#
 # Main        #
