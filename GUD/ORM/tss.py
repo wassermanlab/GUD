@@ -158,11 +158,11 @@ class TSS(Base):
 
     def __str__(self):
         return "{}\t{}\t{}\t{} ({})\t{}\t{} ({}%)\t{}".format(self.chrom,
-            self.start, self.end, self.gene, self.tss, self.strand, self.avg_tpm,
-            self.percent_tpm, self.cell_or_tissue)
+            self.start, self.end, self.gene, self.tss, self.strand,
+            self.tpm, self.cell_or_tissue)
 
     def __repr__(self):
-        return "<TSS(gene={}, tss={}, chrom={}, start={}, end={}, strand={}, sample={}, tpm={}, avg_tpm={}, percent_tpm={}, experiment={}, source={})>".format(
+        return "<TSS(gene={}, tss={}, chrom={}, start={}, end={}, strand={}, sample={}, tpm={}, experiment={}, source={})>".format(
             self.gene, self.tss, self.chrom, self.start, self.end, self.strand, 
-            self.cell_or_tissue, self.replicate, self.tpm, self.avg_tpm,
-            self.percent_tpm, self.experiment_type, self.source_name)
+            self.cell_or_tissue, self.replicate, self.tpm, self.experiment_type,
+            self.source_name)
