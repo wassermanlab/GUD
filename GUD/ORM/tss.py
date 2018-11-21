@@ -159,15 +159,27 @@ class TSS(Base):
         """
 
         # Initialize
-        expression = {}
+        exp_tss = {}
+        all_exp_tss = {}
 
         # For each TSS...
         for tss in cls.select_by_sample(session, sample, avg_tpm):
             # Add TSS
-            expression.setdefault((tss.gene, tss.tss), set())
-            expression[(tss.gene, tss.tss)].add(tss.cell_or_tissue)
+            exp_tss.setdefault((tss.gene, tss.tss), set())
+            exp_tss[(tss.gene, tss.tss)].add(tss.cell_or_tissue)
 
-        print(expression)
+        print(len(exp_tss))
+
+        if exp_in_all_samples:
+            # For each TSS...
+            for tss in frozenset(exp_tss.keys()):
+                # For each sample...
+                for s in sample:
+                    # If TSS not expressed in sample...
+                    if s not in exp_tss(tss):
+                        exp_tss.pop(tss, None)
+
+        print(len(exp_tss))
         exit(0)
 #                
 #        q = q.query(cls.cell_or_tissue.in_(sample))

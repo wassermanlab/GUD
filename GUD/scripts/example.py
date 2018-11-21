@@ -115,6 +115,7 @@ print(bins)
 #for t in feats: print(t)
 
 feats = TSS.select_by_differential_expression(session,
-    sample=samples, avg_tpm=10.0, perc_tpm=33.33)
+    sample=samples, avg_tpm=10.0, perc_tpm=33.33,
+    exp_in_all_samples=True)
 print("\nDE TSSs in skeletal muscle:")
 for t in feats: print(t)
