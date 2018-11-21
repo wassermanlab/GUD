@@ -12,6 +12,8 @@ from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 
+from GUD.ORM.gene import Gene
+
 Base = declarative_base()
 
 class TSS(Base):
@@ -151,7 +153,8 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_sample(cls, session, sample=[], avg_tpm=0.0):
+    def select_by_sample(cls, session, sample=[], avg_tpm=0.0,
+        exclude_non_gene_tss=False):
         """
         Query objects by list of samples. If no samples are provided,
         query all TSSs.
@@ -161,6 +164,10 @@ class TSS(Base):
         
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
+
+        if exclude_non_gene_tss:
+            q = q.filter(exists().where(or_(Gene.name == cls.gene,
+                Gene.name2 == cls.gene)))
 
         return q.all()
 
