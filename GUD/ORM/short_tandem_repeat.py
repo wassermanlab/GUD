@@ -2,11 +2,10 @@ from binning import containing_bins, contained_bins
 from Bio.SeqFeature import FeatureLocation
 
 from sqlalchemy import (
-    Column, Date, Index, Integer,
+    Column, Index, Integer,
     PrimaryKeyConstraint, String
 )
 
-from datetime import date
 from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -21,18 +20,15 @@ class ShortTandemRepeat(Base):
     chrom = Column("chrom", String(5), nullable=False)
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
-    length = Column("length", mysql.INTEGER(unsigned=True), nullable=False)
     motif = Column("motif", String(5), nullable=False)
     pathogenicity = Column("pathogenicity", mysql.INTEGER(
         unsigned=False), nullable=False)
     source_name = Column("source_name", String(25), nullable=False)
-    date = Column("date", Date(), nullable=True)
 
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            chrom, start, end, strand, source_name
+            chrom, start, end, source_name
         ),
 
         Index("ix_str", bin, chrom),
@@ -59,17 +55,37 @@ class ShortTandemRepeat(Base):
             bins = set(containing_bins(start, end) + contained_bins(start, end))
 
         q = session.query(cls).filter(
-                cls.chrom == chrom, cls.end > start, cls.start < end)
+                cls.chrom == chrom, cls.start >= start, cls.start < end)
 
         if bins:
             q = q.filter(cls.bin.in_((list(bins))))
 
         return q.all()
+    
+    @classmethod
+    def select_by_motif(cls, session, motif, compute_rotations=False):
+        """
+        Query objects by motif without, calculate all the rotations of a motif
+        if asked
+        """
+        if compute_rotations is True: #comput the rotations
+            motif_len = len(motif)
+            motif_temp = motif 
+            motifs = []
+            for i in range(motif_len):
+                motif_temp = motif_temp[1:motif_len] +motif_temp[0]
+                motifs.append(motif_temp)    
+        else:    
+            motifs = [motif]
+
+        q = session.query(cls).filter(cls.motif.in_(motifs))
+
+        return q.all()    
 
     def __str__(self):
         return "{}\t{}\t{}\t{}\t{}".format(
-            self.chrom, self.start, self.end, self.length, self.motif)
+            self.chrom, self.start, self.end, self.motif, self.pathogenicity)
 
     def __repr__(self):
-        return "<ShortTandemRepeat(bin={}, chrom={}, start={}, end={}, length={}, motif={}, pathogenicity={})>".format(
-            self.bin, self.chrom, self.start, self.end, self.length, self.motif, self.pathogenicity)
+        return "<ShortTandemRepeat(bin={}, chrom={}, start={}, end={}, motif={}, pathogenicity={})>".format(
+            self.bin, self.chrom, self.start, self.end, self.motif, self.pathogenicity)
