@@ -2,11 +2,10 @@ from binning import containing_bins, contained_bins
 from Bio.SeqFeature import FeatureLocation
 
 from sqlalchemy import (
-    Column, Date, Index, Integer,
+    Column, Index, Integer,
     PrimaryKeyConstraint, String
 )
 
-from datetime import date
 from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -21,17 +20,15 @@ class ShortTandemRepeat(Base):
     chrom = Column("chrom", String(5), nullable=False)
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
     motif = Column("motif", String(5), nullable=False)
     pathogenicity = Column("pathogenicity", mysql.INTEGER(
         unsigned=False), nullable=False)
     source_name = Column("source_name", String(25), nullable=False)
-    date = Column("date", Date(), nullable=True)
 
     __table_args__ = (
 
         PrimaryKeyConstraint(
-            chrom, start, end, strand, source_name
+            chrom, start, end, source_name
         ),
 
         Index("ix_str", bin, chrom),
@@ -66,7 +63,7 @@ class ShortTandemRepeat(Base):
         return q.all()
     
     @classmethod
-    def select_by_motif(cls, motif, compute_rotations=False):
+    def select_by_motif(cls, session, motif, compute_rotations=False):
         """
         Query objects by motif without, calculate all the rotations of a motif
         if asked
