@@ -65,7 +65,7 @@ class TSS(Base):
             bins = set(containing_bins(start, end) + contained_bins(start, end))
 
         q = session.query(cls).filter(cls.chrom == chrom, cls.end > start,
-            cls.start < end, cls.avg_tpm >= avg_tpm))
+            cls.start < end, cls.avg_tpm >= avg_tpm)
 
         if bins:
             q = q.filter(cls.bin.in_((list(bins))))
