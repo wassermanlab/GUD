@@ -128,12 +128,12 @@ class TSS(Base):
 
         if tss:
             # Initialize
-            tss_filter = []
+            ands = []
             # For each gene, tss pair...
-            for pair in tss:
-                tss_filter.append(and_([cls.gene == pair[0],
-                    cls.tss == pair[1]]))
-            q = q.filter(or_(*tss_filter))
+            for i, j in tss:
+                ands.append(and_(cls.gene == i,
+                    cls.tss == j))
+            q = q.filter(or_(*ands))
 
         return q.all()
 
