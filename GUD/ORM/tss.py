@@ -1,8 +1,10 @@
+import re
+
 from binning import containing_bins, contained_bins 
 from Bio.SeqFeature import FeatureLocation
 
 from sqlalchemy import (
-    Column, Date, Enum, Float, Index,
+    and_, or_, Column, Date, Enum, Float, Index,
     Integer, PrimaryKeyConstraint, String, types
 )
 
@@ -102,9 +104,11 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_tss(cls, session, gene, tss):
+    def select_by_tss(cls, session, tss=[]):
         """
         Query objects by TSS. If no TSS is provided, query all TSSs.
+        TSS is provided as a {list} of {lists}/{tuples} in the form 
+        gene, tss.
         """
 
         q = session.query(cls)
@@ -118,18 +122,16 @@ class TSS(Base):
     def select_by_multiple_tss(cls, session, tss=[]):
         """
         Query objects by list of TSSs. If no TSS are provided, query
-        all TSSs. TSSs are provided as a {list} of {tuples} in the form 
-        (gene, tss).
+        all TSSs. TSSs are provided as a {list} of {lists}/{tuples}
+        in the form gene, tss.
         """
-
-        from sqlalchemy import and_, or_
 
         q = session.query(cls)
 
         if tss:
             # Initialize
             ands = []
-            # For each gene, tss pair...
+            # For each gene, TSS pair...
             for i, j in tss:
                 ands.append(and_(cls.gene == i,
                     cls.tss == j))
@@ -151,44 +153,34 @@ class TSS(Base):
 
         return q.all()
 
-#    @classmethod
-#    def select_by_differential_expression(cls, session, sample=[],
-#        avg_tpm=0.0, perc_tpm=0.0, tpm_in_all_samples=False):
-#        """
-#        Query objects differentially expressed in sample.
-#        """
-#
-#        import re
-#
-#        # Initialize
-#        tss = {}
-#        float_regexp = re.compile("\d+\.\d+")
-#
-#        # For each feat...
-#        for feat in cls.select_by_sample(session, sample=sample):
-#            # Initialize
-#            if (feat.gene, feat.tss) not in tss:
-#                tss.setdefault((feat.gene, feat.tss), {})
-#                for
-#            # For sample
-#
-##            You are looking for or_
-##
-##            conds = [ Mymodel.a== 'b', Mymodel.b == 'c', Mymodel.c == 'd']
-##            If you have the above list of conditions just pass them all to or_
-##
-##            from sqlalchemy import or_
-##            Mymodel.query.filter(or_(*conds))
-#
-#            
-#            print(feat)
-#            print("//")
-#            continue
-#            tpms = map(float, re.findall(float_regexp, feat.tpm))
-#            # If enough TPMs...
-#            if sum(tpms) / len(tpms) > avg_tpm:
-#                tss.append((feat.gene, feat.tss))
-#        exit(0)
+    @classmethod
+    def select_by_differential_expression(cls, session, sample=[],
+        avg_tpm=10.0, perc_tpm=25.0, expression_in_all_samples=False):
+        """
+        Query objects differentially expressed in sample.
+        """
+
+        # Initialize
+        expression = {}
+        float_regexp = re.compile("\d+\.\d+")
+
+        # For each feat...
+        for feat in cls.select_by_sample(session, sample=sample):
+            # If not expression for TSS...
+            if (feat.gene, feat.tss) not in expression:
+                expression.setdefault((feat.gene, feat.tss), {})
+                # For each sample...
+                for sample in samples:
+                    expression[(feat.gene, feat.tss)].setdefault(sample, 0.0)
+            # Get TPMs
+            tpms = map(float, re.findall(float_regexp, feat.tpm))
+            expression[(feat.gene, feat.tss)][feat.cell_or_tissue] = sum(tpms) / len(tpms)
+            # If enough TPMs...
+            if sum(tpms) / len(tpms) > avg_tpm:
+                tss.append((feat.gene, feat.tss))
+
+        print(expression)
+        exit(0)
 #                
 #        q = q.query(cls.cell_or_tissue.in_(sample))
 #
