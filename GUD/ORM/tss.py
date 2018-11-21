@@ -122,7 +122,7 @@ class TSS(Base):
         (gene, tss).
         """
 
-        from sqlalchemy import or_
+        from sqlalchemy import and_, or_
 
         q = session.query(cls)
 
@@ -131,8 +131,8 @@ class TSS(Base):
             tss_filter = []
             # For each gene, tss pair...
             for pair in tss:
-                tss_filter.append((cls.gene == pair[0],
-                    cls.tss == pair[1]))
+                tss_filter.append(and_([cls.gene == pair[0],
+                    cls.tss == pair[1]]))
             q = q.filter(or_(*tss_filter))
 
         return q.all()
