@@ -161,23 +161,11 @@ class TSS(Base):
         # Initialize
         expression = {}
 
-        # For each feat...
-        for feat in cls.select_by_sample(session, sample, avg_tpm):
-            print("//")
-            print(feat)
-            exit(0)
-            # If not expression for TSS...
-            if (feat.gene, feat.tss) not in expression:
-                expression.setdefault((feat.gene, feat.tss), {})
-                # For each sample...
-                for sample in samples:
-                    expression[(feat.gene, feat.tss)].setdefault(sample, 0.0)
-            # Get TPMs
-            tpms = map(float, re.findall(float_regexp, feat.tpm))
-            expression[(feat.gene, feat.tss)][feat.cell_or_tissue] = sum(tpms) / len(tpms)
-            # If enough TPMs...
-            if sum(tpms) / len(tpms) > avg_tpm:
-                tss.append((feat.gene, feat.tss))
+        # For each TSS...
+        for tss in cls.select_by_sample(session, sample, avg_tpm):
+            # Add TSS
+            expression.setdefault((tss.gene, tss.tss), set())
+            expression[(tss.gene, tss.tss)].add(tss.cell_or_tissue)
 
         print(expression)
         exit(0)
