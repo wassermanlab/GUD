@@ -895,7 +895,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
             model.source_name = source_name
             model.date = today
             if feat_type == "tss":
-                model.gene = "n/a"
+                model.gene = "%s:%s-%s,%s" % (chrom, start + 1, end, strand)
                 model.tss = 1
                 model.strand = strand
                 if n:
