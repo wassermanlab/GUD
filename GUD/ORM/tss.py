@@ -178,6 +178,7 @@ class TSS(Base):
                     # If TSS not expressed in sample...
                     if s not in exp_tss[tss]:
                         exp_tss.pop(tss, None)
+                        break
 
         print(len(exp_tss))
         exit(0)
