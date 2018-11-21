@@ -52,7 +52,7 @@ class TSS(Base):
 
     @classmethod
     def select_by_bin_range(cls, session, chrom, start, end,
-        sample=[], bins=[], compute_bins=False):
+        sample=[], bins=[], compute_bins=False, avg_tpm=0.0):
         """
         Query objects by chromosomal range using the binning system to
         speed up range searches. If bins are provided, use the given bins.
@@ -64,8 +64,8 @@ class TSS(Base):
         if not bins and compute_bins:
             bins = set(containing_bins(start, end) + contained_bins(start, end))
 
-        q = session.query(cls).filter(
-                cls.chrom == chrom, cls.end > start, cls.start < end)
+        q = session.query(cls).filter(cls.chrom == chrom, cls.end > start,
+            cls.start < end, cls.avg_tpm >= avg_tpm))
 
         if bins:
             q = q.filter(cls.bin.in_((list(bins))))
@@ -76,12 +76,12 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_gene(cls, session, gene):
+    def select_by_gene(cls, session, gene, avg_tpm=0.0):
         """
-        Query objects by gene. If no gene is provided, query all genes.
+        Query objects by gene. If no gene is provided, query all TSSs.
         """
 
-        q = session.query(cls)
+        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
 
         if gene:
             q = q.filter(cls.gene == gene)
@@ -89,13 +89,13 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_genes(cls, session, genes=[]):
+    def select_by_genes(cls, session, genes=[], avg_tpm=0.0):
         """
         Query objects by list of genes. If no genes are provided, query
-        all genes.
+        all TSSs.
         """
 
-        q = session.query(cls)
+        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
 
         if genes:
             q = q.filter(cls.gene.in_(genes))
@@ -103,14 +103,13 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_tss(cls, session, tss=[]):
+    def select_by_tss(cls, session, gene, tss, avg_tpm=0.0):
         """
-        Query objects by TSS. If no TSS is provided, query all TSSs.
-        TSS is provided as a {list} of {lists}/{tuples} in the form 
-        gene, tss.
+        Query objects by TSS (i.e. gene + tss). If no TSS is provided,
+        query all TSSs.
         """
 
-        q = session.query(cls)
+        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
 
         if gene and tss:
             q = q.filter(cls.gene == gene, cls.tss == tss)
@@ -118,14 +117,14 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_multiple_tss(cls, session, tss=[]):
+    def select_by_multiple_tss(cls, session, tss=[], avg_tpm=0.0):
         """
         Query objects by list of TSSs. If no TSS are provided, query
-        all TSSs. TSSs are provided as a {list} of {lists}/{tuples}
-        in the form gene, tss.
+        all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
+        length 2 in the form gene, tss.
         """
 
-        q = session.query(cls)
+        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
 
         if tss:
             # Initialize
@@ -139,13 +138,13 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_sample(cls, session, sample=[]):
+    def select_by_sample(cls, session, sample=[], avg_tpm=0.0):
         """
         Query objects by list of samples. If no samples are provided,
         query all TSSs.
         """
 
-        q = session.query(cls)
+        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
         
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
@@ -154,17 +153,18 @@ class TSS(Base):
 
     @classmethod
     def select_by_differential_expression(cls, session, sample=[],
-        avg_tpm=10.0, perc_tpm=25.0, expression_in_all_samples=False):
+        avg_tpm=0.0, perc_tpm=0.0, exp_in_all_samples=False):
         """
-        Query objects differentially expressed in sample.
+        Query objects differentially expressed in samples.
         """
 
         # Initialize
         expression = {}
-        float_regexp = re.compile("\d+\.\d+")
 
         # For each feat...
-        for feat in cls.select_by_sample(session, sample=sample):
+        for feat in cls.select_by_sample(session, sample, avg_tpm):
+            print(feat)
+            exit(0)
             # If not expression for TSS...
             if (feat.gene, feat.tss) not in expression:
                 expression.setdefault((feat.gene, feat.tss), {})
