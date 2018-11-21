@@ -84,8 +84,8 @@ class ShortTandemRepeat(Base):
 
     def __str__(self):
         return "{}\t{}\t{}\t{}\t{}".format(
-            self.chrom, self.start, self.end, self.length, self.motif)
+            self.chrom, self.start, self.end, self.motif, self.pathogenicity)
 
     def __repr__(self):
-        return "<ShortTandemRepeat(bin={}, chrom={}, start={}, end={}, length={}, motif={}, pathogenicity={})>".format(
-            self.bin, self.chrom, self.start, self.end, self.length, self.motif, self.pathogenicity)
+        return "<ShortTandemRepeat(bin={}, chrom={}, start={}, end={}, motif={}, pathogenicity={})>".format(
+            self.bin, self.chrom, self.start, self.end, self.motif, self.pathogenicity)
