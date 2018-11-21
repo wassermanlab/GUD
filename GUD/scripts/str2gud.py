@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # mysql -u ontarget_w --database tamar_test
-import os, sys, re
+import os
+import sys
+import re
 import argparse
 from binning import assign_bin
-from datetime import date
 import getpass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import mapper, scoped_session, sessionmaker
@@ -18,11 +19,14 @@ from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 # Classes     #
 #-------------#
 
-class Model(object): pass
+
+class Model(object):
+    pass
 
 #-------------#
 # Functions   #
 #-------------#
+
 
 def parse_args():
     """
@@ -30,7 +34,8 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts short tandem repeat location information")
+    parser = argparse.ArgumentParser(
+        description="this script inserts short tandem repeat location information")
 
     parser.add_argument("bed_file", help="gangSTR bed file")
 
@@ -40,13 +45,13 @@ def parse_args():
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db",
-        help="Database name (default = input genome assembly)")
+                             help="Database name (default = input genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
-        help="Host name (default = localhost)")
+                             help="Host name (default = localhost)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="Port number (default = 5506)")
+                             help="Port number (default = 5506)")
     mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
-        help="User name (default = current user)")
+                             help="User name (default = current user)")
 
     args = parser.parse_args()
 
@@ -55,6 +60,7 @@ def parse_args():
         args.db = args.genome
 
     return args
+
 
 def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
 
@@ -68,8 +74,7 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
     engine = create_engine(db_name, echo=False)
     session.remove()
     session.configure(bind=engine, autoflush=False,
-        expire_on_commit=False)
-    today = str(date.today())
+                      expire_on_commit=False)
 
     # Initialize table
     table = ShortTandemRepeat()
@@ -81,26 +86,24 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
         raise ValueError("Cannot create \"short_tandem_repeat\" table!")
     mapper(Model, table.__table__)
 
-    # parse table 
+    # parse table
     with open(bed_file) as f:
-        for line in f: 
+        for line in f:
             split_line = line.split("\t")
             chrom = str(split_line[0])
             start = int(split_line[1])
             end = int(split_line[2])
-            length = int(split_line[3])
             motif = str(split_line[4])
             pathogenicity = 0
 
             model = Model()
-            model.bin             = assign_bin(start, end)
-            model.chrom           = chrom
-            model.start           = start
-            model.end             = end
-            model.length          = length
-            model.motif           = motif
-            model.pathogenicity   = pathogenicity
-            model.date = today
+            model.bin = assign_bin(start, end)
+            model.chrom = chrom
+            model.start = start
+            model.end = end
+            model.motif = motif
+            model.pathogenicity = pathogenicity
+            model.source_name = source_name
 
             session.merge(model)
             session.commit()
@@ -109,6 +112,7 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
 # Main        #
 #-------------#
 
+
 if __name__ == "__main__":
 
     # Parse arguments
@@ -116,4 +120,4 @@ if __name__ == "__main__":
 
     # Insert ENCODE data to GUD database
     insert_str_to_gud_db(args.user, args.host, args.port, args.db,
-     args.bed_file, args.source)
+                         args.bed_file, args.source)
