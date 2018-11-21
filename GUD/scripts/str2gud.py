@@ -97,9 +97,9 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
             model.chrom           = chrom
             model.start           = start
             model.end             = end
-            model.length          = length
             model.motif           = motif
             model.pathogenicity   = pathogenicity
+            model.source_name = source_name
             model.date = today
 
             session.merge(model)
