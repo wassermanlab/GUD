@@ -176,7 +176,7 @@ class TSS(Base):
                 # For each sample...
                 for s in sample:
                     # If TSS not expressed in sample...
-                    if s not in exp_tss(tss):
+                    if s not in exp_tss[tss]:
                         exp_tss.pop(tss, None)
 
         print(len(exp_tss))
