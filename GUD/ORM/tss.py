@@ -75,35 +75,73 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_gene(cls, session, gene, sample=[]):
+    def select_by_gene(cls, session, gene):
         """
-        Query objects by gene.
+        Query objects by gene. If no gene is provided, query all genes.
         """
 
-        q = session.query(cls).filter(cls.gene == gene)
+        q = session.query(cls)
 
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
+        if gene:
+            q = q.filter(cls.gene == gene)
 
         return q.all()
 
     @classmethod
-    def select_by_tss(cls, session, gene, tss, sample=[]):
+    def select_by_genes(cls, session, genes=[]):
         """
-        Query objects by gene tss.
+        Query objects by list of genes. If no genes are provided, query
+        all genes.
         """
 
-        q = session.query(cls).filter(cls.gene == gene, cls.tss == tss)
+        q = session.query(cls)
 
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
+        if genes:
+            q = q.filter(cls.gene.in_(genes))
+
+        return q.all()
+
+    @classmethod
+    def select_by_tss(cls, session, gene, tss):
+        """
+        Query objects by TSS. If no TSS is provided, query all TSSs.
+        """
+
+        q = session.query(cls)
+
+        if gene and tss:
+            q = q.filter(cls.gene == gene, cls.tss == tss)
+
+        return q.all()
+
+    @classmethod
+    def select_by_multiple_tss(cls, session, tss=[]):
+        """
+        Query objects by list of TSSs. If no TSS are provided, query
+        all TSSs. TSSs are provided as a {list} of {tuples} in the form 
+        (gene, tss).
+        """
+
+        from sqlalchemy import or_
+
+        q = session.query(cls)
+
+        if tss:
+            # Initialize
+            tss_filter = []
+            # For each gene, tss pair...
+            for pair in tss:
+                tss_filter.append((cls.gene == pair[0],
+                    cls.tss == pair[1]))
+            q = q.filter(or_(*tss_filter))
 
         return q.all()
 
     @classmethod
     def select_by_sample(cls, session, sample=[]):
         """
-        Query objects by sample.
+        Query objects by list of samples. If no samples are provided,
+        query all TSSs.
         """
 
         q = session.query(cls)
@@ -113,46 +151,59 @@ class TSS(Base):
 
         return q.all()
 
-    @classmethod
-    def select_by_differential_expression(cls, session, sample=[],
-        avg_tpm=0.0, perc_tpm=0.0):
-        """
-        Query objects differentially expressed in sample.
-        """
-
-        import re
-
-        # Initialize
-        tss = []
-        float_regexp = re.compile("\d+\.\d+")
-
-        q = cls.select_by_sample(session, sample=sample)
-
-        # For each feat...
-        for feat in q:
-            print(feat)
-            print("//")
-            continue
-            tpms = map(float, re.findall(float_regexp, feat.tpm))
-            # If enough TPMs...
-            if sum(tpms) / len(tpms) > avg_tpm:
-                tss.append((feat.gene, feat.tss))
-        exit(0)
-                
-        q = q.query(cls.cell_or_tissue.in_(sample))
-
-        q = session.query(cls, func.avg(cls.tpm).label("avg_tpm"),
-            func.sum(cls.percent_tpm).label("sum_perc_tpm")).group_by(
-            cls.gene, cls.tss, cls.chrom, cls.start, cls.end, cls.strand).having(
-            func.avg(cls.tpm) >= avg_tpm_thresh).having(
-            func.sum(cls.percent_tpm) >= sum_perc_tpm_thresh)
-
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-
-        q = q
-        print(q.all())
-        exit(0)
+#    @classmethod
+#    def select_by_differential_expression(cls, session, sample=[],
+#        avg_tpm=0.0, perc_tpm=0.0, tpm_in_all_samples=False):
+#        """
+#        Query objects differentially expressed in sample.
+#        """
+#
+#        import re
+#
+#        # Initialize
+#        tss = {}
+#        float_regexp = re.compile("\d+\.\d+")
+#
+#        # For each feat...
+#        for feat in cls.select_by_sample(session, sample=sample):
+#            # Initialize
+#            if (feat.gene, feat.tss) not in tss:
+#                tss.setdefault((feat.gene, feat.tss), {})
+#                for
+#            # For sample
+#
+##            You are looking for or_
+##
+##            conds = [ Mymodel.a== 'b', Mymodel.b == 'c', Mymodel.c == 'd']
+##            If you have the above list of conditions just pass them all to or_
+##
+##            from sqlalchemy import or_
+##            Mymodel.query.filter(or_(*conds))
+#
+#            
+#            print(feat)
+#            print("//")
+#            continue
+#            tpms = map(float, re.findall(float_regexp, feat.tpm))
+#            # If enough TPMs...
+#            if sum(tpms) / len(tpms) > avg_tpm:
+#                tss.append((feat.gene, feat.tss))
+#        exit(0)
+#                
+#        q = q.query(cls.cell_or_tissue.in_(sample))
+#
+#        q = session.query(cls, func.avg(cls.tpm).label("avg_tpm"),
+#            func.sum(cls.percent_tpm).label("sum_perc_tpm")).group_by(
+#            cls.gene, cls.tss, cls.chrom, cls.start, cls.end, cls.strand).having(
+#            func.avg(cls.tpm) >= avg_tpm_thresh).having(
+#            func.sum(cls.percent_tpm) >= sum_perc_tpm_thresh)
+#
+#        if sample:
+#            q = q.filter(cls.cell_or_tissue.in_(sample))
+#
+#        q = q
+#        print(q.all())
+#        exit(0)
 
     @classmethod
     def feature_exists(cls, session, chrom, start, end, strand,
