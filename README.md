@@ -41,6 +41,185 @@ git submodule add --force git@github.com:oriolfornes/GUD.git
 + Everything in GUD is zero-based open-bookend to keep a standard with BED format
 + Data currently within GUD found [here](https://docs.google.com/document/d/1Jjug_gvsTZk-E1L2sMa8AflUq3SW9RVPOIuNtsQjQZM/edit)
 
+## GUD desc
+
+```
+mysql> show tables;
++----------------------+
+| Tables_in_hg19       |
++----------------------+
+| chrom_size           |
+| conservation         |
+| dna_accessibility    |
+| enhancer             |
+| gene                 |
+| histone_modification |
+| rmsk                 |
+| tad                  |
+| tf_binding           |
+| tss                  |
++----------------------+
+10 rows in set (0.00 sec)
+
+mysql> desc chrom_size;
++-------+------------------+------+-----+---------+-------+
+| Field | Type             | Null | Key | Default | Extra |
++-------+------------------+------+-----+---------+-------+
+| chrom | varchar(5)       | NO   | PRI | NULL    |       |
+| size  | int(10) unsigned | NO   |     | NULL    |       |
++-------+------------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+mysql> desc conservation;
++-------------+----------------------+------+-----+---------+-------+
+| Field       | Type                 | Null | Key | Default | Extra |
++-------------+----------------------+------+-----+---------+-------+
+| bin         | smallint(5) unsigned | NO   | MUL | NULL    |       |
+| chrom       | varchar(5)           | NO   | PRI | NULL    |       |
+| chromStart  | int(10) unsigned     | NO   | PRI | NULL    |       |
+| chromEnd    | int(10) unsigned     | NO   | PRI | NULL    |       |
+| score       | float unsigned       | NO   |     | NULL    |       |
+| source_name | varchar(25)          | NO   | PRI | NULL    |       |
+| date        | date                 | YES  |     | NULL    |       |
++-------------+----------------------+------+-----+---------+-------+
+7 rows in set (0.00 sec)
+
+mysql> desc dna_accessibility;
++-----------------+----------------------+------+-----+---------+-------+
+| Field           | Type                 | Null | Key | Default | Extra |
++-----------------+----------------------+------+-----+---------+-------+
+| bin             | smallint(5) unsigned | NO   | MUL | NULL    |       |
+| chrom           | varchar(5)           | NO   | PRI | NULL    |       |
+| start           | int(10) unsigned     | NO   | PRI | NULL    |       |
+| end             | int(10) unsigned     | NO   | PRI | NULL    |       |
+| cell_or_tissue  | varchar(225)         | NO   | PRI | NULL    |       |
+| experiment_type | varchar(25)          | NO   | PRI | NULL    |       |
+| source_name     | varchar(25)          | NO   | PRI | NULL    |       |
+| date            | date                 | YES  |     | NULL    |       |
++-----------------+----------------------+------+-----+---------+-------+
+8 rows in set (0.00 sec)
+
+mysql> desc enhancer;
++-----------------+----------------------+------+-----+---------+-------+
+| Field           | Type                 | Null | Key | Default | Extra |
++-----------------+----------------------+------+-----+---------+-------+
+| bin             | smallint(5) unsigned | NO   | MUL | NULL    |       |
+| chrom           | varchar(5)           | NO   | PRI | NULL    |       |
+| start           | int(10) unsigned     | NO   | PRI | NULL    |       |
+| end             | int(10) unsigned     | NO   | PRI | NULL    |       |
+| cell_or_tissue  | varchar(225)         | NO   | PRI | NULL    |       |
+| experiment_type | varchar(25)          | NO   | PRI | NULL    |       |
+| source_name     | varchar(25)          | NO   | PRI | NULL    |       |
+| date            | date                 | YES  |     | NULL    |       |
++-----------------+----------------------+------+-----+---------+-------+
+8 rows in set (0.00 sec)
+
+mysql> desc gene;
++-------------+----------------------+------+-----+---------+-------+
+| Field       | Type                 | Null | Key | Default | Extra |
++-------------+----------------------+------+-----+---------+-------+
+| bin         | smallint(5) unsigned | NO   | MUL | NULL    |       |
+| name        | varchar(75)          | NO   | PRI | NULL    |       |
+| chrom       | varchar(5)           | NO   | PRI | NULL    |       |
+| strand      | char(1)              | NO   | PRI | NULL    |       |
+| txStart     | int(10) unsigned     | NO   | PRI | NULL    |       |
+| txEnd       | int(10) unsigned     | NO   | PRI | NULL    |       |
+| cdsStart    | int(10) unsigned     | NO   |     | NULL    |       |
+| cdsEnd      | int(10) unsigned     | NO   |     | NULL    |       |
+| exonStarts  | longblob             | NO   |     | NULL    |       |
+| exonEnds    | longblob             | NO   |     | NULL    |       |
+| name2       | varchar(75)          | NO   | MUL | NULL    |       |
+| source_name | varchar(25)          | NO   | PRI | NULL    |       |
+| date        | date                 | YES  |     | NULL    |       |
++-------------+----------------------+------+-----+---------+-------+
+13 rows in set (0.01 sec)
+
+mysql> desc histone_modification;
++-----------------+----------------------+------+-----+---------+-------+
+| Field           | Type                 | Null | Key | Default | Extra |
++-----------------+----------------------+------+-----+---------+-------+
+| bin             | smallint(5) unsigned | NO   | MUL | NULL    |       |
+| chrom           | varchar(5)           | NO   | PRI | NULL    |       |
+| start           | int(10) unsigned     | NO   | PRI | NULL    |       |
+| end             | int(10) unsigned     | NO   | PRI | NULL    |       |
+| histone_type    | varchar(25)          | NO   | PRI | NULL    |       |
+| cell_or_tissue  | varchar(225)         | NO   | PRI | NULL    |       |
+| experiment_type | varchar(25)          | NO   | PRI | NULL    |       |
+| source_name     | varchar(25)          | NO   | PRI | NULL    |       |
+| date            | date                 | YES  |     | NULL    |       |
++-----------------+----------------------+------+-----+---------+-------+
+9 rows in set (0.00 sec)
+
+mysql> desc rmsk;
++-------------+----------------------+------+-----+---------+-------+
+| Field       | Type                 | Null | Key | Default | Extra |
++-------------+----------------------+------+-----+---------+-------+
+| bin         | smallint(5) unsigned | NO   | MUL | NULL    |       |
+| swScore     | int(10) unsigned     | NO   |     | NULL    |       |
+| genoName    | varchar(5)           | NO   | PRI | NULL    |       |
+| genoStart   | int(10) unsigned     | NO   | PRI | NULL    |       |
+| genoEnd     | int(10) unsigned     | NO   | PRI | NULL    |       |
+| strand      | char(1)              | NO   | PRI | NULL    |       |
+| repName     | varchar(75)          | NO   | PRI | NULL    |       |
+| repClass    | varchar(75)          | NO   | PRI | NULL    |       |
+| repFamily   | varchar(75)          | NO   | PRI | NULL    |       |
+| source_name | varchar(25)          | NO   | PRI | NULL    |       |
+| date        | date                 | YES  |     | NULL    |       |
++-------------+----------------------+------+-----+---------+-------+
+11 rows in set (0.00 sec)
+
+mysql> desc tad;
++--------------------+----------------------+------+-----+---------+-------+
+| Field              | Type                 | Null | Key | Default | Extra |
++--------------------+----------------------+------+-----+---------+-------+
+| bin                | smallint(5) unsigned | NO   | MUL | NULL    |       |
+| chrom              | varchar(5)           | NO   | PRI | NULL    |       |
+| start              | int(10) unsigned     | NO   | PRI | NULL    |       |
+| end                | int(10) unsigned     | NO   | PRI | NULL    |       |
+| cell_or_tissue     | varchar(225)         | NO   | PRI | NULL    |       |
+| experiment_type    | varchar(25)          | NO   | PRI | NULL    |       |
+| restriction_enzyme | varchar(25)          | NO   | PRI | NULL    |       |
+| source_name        | varchar(25)          | NO   | PRI | NULL    |       |
+| date               | date                 | YES  |     | NULL    |       |
++--------------------+----------------------+------+-----+---------+-------+
+9 rows in set (0.00 sec)
+
+mysql> desc tf_binding;
++-----------------+----------------------+------+-----+---------+-------+
+| Field           | Type                 | Null | Key | Default | Extra |
++-----------------+----------------------+------+-----+---------+-------+
+| bin             | smallint(5) unsigned | NO   | MUL | NULL    |       |
+| chrom           | varchar(5)           | NO   | PRI | NULL    |       |
+| start           | int(10) unsigned     | NO   | PRI | NULL    |       |
+| end             | int(10) unsigned     | NO   | PRI | NULL    |       |
+| tf_name         | varchar(25)          | NO   | PRI | NULL    |       |
+| cell_or_tissue  | varchar(225)         | NO   | PRI | NULL    |       |
+| experiment_type | varchar(25)          | NO   | PRI | NULL    |       |
+| source_name     | varchar(25)          | NO   | PRI | NULL    |       |
+| date            | date                 | YES  |     | NULL    |       |
++-----------------+----------------------+------+-----+---------+-------+
+9 rows in set (0.00 sec)
+
+mysql> desc tss;
++-----------------+----------------------+------+-----+---------+-------+
+| Field           | Type                 | Null | Key | Default | Extra |
++-----------------+----------------------+------+-----+---------+-------+
+| bin             | smallint(5) unsigned | NO   | MUL | NULL    |       |
+| gene            | varchar(75)          | YES  | MUL | NULL    |       |
+| tss             | int(11)              | YES  |     | NULL    |       |
+| chrom           | varchar(5)           | NO   | PRI | NULL    |       |
+| start           | int(10) unsigned     | NO   | PRI | NULL    |       |
+| end             | int(10) unsigned     | NO   | PRI | NULL    |       |
+| strand          | char(1)              | NO   | PRI | NULL    |       |
+| cell_or_tissue  | varchar(225)         | NO   | PRI | NULL    |       |
+| avg_tpm         | float                | NO   |     | NULL    |       |
+| experiment_type | varchar(25)          | NO   | PRI | NULL    |       |
+| source_name     | varchar(25)          | NO   | PRI | NULL    |       |
+| date            | date                 | YES  |     | NULL    |       |
++-----------------+----------------------+------+-----+---------+-------+
+12 rows in set (0.00 sec)
+```
+
 
 
 ```

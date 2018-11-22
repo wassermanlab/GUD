@@ -54,7 +54,7 @@ class TSS(Base):
 
     @classmethod
     def select_by_bin_range(cls, session, chrom, start, end,
-        sample=[], bins=[], compute_bins=False, avg_tpm=0.0):
+        sample=[], bins=[], compute_bins=False):
         """
         Query objects by chromosomal range using the binning system to
         speed up range searches. If bins are provided, use the given bins.
@@ -67,7 +67,7 @@ class TSS(Base):
             bins = set(containing_bins(start, end) + contained_bins(start, end))
 
         q = session.query(cls).filter(cls.chrom == chrom, cls.end > start,
-            cls.start < end, cls.avg_tpm >= avg_tpm)
+            cls.start < end)
 
         if bins:
             q = q.filter(cls.bin.in_((list(bins))))
@@ -78,12 +78,12 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_gene(cls, session, gene, sample=[], avg_tpm=0.0):
+    def select_by_gene(cls, session, gene, sample=[]):
         """
         Query objects by gene. If no gene is provided, query all TSSs.
         """
 
-        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
+        q = session.query(cls)
 
         if gene:
             q = q.filter(cls.gene == gene)
@@ -94,13 +94,13 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_genes(cls, session, genes=[], sample=[], avg_tpm=0.0):
+    def select_by_genes(cls, session, genes=[], sample=[]):
         """
         Query objects by list of genes. If no genes are provided, query
         all TSSs.
         """
 
-        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
+        q = session.query(cls)
 
         if genes:
             q = q.filter(cls.gene.in_(genes))
@@ -111,13 +111,13 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_tss(cls, session, gene, tss, sample=[], avg_tpm=0.0):
+    def select_by_tss(cls, session, gene, tss, sample=[]):
         """
         Query objects by TSS (i.e. gene + tss). If no TSS is provided,
         query all TSSs.
         """
 
-        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
+        q = session.query(cls)
 
         if gene and tss:
             q = q.filter(cls.gene == gene, cls.tss == tss)
@@ -128,15 +128,14 @@ class TSS(Base):
         return q.all()
 
     @classmethod
-    def select_by_multiple_tss(cls, session, tss=[], sample=[],
-        avg_tpm=0.0):
+    def select_by_multiple_tss(cls, session, tss=[], sample=[]):
         """
         Query objects by list of TSSs. If no TSS are provided, query
         all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
         length 2 in the form gene, tss.
         """
 
-        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
+        q = session.query(cls)
 
         if tss:
             # Initialize
@@ -152,19 +151,131 @@ class TSS(Base):
 
         return q.all()
 
+#    @classmethod
+#    def select_gene_total_tpm(cls, session, gene):
+#        """
+#        Query objects by list of TSSs. If no TSS are provided, query
+#        all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
+#        length 2 in the form gene, tss.
+#        """
+#
+#        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
+#
+#        if tss:
+#            # Initialize
+#            ands = []
+#            # For each gene, TSS pair...
+#            for i, j in tss:
+#                ands.append(and_(cls.gene == i,
+#                    cls.tss == j))
+#            q = q.filter(or_(*ands))
+#
+#        if sample:
+#            q = q.filter(cls.cell_or_tissue.in_(sample))
+#
+#        return q.all()
+#
+#    @classmethod
+#    def select_genes_total_tpm(cls, session, genes=[]):
+#        """
+#        Query objects by list of TSSs. If no TSS are provided, query
+#        all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
+#        length 2 in the form gene, tss.
+#        """
+#
+#        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
+#
+#        if tss:
+#            # Initialize
+#            ands = []
+#            # For each gene, TSS pair...
+#            for i, j in tss:
+#                ands.append(and_(cls.gene == i,
+#                    cls.tss == j))
+#            q = q.filter(or_(*ands))
+#
+#        if sample:
+#            q = q.filter(cls.cell_or_tissue.in_(sample))
+#
+#        return q.all()
+#
+#    @classmethod
+#    def select_tss_total_tpm(cls, session, gene, tss):
+#        """
+#        Query objects by list of TSSs. If no TSS are provided, query
+#        all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
+#        length 2 in the form gene, tss.
+#        """
+#
+#        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
+#
+#        if tss:
+#            # Initialize
+#            ands = []
+#            # For each gene, TSS pair...
+#            for i, j in tss:
+#                ands.append(and_(cls.gene == i,
+#                    cls.tss == j))
+#            q = q.filter(or_(*ands))
+#
+#        if sample:
+#            q = q.filter(cls.cell_or_tissue.in_(sample))
+#
+#        return q.all()
+#
+#    @classmethod
+#    def select_multiple_tss_total_tpm(cls, session, tss=[]):
+#        """
+#        Query objects by list of TSSs. If no TSS are provided, query
+#        all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
+#        length 2 in the form gene, tss.
+#        """
+#
+#        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
+#
+#        if tss:
+#            # Initialize
+#            ands = []
+#            # For each gene, TSS pair...
+#            for i, j in tss:
+#                ands.append(and_(cls.gene == i,
+#                    cls.tss == j))
+#            q = q.filter(or_(*ands))
+#
+#        if sample:
+#            q = q.filter(cls.cell_or_tissue.in_(sample))
+#
+#        return q.all()
+
     @classmethod
-    def select_by_sample(cls, session, sample=[], avg_tpm=0.0):
+    def select_by_sample(cls, session, sample=[]):
         """
         Query objects by list of samples. If no samples are provided,
         query all TSSs.
         """
 
-        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
+        q = session.query(cls)
 
         if sample:
             q = q.filter(cls.cell_or_tissue.in_(sample))
 
         return q.all()
+
+    @classmethod
+    def select_by_sample_and_relative_exp(cls, session, sample=[],
+        relative_exp=0.25):
+        """
+        Query objects by list of samples. If no samples are provided,
+        query all TSSs.
+        """
+
+        q = session.query(cls)
+
+        if sample:
+            q = q.filter(cls.cell_or_tissue.in_(sample))
+
+        return q.all()
+
 
     @classmethod
     def feature_exists(cls, session, chrom, start, end, strand,
