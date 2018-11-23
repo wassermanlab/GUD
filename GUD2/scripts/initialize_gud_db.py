@@ -80,8 +80,9 @@ def initialize_gud_db(user, host, port, db, genome):
             # Split line
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\w{1,2})$", line[0])
-            if not m.group(1) in GUDglobals.chroms: continue
+            print line
+            m = re.search("^chr(\S+)$", line[0])
+	    if not m.group(1) in GUDglobals.chroms: continue
             # Add row
             rows.append(
                 {
