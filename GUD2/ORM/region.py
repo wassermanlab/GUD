@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String, ForeignKey,
+    Column, Index, PrimaryKeyConstraint, String, ForeignKeyConstraint,
     UniqueConstraint, CheckConstraint
 )
 from sqlalchemy.dialects import mysql
@@ -15,7 +15,7 @@ class Region(Base):
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    chrom = Column("chrom", String(5), nullable=False, ForeignKey('chroms.chrom'))
+    chrom = Column("chrom", String(5), nullable=False)
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
 
@@ -23,6 +23,7 @@ class Region(Base):
         PrimaryKeyConstraint(uid),
         UniqueConstraint(chrom, start, end),
         CheckConstraint('end > start'),
+        ForeignKeyConstraint(['chrom'],['chroms.chrom'])
 
         Index("ix_region", bin, chrom),
 
