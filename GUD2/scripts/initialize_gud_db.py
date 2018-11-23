@@ -3,7 +3,6 @@
 import os, sys, re
 import argparse
 from binning import assign_bin
-from datetime import date
 from ftplib import FTP
 import getpass
 import gzip
@@ -62,7 +61,6 @@ def initialize_gud_db(user, host, port, db, genome):
     session.remove()
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
-    today = str(date.today())
 
     # Create chrom sizes table
     if not engine.has_table("chroms"):

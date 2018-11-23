@@ -1,13 +1,12 @@
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String, ForeignKeyConstraint, ForeignKey,
+    Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint
 )
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
 from GUD2.ORM.chroms import Chroms
 from binning import containing_bins, contained_bins
-Base = declarative_base()
-
+from GUD2.ORM.base import Base
 
 class Region(Base):
 

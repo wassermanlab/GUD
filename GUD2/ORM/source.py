@@ -3,9 +3,7 @@ from sqlalchemy import (
     UniqueConstraint
 )
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
-Base = declarative_base()
-
+from GUD2.ORM.base import Base
 
 class Source(Base):
 

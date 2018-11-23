@@ -1,10 +1,9 @@
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String
+    Column, Index, PrimaryKeyConstraint, String, ForeignKey
 )
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from GUD2.ORM.base import Base
 
 class Chroms(Base):
     
