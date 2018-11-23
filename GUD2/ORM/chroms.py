@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-class Chrom(Base):
+class Chroms(Base):
     
     __tablename__ = "chroms"
 
