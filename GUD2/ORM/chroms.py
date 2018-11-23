@@ -57,5 +57,5 @@ class Chroms(Base):
         return "{}\t{}".format(self.chrom, self.size)
 
     def __repr__(self):
-        return "<Chrom(chrom={}, size={})>".format(
+        return "<Chroms(chrom={}, size={})>".format(
             self.chrom, self.size)

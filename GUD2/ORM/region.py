@@ -1,10 +1,10 @@
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String, ForeignKeyConstraint,
+    Column, Index, PrimaryKeyConstraint, String, ForeignKeyConstraint, ForeignKey,
     UniqueConstraint, CheckConstraint
 )
 from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
-from GUD2.ORM.chrom import Chrom
+from GUD2.ORM.chroms import Chroms
 from binning import containing_bins, contained_bins
 Base = declarative_base()
 
@@ -15,7 +15,7 @@ class Region(Base):
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    chrom = Column("chrom", String(5), nullable=False)
+    chrom = Column("chrom", String(5), ForeignKey('chroms.chrom'), nullable=False)
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
 
@@ -23,7 +23,6 @@ class Region(Base):
         PrimaryKeyConstraint(uid),
         UniqueConstraint(chrom, start, end),
         CheckConstraint('end > start'),
-        ForeignKeyConstraint(['chrom'],['chroms.chrom'])
 
         Index("ix_region", bin, chrom),
 
