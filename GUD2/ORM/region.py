@@ -1,29 +1,29 @@
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String, ForeignKeyConstraint, 
+    Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint
 )
 from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
-from GUD2.ORM.chrom import Chrom 
+from GUD2.ORM.chrom import Chrom
 from binning import containing_bins, contained_bins
 Base = declarative_base()
 
+
 class Region(Base):
-    
+
     __tablename__ = "region"
 
-    uid  = Column("uid", mysql.INTEGER(unsigned=True))
+    uid = Column("uid", mysql.INTEGER(unsigned=True))
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    chrom = Column("chrom", String(5), nullable=False)
+    chrom = Column("chrom", String(5), nullable=False, ForeignKey('chroms.chrom'))
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        ForeignKeyConstraint(['chrom'], ['chrom.chrom']),
         UniqueConstraint(chrom, start, end),
         CheckConstraint('end > start'),
-        
+
         Index("ix_region", bin, chrom),
 
         {
@@ -34,7 +34,7 @@ class Region(Base):
 
     @classmethod
     def select_by_bin_range(cls, session, chrom, start, end,
-        bins=[], compute_bins=False):
+                            bins=[], compute_bins=False):
         """
         Query objects by chromosomal range using the binning system to
         speed up range searches. If bins are provided, use the given bins.
@@ -44,10 +44,11 @@ class Region(Base):
         """
 
         if not bins and compute_bins:
-            bins = set(containing_bins(start, end) + contained_bins(start, end))
+            bins = set(containing_bins(start, end) +
+                       contained_bins(start, end))
 
         q = session.query(cls).filter(cls.chrom == chrom, cls.end > start,
-            cls.start < end)
+                                      cls.start < end)
 
         if bins:
             q = q.filter(cls.bin.in_((list(bins))))
@@ -55,8 +56,8 @@ class Region(Base):
         return q.all()
 
     def __str__(self):
-        return "{}\t{}\t{}\t{}".format(self.bin, self.chrom, 
-                self.start, self.end) 
+        return "{}\t{}\t{}\t{}".format(self.bin, self.chrom,
+                                       self.start, self.end)
 
     def __repr__(self):
         return "<Chrom(uid={}, bin={}, chrom={}, start={}, end={})>".format(

@@ -8,7 +8,7 @@ Base = declarative_base()
 
 class Chrom(Base):
     
-    __tablename__ = "chrom"
+    __tablename__ = "chroms"
 
     chrom = Column("chrom", String(5), nullable=False)
     size = Column("size", mysql.INTEGER(unsigned=True), nullable=False)
