@@ -12,7 +12,7 @@ class Region(Base):
     
     __tablename__ = "region"
 
-    uid  = Column('uid', mysql.INTEGER(unsigned=True))
+    uid  = Column("uid", mysql.INTEGER(unsigned=True))
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
     chrom = Column("chrom", String(5), nullable=False)
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
@@ -24,7 +24,7 @@ class Region(Base):
         UniqueConstraint(chrom, start, end),
         CheckConstraint('end > start'),
         
-        Index("ix_tss", bin, chrom),
+        Index("ix_region", bin, chrom),
 
         {
             "mysql_engine": "MyISAM",

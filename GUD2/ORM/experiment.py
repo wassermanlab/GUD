@@ -18,7 +18,7 @@ class Experiment(Base):
         PrimaryKeyConstraint(uid),
         UniqueConstraint(name),
 
-        Index("ix_tss", name),
+        Index("ix_experiment", name),
 
         {
             "mysql_engine": "MyISAM",

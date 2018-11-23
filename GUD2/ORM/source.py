@@ -18,7 +18,7 @@ class Source(Base):
         PrimaryKeyConstraint(uid),
         UniqueConstraint(name),
 
-        Index("ix_tss", name),
+        Index("ix_source", name),
 
         {
             "mysql_engine": "MyISAM",

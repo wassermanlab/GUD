@@ -19,7 +19,7 @@ class Chrom(Base):
             chrom
         ),
 
-        Index("ix_chrom_size", chrom),
+        Index("ix_chrom", chrom),
 
         {
             "mysql_engine": "MyISAM",

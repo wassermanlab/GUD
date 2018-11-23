@@ -21,7 +21,7 @@ class Sample(Base):
         PrimaryKeyConstraint(uid),
         UniqueConstraint(name, treatment, cell_line, cancer),
 
-        Index("ix_tss", name),
+        Index("ix_sample", name),
 
         {
             "mysql_engine": "MyISAM",
