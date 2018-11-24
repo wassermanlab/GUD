@@ -5,7 +5,7 @@ Object-Relational Mapping (ORM) classes
 __all__ = [
     "chroms", "region", "sample", "source", "experiment"
 ]
-from chroms import Chroms
+from chrom import Chrom
 from region import Region
 from sample import Sample
 from source import Source

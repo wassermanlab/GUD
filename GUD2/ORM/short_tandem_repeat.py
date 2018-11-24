@@ -10,7 +10,7 @@ from GUD2.ORM.base import Base
 
 class ShortTandemRepeat(Base):
 
-    __tablename__ = "short_tandem_repeat"
+    __tablename__ = "short_tandem_repeats"
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     regionID = Column("regionID", Integer, ForeignKey('region.uid'), nullable=False)

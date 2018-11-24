@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import mysql
 from GUD2.ORM.base import Base
 
-class Chroms(Base):
+class Chrom(Base):
     
     __tablename__ = "chroms"
 
@@ -56,5 +56,5 @@ class Chroms(Base):
         return "{}\t{}".format(self.chrom, self.size)
 
     def __repr__(self):
-        return "<Chroms(chrom={}, size={})>".format(
+        return "<Chrom(chrom={}, size={})>".format(
             self.chrom, self.size)

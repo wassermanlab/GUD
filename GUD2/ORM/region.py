@@ -5,12 +5,12 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import mysql
 from binning import containing_bins, contained_bins
-from GUD2.ORM.chroms import Chroms
+from GUD2.ORM.chrom import Chrom
 from GUD2.ORM.base import Base
 
 class Region(Base):
 
-    __tablename__ = "region"
+    __tablename__ = "regions"
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
@@ -52,6 +52,17 @@ class Region(Base):
         if bins:
             q = q.filter(cls.bin.in_((list(bins))))
 
+        return q.all()
+
+    @classmethod
+    def select_by_pos(cls, session, chrom, start, end):
+        """
+        """
+        bins = set(containing_bins(start, end) +
+                   contained_bins(start, end))
+        q = session.query(cls).filter(cls.chrom == chrom, cls.start == start,
+                                      cls.end == end)
+        q = q.filter(cls.bin.in_((list(bins))))
         return q.all()
 
     def __str__(self):

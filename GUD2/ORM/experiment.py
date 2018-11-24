@@ -7,7 +7,7 @@ from GUD2.ORM.base import Base
 
 class Experiment(Base):
 
-    __tablename__ = "experiment"
+    __tablename__ = "experiments"
 
     uid = Column('uid', mysql.INTEGER(unsigned=True), nullable=False)
     name = Column("name", String(250), nullable=False)

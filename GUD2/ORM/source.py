@@ -7,7 +7,7 @@ from GUD2.ORM.base import Base
 
 class Source(Base):
 
-    __tablename__ = "source"
+    __tablename__ = "sources"
 
     uid = Column('uid', mysql.INTEGER(unsigned=True), nullable=False)
     name = Column("name", String(250), nullable=False)
@@ -25,7 +25,7 @@ class Source(Base):
     )
 
     @classmethod
-    def select_by_bin_range(cls, session, name):
+    def select_by_name(cls, session, name):
         """
         Query objects by name of sample type. 
         """
