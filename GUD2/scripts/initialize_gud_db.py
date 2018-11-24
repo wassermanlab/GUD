@@ -12,7 +12,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
 
 from GUD2 import GUDglobals
-from GUD2.ORM.chroms import Chroms
+from GUD2.ORM.chrom import Chrom
 from GUD2.ORM.region import Region
 from GUD2.ORM.sample import Sample
 from GUD2.ORM.source import Source
@@ -66,7 +66,7 @@ def initialize_gud_db(user, host, port, db, genome):
     if not engine.has_table("chroms"):
         # Initialize
         rows = []
-        table = Chroms()
+        table = Chrom()
         table.metadata.bind = engine
         # Create table
         table.metadata.create_all(engine)
