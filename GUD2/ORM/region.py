@@ -4,8 +4,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import mysql
-from GUD2.ORM.chroms import Chroms
 from binning import containing_bins, contained_bins
+from GUD2.ORM.chroms import Chroms
 from GUD2.ORM.base import Base
 
 class Region(Base):
