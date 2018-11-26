@@ -77,7 +77,7 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
     try:
         table.metadata.create_all(engine)
     except:
-        raise ValueError("Cannot create \"short_tandem_repeat\" table!")
+        raise ValueError("Cannot create \"short_tandem_repeats\" table!")
     if not engine.has_table("regions"):
         raise ValueError("No regions table!")
     if not engine.has_table("sources"):
@@ -103,7 +103,7 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
                 region.end = end 
                 session.merge(region)
                 session.commit()
-                reg = region.select_by_pos(session, chrom, start, end)[0].uid
+                reg = region.select_by_pos(session, chrom, start, end).uid
 
             #source entry 
             source = Source()
@@ -112,14 +112,14 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
                 source.name = source_name
                 session.merge(source)
                 session.commit()
-                sou = source.select_by_name(session, source_name)[0]
+                sou = source.select_by_name(session, source_name)
 
             #str entry 
             STR = ShortTandemRepeat()
             STR.motif = motif 
             STR.pathogenicity = pathogenicity
-            STR.regionID = reg.uid
-            STR.sourceID = sou.uid
+            STR.regionID = reg[0].uid
+            STR.sourceID = sou[0].uid
             session.merge(STR)
             session.commit()
 
