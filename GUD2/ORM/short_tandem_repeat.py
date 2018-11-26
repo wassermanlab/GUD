@@ -2,7 +2,6 @@ from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint, Integer
 )
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import mysql
 from GUD2.ORM.region import Region
 from GUD2.ORM.source import Source
