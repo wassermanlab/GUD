@@ -7,6 +7,7 @@ from sqlalchemy.dialects import mysql
 from GUD2.ORM.region import Region
 from GUD2.ORM.source import Source
 from GUD2.ORM.base import Base
+from binning import containing_bins, contained_bins
 
 class ShortTandemRepeat(Base):
 
@@ -37,18 +38,47 @@ class ShortTandemRepeat(Base):
         """
         Query objects based off of their location being within the start only
         motifs through that  
-        """
-        region = Region()
-        regions_in_range = region.select_by_bin_range(session, chrom, start, 
-        end, [], True)
+         """
+        # print(chrom, start, end)
+        # q = Region.select_by_bin_range(session, chrom, start, end, [], True, False)
 
-        q = session.query(cls, regions_in_range).\
-        filter(cls.regionID == regions_in_range.uid)
-
+        bins = set(containing_bins(start, end) + contained_bins(start, end))
+        
+        q = session.query(cls, Region).\
+        join().\
+        filter(Region.uid == cls.regionID).\
+        filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
+        filter(Region.bin.in_(bins))
         return q.all()
+    
+    @classmethod 
+    def select_by_pathogenicity(cls, session):
+        """returns all strs that are pathogenic"""
+        q = session.query(cls).filter(cls.pathogenicity != 0)
+
+        return q.all() 
+
+    @classmethod
+    def select_by_motif(cls, session, motif, compute_rotations=False):
+        """returns all occurences of a certain motif computing 
+        rotations if requested"""
+        if compute_rotations is True: #compute the rotations
+            motif_len = len(motif)
+            motif_temp = motif 
+            motifs = []
+            for i in range(motif_len):
+                motif_temp = motif_temp[1:motif_len] + motif_temp[0]
+                motifs.append(motif_temp)    
+        else:    
+            motifs = [motif]
+
+        q = session.query(cls).filter(cls.motif.in_(motifs))
+
+        return q.all()    
+
 
     def __str__(self):
-        return "{}\t{}".format(self.motif, self.pathogenicit)
+        return "{}\t{}".format(self.motif, self.pathogenicity)
 
     def __repr__(self):
         return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={}, motif={}, pathogencity={})>".format(

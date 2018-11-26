@@ -33,7 +33,7 @@ class Region(Base):
 
     @classmethod
     def select_by_bin_range(cls, session, chrom, start, end,
-                            bins=[], compute_bins=False):
+                            bins=[], compute_bins=False, return_list=True):
         """
         Query objects by chromosomal range using the binning system to
         speed up range searches. If bins are provided, use the given bins.
@@ -52,7 +52,10 @@ class Region(Base):
         if bins:
             q = q.filter(cls.bin.in_((list(bins))))
 
-        return q.all()
+        if return_list:
+            return q.all()
+
+        return q
 
     @classmethod
     def select_by_pos(cls, session, chrom, start, end):
