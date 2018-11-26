@@ -13,8 +13,8 @@ class ShortTandemRepeat(Base):
     __tablename__ = "short_tandem_repeats"
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
-    regionID = Column("regionID", Integer, ForeignKey('region.uid'), nullable=False)
-    sourceID = Column("sourceID", Integer, ForeignKey('source.uid'), nullable=False)
+    regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
+    sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
     motif = Column("motif", String(30), nullable=False)
     pathogenicity = Column("pathogenicity", mysql.INTEGER(unsigned=True), nullable=False)
 
