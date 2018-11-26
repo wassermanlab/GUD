@@ -2,7 +2,6 @@ from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint
 )
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import mysql
 from binning import containing_bins, contained_bins
 from GUD2.ORM.chrom import Chrom

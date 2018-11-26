@@ -27,7 +27,7 @@ class TSS(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(uid, regionID, sourceID, sampleID, experimentID),
+        UniqueConstraint(regionID, sourceID, sampleID, experimentID),
 
         Index("ix_tss", regionID), ## query by bin range 
         Index("ix_tss_gene", gene, tss),

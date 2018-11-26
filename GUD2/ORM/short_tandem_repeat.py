@@ -20,7 +20,7 @@ class ShortTandemRepeat(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(uid, regionID, sourceID),
+        UniqueConstraint(regionID, sourceID),
 
         Index("ix_str", regionID),
         Index("ix_str_pathogenic", pathogenicity),

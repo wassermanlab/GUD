@@ -25,7 +25,7 @@ class Gene(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(uid, regionID, sourceID, strand),
+        UniqueConstraint(regionID, sourceID, strand, name),
 
         Index("ix_gene", regionID),
         Index("ix_gene_acce", name),

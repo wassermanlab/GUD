@@ -101,7 +101,7 @@ def initialize_gud_db(user, host, port, db, genome):
                 source.name = "refGene"
                 session.merge(source)
                 session.commit()
-                sou = source.select_by_name(session, source_name)
+                sou = source.select_by_name(session, "refGene")
 
             ##Gene
             gene = Gene()
