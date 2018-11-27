@@ -28,11 +28,18 @@ class Sample(Base):
     )
 
     @classmethod
-    def select_by_bin_range(cls, session, name):
+    def select_by_name(cls, session, name):
         """
         Query objects by name of sample type. 
         """
-        q = session.query(cls).filter(cls.name == name, )
+        q = session.query(cls).filter(cls.name == name)
+
+        return q.all()
+    
+    @classmethod 
+    def select_exact_sample(cls, session, name, treatment, cell_line, cancer):
+        q = session.query(cls).filter(cls.name == name, cls.treatment == treatment,
+        cls.cell_line == cell_line, cls.cancer == cancer)
 
         return q.all()
 

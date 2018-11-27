@@ -25,7 +25,7 @@ class Experiment(Base):
     )
 
     @classmethod
-    def select_by_bin_range(cls, session, name):
+    def select_by_name(cls, session, name):
         """
         Query objects by name of sample type. 
         """
