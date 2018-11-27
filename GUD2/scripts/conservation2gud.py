@@ -91,7 +91,7 @@ def initialize_gud_db(user, host, port, db, genome):
                 region.bin = assign_bin(int(line[2]), int(line[3]))
                 region.chrom = line[1]
                 region.start = int(line[2])
-                region.end = int(line[3]))
+                region.end = int(line[3])
                 session.merge(region)
                 session.commit()
                 reg = region.select_by_pos(session, chrom, start, end)
@@ -124,8 +124,11 @@ def get_ftp_dir_and_file(genome, data_type):
     except:
         raise ValueError("Cannot connect to FTP goldenPath folder: %s" % genome)
 
-    elif data_type == "rmsk":
-        return "database", "rmsk.txt.gz"
+    if data_type == "conservation":
+        regexp = re.compile("(multiz\d+way.txt.gz)")
+        for file_name in sorted(filter(regexp.search, ftp.nlst("database"))):
+            m = re.search(regexp, file_name)
+            return "database", m.group(1)
 
 def fetch_lines_from_ftp_file(genome, directory, file_name):
     

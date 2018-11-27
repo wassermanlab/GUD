@@ -131,17 +131,8 @@ def get_ftp_dir_and_file(genome, data_type):
         raise ValueError("Cannot connect to FTP goldenPath folder: %s" % genome)
 
     # Fetch bigZips and database files
-    if data_type == "chrom_size":
-        return "bigZips", "%s.chrom.sizes" % genome
-    elif data_type == "gene":
+    if data_type == "gene":
         return "database", "refGene.txt.gz"
-    elif data_type == "rmsk":
-        return "database", "rmsk.txt.gz"
-    elif data_type == "conservation":
-        regexp = re.compile("(multiz\d+way.txt.gz)")
-        for file_name in sorted(filter(regexp.search, ftp.nlst("database"))):
-            m = re.search(regexp, file_name)
-            return "database", m.group(1)
 
 def fetch_lines_from_ftp_file(genome, directory, file_name):
     

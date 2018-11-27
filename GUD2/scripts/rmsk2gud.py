@@ -124,7 +124,7 @@ def get_ftp_dir_and_file(genome, data_type):
     except:
         raise ValueError("Cannot connect to FTP goldenPath folder: %s" % genome)
 
-    elif data_type == "rmsk":
+    if data_type == "rmsk":
         return "database", "rmsk.txt.gz"
 
 def fetch_lines_from_ftp_file(genome, directory, file_name):

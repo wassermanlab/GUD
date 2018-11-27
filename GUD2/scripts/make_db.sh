@@ -5,10 +5,10 @@
 nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.str2gud /space/data/gangSTR/hg19_ver10.sorted.bed -u ontarget_w -d tamar_test &
 
 # insert the gene table
-nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.gene2gud hg19 -u ontarget_w -d tamar_test &
+nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.refgene2gud hg19 -u ontarget_w -d tamar_test &
 
 #conservation
-/usr/local/python2.7.14/bin/python -m GUD2.scripts.conservation2gud hg19 -u ontarget_w -d tamar_test
+nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.conservation2gud hg19 -u ontarget_w -d tamar_test &
 
 #rmsk
-/usr/local/python2.7.14/bin/python -m GUD2.scripts.rmsk2gud hg19 -u ontarget_w -d tamar_test
+nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.rmsk2gud hg19 -u ontarget_w -d tamar_test &
