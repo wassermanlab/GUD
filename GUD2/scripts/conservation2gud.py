@@ -63,7 +63,6 @@ def initialize_gud_db(user, host, port, db, genome):
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
 
-
     # Create conservation table
     if not engine.has_table("conservation"):
         # Initialize
@@ -97,20 +96,21 @@ def initialize_gud_db(user, host, port, db, genome):
                 reg = region.select_by_pos(session, chrom, start, end)
             #source entry 
             source = Source()
-            sou = source.select_by_name(session, source_name)
+            sou = source.select_by_name(session, source_name.group(1))
             if not sou: 
-                source.name = source_name
+                source.name = source_name.group(1)
                 session.merge(source)
                 session.commit()
-                sou = source.select_by_name(session, source_name)
+                sou = source.select_by_name(session, source_name.group(1))
             #conservation entry 
             conservation = Conservation()
             if conservation.is_unique(session, reg[0].uid, sou[0].uid):
-                conservation.score = line[6] 
+                conservation.score = line[6]
                 conservation.regionID = reg[0].uid
                 conservation.sourceID = sou[0].uid
                 session.merge(conservation)
-                session.commit()
+                session.commit()  
+
 
 def get_ftp_dir_and_file(genome, data_type):
 
@@ -124,6 +124,7 @@ def get_ftp_dir_and_file(genome, data_type):
     except:
         raise ValueError("Cannot connect to FTP goldenPath folder: %s" % genome)
 
+    # Fetch bigZips and database files
     if data_type == "conservation":
         regexp = re.compile("(multiz\d+way.txt.gz)")
         for file_name in sorted(filter(regexp.search, ftp.nlst("database"))):
