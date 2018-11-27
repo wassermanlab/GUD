@@ -82,7 +82,7 @@ class ShortTandemRepeat(Base):
         if len(q) == 0:
             return True
         else: 
-            return False: 
+            return False 
 
     def __str__(self):
         return "{}\t{}".format(self.motif, self.pathogenicity)
