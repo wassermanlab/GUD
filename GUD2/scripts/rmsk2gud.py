@@ -81,13 +81,16 @@ def initialize_gud_db(user, host, port, db, genome):
             m = re.search("^chr(\S+)$", line[5])
             if not m.group(1) in GUDglobals.chroms: continue
             #region entry 
+            chrom = line[5]
+            start = int(line[6])
+            end = int(line[7])
             region = Region()
             reg = region.select_by_pos(session, chrom, start, end)
             if not reg: 
-                region.bin = assign_bin(int(line[6]), int(line[7]))
-                region.chrom = line[5]
-                region.start = int(line[6])
-                region.end = int(line[7])
+                region.bin = assign_bin(start, end)
+                region.chrom = chrom
+                region.start = start
+                region.end = end
                 session.merge(region)
                 session.commit()
                 reg = region.select_by_pos(session, chrom, start, end)
