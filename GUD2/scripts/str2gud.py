@@ -67,13 +67,12 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
     session = scoped_session(sessionmaker())
     engine = create_engine(db_name, echo=False)
     session.remove()
-    session.configure(bind=engine, autoflush=False,
+    session.configure(bind=engine, autoflush=True,
                       expire_on_commit=False)
 
     # Initialize table
     table = ShortTandemRepeat()
     table.metadata.bind = engine
-    # if not engine.has_table("short_tandem_repeat"):
     try:
         table.metadata.create_all(engine)
     except:

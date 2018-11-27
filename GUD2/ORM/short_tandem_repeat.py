@@ -2,6 +2,7 @@ from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint, Integer
 )
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import mysql
 from GUD2.ORM.region import Region
 from GUD2.ORM.source import Source
@@ -14,7 +15,9 @@ class ShortTandemRepeat(Base):
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
+    child = relationship("Region")
     sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
+    source = relationship("Source")
     motif = Column("motif", String(30), nullable=False)
     pathogenicity = Column("pathogenicity", mysql.INTEGER(unsigned=True), nullable=False)
 
