@@ -115,11 +115,11 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
 
             #str entry 
             STR = ShortTandemRepeat()
-            if STR.is_unique(session, reg[0].uid, sou[0].uid):
+            if STR.is_unique(session, reg.uid, sou.uid):
                 STR.motif = motif 
                 STR.pathogenicity = pathogenicity
-                STR.regionID = reg[0].uid
-                STR.sourceID = sou[0].uid
+                STR.regionID = reg.uid
+                STR.sourceID = sou.uid
                 session.merge(STR)
                 session.commit()
 

@@ -65,7 +65,7 @@ class Region(Base):
         q = session.query(cls).filter(cls.chrom == chrom, cls.start == start,
                                       cls.end == end)
         q = q.filter(cls.bin.in_((list(bins))))
-        return q.all()
+        return q.first()
 
     def __str__(self):
         return "{}\t{}\t{}\t{}".format(self.bin, self.chrom,

@@ -104,14 +104,14 @@ def initialize_gud_db(user, host, port, db, genome):
                 sou = source.select_by_name(session, "rmsk")
             #conservation entry 
             rmsk = RepeatMask()
-            if rmsk.is_unique(session, reg[0].uid, sou[0].uid):
+            if rmsk.is_unique(session, reg.uid, sou.uid):
                 rmsk.swScore = line[1] 
                 rmsk.repName = line[10] 
                 rmsk.repClass = line[11] 
                 rmsk.repFamily = line[12]
                 rmsk.strand = line[9] 
-                rmsk.regionID = reg[0].uid
-                rmsk.sourceID = sou[0].uid
+                rmsk.regionID = reg.uid
+                rmsk.sourceID = sou.uid
                 session.merge(rmsk)
                 session.commit()           
 

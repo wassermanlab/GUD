@@ -105,10 +105,10 @@ def initialize_gud_db(user, host, port, db, genome):
             sou = source.select_by_name(session, source_name.group(1))
             
             conservation = Conservation()
-            if conservation.is_unique(session, reg[0].uid, sou[0].uid):
+            if conservation.is_unique(session, reg.uid, sou.uid):
                 conservation.score = line[6]
-                conservation.regionID = reg[0].uid
-                conservation.sourceID = sou[0].uid
+                conservation.regionID = reg.uid
+                conservation.sourceID = sou.uid
                 rows.append(conservation)
             if len(rows) == 100000:
                 session.add_all(rows)

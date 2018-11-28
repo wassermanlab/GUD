@@ -174,7 +174,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                         samples[sample_names[m.group(1)]].append(float(tpm))
                         total_tpms += float(tpm)
             # For each sample...
-            for sample in samples:
+            for s in samples:
                 ## Region
                 sample = Sample()
                 samp = sample.select_exact_sample(session, name, treatment, cell_line, cancer)
@@ -186,7 +186,7 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                     session.merge(samp)
                     session.commit()
                     samp = sample.select_exact_sample(session, name, treatment, cell_line, cancer)
-                model.cell_or_tissue = sample ## ask oriol about this 
+                model.cell_or_tissue = s ## ask oriol about this 
                 # Skip enhancers with 0 tpm
                 if sum(samples[sample]) == 0: continue
                 if feat_type == "tss":
@@ -194,10 +194,10 @@ def insert_fantom_to_gud_db(user, host, port, db, matrix_file,
                 
                 ## Sample 
                 ## Feature commiting 
-                feat.regionID = reg[0].uid
-                feat.sourceID = sou[0].uid
-                feat.sampleID = samp[0].uid 
-                feat.experimentID = ex[0].uid
+                feat.regionID = reg.uid
+                feat.sourceID = sou.uid
+                feat.sampleID = samp.uid 
+                feat.experimentID = ex.uid
                 session.merge(feat)
                 session.commit()
 

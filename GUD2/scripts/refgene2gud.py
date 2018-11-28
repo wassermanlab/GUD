@@ -105,8 +105,8 @@ def initialize_gud_db(user, host, port, db, genome):
 
             ##Gene
             gene = Gene()
-            gene.regionID = reg[0].uid
-            gene.sourceID = sou[0].uid
+            gene.regionID = reg.uid
+            gene.sourceID = sou.uid
             gene.name = line[1]
             gene.cdsStart = line[6]
             gene.cdsEnd = line[7]

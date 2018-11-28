@@ -41,7 +41,7 @@ class Sample(Base):
         q = session.query(cls).filter(cls.name == name, cls.treatment == treatment,
         cls.cell_line == cell_line, cls.cancer == cancer)
 
-        return q.all()
+        return q.first()
 
     def __str__(self):
         return "{}\t{}\t{}\t{}".format(self.name, self.treatment,

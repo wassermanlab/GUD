@@ -29,9 +29,9 @@ class Source(Base):
         """
         Query objects by name of sample type. 
         """
-        q = session.query(cls).filter(cls.name == name, )
+        q = session.query(cls).filter(cls.name == name)
 
-        return q.all()
+        return q.first()
 
     def __str__(self):
         return "{}".format(self.name)
