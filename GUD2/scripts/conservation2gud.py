@@ -88,32 +88,34 @@ def initialize_gud_db(user, host, port, db, genome):
             start = int(line[2])
             end = int(line[3])
             region = Region()
+            source = Source()
             reg = region.select_by_pos(session, chrom, start, end)
-            if not reg: 
+            sou = source.select_by_name(session, source_name.group(1))
+            if not reg:
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
                 region.start = start
                 region.end = end
-                session.merge(region)
-                session.commit()
-                reg = region.select_by_pos(session, chrom, start, end)
-            #source entry 
-            source = Source()
-            sou = source.select_by_name(session, source_name.group(1))
-            if not sou: 
+                session.add(region)
+            if not sou:    
                 source.name = source_name.group(1)
-                session.merge(source)
-                session.commit()
-                sou = source.select_by_name(session, source_name.group(1))
-            #conservation entry 
+                session.add(source)
+            session.commit()
+            reg = region.select_by_pos(session, chrom, start, end)
+            sou = source.select_by_name(session, source_name.group(1))
+            
             conservation = Conservation()
             if conservation.is_unique(session, reg[0].uid, sou[0].uid):
                 conservation.score = line[6]
                 conservation.regionID = reg[0].uid
                 conservation.sourceID = sou[0].uid
-                session.merge(conservation)
-                session.commit()  
-
+                rows.append(conservation)
+            if len(rows) == 100000:
+                session.add_all(rows)
+                session.commit()
+                rows = []  
+        session.add_all(rows)
+        session.commit()
 
 def get_ftp_dir_and_file(genome, data_type):
 
