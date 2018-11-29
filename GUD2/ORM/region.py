@@ -3,7 +3,7 @@ from sqlalchemy import (
     UniqueConstraint, CheckConstraint
 )
 from sqlalchemy.dialects import mysql
-from binning import containing_bins, contained_bins
+from binning import assign_bin, containing_bins, contained_bins
 from GUD2.ORM.chrom import Chrom
 from GUD2.ORM.base import Base
 
@@ -56,20 +56,15 @@ class Region(Base):
 
         return q
 
-    # Comment for tamario:
-    # Change name to select_by_exact_location
     @classmethod
-    def select_by_pos(cls, session, chrom, start, end):
+    def select_by_exact_location(cls, session, chrom, start, end):
         """
         """
 
-        bins = set(containing_bins(start, end) +
-                   contained_bins(start, end))
+        bin = assign_bin(start, end)
 
-        q = session.query(cls).filter(cls.chrom == chrom, cls.start == start,
-                                      cls.end == end)
-
-        q = q.filter(cls.bin.in_((list(bins))))
+        q = session.query(cls).filter(cls.bin == bin,
+            cls.chrom == chrom, cls.start == start, cls.end == end)
 
         return q.first()
 
