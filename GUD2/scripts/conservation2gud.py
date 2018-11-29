@@ -27,7 +27,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script initializes a GUD database for the given genome.")
+    parser = argparse.ArgumentParser(description="this script inserts the UCSC's \"multizNway\" alignment for the input genome into GUD.")
 
     parser.add_argument("genome", help="Genome assembly")
 
@@ -50,7 +50,8 @@ def parse_args():
 
     return args
 
-def initialize_gud_db(user, host, port, db, genome):
+def insert_conservation_to_gud_db(user, host, port,
+    db, genome):
 
     # Initialize
     db_name = "mysql://{}:@{}:{}/{}".format(
@@ -74,7 +75,16 @@ def initialize_gud_db(user, host, port, db, genome):
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "conservation")
         # Get source name
-        source_name = re.search("^(.+).txt.gz$", file_name)
+        source = Source()
+        m = re.search("^(.+).txt.gz$", file_name)
+        source_name = m.group(1)
+        sou = source.select_by_name(session, source_name)
+        if not sou:
+            # Insert source name
+            source.name = source_name
+            session.add(source)
+            session.commit()
+            sou = source.select_by_name(session, source_name)
         # Download data
         for line in fetch_lines_from_ftp_file(
             genome, directory, file_name):
@@ -83,27 +93,23 @@ def initialize_gud_db(user, host, port, db, genome):
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[1])
             if not m.group(1) in GUDglobals.chroms: continue
-            #region entry 
+            # Get coordinates
             chrom = line[1]
             start = int(line[2])
             end = int(line[3])
+            # Get region
             region = Region()
-            source = Source()
             reg = region.select_by_pos(session, chrom, start, end)
-            sou = source.select_by_name(session, source_name.group(1))
             if not reg:
+                # Insert region
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
                 region.start = start
                 region.end = end
                 session.add(region)
-            if not sou:    
-                source.name = source_name.group(1)
-                session.add(source)
-            session.commit()
-            reg = region.select_by_pos(session, chrom, start, end)
-            sou = source.select_by_name(session, source_name.group(1))
-            
+                session.commit()
+                reg = region.select_by_pos(session, chrom, start, end)
+            # Insert conserved regions in bulks of 100,000
             conservation = Conservation()
             if conservation.is_unique(session, reg.uid, sou.uid):
                 conservation.score = line[6]
@@ -113,7 +119,7 @@ def initialize_gud_db(user, host, port, db, genome):
             if len(rows) == 100000:
                 session.add_all(rows)
                 session.commit()
-                rows = []  
+                rows = []
         session.add_all(rows)
         session.commit()
 
@@ -137,7 +143,7 @@ def get_ftp_dir_and_file(genome, data_type):
             return "database", m.group(1)
 
 def fetch_lines_from_ftp_file(genome, directory, file_name):
-    
+
     # Initialize
     global BIO
     ftp = FTP("hgdownload.soe.ucsc.edu")
@@ -177,7 +183,6 @@ if __name__ == "__main__":
     # Parse arguments
     args = parse_args()
 
-    # Initialize GUD database: create tables
-    # and download data to populate them 
-    initialize_gud_db(args.user, args.host,
+    # Insert conservation to GUD database
+    insert_conservation_to_gud_db(args.user, args.host,
         args.port, args.db, args.genome)

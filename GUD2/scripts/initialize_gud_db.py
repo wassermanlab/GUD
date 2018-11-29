@@ -27,7 +27,9 @@ def parse_args():
     This function parses arguments provided via the command
     line using argparse.
     """
+
     parser = argparse.ArgumentParser(description="this script initializes a GUD database for the given genome.")
+
     parser.add_argument("genome", help="Genome assembly")
 
     # MySQL args
@@ -62,13 +64,11 @@ def initialize_gud_db(user, host, port, db, genome):
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
 
-    # Create chrom sizes table
     if not engine.has_table("chroms"):
-        # Initialize
+        # Create table
         rows = []
         table = Chrom()
         table.metadata.bind = engine
-        # Create table
         table.metadata.create_all(engine)
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "chrom_size")
@@ -79,7 +79,7 @@ def initialize_gud_db(user, host, port, db, genome):
             line = line.split("\t")
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[0])
-	    if not m.group(1) in GUDglobals.chroms: continue
+            if not m.group(1) in GUDglobals.chroms: continue
             # Add row
             rows.append(
                 {
@@ -90,22 +90,22 @@ def initialize_gud_db(user, host, port, db, genome):
         # Insert rows to table
         engine.execute(table.__table__.insert(), rows)
     if not engine.has_table("region"):
-        # initialize table
+        # Create table
         table = Region()
         table.metadata.bind = engine
         table.metadata.create_all(engine)
     if not engine.has_table("sample"):
-        # initialize table
+        # Create table
         table = Sample()
         table.metadata.bind = engine
         table.metadata.create_all(engine)
     if not engine.has_table("source"):
-        # initialize table
+        # Create table
         table = Source()
         table.metadata.bind = engine
         table.metadata.create_all(engine)
     if not engine.has_table("experiment"):
-        # initialize table
+        # Create table
         table = Experiment()
         table.metadata.bind = engine
         table.metadata.create_all(engine)
@@ -127,7 +127,7 @@ def get_ftp_dir_and_file(genome, data_type):
         return "bigZips", "%s.chrom.sizes" % genome
 
 def fetch_lines_from_ftp_file(genome, directory, file_name):
-    
+
     # Initialize
     global BIO
     ftp = FTP("hgdownload.soe.ucsc.edu")
@@ -148,7 +148,6 @@ def fetch_lines_from_ftp_file(genome, directory, file_name):
         # If compressed file...
         if file_name.endswith(".gz"):
             f = gzip.GzipFile(fileobj=BIO, mode="rb")
-        # ... Else...
         else:
             f = BIO
         # For each line...
@@ -167,7 +166,6 @@ if __name__ == "__main__":
     # Parse arguments
     args = parse_args()
 
-    # Initialize GUD database: create tables
-    # and download data to populate them 
+    # Initialize GUD database
     initialize_gud_db(args.user, args.host,
         args.port, args.db, args.genome)

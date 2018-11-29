@@ -56,15 +56,21 @@ class Region(Base):
 
         return q
 
+    # Comment for tamario:
+    # Change name to select_by_exact_location
     @classmethod
     def select_by_pos(cls, session, chrom, start, end):
         """
         """
+
         bins = set(containing_bins(start, end) +
                    contained_bins(start, end))
+
         q = session.query(cls).filter(cls.chrom == chrom, cls.start == start,
                                       cls.end == end)
+
         q = q.filter(cls.bin.in_((list(bins))))
+
         return q.first()
 
     def __str__(self):
