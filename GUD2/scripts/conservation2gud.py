@@ -74,7 +74,7 @@ def insert_conservation_to_gud_db(user, host, port,
         table.metadata.create_all(engine)
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "conservation")
-        # Get source name
+        # Get source
         source = Source()
         m = re.search("^(.+).txt.gz$", file_name)
         source_name = m.group(1)

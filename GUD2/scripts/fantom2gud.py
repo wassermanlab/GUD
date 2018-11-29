@@ -15,11 +15,12 @@ import warnings
 
 # Import from GUD module
 from GUD2 import GUDglobals
-from GUD2.ORM.tss import TSS
+from GUD2.ORM.enhancer import Enhancer
 from GUD2.ORM.experiment import Experiment
 from GUD2.ORM.region import Region
 from GUD2.ORM.sample import Sample
 from GUD2.ORM.source import Source
+from GUD2.ORM.tss import TSS
 
 #-------------#
 # Functions   #
@@ -61,8 +62,8 @@ def insert_fantom_to_gud_db(user, host, port, db,
     matrix_file, samples_file, feat_type, source_name):
 
     # Initialize
+    samples = {}
     sample_ids = []
-    sample_metadata = {}
     db_name = "mysql://{}:@{}:{}/{}".format(
         user, host, port, db)
     if not database_exists(db_name):
@@ -90,7 +91,7 @@ def insert_fantom_to_gud_db(user, host, port, db,
         if line[6] == "Yes": cancer = True
         else: cancer = False
         # Get sample
-        sample_metadata.setdefault(sample_id, {
+        samples.setdefault(sample_id, {
             "sample_name": sample_name,
             "cell_or_tissue": cell_or_tissue,
             "add": add,
@@ -99,29 +100,14 @@ def insert_fantom_to_gud_db(user, host, port, db,
             "cancer": cancer
         })
 
-    # Initialize enhancer table
-    if feat_type == "enhancer":
-        table = Enhancer()
-        lines = GUDglobals.parse_csv_file(matrix_file, gz)
-        counts_start_at = 1
-    # Initialize tss table
-    if feat_type == "tss":
-        table = TSS()
-        lines = GUDglobals.parse_tsv_file(matrix_file, gz)
-        counts_start_at = 7
-    # Create table    
-    if not engine.has_table(feat_type):
-        table.metadata.bind = engine
-        table.metadata.create_all(engine)
-
     # Get experiment
     experiment = Experiment()
     exp = experiment.select_by_name(session, "CAGE")
     if not exp:    
         experiment.name = "CAGE"
         session.add(experiment)
-    session.commit()
-    exp = experiment.select_by_name(session, "CAGE")
+        session.commit()
+        exp = experiment.select_by_name(session, "CAGE")
 
     # Get source
     source = Source()
@@ -129,18 +115,26 @@ def insert_fantom_to_gud_db(user, host, port, db,
     if not sou:    
         source.name = source_name
         session.add(source)
-    session.commit()
-    sou = source.select_by_name(session, source_name)
+        session.commit()
+        sou = source.select_by_name(session, source_name)
 
-    print(exp, sou)
-    exit(0)
-
-
-    # Insert data
+    # Create enhancer/TSS tables
+    if feat_type == "enhancer":
+        table = Enhancer()
+        lines = GUDglobals.parse_csv_file(matrix_file, gz)
+        counts_start_at = 1
+    if feat_type == "tss":
+        table = TSS()
+        lines = GUDglobals.parse_tsv_file(matrix_file, gz)
+        counts_start_at = 7    
+    if not engine.has_table(feat_type):
+        table.metadata.bind = engine
+        table.metadata.create_all(engine)
+    # For each line...
     for line in lines:
         # Skip comments
         if line[0].startswith("#"): continue
-        # If no samples...
+        # Get sample IDs
         if len(sample_ids) == 0:
             for sample in line[counts_start_at:]:
                 m = re.search("(CNhs\d+)", unquote(sample))
@@ -148,9 +142,9 @@ def insert_fantom_to_gud_db(user, host, port, db,
         # If enhancer/TSS...
         elif line[0].startswith("chr") or line[0].startswith("\"chr"):
             # Initialize
-            samples = {}
-            total_tpms = 0.0
-            # Get chrom, start, end
+            data = {}
+            rows = []
+            # Get coordinates
             if feat_type == "enhancer":
                 m = re.search("(chr\S+)\:(\d+)\-(\d+)", line[0])
             if feat_type == "tss":
@@ -161,101 +155,79 @@ def insert_fantom_to_gud_db(user, host, port, db,
             end = int(m.group(3))
             if feat_type == "tss":
                 strand = m.group(4)
+                if n:
+                    gene = n.group(2)
+                    tss_id = n.group(1)
+                else:
+                    gene = None
+                    tss_id = 1
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", chrom)
             if not m.group(1) in GUDglobals.chroms: continue
-
             # Get region
             region = Region()
-            reg = region.select_by_pos(session, chrom, start, end)
+            reg = region.select_by_exact_location(session, chrom, start, end)
             if not reg:
+                # Insert region
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
                 region.start = start
                 region.end = end
                 session.add(region)
-            reg = region.select_by_pos(session, chrom, start, end)
-
-            if feat_type == "enhancer":
-                feature = Enhancer()
-            if feat_type == "tss":
-                feature = TSS()
-            if tss.is_unique(session, reg.uid, sou.uid):
-                tss.score = line[6]
-                tss.regionID = reg.uid
-                tss.sourceID = sou.uid
-                rows.append(conservation)
-
-                tss.regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
-                tss.sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
-                tss.sampleID = Column("sampleID", Integer, ForeignKey('samples.uid'), nullable=False)
-                tss.experimentID = Column("experimentID", Integer, ForeignKey('experiments.uid'), nullable=False)
-                tss.gene = Column("gene", String(75), ForeignKey('genes.name2'))
-                tss.tss = Column("tss", mysql.INTEGER(unsigned=True))
-                tss.avg_tpm = Column("avg_tpm", Float, nullable=False)
-                tss.strand = Column("strand", mysql.CHAR(1), nullable=False)
-#
-#                
-#            if len(rows) == 100000:
-#                session.add_all(rows)
-#                session.commit()
-#                rows = []  
-#        session.add_all(rows)
-#        session.commit()
-#
-#            #region entry 
-#            chrom = line[1]
-#            start = int(line[2])
-#            end = int(line[3])
-#            region = Region()
-#            source = Source()
-#            reg = region.select_by_pos(session, chrom, start, end)
-#            sou = source.select_by_name(session, source_name.group(1))
-#
-#
-#
-#            # Create model
-#            model = Model()
-#            model.bin = assign_bin(int(start), int(end))
-#            model.chrom = chrom
-#            model.start = start
-#            model.end = end
-#            model.experiment_type = "CAGE"
-#            model.source_name = source_name
-#            model.date = today
-#            if feat_type == "tss":
-#                model.gene = "%s:%s-%s,%s" % (chrom, start + 1, end, strand)
-#                model.tss = 1
-#                model.strand = strand
-#                if n:
-#                    model.gene = n.group(2)
-#                    model.tss = n.group(1)
-#            # For each sample...
-#            for i in range(counts_start_at, len(line)):
-#                # Initialize
-#                tpm = "%.3f" % float(line[i])
-#                sample = fantom_sample_names[i - counts_start_at]
-#                # Keep original sample names
-#                if keep:
-#                    samples.setdefault(sample, [float(tpm)])
-#                    total_tpms += float(tpm)
-#                else:
-#                    m = re.search("(CNhs\d+)", sample)
-#                    if m.group(1) in sample_names:
-#                        samples.setdefault(sample_names[m.group(1)], [])
-#                        samples[sample_names[m.group(1)]].append(float(tpm))
-#                        total_tpms += float(tpm)
-#            # For each sample...
-#            for sample in samples:
-#                model.cell_or_tissue = sample
-#                # Skip enhancers with 0 tpm
-#                if sum(samples[sample]) == 0: continue
-#                if feat_type == "tss":
-#                    model.avg_tpm = "%.3f" % float(sum(samples[sample]) / len(samples[sample]))
-##                    model.percent_tpm = "%.3f" % float(sum(samples[sample]) * 100 / total_tpms)
-#                # Upsert model & commit
-#                session.merge(model)
-#                session.commit()
+                session.commit()
+                reg = region.select_by_exact_location(session, chrom, start, end)
+            # For each sample...
+            for i in range(counts_start_at, len(line)):
+                # Skip sample
+                sample_id = sample_ids[i - counts_start_at]
+                if not samples[sample_id]["add"]: continue
+                # Get data
+                name = samples[sample_id]["cell_or_tissue"]
+                treatment = samples[sample_id]["treatment"]
+                cell_line = samples[sample_id]["cell_line"]
+                cancer = samples[sample_id]["cancer"]
+                data.setdefault((name, treatment, cell_line, cancer), [])
+                data[(name, treatment, cell_line, cancer)].append(float(line[i]))
+            # For each sample...
+            for name, treatment, cell_line, cancer in data:
+                # Skip if enhancer/TSS not expressed in sample
+                # avg_tpm = "%.3f" % float(sum(data[sample_id]) / len(data[sample_id]))
+                avg_tpm = float(sum(data[name, treatment, cell_line, cancer]) /
+                    len(data[name, treatment, cell_line, cancer]))
+                if avg_tpm == 0: continue
+                # Get sample
+                sample = Sample()
+                sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
+                if not sam:    
+                    sample.name = name
+                    sample.treatment = treatment
+                    sample.cell_line = cell_line
+                    sample.cancer = cancer
+                    session.add(sample)
+                    session.commit()
+                    sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
+                if feat_type == "enhancer":
+                    enhancer = Enhancer()
+                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
+                        enhancer.regionID = reg.uid
+                        enhancer.sourceID = sou.uid
+                        enhancer.sampleID = sam.uid
+                        enhancer.experimentID = exp.uid
+                        rows.append(enhancer)
+                if feat_type == "tss":
+                    tss = TSS()
+                    if tss.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
+                        tss.regionID = reg.uid
+                        tss.sourceID = sou.uid
+                        tss.sampleID = sam.uid
+                        tss.experimentID = exp.uid
+                        tss.strand = strand
+                        tss.gene = gene
+                        tss.tss = tss_id
+                        tss.avg_tpm = "%.3f" % avg_tpm
+                        rows.append(tss)
+            session.add_all(rows)
+            session.commit()
 
 #-------------#
 # Main        #
