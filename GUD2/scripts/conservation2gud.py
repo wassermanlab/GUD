@@ -99,7 +99,7 @@ def insert_conservation_to_gud_db(user, host, port,
             end = int(line[3])
             # Get region
             region = Region()
-            reg = region.select_by_pos(session, chrom, start, end)
+            reg = region.select_by_exact_location(session, chrom, start, end)
             if not reg:
                 # Insert region
                 region.bin = assign_bin(start, end)
@@ -108,7 +108,7 @@ def insert_conservation_to_gud_db(user, host, port,
                 region.end = end
                 session.add(region)
                 session.commit()
-                reg = region.select_by_pos(session, chrom, start, end)
+                reg = region.select_by_exact_location(session, chrom, start, end)
             # Insert conserved regions in bulks of 100,000
             conservation = Conservation()
             if conservation.is_unique(session, reg.uid, sou.uid):
