@@ -129,7 +129,7 @@ class Globals(object):
         if header != "" and sequence != "":
             yield header, sequence
 
-    def get_ucsc_ftp_dir_and_file(genome, data_type):
+    def get_ucsc_ftp_dir_and_file(self, genome, data_type):
 
         # Initialize
         ftp = FTP("hgdownload.soe.ucsc.edu")
@@ -154,7 +154,7 @@ class Globals(object):
                 m = re.search(regexp, file_name)
                 return "database", m.group(1)
 
-    def fetch_lines_from_ucsc_ftp_file(genome, directory, file_name):
+    def fetch_lines_from_ucsc_ftp_file(self, genome, directory, file_name):
 
         # Initialize
         global BIO
@@ -183,7 +183,7 @@ class Globals(object):
             for line in f:
                 yield line.decode("UTF-8").strip("\n")
 
-    def handle_bytes(bytes):
+    def handle_bytes(self, bytes):
         BIO.write(bytes)
 
 GUDglobals = Globals()
