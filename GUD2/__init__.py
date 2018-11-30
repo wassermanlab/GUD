@@ -171,7 +171,7 @@ class Globals(object):
         # If valid file...
         if file_name in ftp.nlst():
             # Retrieve FTP file
-            ftp.retrbinary("RETR %s" % file_name, callback=handle_bytes)
+            ftp.retrbinary("RETR %s" % file_name, callback=self.handle_bytes)
             BIO.seek(0) # Go back to the start
             # If compressed file...
             if file_name.endswith(".gz"):
