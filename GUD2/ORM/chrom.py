@@ -1,23 +1,23 @@
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String, ForeignKey
+    Column, Index, PrimaryKeyConstraint, String
 )
-from sqlalchemy.orm import relationship
+
 from sqlalchemy.dialects import mysql
+
 from GUD2.ORM.base import Base
 
 class Chrom(Base):
-    
+
     __tablename__ = "chroms"
 
     chrom = Column("chrom", String(5), nullable=False)
-    size = Column("size", mysql.INTEGER(unsigned=True), nullable=False)
+
+    size = Column("size", mysql.INTEGER(unsigned=True),
+        nullable=False)
 
     __table_args__ = (
 
-        PrimaryKeyConstraint(
-            chrom
-        ),
-
+        PrimaryKeyConstraint(chrom),
         Index("ix_chrom", chrom),
 
         {
@@ -29,13 +29,13 @@ class Chrom(Base):
     @classmethod
     def chrom_sizes(cls, session): 
         """
-        Returns the sizes of all chroms as a dict.
+        Returns the size of all chroms as a dict.
         """
 
         chrom_sizes = {}
-        
+
         q = session.query(cls)
-        
+
         for c in q:
             chrom_sizes.setdefault(c.chrom, int(c.size))
 
@@ -44,9 +44,9 @@ class Chrom(Base):
     @classmethod
     def chrom_size(cls, session, chrom):
         """
-        Returns the size of the given chrom.
+        Returns the size of given chrom.
         """
-        
+
         q = session.query(cls).filter(cls.chrom == chrom)
 
         for c in q:
@@ -57,4 +57,5 @@ class Chrom(Base):
 
     def __repr__(self):
         return "<Chrom(chrom={}, size={})>".format(
-            self.chrom, self.size)
+            self.chrom, self.size
+        )
