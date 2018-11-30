@@ -84,7 +84,7 @@ class Region(Base):
 
     def __str__(self):
         return "{}\t{}\t{}\t{}".format(
-            self.bin
+            self.bin,
             self.chrom,
             self.start,
             self.end,
