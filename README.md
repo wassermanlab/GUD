@@ -220,7 +220,7 @@ mysql> desc tss;
 12 rows in set (0.00 sec)
 ```
 
-
+## GUD data
 
 ```
 mysql> show tables;
@@ -628,26 +628,27 @@ mysql> select count(*) from histone_modification;
 +-----------+
 | count(*)  |
 +-----------+
-| 202566780 |
+| 284945565 |
 +-----------+
-1 row in set (0.06 sec)
+1 row in set (0.00 sec)
 
 mysql> select distinct(histone_type) from histone_modification;
 +--------------+
 | histone_type |
 +--------------+
+| H3K27me3     |
+| H3K9me3      |
 | H3K4me3      |
 | H3K4me1      |
 | H3K27ac      |
 | H3K36me3     |
-| H3K9me3      |
 | H3K23me2     |
-| H3K27me3     |
+| H3K9ac       |
 | H3F3A        |
 | H4K8ac       |
 | H4K20me1     |
+| H3K23ac      |
 | H4K91ac      |
-| H3K9ac       |
 | H3K4me2      |
 | H4K5ac       |
 | H3K79me2     |
@@ -660,44 +661,58 @@ mysql> select distinct(histone_type) from histone_modification;
 | H3K56ac      |
 | H2BK5ac      |
 | H3K18ac      |
-| H3K23ac      |
 | H3K4ac       |
 | H2AK5ac      |
-| H2BK12ac     |
 | H2BK15ac     |
 | H2BK120ac    |
+| H4K12ac      |
+| H2BK12ac     |
 | H2BK20ac     |
 | H3T11ph      |
 +--------------+
-32 rows in set (17 min 59.88 sec)
+33 rows in set (24 min 47.65 sec)
 
 mysql> select distinct(cell_or_tissue) from histone_modification;
 +------------------------------------------------------------------------+
 | cell_or_tissue                                                         |
 +------------------------------------------------------------------------+
+| trophoblast tissue                                                     |
+| placental basal plate tissue                                           |
+| placenta tissue                                                        |
 | chorionic villus tissue                                                |
 | chorion tissue                                                         |
 | fibroblast of breast primary cell                                      |
+| myoepithelial cell of mammary gland primary cell                       |
 | luminal epithelial cell of mammary gland primary cell                  |
 | T-cell primary cell                                                    |
 | foreskin fibroblast primary cell                                       |
 | UCSF-4 stem cell                                                       |
 | H1-hESC stem cell                                                      |
+| peripheral blood mononuclear cell primary cell                         |
 | foreskin melanocyte primary cell                                       |
 | germinal matrix tissue                                                 |
 | mammary stem cell stem cell                                            |
 | GM23248 cell line                                                      |
+| neurosphere primary cell                                               |
+| spleen tissue                                                          |
 | amnion tissue                                                          |
+| neural progenitor cell in vitro differentiated cells                   |
+| neutrophil primary cell                                                |
 | GM23338 induced pluripotent stem cell line                             |
 | breast epithelium tissue                                               |
+| smooth muscle cell in vitro differentiated cells                       |
 | foreskin keratinocyte primary cell                                     |
 | hepatocyte in vitro differentiated cells                               |
 | brain tissue                                                           |
 | SK-N-SH cell line                                                      |
+| stomach tissue                                                         |
 | heart left ventricle tissue                                            |
 | K562 cell line                                                         |
 | cerebellum tissue                                                      |
+| tibial artery tissue                                                   |
 | Peyer's patch tissue                                                   |
+| right lobe of liver tissue                                             |
+| vagina tissue                                                          |
 | coronary artery tissue                                                 |
 | NCI-H929 cell line                                                     |
 | adrenal gland tissue                                                   |
@@ -709,27 +724,41 @@ mysql> select distinct(cell_or_tissue) from histone_modification;
 | CD14-positive monocyte primary cell                                    |
 | AG04450 cell line                                                      |
 | SU-DHL-6 cell line                                                     |
+| sigmoid colon tissue                                                   |
+| thymus tissue                                                          |
 | large intestine tissue                                                 |
+| thoracic aorta tissue                                                  |
+| prostate tissue                                                        |
 | HUES6 stem cell                                                        |
 | Loucy cell line                                                        |
 | H9 stem cell                                                           |
 | iPS DF 19.11 induced pluripotent stem cell line                        |
+| neural stem progenitor cell in vitro differentiated cells              |
 | common myeloid progenitor, CD34-positive primary cell                  |
 | NT2/D1 cell line                                                       |
 | B cell primary cell                                                    |
 | HeLa-S3 cell line                                                      |
+| upper lobe of left lung tissue                                         |
+| spinal cord tissue                                                     |
 | DND-41 cell line                                                       |
+| subcutaneous abdominal adipose tissue tissue                           |
+| trophoblast cell in vitro differentiated cells                         |
+| muscle of trunk tissue                                                 |
 | endothelial cell of umbilical vein primary cell                        |
+| temporal lobe tissue                                                   |
+| pancreas tissue                                                        |
 | colonic mucosa tissue                                                  |
 | mesenchymal stem cell in vitro differentiated cells                    |
 | kidney epithelial cell primary cell                                    |
 | IMR-90 cell line                                                       |
 | lung tissue                                                            |
+| urinary bladder tissue                                                 |
 | BJ cell line                                                           |
 | HepG2 cell line                                                        |
 | bronchial epithelial cell primary cell                                 |
 | esophagus muscularis mucosa tissue                                     |
 | caudate nucleus tissue                                                 |
+| ovary tissue                                                           |
 | HCT116 cell line                                                       |
 | Jurkat clone E61 cell line                                             |
 | A673 cell line                                                         |
@@ -741,6 +770,8 @@ mysql> select distinct(cell_or_tissue) from histone_modification;
 | fibroblast of lung primary cell                                        |
 | CD8-positive, alpha-beta T cell primary cell                           |
 | H7-hESC stem cell                                                      |
+| mononuclear cell primary cell                                          |
+| skeletal muscle myoblast primary cell                                  |
 | ectodermal cell in vitro differentiated cells                          |
 | PC-9 cell line                                                         |
 | VCaP cell line                                                         |
@@ -752,7 +783,9 @@ mysql> select distinct(cell_or_tissue) from histone_modification;
 | esophagus tissue                                                       |
 | MCF-7 cell line                                                        |
 | ES-I3 stem cell                                                        |
+| skeletal muscle cell primary cell                                      |
 | HUES64 stem cell                                                       |
+| osteoblast primary cell                                                |
 | cardiac muscle cell in vitro differentiated cells                      |
 | CD4-positive, alpha-beta T cell primary cell                           |
 | DOHH2 cell line                                                        |
@@ -762,49 +795,73 @@ mysql> select distinct(cell_or_tissue) from histone_modification;
 | C4-2B cell line                                                        |
 | KMS-11 cell line                                                       |
 | Panc1 cell line                                                        |
+| tibial nerve tissue                                                    |
 | gastroesophageal sphincter tissue                                      |
 | OCI-LY1 cell line                                                      |
 | ACC112 cell line                                                       |
 | esophagus squamous epithelium tissue                                   |
 | liver tissue                                                           |
 | fibroblast of the aortic adventitia primary cell                       |
+| neural cell in vitro differentiated cells                              |
 | LNCaP clone FGC cell line                                              |
 | HFF-Myc cell line                                                      |
 | GM12864 cell line                                                      |
+| natural killer cell primary cell                                       |
+| transverse colon tissue                                                |
 | OCI-LY3 cell line                                                      |
 | HUES48 stem cell                                                       |
 | PC-3 cell line                                                         |
+| naive thymus-derived CD4-positive, alpha-beta T cell primary cell      |
 | A549 cell line                                                         |
+| neuroepithelial stem cell in vitro differentiated cells                |
+| thyroid gland tissue                                                   |
+| skeletal muscle satellite cell primary cell                            |
 | GM12865 cell line                                                      |
+| stomach smooth muscle tissue                                           |
 | cardiac fibroblast primary cell                                        |
 | iPS-18a induced pluripotent stem cell line                             |
+| radial glial cell in vitro differentiated cells                        |
 | RWPE2 cell line                                                        |
 | epithelial cell of proximal tubule primary cell                        |
+| neuron in vitro differentiated cells                                   |
 | cardiac muscle cell primary cell                                       |
 | GM06990 cell line                                                      |
 | brain microvascular endothelial cell primary cell                      |
 | HL-60 cell line                                                        |
 | AG09319 cell line                                                      |
+| retinal pigment epithelial cell primary cell                           |
 | keratinocyte primary cell                                              |
 | astrocyte of the spinal cord primary cell                              |
 | mesendoderm in vitro differentiated cells                              |
 | iPS DF 6.9 induced pluripotent stem cell line                          |
 | 22Rv1 cell line                                                        |
 | astrocyte of the cerebellum primary cell                               |
+| mesodermal cell in vitro differentiated cells                          |
 | AG09309 cell line                                                      |
 | endodermal cell in vitro differentiated cells                          |
+| small intestine tissue                                                 |
 | epithelial cell of prostate primary cell                               |
+| skeletal muscle tissue tissue                                          |
 | KOPT-K1 cell line                                                      |
 | CD8-positive, alpha-beta memory T cell primary cell                    |
+| testis tissue                                                          |
+| myotube in vitro differentiated cells                                  |
 | layer of hippocampus tissue                                            |
 | iPS-20b induced pluripotent stem cell line                             |
+| muscle layer of duodenum tissue                                        |
+| right atrium auricular region tissue                                   |
 | kidney tissue                                                          |
+| mucosa of stomach tissue                                               |
 | astrocyte primary cell                                                 |
 | CD4-positive, CD25-positive, alpha-beta regulatory T cell primary cell |
 | cingulate gyrus tissue                                                 |
+| uterus tissue                                                          |
 | duodenal mucosa tissue                                                 |
+| mucosa of rectum tissue                                                |
 | Parathyroid adenoma tissue                                             |
 | WI38 cell line                                                         |
+| substantia nigra tissue                                                |
+| mid-neurogenesis radial glial cells in vitro differentiated cells      |
 | angular gyrus tissue                                                   |
 | WERI-Rb-1 cell line                                                    |
 | adipocyte in vitro differentiated cells                                |
@@ -812,23 +869,29 @@ mysql> select distinct(cell_or_tissue) from histone_modification;
 | effector memory CD4-positive, alpha-beta T cell primary cell           |
 | iPS-18c induced pluripotent stem cell line                             |
 | HEK293 cell line                                                       |
-| mesodermal cell in vitro differentiated cells                          |
+| psoas muscle tissue                                                    |
 | iPS-15b induced pluripotent stem cell line                             |
+| middle frontal area 46 tissue                                          |
+| muscle of leg tissue                                                   |
 | GM12875 cell line                                                      |
 | fibroblast of pulmonary artery primary cell                            |
 | heart right ventricle tissue                                           |
 | iPS-11a induced pluripotent stem cell line                             |
 | epithelial cell of esophagus primary cell                              |
 | fibroblast of mammary gland primary cell                               |
+| rectal smooth muscle tissue tissue                                     |
+| regulatory T cell primary cell                                         |
 | AG10803 cell line                                                      |
 | choroid plexus epithelial cell primary cell                            |
+| right cardiac atrium tissue                                            |
 | AG04449 cell line                                                      |
+| muscle layer of colon tissue                                           |
 | aorta tissue                                                           |
 | heart tissue                                                           |
 | T-helper 17 cell primary cell                                          |
 | adipose tissue tissue                                                  |
 +------------------------------------------------------------------------+
-152 rows in set (34 min 54.65 sec)
+214 rows in set (47 min 19.18 sec)
 
 +----------+
 
