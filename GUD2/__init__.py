@@ -11,7 +11,9 @@ __organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
 __version__ = "0.0.1"
 
 import os, sys, re
+from ftplib import FTP
 import gzip
+from io import BytesIO
 
 __all__ = ["ORM"]
 
@@ -126,5 +128,62 @@ class Globals(object):
                 sequence += sub_sequence
         if header != "" and sequence != "":
             yield header, sequence
-            
+
+    def get_ucsc_ftp_dir_and_file(genome, data_type):
+
+        # Initialize
+        ftp = FTP("hgdownload.soe.ucsc.edu")
+        ftp.login()
+
+        # Change into "genome" folder
+        try:
+            ftp.cwd(os.path.join("goldenPath", genome))
+        except:
+            raise ValueError("Cannot connect to FTP goldenPath folder: %s" % genome)
+
+        # Fetch bigZips and database files
+        if data_type == "chrom_size":
+            return "bigZips", "%s.chrom.sizes" % genome
+        elif data_type == "gene":
+            return "database", "refGene.txt.gz"
+        elif data_type == "rmsk":
+            return "database", "rmsk.txt.gz"
+        elif data_type == "conservation":
+            regexp = re.compile("(multiz\d+way.txt.gz)")
+            for file_name in sorted(filter(regexp.search, ftp.nlst("database"))):
+                m = re.search(regexp, file_name)
+                return "database", m.group(1)
+
+    def fetch_lines_from_ucsc_ftp_file(genome, directory, file_name):
+
+        # Initialize
+        global BIO
+        ftp = FTP("hgdownload.soe.ucsc.edu")
+        ftp.login()
+        BIO = BytesIO()
+
+        # Change into "genome" "directory" folder
+        try:
+            ftp.cwd(os.path.join("goldenPath", genome, directory))
+        except:
+            raise ValueError("Cannot connect to FTP goldenPath folder: %s/%s" % (genome, directory))
+
+        # If valid file...
+        if file_name in ftp.nlst():
+            # Retrieve FTP file
+            ftp.retrbinary("RETR %s" % file_name, callback=handle_bytes)
+            BIO.seek(0) # Go back to the start
+            # If compressed file...
+            if file_name.endswith(".gz"):
+                f = gzip.GzipFile(fileobj=BIO, mode="rb")
+            # ... Else...
+            else:
+                f = BIO
+            # For each line...
+            for line in f:
+                yield line.decode("UTF-8").strip("\n")
+
+    def handle_bytes(bytes):
+        BIO.write(bytes)
+
 GUDglobals = Globals()

@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 
-import os, sys, re
+import re
 import argparse
 from binning import assign_bin
-from ftplib import FTP
 import getpass
-import gzip
-from io import BytesIO
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
@@ -27,19 +24,21 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts the UCSC's \"multizNway\" alignment for the input genome into GUD.")
+    parser = argparse.ArgumentParser(description="inserts the UCSC's \"multizNway\" align. for given genome into GUD.")
 
     parser.add_argument("genome", help="Genome assembly")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db",
-        help="Database name (default = input genome assembly)")
+        help="Database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="Host name (default = localhost)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="Port number (default = 5506)")
-    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
+
+    user = getpass.getuser()
+    mysql_group.add_argument("-u", "--user", default=user,
         help="User name (default = current user)")
 
     args = parser.parse_args()
@@ -64,16 +63,16 @@ def insert_conservation_to_gud_db(user, host, port,
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
 
-    # Create conservation table
     if not engine.has_table("conservation"):
         # Initialize
         rows = []
+        # Create table
         table = Conservation()
         table.metadata.bind = engine
-        # Create table
         table.metadata.create_all(engine)
-        # Get UCSC FTP file
-        directory, file_name = get_ftp_dir_and_file(genome, "conservation")
+        # Get UCSC FTP dir/file
+        directory, file_name = GUDglobals.get_ucsc_ftp_dir_and_file(
+            genome, "conservation")
         # Get source
         source = Source()
         m = re.search("^(.+).txt.gz$", file_name)
@@ -85,8 +84,8 @@ def insert_conservation_to_gud_db(user, host, port,
             session.add(source)
             session.commit()
             sou = source.select_by_name(session, source_name)
-        # Download data
-        for line in fetch_lines_from_ftp_file(
+        # For each line...
+        for line in GUDglobals.fetch_lines_from_ucsc_ftp_file(
             genome, directory, file_name):
             # Split line
             line = line.split("\t")
@@ -99,7 +98,8 @@ def insert_conservation_to_gud_db(user, host, port,
             end = int(line[3])
             # Get region
             region = Region()
-            reg = region.select_by_exact_location(session, chrom, start, end)
+            reg = region.select_unique(
+                session, chrom, start, end)
             if not reg:
                 # Insert region
                 region.bin = assign_bin(start, end)
@@ -108,7 +108,8 @@ def insert_conservation_to_gud_db(user, host, port,
                 region.end = end
                 session.add(region)
                 session.commit()
-                reg = region.select_by_exact_location(session, chrom, start, end)
+                reg = region.select_unique(
+                    session, chrom, start, end)
             # Insert conserved regions in bulks of 100,000
             conservation = Conservation()
             if conservation.is_unique(session, reg.uid, sou.uid):
@@ -119,60 +120,11 @@ def insert_conservation_to_gud_db(user, host, port,
             if len(rows) == 100000:
                 session.add_all(rows)
                 session.commit()
+                # Initialize
                 rows = []
+        # Insert remaining conserved regions
         session.add_all(rows)
         session.commit()
-
-def get_ftp_dir_and_file(genome, data_type):
-
-    # Initialize
-    ftp = FTP("hgdownload.soe.ucsc.edu")
-    ftp.login()
-
-    # Change into "genome" folder
-    try:
-        ftp.cwd(os.path.join("goldenPath", genome))
-    except:
-        raise ValueError("Cannot connect to FTP goldenPath folder: %s" % genome)
-
-    # Fetch bigZips and database files
-    if data_type == "conservation":
-        regexp = re.compile("(multiz\d+way.txt.gz)")
-        for file_name in sorted(filter(regexp.search, ftp.nlst("database"))):
-            m = re.search(regexp, file_name)
-            return "database", m.group(1)
-
-def fetch_lines_from_ftp_file(genome, directory, file_name):
-
-    # Initialize
-    global BIO
-    ftp = FTP("hgdownload.soe.ucsc.edu")
-    ftp.login()
-    BIO = BytesIO()
-
-    # Change into "genome" "directory" folder
-    try:
-        ftp.cwd(os.path.join("goldenPath", genome, directory))
-    except:
-        raise ValueError("Cannot connect to FTP goldenPath folder: %s/%s" % (genome, directory))
-
-    # If valid file...
-    if file_name in ftp.nlst():
-        # Retrieve FTP file
-        ftp.retrbinary("RETR %s" % file_name, callback=handle_bytes)
-        BIO.seek(0) # Go back to the start
-        # If compressed file...
-        if file_name.endswith(".gz"):
-            f = gzip.GzipFile(fileobj=BIO, mode="rb")
-        # ... Else...
-        else:
-            f = BIO
-        # For each line...
-        for line in f:
-            yield line.decode("UTF-8").strip("\n")
-
-def handle_bytes(bytes):
-    BIO.write(bytes)
 
 #-------------#
 # Main        #
