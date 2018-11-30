@@ -12,3 +12,6 @@ nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.conservation2gud hg19 -
 
 #rmsk
 nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.rmsk2gud hg19 -u ontarget_w -d tamar_test &
+
+#fantom2gud
+nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.fantom2gud hg19 -u ontarget_w -d tamar_test &
