@@ -1,8 +1,8 @@
 from binning import assign_bin, containing_bins, contained_bins
 
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String, ForeignKey,
-    UniqueConstraint, CheckConstraint
+    Column, Index, PrimaryKeyConstraint, String,
+    ForeignKey, UniqueConstraint, CheckConstraint
 )
 
 from sqlalchemy.dialects import mysql

@@ -24,7 +24,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="inserts the UCSC's \"multizNway\" align. for given genome into GUD.")
+    parser = argparse.ArgumentParser(description="inserts the UCSC's \"multizNway\" table for given genome into GUD.")
 
     parser.add_argument("genome", help="Genome assembly")
 
