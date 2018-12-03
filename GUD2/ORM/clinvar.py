@@ -29,7 +29,7 @@ class ClinVar(Base):
     CADD = Column("CADD", Float)
     CLNDISDB = Column("CLNDISDB", mysql.VARCHAR(3000)) ## check 
     CLNDN = Column("CLNDN", mysql.VARCHAR(3000))
-    CLNSIG = Column("CLNSIG", mysql.VARCHAR(3000))
+    CLNSIG = Column("CLNSIG", mysql.VARCHAR(500))
     gnomad_exome_af_global = Column("gnomad_exome_af_global", Float)
     gnomad_exome_hom_global = Column("gnomad_exome_hom_global", Float)
     gnomad_genome_af_global = Column("gnomad_genome_af_global", Float)
@@ -41,8 +41,6 @@ class ClinVar(Base):
 
         Index("ix_clinvar", regionID),
         Index("ix_clinvar_clnsig", CLNSIG),
-        Index("ix_clinvar_feature", ANN_Feature_Type),
-        Index("ix_clinvar_gene_name", ANN_Gene_Name),
         Index("ix_clinvar_id", clinvarID),
 
         {
