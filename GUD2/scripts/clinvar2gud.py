@@ -157,7 +157,7 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
             clinvar.gnomad_exome_hom_global = None if line_list[12] is None else float(line_list[12])
             clinvar.gnomad_genome_af_global = None if line_list[13] is None else float(line_list[13])
             clinvar.gnomad_genome_hom_global = None if line_list[14] is None else float(line_list[14])
-            session.add(region)
+            session.add(clinvar)
             session.commit()
 #-------------#
 # Main        #

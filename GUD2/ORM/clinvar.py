@@ -40,7 +40,6 @@ class ClinVar(Base):
         UniqueConstraint(clinvarID),
 
         Index("ix_clinvar", regionID),
-        Index("ix_clinvar_clnsig", CLNSIG),
         Index("ix_clinvar_id", clinvarID),
 
         {
