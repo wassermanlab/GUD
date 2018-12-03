@@ -17,4 +17,4 @@ nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.rmsk2gud hg19 -u ontarg
 nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.fantom2gud hg19 -u ontarget_w -d tamar_test &
 
 #clinvar insertion 
-nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.clinvar2gud GUD2/scripts/clinvar.norm.anno.vcf -u ontarget_w -d tamar_test &
+nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.clinvar2gud ../clinvar.norm.anno.vcf -u ontarget_w -d tamar_test &

@@ -66,14 +66,14 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
     session.remove()
     session.configure(bind=engine, autoflush=True,
                       expire_on_commit=False)
-    
+
     # Initialize table
     table = ClinVar()
     table.metadata.bind = engine
     try:
         table.metadata.create_all(engine)
     except:
-        raise ValueError("Cannot create \"clinvar\" table!")
+        raise ValueError("Cannot create \"short_tandem_repeats\" table!")
     if not engine.has_table("regions"):
         raise ValueError("No regions table!")
     if not engine.has_table("sources"):
@@ -172,7 +172,11 @@ if __name__ == "__main__":
 
     # Parse arguments
     args = parse_args()
-
+    print args.user
+    print args.host
+    print args.port
+    print args.db  
+    print args.vcf_file
     # Insert ENCODE data to GUD database
     insert_clinvar_to_gud_db(args.user, args.host, args.port, args.db,
                          args.vcf_file)

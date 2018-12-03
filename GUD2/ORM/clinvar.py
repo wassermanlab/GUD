@@ -1,31 +1,3 @@
-##Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID
-#INFO=<ID=ANN,Number=.,Type=String,Description="Functional annotations: 'Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length | CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO' ">
-#INFO=<ID=CADD,Number=1,Type=String,Description="calculated by self of overlapping values in column 6 from /mnt/causes-vnx1/DATABASES/CADD/whole_genome_SNVs.tsv.gz">
-#INFO=<ID=CLNDISDB,Number=.,Type=String,Description="Tag-value pairs of disease database name and identifier, e.g. OMIM:NNNNNN">
-#INFO=<ID=CLNDN,Number=.,Type=String,Description="ClinVar's preferred disease name for the concept specified by disease identifiers in CLNDISDB">
-#INFO=<ID=CLNSIG,Number=.,Type=String,Description="Clinical significance for this single variant">
-#INFO=<ID=gnomad_exome_af_global,Number=A,Type=Float,Description="Allele Frequency among genotypes, for each ALT allele, in the same order as listed (from /mnt/causes-vnx1/DATABASES/GNOMAD/gnomad.exomes.r2.0.2.sites.norm.vcf.gz)">
-#INFO=<ID=gnomad_exome_hom_global,Number=A,Type=Integer,Description="Count of homozygous individuals (from /mnt/causes-vnx1/DATABASES/GNOMAD/gnomad.exomes.r2.0.2.sites.norm.vcf.gz)">
-#INFO=<ID=gnomad_genome_af_global,Number=A,Type=Float,Description="Allele Frequency among genotypes, for each ALT allele, in the same order as listed (from /mnt/causes-vnx1/DATABASES/GNOMAD/gnomad.genomes.r2.0.2.sites.wholeGenome.norm.vcf.gz)">
-#INFO=<ID=gnomad_genome_hom_global,Number=A,Type=Integer,Description="Count of homozygous individuals (from /mnt/causes-vnx1/DATABASES/GNOMAD/gnomad.genomes.r2.0.2.sites.wholeGenome.norm.vcf.gz)">
-##fileDate=2018-10-28
-##source=ClinVar
-# CLNDISDB=MedGen:C4015293,OMIM:616126,Orphanet:ORPHA319563;
-# CLNDN=Immunodeficiency_38_with_basal_ganglia_calcification;
-# CLNSIG=Likely_benign;
-# ANN=
-# A|
-# missense_variant|
-# MODERATE|
-# ISG15|
-# ENSG00000187608|
-# transcript|
-# gnomad_genome_af_global=0.00061401;
-# gnomad_genome_hom_global=0;
-# gnomad_exome_af_global=0.00039995;
-# gnomad_exome_hom_global=0;
-# CADD=14.92 
-###########################
 from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint, Integer, Float
