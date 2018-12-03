@@ -120,7 +120,7 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
               region.end = end 
               session.merge(region)
               session.commit()
-              reg = region.select_by_pos(session, chrom, start, end)
+              reg = region.select_by_exact_location(session, chrom, start, end)
           ## add info fields
           for i in info:
             i_split = i.split("=")
