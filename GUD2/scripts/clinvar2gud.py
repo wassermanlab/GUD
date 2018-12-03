@@ -86,7 +86,7 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
     sou = source.select_by_name(session, source_name)
     if not sou: 
         source.name = source_name
-        session.merge(source)
+        session.add(source)
         session.commit()
         sou = source.select_by_name(session, source_name)
 
@@ -118,7 +118,7 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
               region.chrom = chrom
               region.start = start
               region.end = end 
-              session.merge(region)
+              session.add(region)
               session.commit()
               reg = region.select_by_exact_location(session, chrom, start, end)
           ## add info fields
@@ -157,7 +157,8 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
             clinvar.gnomad_exome_hom_global = None if line_list[12] is None else float(line_list[12])
             clinvar.gnomad_genome_af_global = None if line_list[13] is None else float(line_list[13])
             clinvar.gnomad_genome_hom_global = None if line_list[14] is None else float(line_list[14])
-          
+            session.add(region)
+            session.commit()
 #-------------#
 # Main        #
 #-------------#
