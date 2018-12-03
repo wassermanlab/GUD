@@ -137,7 +137,7 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
           clinvarID = fields[2]
           clinvar = ClinVar()
           cln = clinvar.is_unique(session, clinvarID)
-          if not cln: 
+          if cln: 
             clinvar.regionID = reg.uid
             clinvar.sourceID = sou.uid
             clinvar.ref = fields[3]
