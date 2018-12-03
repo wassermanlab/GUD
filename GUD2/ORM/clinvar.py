@@ -16,21 +16,20 @@ class ClinVar(Base):
     regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
     sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
     ##fields
-    ref = Column("ref", String, nullable=False)
-    alt = Column("alt", String, nullable=False)
-    clinvarID = Column("clinvarID", String, nullable=False)
+    ref = Column("ref", String(5000), nullable=False) ## check these
+    alt = Column("alt", String(5000), nullable=False) ## check these
+    clinvarID = Column("clinvarID", String(7), nullable=False)
     ##info
-    ANN_Allele = Column("ANN_Allele", String)
-    ANN_Annotation = Column("ANN_Annotation", String)
-    ANN_Annotation_Impact = Column("ANN_Annotation_Impact", String)
-    ANN_Gene_Name = Column("ANN_Gene_Name", String)
-    ANN_Gene_ID = Column("ANN_Gene_ID", String)
-    ANN_Feature_Type = Column("ANN_Feature_Type", String)
-    ANN_Feature_ID = Column("ANN_Feature_ID", String)
+    ANN_Annotation = Column("ANN_Annotation", String(250))
+    ANN_Annotation_Impact = Column("ANN_Annotation_Impact", String(50))
+    ANN_Gene_Name = Column("ANN_Gene_Name", String(50))
+    ANN_Gene_ID = Column("ANN_Gene_ID", String(50))
+    ANN_Feature_Type = Column("ANN_Feature_Type", String(500))
+    ANN_Feature_ID = Column("ANN_Feature_ID", String(50))
     CADD = Column("CADD", Float)
-    CLNDISDB = Column("CLNDISDB", String)
-    CLNDN = Column("CLNDN", String)
-    CLNSIG = Column("CLNSIG", String)
+    CLNDISDB = Column("CLNDISDB", String(3000)) ## check 
+    CLNDN = Column("CLNDN", String(3000))
+    CLNSIG = Column("CLNSIG", String(3000))
     gnomad_exome_af_global = Column("gnomad_exome_af_global", Float)
     gnomad_exome_hom_global = Column("gnomad_exome_hom_global", Float)
     gnomad_genome_af_global = Column("gnomad_genome_af_global", Float)
@@ -58,8 +57,6 @@ class ClinVar(Base):
         Query objects based off of their location being within the start only
         motifs through that  
          """
-        # print(chrom, start, end)
-        # q = Region.select_by_bin_range(session, chrom, start, end, [], True, False)
         bin = assign_bin(start, end)
         q = session.query(cls, Region).\
         join().\

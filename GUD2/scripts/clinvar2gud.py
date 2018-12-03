@@ -30,7 +30,7 @@ def parse_args():
     """
 
     parser = argparse.ArgumentParser(
-        description="this script inserts short tandem repeat location information")
+        description="this script inserts clinvar information")
 
     parser.add_argument("vcf_file", help="annotated clinvar")
 
@@ -73,11 +73,7 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
     try:
         table.metadata.create_all(engine)
     except:
-        raise ValueError("Cannot create \"short_tandem_repeats\" table!")
-    if not engine.has_table("regions"):
-        raise ValueError("No regions table!")
-    if not engine.has_table("sources"):
-        raise ValueError("No sources table!")
+        raise ValueError("Cannot create \"ClinVar\" table!")
     
     # add source  
     day = str(date.today())
@@ -147,7 +143,6 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
             clinvar.ref = fields[3]
             clinvar.alt = fields[4]
             clinvar.clinvarID = fields[2]
-            clinvar.ANN_Allele = line_list[0]
             clinvar.ANN_Annotation = line_list[1]
             clinvar.ANN_Annotation_Impact = line_list[2]
             clinvar.ANN_Gene_Name = line_list[3]
@@ -172,11 +167,6 @@ if __name__ == "__main__":
 
     # Parse arguments
     args = parse_args()
-    print args.user
-    print args.host
-    print args.port
-    print args.db  
-    print args.vcf_file
     # Insert ENCODE data to GUD database
     insert_clinvar_to_gud_db(args.user, args.host, args.port, args.db,
                          args.vcf_file)
