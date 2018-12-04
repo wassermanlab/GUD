@@ -6,7 +6,7 @@ from sqlalchemy.dialects import mysql
 from GUD2.ORM.region import Region
 from GUD2.ORM.source import Source
 from GUD2.ORM.base import Base
-from binning import containing_bins, contained_bins
+from binning import containing_bins, contained_bins, assign_bin
 
 class Gene(Base):
 
@@ -43,12 +43,12 @@ class Gene(Base):
         Query objects based off of their location being within the start only
         motifs through that  
          """
-        bins = set(containing_bins(start, end) + contained_bins(start, end))
+        bin = assign_bin(start, end)
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\
         filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
-        filter(Region.bin.in_(bins))
+        filter(Region.bin == bin)
         return q.all()
 
     @classmethod
@@ -80,9 +80,24 @@ class Gene(Base):
         if names:
             q = q.filter(cls.name2.in_(names))
         return q.all()
+    
+    @classmethod
+    def select_by_uid(cls, session, uid):
+        """Query refGene objects by uid returning one uid"""
+        q = session.query(cls)
+        q.filter(cls.uid == uid)
+        return q.first()
+    
+    @classmethod
+    def select_by_uid_joined(cls, session, uid):
+        """Query refGene objects by uid returning one uid"""
+        q = session.query(cls, Region).\
+        join().\
+        filter(Region.uid == cls.regionID).\
+        filter(cls.uid == uid)
+        return q.first()
 
-
-    # Have to fix so it returns more stuff...
     def __repr__(self):
         return "<Gene(uid={}, name={}, name2={}, strand={})>".format(
             self.uid, self.name, self.name2, self.strand,)
+

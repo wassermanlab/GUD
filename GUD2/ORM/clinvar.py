@@ -42,7 +42,7 @@ class ClinVar(Base):
         Index("ix_clinvar", regionID),
         Index("ix_clinvar_id", clinvarID),
 
-        {
+        {  
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
         }
@@ -73,3 +73,9 @@ class ClinVar(Base):
     # def __repr__(self):
     #     return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={}, motif={}, pathogencity={})>".format(
     #         self.uid, self.regionID, self.sourceID, self.motif, self.pathogenicity)
+
+# db_name = "mysql://{}:@{}:{}/{}".format("ontarget_r",
+#                                         "ontarget.cmmt.ubc.ca", "5506", "tamar_test")
+
+# engine = create_engine(db_name, echo=False)
+# session = Session(engine)

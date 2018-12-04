@@ -6,7 +6,7 @@ from sqlalchemy.dialects import mysql
 from GUD2.ORM.region import Region
 from GUD2.ORM.source import Source
 from GUD2.ORM.base import Base
-from binning import containing_bins, contained_bins
+from binning import containing_bins, contained_bins, assign_bin
 
 class ShortTandemRepeat(Base):
 
@@ -38,17 +38,32 @@ class ShortTandemRepeat(Base):
         Query objects based off of their location being within the start only
         motifs through that  
          """
-        # print(chrom, start, end)
-        # q = Region.select_by_bin_range(session, chrom, start, end, [], True, False)
-
-        bins = set(containing_bins(start, end) + contained_bins(start, end))
-        
+        bin = assign_bin(start, end)
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\
         filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
-        filter(Region.bin.in_(bins))
+        filter(Region.bin == bin)
+        print str(q)
         return q.all()
+
+    @classmethod
+    def select_by_exact_location(cls, session, chrom, start, end):
+        """
+        Query objects based off of their location being within the start only
+        motifs through that  
+         """
+        # print(chrom, start, end)
+        # q = Region.select_by_bin_range(session, chrom, start, end, [], True, False)
+
+        bin = assign_bin(start, end)
+        
+        q = session.query(cls, Region).\
+        join().\
+        filter(Region.uid == cls.regionID).\
+        filter(Region.chrom == chrom, Region.start == start, Region.end == end).\
+        filter(Region.bin == bin)
+        return q.first()
     
     @classmethod 
     def select_by_pathogenicity(cls, session):
@@ -79,10 +94,7 @@ class ShortTandemRepeat(Base):
     def is_unique(cls, session, regionID, sourceID):
         q = session.query(cls).filter(cls.regionID == regionID, cls.sourceID == sourceID)
         q = q.all()
-        if len(q) == 0:
-            return True
-        else: 
-            return False 
+        return len(q) == 0
 
     def __str__(self):
         return "{}\t{}".format(self.motif, self.pathogenicity)

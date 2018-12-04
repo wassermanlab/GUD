@@ -172,11 +172,13 @@ def insert_bed_to_gud_db(user, host, port, db, bed_files,
             sample = Sample()
             samp = sample.select_exact_sample(session, name, treatment, cell_line, cancer)
             if not samp: 
-                sample.name = cell_or_tissue
-                sample.treatment = 
-                sample.cell_line = 
-                sample.cancer = 
-                session.add(sample)
+                None
+                ## TODO
+                # sample.name = cell_or_tissue
+                # sample.treatment = 
+                # sample.cell_line = 
+                # sample.cancer = 
+                # session.add(sample)
             # Experiment 
             experiment = Experiment()
             exp = experiment.select_by_name(session, name)
