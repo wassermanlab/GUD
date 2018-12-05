@@ -89,6 +89,7 @@ class ShortTandemRepeat(Base):
 
         return q.all()  
 
+    @classmethod
     def select_by_uid(cls, session, uid):
         q = session.query(cls, Region).\
         join().\
