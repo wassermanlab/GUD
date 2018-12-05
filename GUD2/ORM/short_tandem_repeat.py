@@ -88,7 +88,14 @@ class ShortTandemRepeat(Base):
 
         q = session.query(cls).filter(cls.motif.in_(motifs))
 
-        return q.all()    
+        return q.all()  
+
+    def select_by_uid(session, uid):
+        q = session.query(cls, Region).\
+        join().\
+        filter(Region.uid == cls.regionID).\
+        filter(cls.uid == uid)
+        return q.first()
 
     @classmethod
     def is_unique(cls, session, regionID, sourceID):
