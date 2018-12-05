@@ -67,15 +67,22 @@ class ClinVar(Base):
         q = session.query(cls).filter(cls.clinvarID == clinvarID)
         return len(q.all()) == 0
 
-    # def __str__(self):
-    #     return "{}\t{}".format(self.motif, self.pathogenicity)
+    def __str__(self):
+        return "REF\tALT\tclinvarID\tannotation\tannotation_impact\tfeature_type\tCLNDISDB\tCLINSIG\n{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".\
+        format(self.ref, self.alt, self.clinvarID, 
+        self.ANN_Annotation, self.ANN_Annotation_Impact, self.ANN_Feature_Type,
+        self.CLNDISDB, self.CLNSIG)
 
-    # def __repr__(self):
-    #     return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={}, motif={}, pathogencity={})>".format(
-    #         self.uid, self.regionID, self.sourceID, self.motif, self.pathogenicity)
-
-# db_name = "mysql://{}:@{}:{}/{}".format("ontarget_r",
-#                                         "ontarget.cmmt.ubc.ca", "5506", "tamar_test")
-
-# engine = create_engine(db_name, echo=False)
-# session = Session(engine)
+    def __repr__(self):
+        return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={},\
+        ref={}, alt={}, clinvarID={},\
+        ANN_Annotation={}, ANN_Annotation_Impact={}, ANN_Gene_Name={},\
+        ANN_Gene_ID={}, ANN_Feature_Type={}, ANN_Feature_ID={},\
+        CADD={}, CLNDISDB={}, CLNDN={}, CLNSIG={},\
+        gnomad_exome_af_global={}, gnomad_exome_hom_global={}, gnomad_genome_af_global={}, gnomad_genome_hom_global={})>".format(
+            self.uid, self.regionID, self.sourceID, self.ref, self.alt, self.clinvarID,
+            self.ANN_Annotation, self.ANN_Annotation_Impact, self.ANN_Gene_Name,
+            self.ANN_Gene_ID, self.ANN_Feature_Type, self.ANN_Feature_ID,
+            self.CADD, self.CLNDISDB, self.CLNDN, self.CLNSIG, 
+            self.gnomad_exome_af_global, self.gnomad_exome_hom_global,
+            self.gnomad_genome_af_global, self.gnomad_genome_hom_global)

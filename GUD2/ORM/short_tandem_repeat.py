@@ -38,12 +38,12 @@ class ShortTandemRepeat(Base):
         Query objects based off of their location being within the start only
         motifs through that  
          """
-        bin = assign_bin(start, end)
+        bins = set(containing_bins(start, end) + contained_bins(start, end))
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\
         filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
-        filter(Region.bin == bin)
+        filter(Region.bin.in_(bins))
         print str(q)
         return q.all()
 
