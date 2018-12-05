@@ -44,7 +44,6 @@ class ShortTandemRepeat(Base):
         filter(Region.uid == cls.regionID).\
         filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
         filter(Region.bin.in_(bins))
-        print str(q)
         return q.all()
 
     @classmethod
