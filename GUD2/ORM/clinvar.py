@@ -69,8 +69,10 @@ class ClinVar(Base):
         query all genes.
         """
         q = session.query(cls)
-        if name:
-            q = q.filter(cls.clinvarID == clinvarID)
+        q = session.query(cls, Region).\
+        join().\
+        filter(Region.uid == cls.regionID).\
+        filter(cls.clinvarID = clinvarID)
         return q.first()
 
     @classmethod
