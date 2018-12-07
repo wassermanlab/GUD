@@ -54,13 +54,13 @@ class ClinVar(Base):
         Query objects based off of their location being within the start only
         motifs through that  
          """
-        bin = assign_bin(start, end)
+        bins = set(containing_bins(start, end) + contained_bins(start, end))
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\
         filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
-        filter(Region.bin == bin)
-        return q.all() 
+        filter(Region.bin.in_(bins))
+        return q.all()
 
     @classmethod
     def select_by_name(cls, session, clinvarID):
