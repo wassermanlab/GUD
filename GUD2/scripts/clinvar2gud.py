@@ -108,7 +108,7 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
           info[-1] = info[-1].rstrip()
           
           # make region
-          chrom = fields[0]
+          chrom = "chr" + str(fields[0]) 
           start = int(fields[1]) - 1
           end = start + len(fields[3]) ##finish this 
           region = Region()
