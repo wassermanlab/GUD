@@ -63,6 +63,17 @@ class ClinVar(Base):
         return q.all() 
 
     @classmethod
+    def select_by_name(cls, session, clinvarID):
+        """
+        Query refGene objects by common name. If no name is provided,
+        query all genes.
+        """
+        q = session.query(cls)
+        if name:
+            q = q.filter(cls.clinvarID == clinvarID)
+        return q.first()
+
+    @classmethod
     def is_unique(cls, session, clinvarID):
         q = session.query(cls).filter(cls.clinvarID == clinvarID)
         return len(q.all()) == 0
