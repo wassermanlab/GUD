@@ -72,7 +72,7 @@ class ClinVar(Base):
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\
-        filter(cls.clinvarID = clinvarID)
+        filter(cls.clinvarID == clinvarID)
         return q.first()
 
     @classmethod
