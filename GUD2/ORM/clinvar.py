@@ -42,7 +42,7 @@ class ClinVar(Base):
         Index("ix_clinvar", regionID),
         Index("ix_clinvar_id", clinvarID),
 
-        {
+        {  
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
         }
@@ -54,22 +54,48 @@ class ClinVar(Base):
         Query objects based off of their location being within the start only
         motifs through that  
          """
-        bin = assign_bin(start, end)
+        bins = set(containing_bins(start, end) + contained_bins(start, end))
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\
         filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
-        filter(Region.bin == bin)
-        return q.all() 
+        filter(Region.bin.in_(bins))
+        return q.all()
+
+    @classmethod
+    def select_by_name(cls, session, clinvarID):
+        """
+        Query refGene objects by common name. If no name is provided,
+        query all genes.
+        """
+        q = session.query(cls)
+        q = session.query(cls, Region).\
+        join().\
+        filter(Region.uid == cls.regionID).\
+        filter(cls.clinvarID == clinvarID)
+        return q.first()
 
     @classmethod
     def is_unique(cls, session, clinvarID):
         q = session.query(cls).filter(cls.clinvarID == clinvarID)
         return len(q.all()) == 0
 
-    # def __str__(self):
-    #     return "{}\t{}".format(self.motif, self.pathogenicity)
+    def __str__(self):
+        return "REF\tALT\tclinvarID\tannotation\tannotation_impact\tfeature_type\tCLNDISDB\tCLINSIG\n{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".\
+        format(self.ref, self.alt, self.clinvarID, 
+        self.ANN_Annotation, self.ANN_Annotation_Impact, self.ANN_Feature_Type,
+        self.CLNDISDB, self.CLNSIG)
 
-    # def __repr__(self):
-    #     return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={}, motif={}, pathogencity={})>".format(
-    #         self.uid, self.regionID, self.sourceID, self.motif, self.pathogenicity)
+    def __repr__(self):
+        return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={},\
+        ref={}, alt={}, clinvarID={},\
+        ANN_Annotation={}, ANN_Annotation_Impact={}, ANN_Gene_Name={},\
+        ANN_Gene_ID={}, ANN_Feature_Type={}, ANN_Feature_ID={},\
+        CADD={}, CLNDISDB={}, CLNDN={}, CLNSIG={},\
+        gnomad_exome_af_global={}, gnomad_exome_hom_global={}, gnomad_genome_af_global={}, gnomad_genome_hom_global={})>".format(
+            self.uid, self.regionID, self.sourceID, self.ref, self.alt, self.clinvarID,
+            self.ANN_Annotation, self.ANN_Annotation_Impact, self.ANN_Gene_Name,
+            self.ANN_Gene_ID, self.ANN_Feature_Type, self.ANN_Feature_ID,
+            self.CADD, self.CLNDISDB, self.CLNDN, self.CLNSIG, 
+            self.gnomad_exome_af_global, self.gnomad_exome_hom_global,
+            self.gnomad_genome_af_global, self.gnomad_genome_hom_global)

@@ -84,7 +84,7 @@ def initialize_gud_db(user, host, port, db, genome):
             end = int(line[5])
             bin = assign_bin(start, end)
             region = Region()
-            reg = region.select_by_pos(session, chrom, start, end)
+            reg = region.select_by_exact_location(session, chrom, start, end)
             if not reg: 
                 region.bin = bin
                 region.chrom = chrom
@@ -92,7 +92,7 @@ def initialize_gud_db(user, host, port, db, genome):
                 region.end = end 
                 session.merge(region)
                 session.commit()
-                reg = region.select_by_pos(session, chrom, start, end)
+                reg = region.select_by_exact_location(session, chrom, start, end)
 
             ##Source
             source = Source()

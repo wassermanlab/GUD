@@ -94,7 +94,7 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
             
             #region entry 
             region = Region()
-            reg = region.select_by_pos(session, chrom, start, end)
+            reg = region.select_by_exact_location(session, chrom, start, end)
             if not reg: 
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
@@ -102,7 +102,7 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
                 region.end = end 
                 session.merge(region)
                 session.commit()
-                reg = region.select_by_pos(session, chrom, start, end)
+                reg = region.select_by_exact_location(session, chrom, start, end)
 
             #source entry 
             source = Source()
