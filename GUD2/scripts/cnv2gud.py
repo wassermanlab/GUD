@@ -106,29 +106,28 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
                 copy_number = int(split_line[6])
                 
                 if chrom in chroms:
-                    print chrom
-                    # # region entry 
-                    # region = Region()
-                    # reg = region.select_by_exact_location(session, chrom, start, end)
-                    # if not reg: 
-                    #     region.bin = assign_bin(start, end)
-                    #     region.chrom = chrom
-                    #     region.start = start
-                    #     region.end = end 
-                    #     session.merge(region)
-                    #     session.commit()
-                    #     reg = region.select_by_exact_location(session, chrom, start, end)
+                    # region entry 
+                    region = Region()
+                    reg = region.select_by_exact_location(session, chrom, start, end)
+                    if not reg: 
+                        region.bin = assign_bin(start, end)
+                        region.chrom = chrom
+                        region.start = start
+                        region.end = end 
+                        session.merge(region)
+                        session.commit()
+                        reg = region.select_by_exact_location(session, chrom, start, end)
     
-                    # # str entry 
-                    # cnv = CNV()
-                    # if cnv.is_unique(session, reg.uid, sou.uid, variant_type, copy_number, clinical_interpretation):
-                    #     cnv.variant_type = variant_type 
-                    #     cnv.copy_number = copy_number
-                    #     cnv.clinical_interpretation = clinical_interpretation
-                    #     cnv.regionID = reg.uid
-                    #     cnv.sourceID = sou.uid
-                    #     session.merge(cnv)
-                    #     session.commit()
+                    # str entry 
+                    cnv = CNV()
+                    if cnv.is_unique(session, reg.uid, sou.uid, variant_type, copy_number, clinical_interpretation):
+                        cnv.variant_type = variant_type 
+                        cnv.copy_number = copy_number
+                        cnv.clinical_interpretation = clinical_interpretation
+                        cnv.regionID = reg.uid
+                        cnv.sourceID = sou.uid
+                        session.merge(cnv)
+                        session.commit()
 
 #-------------#
 # Main        #
