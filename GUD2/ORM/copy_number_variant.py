@@ -9,10 +9,9 @@ from GUD2.ORM.base import Base
 from binning import containing_bins, contained_bins, assign_bin
 
 class CNV(Base):
-#chrom  start   end     name    clinical_interpretation variant_type    copy_number
     __tablename__ = "copy_number_variants"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
+    uid = Column("uid", String(50))
     regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
     sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
     variant_type = Column("variant_type", String(50), nullable=False)
@@ -21,7 +20,6 @@ class CNV(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(regionID, sourceID, variant_type, copy_number, clinical_interpretation),
 
         Index("ix_cnv", regionID),
         Index("ix_cnv_uid", uid),
@@ -71,9 +69,8 @@ class CNV(Base):
         return q.first()
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID, variant_type, copy_number, clinical_interpretation):
-        q = session.query(cls).filter(cls.regionID == regionID, cls.sourceID == sourceID,
-         cls.variant_type == variant_type, cls.copy_number==copy_number, cls.clinical_interpretation==clinical_interpretation)
+    def is_unique(cls, session, name):
+        q = session.query(cls).filter(cls.uid == name)
         q = q.all()
         return len(q) == 0
 

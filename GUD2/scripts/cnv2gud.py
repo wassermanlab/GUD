@@ -101,6 +101,7 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
                 chrom = str(split_line[0]) 
                 start = int(split_line[1])
                 end = int(split_line[2])
+                name = str(split_line[3])
                 clinical_interpretation = str(split_line[4])
                 variant_type = str(split_line[5])
                 copy_number = int(split_line[6])
@@ -121,7 +122,7 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
                     # str entry 
                     cnv = CNV()
                     if cnv.is_unique(session, reg.uid, sou.uid, variant_type, copy_number, clinical_interpretation):
-                        cnv.variant_type = variant_type 
+                        cnv.uid = name 
                         cnv.copy_number = copy_number
                         cnv.clinical_interpretation = clinical_interpretation
                         cnv.regionID = reg.uid
