@@ -18,3 +18,6 @@ nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.fantom2gud hg19 -u onta
 
 #clinvar insertion 
 nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.clinvar2gud ../clinvar.norm.anno.vcf -u ontarget_w -d tamar_test &
+
+#str insertion 
+nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.cnv2gud <file> -u ontarget_w -d tamar_test &
