@@ -93,8 +93,8 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
 
     # parse table
     with open(tsv_file) as f:
-        if not line.startswith("#"):
-            for line in f:
+        for line in f:
+            if not line.startswith("#"):
                 split_line = line.split("\t")
                 split_line[-1] = split_line[-1].rstrip()
                 chrom = str(split_line[0]) 
