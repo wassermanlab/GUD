@@ -91,6 +91,7 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
         session.commit()
         sou = source.select_by_name(session, source_name)
 
+    chroms = ["chr"+ch for ch in GUDglobals.chroms]
     # parse table
     with open(tsv_file) as f:
         for line in f:
@@ -104,7 +105,7 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
                 variant_type = str(split_line[5])
                 copy_number = int(split_line[6])
                 
-                if chrom in GUDglobals.chroms:
+                if chrom in chroms:
                     print chrom
                     # # region entry 
                     # region = Region()
