@@ -117,7 +117,6 @@ def initialize_gud_db(user, host, port, db, genome):
             session.merge(gene)
             session.commit()
 
-
 def get_ftp_dir_and_file(genome, data_type):
 
     # Initialize
