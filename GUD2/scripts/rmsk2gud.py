@@ -72,6 +72,14 @@ def initialize_gud_db(user, host, port, db, genome):
         table.metadata.create_all(engine)
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "rmsk")
+        # Get source
+        source = Source()
+        sou = source.select_by_name(session, "rmsk")
+        if not sou: 
+            source.name = "rmsk"
+            session.merge(source)
+            session.commit()
+            sou = source.select_by_name(session, "rmsk")
         # Download data
         for line in fetch_lines_from_ftp_file(
             genome, directory, file_name):
@@ -80,29 +88,23 @@ def initialize_gud_db(user, host, port, db, genome):
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[5])
             if not m.group(1) in GUDglobals.chroms: continue
-            #region entry 
+            # Get coordinates
             chrom = line[5]
             start = int(line[6])
             end = int(line[7])
+            # Get region
             region = Region()
-            reg = region.select_by_pos(session, chrom, start, end)
-            if not reg: 
+            reg = region.select_by_exact_location(session, chrom, start, end)
+            if not reg:
+                # Insert region
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
                 region.start = start
                 region.end = end
-                session.merge(region)
+                session.add(region)
                 session.commit()
-                reg = region.select_by_pos(session, chrom, start, end)
-            #source entry 
-            source = Source()
-            sou = source.select_by_name(session, "rmsk")
-            if not sou: 
-                source.name = "rmsk"
-                session.merge(source)
-                session.commit()
-                sou = source.select_by_name(session, "rmsk")
-            #conservation entry 
+                reg = region.select_by_exact_location(session, chrom, start, end)
+            # Insert repeat
             rmsk = RepeatMask()
             if rmsk.is_unique(session, reg.uid, sou.uid):
                 rmsk.swScore = line[1] 

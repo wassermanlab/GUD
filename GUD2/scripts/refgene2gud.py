@@ -70,6 +70,14 @@ def initialize_gud_db(user, host, port, db, genome):
         table.metadata.create_all(engine)
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "gene")
+        # Get source
+        source = Source()
+        sou = source.select_by_name(session, "refGene")
+        if not sou: 
+            source.name = "refGene"
+            session.merge(source)
+            session.commit()
+            sou = source.select_by_name(session, "refGene")
         # Download data
         for line in fetch_lines_from_ftp_file(
             genome, directory, file_name):
@@ -78,32 +86,23 @@ def initialize_gud_db(user, host, port, db, genome):
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[2])
             if not m.group(1) in GUDglobals.chroms: continue
-            ##Region
+            # Get coordinates
             chrom = line[2]
             start = int(line[4])
             end = int(line[5])
-            bin = assign_bin(start, end)
+            # Get region
             region = Region()
             reg = region.select_by_exact_location(session, chrom, start, end)
-            if not reg: 
-                region.bin = bin
+            if not reg:
+                # Insert region
+                region.bin = assign_bin(start, end)
                 region.chrom = chrom
                 region.start = start
-                region.end = end 
-                session.merge(region)
+                region.end = end
+                session.add(region)
                 session.commit()
                 reg = region.select_by_exact_location(session, chrom, start, end)
-
-            ##Source
-            source = Source()
-            sou = source.select_by_name(session, "refGene")
-            if not sou: 
-                source.name = "refGene"
-                session.merge(source)
-                session.commit()
-                sou = source.select_by_name(session, "refGene")
-
-            ##Gene
+            # Insert gene
             gene = Gene()
             gene.regionID = reg.uid
             gene.sourceID = sou.uid
