@@ -4,6 +4,9 @@
 #str insertion 
 nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.str2gud /space/data/gangSTR/hg19_ver10.sorted.0based.bed -u ontarget_w -d tamar_test &
 
+#pathogenic str insertion 
+/usr/local/python2.7.14/bin/python -m GUD2.scripts.path_str2gud ../Pathogenic_STR_Table_Shifted.bed -u ontarget_w -d tamar_test --source pathogenic_str
+
 # insert the gene table
 nohup /usr/local/python2.7.14/bin/python -m GUD2.scripts.refgene2gud hg19 -u ontarget_w -d tamar_test &
 

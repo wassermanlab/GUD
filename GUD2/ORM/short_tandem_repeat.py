@@ -20,7 +20,7 @@ class ShortTandemRepeat(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(regionID, sourceID),
+        UniqueConstraint(regionID, sourceID, pathogenicity),
 
         Index("ix_str", regionID),
         Index("ix_str_pathogenic", pathogenicity),
@@ -98,8 +98,8 @@ class ShortTandemRepeat(Base):
         return q.first()
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID):
-        q = session.query(cls).filter(cls.regionID == regionID, cls.sourceID == sourceID)
+    def is_unique(cls, session, regionID, sourceID, pathogenicity):
+        q = session.query(cls).filter(cls.regionID == regionID, cls.sourceID == sourceID, cls.pathogenicity == pathogenicity)
         q = q.all()
         return len(q) == 0
 
