@@ -15,6 +15,9 @@ import warnings
 from GUD2 import GUDglobals
 from GUD2.ORM.dna_accessibility import DNAAccessibility
 from GUD2.ORM.histone_modification import HistoneModification
+from GUD2.ORM.region import Region
+from GUD2.ORM.sample import Sample
+from GUD2.ORM.source import Source
 from GUD2.ORM.tf_binding import TFBinding
 
 #-------------#
