@@ -182,15 +182,13 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             metadata.setdefault((experiment_type, experiment_target), [])
             metadata[(experiment_type, experiment_target)].append((accession, biosample))
 
-    print(metadata)
-    exit(0)
-
     # For each cell/tissue, experiment and target...
-    for cell_or_tissue, experiment_type, experiment_target in sorted(metadata):
+    for experiment_type, experiment_target in sorted(metadata):
         # Initialize
         lines = []
+        merged_lines = []
         # For each accession...
-        for accession in sorted(metadata[(cell_or_tissue, experiment_type, experiment_target)]):                
+        for accession, biosample in sorted(metadata[(experiment_type, experiment_target)]):                
             # If accession file exists
             file_name = os.path.join(directory, "%s.bed.gz" % accession)
             if os.path.exists(file_name):
@@ -216,25 +214,27 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             bed_obj = pybedtools.BedTool("\n".join(lines), from_string=True)
             # Sort and merge
             for chrom, start, end in bed_obj.sort().merge():
-                # Create model
-                model = Model()
-                model.bin = assign_bin(int(start), int(end))
-                model.chrom = chrom
-                model.start = start
-                model.end = end
-                model.cell_or_tissue = cell_or_tissue
-                model.experiment_type = experiment_type
-                model.source_name = source_name
-                model.date = today
-                if feat_type == "histone":
-                    model.histone_type = experiment_target
-                if feat_type == "tf":
-                    model.tf_name = experiment_target
-                # Upsert model & commit
-                session.merge(model)
-                session.commit()
+                merged_lines.append((chrom, start, end))
+#                # Create model
+#                model = Model()
+#                model.bin = assign_bin(int(start), int(end))
+#                model.chrom = chrom
+#                model.start = start
+#                model.end = end
+#                model.cell_or_tissue = cell_or_tissue
+#                model.experiment_type = experiment_type
+#                model.source_name = source_name
+#                model.date = today
+#                if feat_type == "histone":
+#                    model.histone_type = experiment_target
+#                if feat_type == "tf":
+#                    model.tf_name = experiment_target
+#                # Upsert model & commit
+#                session.merge(model)
+#                session.commit()
             # Empty cache
             pybedtools.cleanup()
+        print(len(lines), len(merged_lines))
 
 #-------------#
 # Main        #
