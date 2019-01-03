@@ -1,0 +1,61 @@
+from sqlalchemy import (
+    Column, Index, PrimaryKeyConstraint, String
+)
+
+from sqlalchemy.dialects import mysql
+
+from GUD2.ORM.base import Base
+
+class Chrom(Base):
+
+    __tablename__ = "chroms"
+
+    chrom = Column("chrom", String(5), nullable=False)
+
+    size = Column("size", mysql.INTEGER(unsigned=True),
+        nullable=False)
+
+    __table_args__ = (
+
+        PrimaryKeyConstraint(chrom),
+        Index("ix_chrom", chrom),
+
+        {
+            "mysql_engine": "MyISAM",
+            "mysql_charset": "utf8"
+        }
+    )
+
+    @classmethod
+    def chrom_sizes(cls, session): 
+        """
+        Returns the size of all chroms as a dict.
+        """
+
+        chrom_sizes = {}
+
+        q = session.query(cls)
+
+        for c in q:
+            chrom_sizes.setdefault(c.chrom, int(c.size))
+
+        return chrom_sizes
+
+    @classmethod
+    def chrom_size(cls, session, chrom):
+        """
+        Returns the size of given chrom.
+        """
+
+        q = session.query(cls).filter(cls.chrom == chrom)
+
+        for c in q:
+            return int(c.size)
+
+    def __str__(self):
+        return "{}\t{}".format(self.chrom, self.size)
+
+    def __repr__(self):
+        return "<Chrom(chrom={}, size={})>".format(
+            self.chrom, self.size
+        )
