@@ -126,9 +126,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             "cancer": cancer
         })
 
-    print(samples)
-    exit(0)
-
 #    # Initialize table
 #    if feat_type == "accessibility":
 #        table = DnaAccessibility()
