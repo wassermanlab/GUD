@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
 
+# Import from GUD module
 from GUD2 import GUDglobals
 from GUD2.ORM.chrom import Chrom
 from GUD2.ORM.experiment import Experiment
@@ -24,7 +25,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script initializes a GUD database for the given genome.")
+    parser = argparse.ArgumentParser(description="initializes a GUD database for the given genome.")
 
     parser.add_argument("genome", help="Genome assembly")
 
@@ -48,6 +49,15 @@ def parse_args():
         args.db = args.genome
 
     return args
+
+def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # Initialize GUD database
+    initialize_gud_db(args.user, args.host,
+        args.port, args.db, args.genome)
 
 def initialize_gud_db(user, host, port, db, genome):
 
@@ -120,9 +130,4 @@ def initialize_gud_db(user, host, port, db, genome):
 
 if __name__ == "__main__":
 
-    # Parse arguments
-    args = parse_args()
-
-    # Initialize GUD database
-    initialize_gud_db(args.user, args.host,
-        args.port, args.db, args.genome)
+    main()

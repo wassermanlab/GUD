@@ -1,14 +1,12 @@
 #!/usr/bin/env python
-# mysql -u ontarget_w --database tamar_test
-import os
-import sys
-import re
+
+import os, sys, re
 import argparse
 from binning import assign_bin
 import getpass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import mapper, scoped_session, sessionmaker
-from sqlalchemy_utils import database_exists
+from sqlalchemy_utils import create_database, database_exists
 import warnings
 
 # Import from GUD module
@@ -21,7 +19,6 @@ from GUD2.ORM.source import Source
 # Functions   #
 #-------------#
 
-
 def parse_args():
     """
     This function parses arguments provided via the command
@@ -31,21 +28,24 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="this script inserts short tandem repeat location information")
 
-    parser.add_argument("bed_file", help="gangSTR bed file")
+    parser.add_argument("bedfile", help="BED file from gangSTR")
 
     # Optional args
-    parser.add_argument("--source", default="gangSTR", help="Source name")
+    parser.add_argument("--source", default="gangSTR",
+        help="Source name (default = \"gangSTR\")")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db",
-                             help="Database name (default = input genome assembly)")
+        help="Database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
-                             help="Host name (default = localhost)")
+        help="Host name (default = localhost)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
-                             help="Port number (default = 5506)")
-    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
-                             help="User name (default = current user)")
+        help="Port number (default = 5506)")
+
+    user = getpass.getuser()
+    mysql_group.add_argument("-u", "--user", default=user,
+        help="User name (default = current user)")
 
     args = parser.parse_args()
 
@@ -55,6 +55,14 @@ def parse_args():
 
     return args
 
+def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # Insert gangSTR data to GUD database
+    insert_str_to_gud_db(args.user, args.host, args.port,
+        args.db, args.bed_file, args.source)
 
 def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
 
@@ -63,12 +71,12 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
     db_name = "mysql://{}:@{}:{}/{}".format(
         user, host, port, db)
     if not database_exists(db_name):
-        raise ValueError("GUD db does not exist: %s" % db_name)
+        create_database(db_name)
     session = scoped_session(sessionmaker())
     engine = create_engine(db_name, echo=False)
     session.remove()
-    session.configure(bind=engine, autoflush=True,
-                      expire_on_commit=False)
+    session.configure(bind=engine, autoflush=False,
+        expire_on_commit=False)
 
     # Initialize table
     table = ShortTandemRepeat()
@@ -127,12 +135,6 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
 # Main        #
 #-------------#
 
-
 if __name__ == "__main__":
 
-    # Parse arguments
-    args = parse_args()
-
-    # Insert ENCODE data to GUD database
-    insert_str_to_gud_db(args.user, args.host, args.port, args.db,
-                         args.bed_file, args.source)
+    main()

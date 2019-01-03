@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
 
+# Import from GUD module
 from GUD2 import GUDglobals
 from GUD2.ORM.repeat_mask import RepeatMask
 from GUD2.ORM.region import Region
@@ -49,6 +50,16 @@ def parse_args():
 
     return args
 
+def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # Initialize GUD database: create tables
+    # and download data to populate them 
+    initialize_gud_db(args.user, args.host,
+        args.port, args.db, args.genome)
+
 def initialize_gud_db(user, host, port, db, genome):
 
     # Initialize
@@ -72,6 +83,15 @@ def initialize_gud_db(user, host, port, db, genome):
         table.metadata.create_all(engine)
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "rmsk")
+        # Get source
+        source = Source()
+        sou = source.select_by_name(session, "rmsk")
+        if not sou:
+            # Insert source name
+            source.name = "rmsk"
+            session.add(source)
+            session.commit()
+            sou = source.select_by_name(session, "rmsk")
         # Download data
         for line in fetch_lines_from_ftp_file(
             genome, directory, file_name):
@@ -80,29 +100,26 @@ def initialize_gud_db(user, host, port, db, genome):
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[5])
             if not m.group(1) in GUDglobals.chroms: continue
-            #region entry 
+
+            # Get coordinates
             chrom = line[5]
             start = int(line[6])
             end = int(line[7])
+            # Get region
             region = Region()
-            reg = region.select_by_pos(session, chrom, start, end)
-            if not reg: 
+            reg = region.select_unique(
+                session, chrom, start, end)
+            if not reg:
+                # Insert region
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
                 region.start = start
                 region.end = end
-                session.merge(region)
+                session.add(region)
                 session.commit()
-                reg = region.select_by_pos(session, chrom, start, end)
-            #source entry 
-            source = Source()
-            sou = source.select_by_name(session, "rmsk")
-            if not sou: 
-                source.name = "rmsk"
-                session.merge(source)
-                session.commit()
-                sou = source.select_by_name(session, "rmsk")
-            #conservation entry 
+                reg = region.select_unique(
+                    session, chrom, start, end)
+            # Insert repeat regions
             rmsk = RepeatMask()
             if rmsk.is_unique(session, reg.uid, sou.uid):
                 rmsk.swScore = line[1] 
@@ -168,10 +185,4 @@ def handle_bytes(bytes):
 
 if __name__ == "__main__":
 
-    # Parse arguments
-    args = parse_args()
-
-    # Initialize GUD database: create tables
-    # and download data to populate them 
-    initialize_gud_db(args.user, args.host,
-        args.port, args.db, args.genome)
+    main()

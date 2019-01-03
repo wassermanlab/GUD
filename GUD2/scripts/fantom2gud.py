@@ -58,6 +58,16 @@ def parse_args():
 
     return args
 
+def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # Insert FANTOM data to GUD database
+    insert_fantom_to_gud_db(args.user, args.host, args.port,
+        args.db, args.matrix, args.samples, args.feat_type,
+        args.source)
+
 def insert_fantom_to_gud_db(user, host, port, db,
     matrix_file, samples_file, feat_type, source_name):
 
@@ -235,10 +245,4 @@ def insert_fantom_to_gud_db(user, host, port, db,
 
 if __name__ == "__main__":
 
-    # Parse arguments
-    args = parse_args()
-
-    # Insert FANTOM data to GUD database
-    insert_fantom_to_gud_db(args.user, args.host, args.port,
-        args.db, args.matrix, args.samples, args.feat_type,
-        args.source)
+    main()

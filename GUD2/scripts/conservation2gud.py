@@ -49,6 +49,15 @@ def parse_args():
 
     return args
 
+def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # Insert conservation to GUD database
+    insert_conservation_to_gud_db(args.user, args.host,
+        args.port, args.db, args.genome)
+
 def insert_conservation_to_gud_db(user, host, port,
     db, genome):
 
@@ -132,9 +141,4 @@ def insert_conservation_to_gud_db(user, host, port,
 
 if __name__ == "__main__":
 
-    # Parse arguments
-    args = parse_args()
-
-    # Insert conservation to GUD database
-    insert_conservation_to_gud_db(args.user, args.host,
-        args.port, args.db, args.genome)
+    main()
