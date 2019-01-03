@@ -11,6 +11,7 @@ __organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
 __version__ = "0.0.1"
 
 import os, sys, re
+from Bio import SeqIO
 import gzip
 
 __all__ = ["ORM"]
@@ -43,19 +44,16 @@ class Globals(object):
         """
 
         if os.path.exists(file_name):
-            # Initialize #
-            f = None
-            # Open file handle #
+            # Open file handle
             if gz:
                 try: f = gzip.open(file_name, "rt")
                 except: raise ValueError("Could not open file %s" % file_name)
             else:
                 try: f = open(file_name, "rt")
                 except: raise ValueError("Could not open file %s" % file_name)
-            # For each line... #
+            # For each line...
             for line in f:
-                line = line.replace("\r", "")
-                yield line.strip("\n")
+                yield line.replace("\r", "").strip("\n")
             f.close()
         else:
             raise ValueError("File %s does not exist!" % file_name)
@@ -72,10 +70,9 @@ class Globals(object):
         @return: {list}
         """
 
-        # For each line... #
+        # For each line...
         for line in self.parse_file(file_name, gz):
-            line = line.split(",")
-            yield line
+            yield line.split(",")
 
     def parse_tsv_file(self, file_name, gz=False):
         """
@@ -89,10 +86,9 @@ class Globals(object):
         @return: {list}
         """
 
-        # For each line... #
+        # For each line...
         for line in self.parse_file(file_name, gz):
-            line = line.split("\t")
-            yield line
+            yield line.split("\t")
 
     def parse_fasta_file(self, file_name, gz=False, clean=True):
         """
@@ -102,29 +98,27 @@ class Globals(object):
         @input:
         file_name {str}
         gz {bool} use the gzip module
+        clean {bool} replace non-standard amino acids by Xs
 
         @return: [header, sequence]
         """
 
-        # Initialize #
-        header = ""
-        sequence = ""
-        # For each line... #
-        for line in self.parse_file(file_name, gz):
-            if len(line) == 0: continue
-            if line.startswith("#"): continue
-            if line.startswith(">"):
-                if header != "" and sequence != "":
-                    yield header, sequence
-                header = ""
-                sequence = ""
-                m = re.search("^>(.+)", line)
-                if m: header = m.group(1)
-            elif header != "":
-                sub_sequence = line.upper()
-                if clean: sub_sequence = re.sub("[^ACDEFGHIKLMNPQRSTUVWY]", "X", sub_sequence)
-                sequence += sub_sequence
-        if header != "" and sequence != "":
-            yield header, sequence
+        if os.path.exists(file_name):
+            # Open file handle
+            if gz or file_name.endswith(".gz"):
+                try: f = gzip.open(file_name, "rt")
+                except: raise ValueError("Could not open file %s" % file_name)
+            else:
+                try: f = open(file_name, "rt")
+                except: raise ValueError("Could not open file %s" % file_name)
+            # For each SeqRecord...
+            for seq_record in SeqIO.parse(f, "fasta"):
+                # Initialize
+                header = seq_record.id
+                sequence = str(seq_record.seq).upper()
+                yield header, sequence
+            f.close()
+        else:
+            raise ValueError("File %s does not exist!" % file_name)
             
 GUDglobals = Globals()
