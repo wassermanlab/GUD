@@ -190,7 +190,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
     # For each cell/tissue, experiment and target...
     for experiment_type, experiment_target in sorted(metadata):
         if os.path.isdir(dummy_dir): shutil.rmtree(dummy_dir)
-        os.makedir(dummy_dir)
+        os.mkdir(dummy_dir)
         if experiment_type == "FAIRE-seq":
             for accession, biosample in metadata[(experiment_type, experiment_target)]:
                 # Copy BED file
