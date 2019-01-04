@@ -196,7 +196,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             for accession, biosample in metadata[(experiment_type, experiment_target)]:
                 # Copy BED file
                 bed_obj = pybedtools.BedTool(os.path.join(directory, "%s.bed.gz" % accession))
-                bed_obj.saveas(os.path.join(dummy_dir, "%s.bed" % accession), compressed=False)
+                bed_obj.sort().saveas(os.path.join(dummy_dir, "%s.bed" % accession), compressed=False)
             # Empty cache
             pybedtools.cleanup()
     exit(0)
