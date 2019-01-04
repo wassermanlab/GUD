@@ -42,6 +42,8 @@ def parse_args():
         help="Type of genomic feature")
 
     # Optional args
+    parser.add_argument("--dummy-dir", default="/tmp/",
+        help="Dummy directory (default = /tmp/)")
     parser.add_argument("--source", default="ENCODE",
         help="Source name (e.g. \"PMID:22955616\"; default = \"ENCODE\")")
 
@@ -74,10 +76,11 @@ def main():
     # Insert ENCODE data to GUD database
     insert_encode_to_gud_db(args.user, args.host, args.port,
         args.db, args.genome, args.metadata, args.directory,
-        args.samples, args.feat_type, args.source)
+        args.samples, args.feat_type, args.dummy_dir, args.source)
 
 def insert_encode_to_gud_db(user, host, port, db, genome,
-    metadata_file, directory, samples_file, feat_type, source_name):
+    metadata_file, directory, samples_file, feat_type, dummy_dir,
+    source_name):
 
     # Initialize
     samples = {}
@@ -92,6 +95,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
     today = str(date.today())
+    dummy_dir = os.path.join(options.dummy_dir,
+        "%s.%s" % (os.path.basename(__file__), os.getpid()))
 
     # Get source
     source = Source()
@@ -181,6 +186,9 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             # Get metadata
             metadata.setdefault((experiment_type, experiment_target), [])
             metadata[(experiment_type, experiment_target)].append((accession, biosample))
+
+    print(metadata)
+    exit(0)
 
     # For each cell/tissue, experiment and target...
     for experiment_type, experiment_target in sorted(metadata):
