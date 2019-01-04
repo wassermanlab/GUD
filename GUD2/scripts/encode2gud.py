@@ -187,7 +187,9 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             metadata.setdefault((experiment_type, experiment_target), [])
             metadata[(experiment_type, experiment_target)].append((accession, biosample))
 
-    print(metadata)
+    # For each cell/tissue, experiment and target...
+    for experiment_type, experiment_target in sorted(metadata):
+        print(experiment_type, experiment_target, len(metadata[(experiment_type, experiment_target)]))
     exit(0)
 
     # For each cell/tissue, experiment and target...
