@@ -189,7 +189,15 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
     # For each cell/tissue, experiment and target...
     for experiment_type, experiment_target in sorted(metadata):
-        print(experiment_type, experiment_target, len(metadata[(experiment_type, experiment_target)]))
+        if os.path.isdir(dummy_dir): shutil.rmtree(dummy_dir)
+        os.makedir(dummy_dir)
+        if experiment_type == "FAIRE-seq":
+            for accession, biosample in metadata[(experiment_type, experiment_target)]:
+                # Copy BED file
+                bed_obj = pybedtools.BedTool(os.path.join(directory, "%s.bed.gz" % accession))
+                bed_obj.saveas(os.path.join(dummy_dir, "%s.bed" % accession))
+            # Empty cache
+            pybedtools.cleanup()
     exit(0)
 
     # For each cell/tissue, experiment and target...
