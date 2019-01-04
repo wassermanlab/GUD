@@ -95,7 +95,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
     today = str(date.today())
-    dummy_dir = os.path.join(options.dummy_dir,
+    dummy_dir = os.path.join(dummy_dir,
         "%s.%s" % (os.path.basename(__file__), os.getpid()))
 
     # Get source
