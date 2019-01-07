@@ -264,8 +264,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 if m: accessions.setdefault(m.group(1), line[-1])
             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
-                accession2regions.setdefault(line[-1], [])
-                accession2regions[line[-1]].append(int(line[0]) - 1)
+                accession2regions.setdefault(line[-1], set())
+                accession2regions[line[-1]].add(int(line[0]) - 1)
             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.bed" % cluster_file):
                 regions.append((line[0], int(line[1]), int(line[2])))
@@ -277,7 +277,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
                     samples[biosample]["cell_line"], samples[biosample]["cancer"])
                 # For each region...
-                for region in accession2regions[accessions[accession]]:
+                for region in sorted(accession2regions[accessions[accession]]):
                     # Get coordinates
                     chrom, start, end = regions[region]
                     # Ignore non-standard chroms, scaffolds, etc.
