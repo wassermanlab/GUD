@@ -236,7 +236,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         if cluster:
             # Initialize
             accessions = {}
-            accessions2regions = {}
+            accession2regions = {}
             regions = []
             bed_files = os.path.join(dummy_dir, "files.txt")
             table_file = os.path.join(dummy_dir, "table.txt")
@@ -264,8 +264,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 if m: accessions.setdefault(m.group(1), line[-1])
             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
-                accessions2regions.setdefault(line[-1], [])
-                accessions2regions[line[-1]].append(int(line[0]) - 1)
+                accession2regions.setdefault(line[-1], [])
+                accession2regions[line[-1]].append(int(line[0]) - 1)
             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.bed" % cluster_file):
                 regions.append((line[0], int(line[1]), int(line[2])))
