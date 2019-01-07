@@ -234,8 +234,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         # Cluster regions
         if cluster:
             # Initialize
-            labels = {}
-            clusters = {}
+            accessions = {}
+            accessions2regions = {}
             regions = []
             bed_files = os.path.join(dummy_dir, "files.txt")
             table_file = os.path.join(dummy_dir, "table.txt")
@@ -259,13 +259,53 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     stderr=subprocess.STDOUT)
             # For each line...
             for line in GUDglobals.parse_tsv_file(table_file):
-                print(line)
                 m = re.search("%s/(\S+).bed" % dummy_dir, line[0])
-                if m: labels.setdefault(line[-1], m.group(1))
-            print(labels)
-            exit(0)
-            
-            
+                if m: accessions.setdefault(m.group(1), line[-1])
+            # For each line...
+            for line in GUDglobals.parse_tsv_file("%s.cluster", cluster_file):
+                accessions2regions.setdefault(line[-1], [])
+                accessions2regions[line[-1]].append(int(line[0]) - 1)
+            # For each line...
+            for line in GUDglobals.parse_tsv_file("%s.bed", cluster_file):
+                regions.append((line[0], int(line[1], int(line[2]))))
+            # For each accession, biosample...
+            for accession, biosample in metadata[(experiment_type, experiment_target)]:
+                # Get sample
+                sample = Sample()
+                sam = sample.select_by_exact_sample(session,
+                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
+                # For each region...
+                for region in accession2regions[accessions[accession]]:
+                    # Get coordinates
+                    chrom, start, end = regions[region]
+                    # Ignore non-standard chroms, scaffolds, etc.
+                    m = re.search("^chr(\S+)$", chrom)
+                    if not m.group(1) in GUDglobals.chroms: continue
+                    # Get region
+                    region = Region()
+                    reg = region.select_by_exact_location(session, chrom, start, end)
+                    if not reg:
+                        # Insert region
+                        region.bin = assign_bin(start, end)
+                        region.chrom = chrom
+                        region.start = start
+                        region.end = end
+                        session.add(region)
+                        session.commit()
+                        reg = region.select_by_exact_location(session, chrom, start, end)
+                    # Insert feature
+                    feat = copy.copy(table)
+                    feat.regionID = reg.uid
+                    feat.sourceID = sou.uid
+                    feat.sampleID = sam.uid
+                    feat.experimentID = exp.uid
+                    if feat_type == "histone":
+                        feat.histone_type = experiment_target
+                    if feat_type == "tf":
+                        feat.tf = experiment_target
+                    session.merge(feat)
+                    session.commit()
         # Do not cluster regions
         else:
             # For each accession, biosample...
