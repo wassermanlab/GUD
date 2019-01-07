@@ -202,7 +202,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             session.add(experiment)
             session.commit()
             exp = experiment.select_by_name(session, experiment_type)
-        dummy_dir = "/space/data/tmp/encode2gud.py.16498/"
+        dummy_dir = "/space/data/tmp/encode2gud.py.16498"
 ##        if os.path.isdir(dummy_dir): shutil.rmtree(dummy_dir)
 ##        os.mkdir(dummy_dir)
         if experiment_type != "FAIRE-seq": continue
@@ -234,6 +234,9 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         # Cluster regions
         if cluster:
             # Initialize
+            table = {}
+            clusters = {}
+            regions = []
             bed_files = os.path.join(dummy_dir, "files.txt")
             table_file = os.path.join(dummy_dir, "table.txt")
             cluster_file = os.path.join(dummy_dir, "clusters")
@@ -254,6 +257,14 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 process = subprocess.check_output(["regCluster", table_file,
                     "%s.cluster" % cluster_file, "%s.bed" % cluster_file],
                     stderr=subprocess.STDOUT)
+            # For each line...
+            for line in GUDglobals.parse_file(table_file):
+                m = re.search("%s(\S+).bed" % dummy_dir, line[0])
+                if m: table.setdefault(line[-1], m.group(1))
+            print(table)
+            exit(0)
+            
+            
         # Do not cluster regions
         else:
             # For each accession, biosample...
