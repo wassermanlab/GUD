@@ -43,6 +43,8 @@ def parse_args():
         help="Type of genomic feature")
 
     # Optional args
+    parser.add_argument("-c", "--cluster", action="store_true",
+        help="Cluster genomic regions w/ UCSC's regCluster (default = False)")
     parser.add_argument("--dummy-dir", default="/tmp/",
         help="Dummy directory (default = /tmp/)")
     parser.add_argument("--source", default="ENCODE",
