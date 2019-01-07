@@ -202,8 +202,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             session.add(experiment)
             session.commit()
             exp = experiment.select_by_name(session, experiment_type)
-        print(exp)
-        exit(0)
         dummy_dir = "/space/data/tmp/encode2gud.py.16498/"
 ##        if os.path.isdir(dummy_dir): shutil.rmtree(dummy_dir)
 ##        os.mkdir(dummy_dir)
@@ -291,81 +289,70 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         reg = region.select_by_exact_location(session, chrom, start, end)
                     # Insert feature
                     feat = copy.copy(table)
-#                    regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
-#                    sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
-#                    sampleID = Column("sampleID", Integer, ForeignKey('samples.uid'), nullable=False)
-#                    experimentID = Column("experimentID", Integer, ForeignKey('experiments.uid'), nullable=False)
                     feat.regionID = reg.uid
                     feat.sourceID = sou.uid
                     feat.sampleID = sam.uid
-                    feat.experimentID = line[1]
-#                    gene.cdsStart = line[6]
-#                    gene.cdsEnd = line[7]
-#                    gene.exonStarts = line[9]
-#                    gene.exonEnds = line[10]
-#                    gene.name2 = line[12]
-#                    gene.strand = line[3]
-#                    session.merge(gene)
-#                    session.commit()
-    
-#            # Copy BED file
-#            bed_obj = pybedtools.BedTool(os.path.join(directory, "%s.bed.gz" % accession))
-#            bed_obj.sort().saveas(os.path.join(dummy_dir, "%s.bed" % accession), compressed=False)
-        
-
-    # For each cell/tissue, experiment and target...
-    for experiment_type, experiment_target in sorted(metadata):
-        # Initialize
-        lines = []
-        merged_lines = []
-        # For each accession...
-        for accession, biosample in sorted(metadata[(experiment_type, experiment_target)]):                
-            # If accession file exists
-            file_name = os.path.join(directory, "%s.bed.gz" % accession)
-            if os.path.exists(file_name):
-                try:
-                    # For each line...
-                    for line in GUDglobals.parse_tsv_file(file_name, gz=True):
-                        # Skip if not enough elements
-                        if len(line) < 3: continue
-                        # Ignore non-standard chroms, scaffolds, etc.
-                        m = re.search("^chr(\w{1,2})$", line[0])
-                        if not m.group(1) in GUDglobals.chroms: continue
-                        # Skip if not start or end
-                        if not line[1].isdigit(): continue
-                        if not line[2].isdigit(): continue
-                        # If start is smaller than end
-                        if int(line[1]) < int(line[2]):
-                            lines.append("\t".join(line[:3]))
-                except:
-                    warnings.warn("\nCould not read file: \"%s\"\n\tSkipping file...\n" % file_name)
-        # If lines...
-        if lines:
-            # Create BED object
-            bed_obj = pybedtools.BedTool("\n".join(lines), from_string=True)
-            # Sort and merge
-            for chrom, start, end in bed_obj.sort().merge():
-                merged_lines.append((chrom, start, end))
-#                # Create model
-#                model = Model()
-#                model.bin = assign_bin(int(start), int(end))
-#                model.chrom = chrom
-#                model.start = start
-#                model.end = end
-#                model.cell_or_tissue = cell_or_tissue
-#                model.experiment_type = experiment_type
-#                model.source_name = source_name
-#                model.date = today
-#                if feat_type == "histone":
-#                    model.histone_type = experiment_target
-#                if feat_type == "tf":
-#                    model.tf_name = experiment_target
-#                # Upsert model & commit
-#                session.merge(model)
-#                session.commit()
-            # Empty cache
-            pybedtools.cleanup()
-        print(len(lines), len(merged_lines))
+                    feat.experimentID = exp.uid
+                    if feat_type == "histone":
+                        feat.histone_type = experiment_target
+                    if feat_type == "tf":
+                        feat.tf = experiment_target
+                    session.merge(gene)
+                    session.commit()
+#
+#    # For each cell/tissue, experiment and target...
+#    for experiment_type, experiment_target in sorted(metadata):
+#        # Initialize
+#        lines = []
+#        merged_lines = []
+#        # For each accession...
+#        for accession, biosample in sorted(metadata[(experiment_type, experiment_target)]):                
+#            # If accession file exists
+#            file_name = os.path.join(directory, "%s.bed.gz" % accession)
+#            if os.path.exists(file_name):
+#                try:
+#                    # For each line...
+#                    for line in GUDglobals.parse_tsv_file(file_name, gz=True):
+#                        # Skip if not enough elements
+#                        if len(line) < 3: continue
+#                        # Ignore non-standard chroms, scaffolds, etc.
+#                        m = re.search("^chr(\w{1,2})$", line[0])
+#                        if not m.group(1) in GUDglobals.chroms: continue
+#                        # Skip if not start or end
+#                        if not line[1].isdigit(): continue
+#                        if not line[2].isdigit(): continue
+#                        # If start is smaller than end
+#                        if int(line[1]) < int(line[2]):
+#                            lines.append("\t".join(line[:3]))
+#                except:
+#                    warnings.warn("\nCould not read file: \"%s\"\n\tSkipping file...\n" % file_name)
+#        # If lines...
+#        if lines:
+#            # Create BED object
+#            bed_obj = pybedtools.BedTool("\n".join(lines), from_string=True)
+#            # Sort and merge
+#            for chrom, start, end in bed_obj.sort().merge():
+#                merged_lines.append((chrom, start, end))
+##                # Create model
+##                model = Model()
+##                model.bin = assign_bin(int(start), int(end))
+##                model.chrom = chrom
+##                model.start = start
+##                model.end = end
+##                model.cell_or_tissue = cell_or_tissue
+##                model.experiment_type = experiment_type
+##                model.source_name = source_name
+##                model.date = today
+##                if feat_type == "histone":
+##                    model.histone_type = experiment_target
+##                if feat_type == "tf":
+##                    model.tf_name = experiment_target
+##                # Upsert model & commit
+##                session.merge(model)
+##                session.commit()
+#            # Empty cache
+#            pybedtools.cleanup()
+#        print(len(lines), len(merged_lines))
 
 #-------------#
 # Main        #
