@@ -10,6 +10,7 @@ import shutil
 from sqlalchemy import create_engine
 from sqlalchemy.orm import mapper, scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
+import subprocess
 import warnings
 
 # Import from GUD module
