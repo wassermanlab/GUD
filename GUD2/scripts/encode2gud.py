@@ -258,7 +258,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     "%s.cluster" % cluster_file, "%s.bed" % cluster_file],
                     stderr=subprocess.STDOUT)
             # For each line...
-            for line in GUDglobals.parse_file(table_file):
+            for line in GUDglobals.parse_tsv_file(table_file):
                 print(line)
                 m = re.search("%s\/(\S+)\.bed" % dummy_dir, line[0])
                 if m: labels.setdefault(line[-1], m.group(1))
