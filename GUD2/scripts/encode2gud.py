@@ -259,7 +259,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     stderr=subprocess.STDOUT)
             # For each line...
             for line in GUDglobals.parse_file(table_file):
-                m = re.search("%s(\S+).bed" % dummy_dir, line[0])
+                print(line)
+                m = re.search("%s/(\S+).bed" % dummy_dir, line[0])
                 if m: labels.setdefault(line[-1], m.group(1))
             print(labels)
             exit(0)
