@@ -206,24 +206,24 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 ##        if os.path.isdir(dummy_dir): shutil.rmtree(dummy_dir)
 ##        os.mkdir(dummy_dir)
         if experiment_type != "FAIRE-seq": continue
-#        # For each accession, biosample...
-#        for accession, biosample in metadata[(experiment_type, experiment_target)]:
-#            # Get sample
-#            sample = Sample()
-#            sam = sample.select_by_exact_sample(session,
-#                samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
-#                samples[biosample]["cell_line"], samples[biosample]["cancer"])
-#            if not sam:
-#                # Insert sample
-#                sample.name = samples[biosample]["cell_or_tissue"]
-#                sample.treatment = samples[biosample]["treatment"]
-#                sample.cell_line = samples[biosample]["cell_line"]
-#                sample.cancer = samples[biosample]["cancer"]
-#                session.add(sample)
-#                session.commit()
-#                sam = sample.select_by_exact_sample(session,
-#                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
-#                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
+        # For each accession, biosample...
+        for accession, biosample in metadata[(experiment_type, experiment_target)]:
+            # Get sample
+            sample = Sample()
+            sam = sample.select_by_exact_sample(session,
+                samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+                samples[biosample]["cell_line"], samples[biosample]["cancer"])
+            if not sam:
+                # Insert sample
+                sample.name = samples[biosample]["cell_or_tissue"]
+                sample.treatment = samples[biosample]["treatment"]
+                sample.cell_line = samples[biosample]["cell_line"]
+                sample.cancer = samples[biosample]["cancer"]
+                session.add(sample)
+                session.commit()
+                sam = sample.select_by_exact_sample(session,
+                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
 #            # Copy BED file
 #            bed_obj = pybedtools.BedTool(
 #                os.path.join(directory, "%s.bed.gz" % accession))
