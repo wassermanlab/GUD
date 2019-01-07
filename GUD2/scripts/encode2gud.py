@@ -256,15 +256,15 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 sam = sample.select_by_exact_sample(session,
                     samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
                     samples[biosample]["cell_line"], samples[biosample]["cancer"])
-                # For each chrom, start, end...
-                for chrom, start, end in bed_obj:
+                # For each feature...
+                for feat in bed_obj:
                     # Ignore non-standard chroms, scaffolds, etc.
-                    m = re.search("^chr(\S+)$", chrom)
+                    m = re.search("^chr(\S+)$", feat[0])
                     if not m.group(1) in GUDglobals.chroms: continue
                     # Get coordinates
-                    chrom = chrom
-                    start = int(start)
-                    end = int(end)
+                    chrom = feat[0]
+                    start = int(feat[1])
+                    end = int(feat[2])
                     # Get region
                     region = Region()
                     reg = region.select_by_exact_location(session, chrom, start, end)
