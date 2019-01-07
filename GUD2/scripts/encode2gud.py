@@ -297,7 +297,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         feat.histone_type = experiment_target
                     if feat_type == "tf":
                         feat.tf = experiment_target
-                    session.merge(gene)
+                    session.merge(feat)
                     session.commit()
 #
 #    # For each cell/tissue, experiment and target...
