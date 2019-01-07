@@ -263,11 +263,11 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 m = re.search("%s/(\S+).bed" % dummy_dir, line[0])
                 if m: accessions.setdefault(m.group(1), line[-1])
             # For each line...
-            for line in GUDglobals.parse_tsv_file("%s.cluster", cluster_file):
+            for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
                 accessions2regions.setdefault(line[-1], [])
                 accessions2regions[line[-1]].append(int(line[0]) - 1)
             # For each line...
-            for line in GUDglobals.parse_tsv_file("%s.bed", cluster_file):
+            for line in GUDglobals.parse_tsv_file("%s.bed" % cluster_file):
                 regions.append((line[0], int(line[1], int(line[2]))))
             # For each accession, biosample...
             for accession, biosample in metadata[(experiment_type, experiment_target)]:
