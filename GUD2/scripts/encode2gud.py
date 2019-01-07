@@ -238,7 +238,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 exit(0)
                 # Load BED file
                 bed_obj = pybedtools.BedTool(
-                    os.path.join(dummy_dir, "%s.bed" % accession)
+                    os.path.join(dummy_dir, "%s.bed" % accession))
                 # Get sample
                 sample = Sample()
                 sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
