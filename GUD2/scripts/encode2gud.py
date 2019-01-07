@@ -188,6 +188,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 #                accession, audit))
         # This is a released sample!
         if assembly == genome and status == "released":
+            # Skip sample
+            if not samples[biosample]["add"]: continue
             # Get metadata
             metadata.setdefault((experiment_type, experiment_target), [])
             metadata[(experiment_type, experiment_target)].append((accession, biosample))
@@ -234,17 +236,27 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         else:
             # For each accession, biosample...
             for accession, biosample in metadata[(experiment_type, experiment_target)]:
-                print(accession, biosample)
-                exit(0)
                 # Load BED file
                 bed_obj = pybedtools.BedTool(
                     os.path.join(dummy_dir, "%s.bed" % accession))
                 # Get sample
                 sample = Sample()
-                sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
+                sam = sample.select_by_exact_sample(session,
+                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
                 if not sam:
-                    pass
-                exit(0)
+                    # Insert sample
+                    sample.name = samples[biosample]["cell_or_tissue"]
+                    sample.treatment = samples[biosample]["treatment"]
+                    sample.cell_line = samples[biosample]["cell_line"]
+                    sample.cancer = samples[biosample]["cancer"]
+                    session.add(sample)
+                    session.commit()
+                    sam = sample.select_by_exact_sample(session,
+                        samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+                        samples[biosample]["cell_line"], samples[biosample]["cancer"])
+                continue
+            exit(0)
 #                # For each chrom, start, end...
 #                for chrom, start, end in bed_obj:
 #                    # Ignore non-standard chroms, scaffolds, etc.
