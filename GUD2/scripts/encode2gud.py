@@ -201,11 +201,13 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 #        # For each accession, biosample...
 #        for accession, biosample in metadata[(experiment_type, experiment_target)]:
 #            # Copy BED file
-#            bed_obj = pybedtools.BedTool(os.path.join(directory, "%s.bed.gz" % accession))
-#            bed_obj.sort().saveas(os.path.join(dummy_dir, "%s.bed" % accession), compressed=False)
+#            bed_obj = pybedtools.BedTool(
+#                os.path.join(directory, "%s.bed.gz" % accession))
+#            bed_obj.sort().saveas(os.path.join(
+#                dummy_dir, "%s.bed" % accession), compressed=False)
 #        # Empty cache
 #        pybedtools.cleanup()
-        # Cluster
+        # Cluster regions
         if cluster:
             # Initialize
             bed_files = os.path.join(dummy_dir, "files.txt")
@@ -228,8 +230,62 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 process = subprocess.check_output(["regCluster", table_file,
                     "%s.cluster" % cluster_file, "%s.bed" % cluster_file],
                     stderr=subprocess.STDOUT)
-            exit(0)
-    exit(0)
+        # Do not cluster regions
+        else:
+            # For each accession, biosample...
+            for accession, biosample in metadata[(experiment_type, experiment_target)]:
+                print(accession, biosample)
+                exit(0)
+                # Load BED file
+                bed_obj = pybedtools.BedTool(
+                    os.path.join(dummy_dir, "%s.bed" % accession)
+                # Get sample
+                sample = Sample()
+                sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
+                if not sam:
+                    pass
+                exit(0)
+#                # For each chrom, start, end...
+#                for chrom, start, end in bed_obj:
+#                    # Ignore non-standard chroms, scaffolds, etc.
+#                    m = re.search("^chr(\S+)$", chrom)
+#                    if not m.group(1) in GUDglobals.chroms: continue
+#                    # Get coordinates
+#                    chrom = chrom
+#                    start = int(start)
+#                    end = int(end)
+#                    # Get region
+#                    region = Region()
+#                    reg = region.select_by_exact_location(session, chrom, start, end)
+#                    if not reg:
+#                        # Insert region
+#                        region.bin = assign_bin(start, end)
+#                        region.chrom = chrom
+#                        region.start = start
+#                        region.end = end
+#                        session.add(region)
+#                        session.commit()
+#                        reg = region.select_by_exact_location(session, chrom, start, end)
+#
+#                    
+#                    # Insert gene
+#                    gene = Gene()
+#                    gene.regionID = reg.uid
+#                    gene.sourceID = sou.uid
+#                    gene.name = line[1]
+#                    gene.cdsStart = line[6]
+#                    gene.cdsEnd = line[7]
+#                    gene.exonStarts = line[9]
+#                    gene.exonEnds = line[10]
+#                    gene.name2 = line[12]
+#                    gene.strand = line[3]
+#                    session.merge(gene)
+#                    session.commit()
+    
+#            # Copy BED file
+#            bed_obj = pybedtools.BedTool(os.path.join(directory, "%s.bed.gz" % accession))
+#            bed_obj.sort().saveas(os.path.join(dummy_dir, "%s.bed" % accession), compressed=False)
+        
 
     # For each cell/tissue, experiment and target...
     for experiment_type, experiment_target in sorted(metadata):
