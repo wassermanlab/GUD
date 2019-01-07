@@ -16,6 +16,7 @@ import warnings
 
 # Import from GUD module
 from GUD2 import GUDglobals
+from GUD2.ORM.experiment import Experiment
 from GUD2.ORM.dna_accessibility import DNAAccessibility
 from GUD2.ORM.histone_modification import HistoneModification
 from GUD2.ORM.region import Region
