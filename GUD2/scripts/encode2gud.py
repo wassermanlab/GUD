@@ -138,11 +138,11 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
     # Create ENCODE table
     if feat_type == "accessibility":
-        table = DnaAccessibility()
+        table = DNAAccessibility()
     if feat_type == "histone":
         table = HistoneModification()
     if feat_type == "tf":
-        table = TfBinding()
+        table = TFBinding()
     if not engine.has_table(table.__tablename__):
         table.metadata.bind = engine
         table.metadata.create_all(engine)
