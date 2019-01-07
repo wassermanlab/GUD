@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument("-c", "--cluster", action="store_true",
         help="cluster regions with regCluster (default = False)")
     parser.add_argument("--dummy-dir", default="/tmp/",
-        help="dummy directory (default = /tmp/)")
+        metavar="DUMMYDIR", help="dummy directory (default = /tmp/)")
     parser.add_argument("--source", default="ENCODE",
         help="source name (e.g. \"PMID:22955616\"; default = \"ENCODE\")")
 
