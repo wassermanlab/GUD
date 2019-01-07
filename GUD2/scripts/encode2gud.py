@@ -33,9 +33,9 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="this script inserts \"accessibility\", \"histone\" or \"tf\" data from ENCODE into GUD. arguments \"metadata\" and \"directory\" refer to the execution \"xargs -n 1 curl -O -L < file.txt\". genomic features include \"accessibility\", \"histone\" and \"tf\".")
 
-    parser.add_argument("genome", help="Genome assembly")
-    parser.add_argument("metadata", help="Metadata file")
-    parser.add_argument("directory", help="Downloads directory")
+    parser.add_argument("genome", help="genome assembly")
+    parser.add_argument("metadata", help="metadata file")
+    parser.add_argument("directory", help="downloads directory")
     parser.add_argument("samples", help="ENCODE samples (manually-curated)")
 
     feats = ["accessibility", "histone", "tf"]
@@ -44,24 +44,24 @@ def parse_args():
 
     # Optional args
     parser.add_argument("-c", "--cluster", action="store_true",
-        help="Cluster genomic regions w/ UCSC's regCluster (default = False)")
+        help="cluster genomic regions w/ UCSC's regCluster (default = False)")
     parser.add_argument("--dummy-dir", default="/tmp/",
-        help="Dummy directory (default = /tmp/)")
+        help="dummy directory (default = /tmp/)")
     parser.add_argument("--source", default="ENCODE",
-        help="Source name (e.g. \"PMID:22955616\"; default = \"ENCODE\")")
+        help="source name (e.g. \"PMID:22955616\"; default = \"ENCODE\")")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db",
-        help="Database name (default = given genome assembly)")
+        help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
-        help="Host name (default = localhost)")
+        help="host name (default = localhost)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="Port number (default = 5506)")
+        help="port number (default = 5506)")
 
     user = getpass.getuser()
     mysql_group.add_argument("-u", "--user", default=user,
-        help="User name (default = current user)")
+        help="user name (default = current user)")
 
     args = parser.parse_args()
 
