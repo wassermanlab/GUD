@@ -195,7 +195,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         dummy_dir = "/space/data/tmp/encode2gud.py.16498/"
 ##        if os.path.isdir(dummy_dir): shutil.rmtree(dummy_dir)
 ##        os.mkdir(dummy_dir)
-#        if experiment_type != "FAIRE-seq": continue
+        if experiment_type != "FAIRE-seq": continue
 #        # For each accession, biosample...
 #        for accession, biosample in metadata[(experiment_type, experiment_target)]:
 #            # Get sample
