@@ -3,6 +3,7 @@
 import os, sys, re
 import argparse
 from binning import assign_bin
+import copy
 from datetime import date
 import getpass
 import pybedtools
@@ -136,7 +137,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             "cancer": cancer
         })
 
-    # Create ENCODE table
+    # Create table
     if feat_type == "accessibility":
         table = DNAAccessibility()
     if feat_type == "histone":
@@ -192,6 +193,16 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
     # For each cell/tissue, experiment, target...
     for experiment_type, experiment_target in sorted(metadata):
+        # Get source
+        experiment = Experiment()
+        exp = experiment.select_by_name(session, experiment_type)
+        if not exp:    
+            experiment.name = experiment_type
+            session.add(experiment)
+            session.commit()
+            exp = source.select_by_name(session, experiment_type)
+        print(exp)
+        exit(0)
         dummy_dir = "/space/data/tmp/encode2gud.py.16498/"
 ##        if os.path.isdir(dummy_dir): shutil.rmtree(dummy_dir)
 ##        os.mkdir(dummy_dir)
@@ -257,14 +268,14 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
                     samples[biosample]["cell_line"], samples[biosample]["cancer"])
                 # For each feature...
-                for feat in bed_obj:
+                for feature in bed_obj:
                     # Ignore non-standard chroms, scaffolds, etc.
-                    m = re.search("^chr(\S+)$", feat[0])
+                    m = re.search("^chr(\S+)$", feature[0])
                     if not m.group(1) in GUDglobals.chroms: continue
                     # Get coordinates
-                    chrom = feat[0]
-                    start = int(feat[1])
-                    end = int(feat[2])
+                    chrom = feature[0]
+                    start = int(feature[1])
+                    end = int(feature[2])
                     # Get region
                     region = Region()
                     reg = region.select_by_exact_location(session, chrom, start, end)
@@ -277,15 +288,16 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         session.add(region)
                         session.commit()
                         reg = region.select_by_exact_location(session, chrom, start, end)
-                    print(reg)
-                    exit(0)
-                    
-#                    
-#                    # Insert gene
-#                    gene = Gene()
-#                    gene.regionID = reg.uid
-#                    gene.sourceID = sou.uid
-#                    gene.name = line[1]
+                    # Insert feature
+                    feat = copy.copy(table)
+#                    regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
+#                    sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
+#                    sampleID = Column("sampleID", Integer, ForeignKey('samples.uid'), nullable=False)
+#                    experimentID = Column("experimentID", Integer, ForeignKey('experiments.uid'), nullable=False)
+                    feat.regionID = reg.uid
+                    feat.sourceID = sou.uid
+                    feat.sampleID = sam.uid
+                    feat.experimentID = line[1]
 #                    gene.cdsStart = line[6]
 #                    gene.cdsEnd = line[7]
 #                    gene.exonStarts = line[9]

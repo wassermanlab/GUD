@@ -58,8 +58,6 @@ class Region(Base):
 
     @classmethod
     def select_by_exact_location(cls, session, chrom, start, end):
-        """
-        """
 
         bin = assign_bin(start, end)
 
@@ -70,7 +68,7 @@ class Region(Base):
 
     def __str__(self):
         return "{}\t{}\t{}\t{}".format(self.bin, self.chrom,
-                                       self.start, self.end)
+            self.start, self.end)
 
     def __repr__(self):
         return "<Chrom(uid={}, bin={}, chrom={}, start={}, end={})>".format(

@@ -47,7 +47,7 @@ class Sample(Base):
 
     def __str__(self):
         return "{}\t{}\t{}\t{}".format(self.name, self.treatment,
-                                       self.cell_line, self.cancer)
+            self.cell_line, self.cancer)
 
     def __repr__(self):
         return "<Sample(uid={}, name={}, treatment={}, cell_line={}, cancer={})>".format(

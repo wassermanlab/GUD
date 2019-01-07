@@ -9,7 +9,7 @@ class Source(Base):
 
     __tablename__ = "sources"
 
-    uid = Column('uid', mysql.INTEGER(unsigned=True), nullable=False)
+    uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
     name = Column("name", String(250), nullable=False)
 
     __table_args__ = (
