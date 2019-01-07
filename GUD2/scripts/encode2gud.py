@@ -210,6 +210,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             # Initialize
             bed_files = os.path.join(dummy_dir, "files.txt")
             table_file = os.path.join(dummy_dir, "table.txt")
+            cluster_file = os.path.join(dummy_dir, "clusters")
             # Create BED file list
             if not os.path.exists(bed_files):
                 # For each file...
@@ -221,7 +222,12 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             # Make table of tables
             if not os.path.exists(table_file):
                 process = subprocess.check_output(["regClusterMakeTableOfTables",
-                    "uw01", bed_files, table_file], stderr=subprocess.STDOUT)    
+                    "uw01", bed_files, table_file], stderr=subprocess.STDOUT)
+            # Make clusters
+            if not os.path.exists(cluster_file):
+                process = subprocess.check_output(["regCluster", table_file,
+                    "%s.cluster" % cluster_file, "%s.bed" % cluster_file],
+                    stderr=subprocess.STDOUT)
             exit(0)
     exit(0)
 
