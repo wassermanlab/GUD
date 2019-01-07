@@ -201,7 +201,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             experiment.name = experiment_type
             session.add(experiment)
             session.commit()
-            exp = source.select_by_name(session, experiment_type)
+            exp = experiment.select_by_name(session, experiment_type)
         print(exp)
         exit(0)
         dummy_dir = "/space/data/tmp/encode2gud.py.16498/"
