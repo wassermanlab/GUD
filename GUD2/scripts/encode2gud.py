@@ -234,7 +234,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         # Cluster regions
         if cluster:
             # Initialize
-            table = {}
+            labels = {}
             clusters = {}
             regions = []
             bed_files = os.path.join(dummy_dir, "files.txt")
@@ -260,8 +260,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             # For each line...
             for line in GUDglobals.parse_file(table_file):
                 m = re.search("%s(\S+).bed" % dummy_dir, line[0])
-                if m: table.setdefault(line[-1], m.group(1))
-            print(table)
+                if m: labels.setdefault(line[-1], m.group(1))
+            print(labels)
             exit(0)
             
             
