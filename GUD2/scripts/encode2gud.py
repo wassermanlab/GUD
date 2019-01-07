@@ -208,7 +208,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             # Initialize
             bed_files = os.path.join(dummy_dir, "files.txt")
             # For each file...
-            for bed_file in on.listdir(dummy_dir):
+            for bed_file in os.listdir(dummy_dir):
                 # Skip non-BED files
                 if not bed_file.enswith(".bed"): continue
                 # Add file to list
