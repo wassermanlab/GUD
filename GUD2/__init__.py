@@ -120,5 +120,26 @@ class Globals(object):
             f.close()
         else:
             raise ValueError("File %s does not exist!" % file_name)
-            
+
+    #-------------#
+    # Functions   #
+    #-------------#
+
+    def write(self, file_name=None, content=None):
+        """
+        This function writes content to a file or, if no file is
+        provided, to STDOUT. Note that content will be appended
+        at the end of the file.
+        """
+
+        if file_name:
+            try:
+                f = open(file_name, "a")
+            except:
+                raise ValueError("Could not create file: %s" % file_name)
+            # Write
+            f.write("%s\n" % content)
+        else:
+            sys.stdout.write("%s\n" % content)
+
 GUDglobals = Globals()
