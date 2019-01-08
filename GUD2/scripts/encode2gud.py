@@ -194,6 +194,10 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
     # For each cell/tissue, experiment, target...
     for experiment_type, experiment_target in sorted(metadata):
+        # Remove dummy dir
+        if os.path.isdir(dummy_dir): shutil.rmtree(dummy_dir)
+        # Create dummy dir
+        os.mkdir(dummy_dir)
         # Get source
         experiment = Experiment()
         exp = experiment.select_by_name(session, experiment_type)
@@ -202,10 +206,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             session.add(experiment)
             session.commit()
             exp = experiment.select_by_name(session, experiment_type)
-        dummy_dir = "/space/data/tmp/encode2gud.py.16498"
-##        if os.path.isdir(dummy_dir): shutil.rmtree(dummy_dir)
-##        os.mkdir(dummy_dir)
-        if experiment_type != "FAIRE-seq": continue
         # For each accession, biosample...
         for accession, biosample in metadata[(experiment_type, experiment_target)]:
             # Get sample
@@ -224,14 +224,13 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 sam = sample.select_by_exact_sample(session,
                     samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
                     samples[biosample]["cell_line"], samples[biosample]["cancer"])
-#            # Copy BED file
-#            bed_obj = pybedtools.BedTool(
-#                os.path.join(directory, "%s.bed.gz" % accession))
-#            bed_obj.sort().saveas(os.path.join(
-#                dummy_dir, "%s.bed" % accession), compressed=False)
-#        # Empty cache
-#        pybedtools.cleanup()
-
+            # Copy BED file
+            bed_obj = pybedtools.BedTool(
+                os.path.join(directory, "%s.bed.gz" % accession))
+            bed_obj.sort().saveas(os.path.join(
+                dummy_dir, "%s.bed" % accession), compressed=False)
+        # Empty cache
+        pybedtools.cleanup()
         # Cluster regions
         if cluster:
             # Initialize
@@ -307,7 +306,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         feat.tf = experiment_target
                     session.merge(feat)
                     session.commit()
-
         # Do not cluster
         else:
             # For each accession, biosample...
@@ -353,6 +351,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         feat.tf = experiment_target
                     session.merge(feat)
                     session.commit()
+        # Remove dummy dir
+        shutil.rmtree(dummy_dir)
 
 #-------------#
 # Main        #
