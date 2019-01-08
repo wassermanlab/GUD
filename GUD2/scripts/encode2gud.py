@@ -225,12 +225,15 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
                     samples[biosample]["cell_line"], samples[biosample]["cancer"])
             # Copy BED file
-            bed_obj = pybedtools.BedTool(
-                os.path.join(directory, "%s.bed.gz" % accession))
-            bed_obj.sort().saveas(os.path.join(
-                dummy_dir, "%s.bed" % accession), compressed=False)
-        # Empty cache
-        pybedtools.cleanup()
+            gz_bed_file = os.path.join(directory, "%s.bed.gz" % accession)
+            bed_file os.path.join(dummy_dir, "%s.bed" % accession)
+            os.system("zcat %s | sort -k 1,1 -k2,2n > %s" % (gz_bed_file, bed_file))
+#            bed_obj = pybedtools.BedTool(
+#                os.path.join(directory, "%s.bed.gz" % accession))
+#            bed_obj.sort().saveas(os.path.join(
+#                dummy_dir, "%s.bed" % accession), compressed=False)
+#        # Empty cache
+#        pybedtools.cleanup()
         # Cluster regions
         if cluster:
             # Initialize
