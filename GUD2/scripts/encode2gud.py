@@ -228,7 +228,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             # Copy BED file
             gz_bed_file = os.path.join(directory, "%s.bed.gz" % accession)
             bed_file = os.path.join(exp_dummy_dir, "%s.bed" % accession)
-            os.system("zcat %s | sort -k 1,1 -k2,2n > %s" % (gz_bed_file, bed_file))
+            if not os.path.exists(bed_file):
+                os.system("zcat %s | sort -k 1,1 -k2,2n > %s" % (gz_bed_file, bed_file))
 #            bed_obj = pybedtools.BedTool(
 #                os.path.join(directory, "%s.bed.gz" % accession))
 #            bed_obj.sort().saveas(os.path.join(
