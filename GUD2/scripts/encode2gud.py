@@ -193,11 +193,9 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
     # For each cell/tissue, experiment, target...
     for experiment_type, experiment_target in sorted(metadata):
-        print(experiment_type)
-        print(metadata[(experiment_type, experiment_target)])
         # Initialize
         exp_dummy_dir = os.path.join(dummy_dir,
-            "%s.%s" % (experiment_type, experiment_target))
+            "%s.%s" % (experiment_type.replace(" ", "_"), experiment_target))
 #        # Remove dummy dir
 #        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
         # Create dummy dir
