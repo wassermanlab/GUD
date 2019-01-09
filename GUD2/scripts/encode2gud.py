@@ -102,8 +102,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
     today = str(date.today())
-    dummy_dir = os.path.join(dummy_dir,
-        "%s.%s" % (os.path.basename(__file__), os.getpid()))
 
     # Get source
     source = Source()
@@ -194,10 +192,13 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
     # For each cell/tissue, experiment, target...
     for experiment_type, experiment_target in sorted(metadata):
-        # Remove dummy dir
-        if os.path.isdir(dummy_dir): shutil.rmtree(dummy_dir)
+        # Initialize
+        exp_dummy_dir = os.path.join(dummy_dir,
+            "%s.%s" % (experiment_type, experiment_target))
+#        # Remove dummy dir
+#        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
         # Create dummy dir
-        os.mkdir(dummy_dir)
+        if not os.path.isdir(exp_dummy_dir): os.mkdir(exp_dummy_dir)
         # Get source
         experiment = Experiment()
         exp = experiment.select_by_name(session, experiment_type)
@@ -226,12 +227,12 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     samples[biosample]["cell_line"], samples[biosample]["cancer"])
             # Copy BED file
             gz_bed_file = os.path.join(directory, "%s.bed.gz" % accession)
-            bed_file = os.path.join(dummy_dir, "%s.bed" % accession)
+            bed_file = os.path.join(exp_dummy_dir, "%s.bed" % accession)
             os.system("zcat %s | sort -k 1,1 -k2,2n > %s" % (gz_bed_file, bed_file))
 #            bed_obj = pybedtools.BedTool(
 #                os.path.join(directory, "%s.bed.gz" % accession))
 #            bed_obj.sort().saveas(os.path.join(
-#                dummy_dir, "%s.bed" % accession), compressed=False)
+#                exp_dummy_dir, "%s.bed" % accession), compressed=False)
 #        # Empty cache
 #        pybedtools.cleanup()
         # Cluster regions
@@ -240,122 +241,122 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             accessions = {}
             accession2regions = {}
             regions = []
-            bed_files = os.path.join(dummy_dir, "files.txt")
-            table_file = os.path.join(dummy_dir, "table.txt")
-            cluster_file = os.path.join(dummy_dir, "clusters")
+            bed_files = os.path.join(exp_dummy_dir, "files.txt")
+            table_file = os.path.join(exp_dummy_dir, "table.txt")
+            cluster_file = os.path.join(exp_dummy_dir, "clusters")
             # Create BED file list
             if not os.path.exists(bed_files):
                 # For each file...
-                for bed_file in os.listdir(dummy_dir):
+                for bed_file in os.listdir(exp_dummy_dir):
                     # Skip non-BED files
                     if not bed_file.endswith(".bed"): continue
                     # Add file to list
-                    GUDglobals.write(bed_files, os.path.join(dummy_dir, bed_file))
+                    GUDglobals.write(bed_files, os.path.join(exp_dummy_dir, bed_file))
             # Make table of tables
             if not os.path.exists(table_file):
                 process = subprocess.check_output(["regClusterMakeTableOfTables",
                     "uw01", bed_files, table_file], stderr=subprocess.STDOUT)
-            # Make clusters
-            if not os.path.exists(cluster_file):
-                process = subprocess.check_output(["regCluster", table_file,
-                    "%s.cluster" % cluster_file, "%s.bed" % cluster_file],
-                    stderr=subprocess.STDOUT)
-            # For each line...
-            for line in GUDglobals.parse_tsv_file(table_file):
-                m = re.search("%s/(\S+).bed" % dummy_dir, line[0])
-                if m: accessions.setdefault(m.group(1), line[-1])
-            # For each line...
-            for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
-                accession2regions.setdefault(line[-1], set())
-                accession2regions[line[-1]].add(int(line[0]) - 1)
-            # For each line...
-            for line in GUDglobals.parse_tsv_file("%s.bed" % cluster_file):
-                regions.append((line[0], int(line[1]), int(line[2])))
-            # For each accession, biosample...
-            for accession, biosample in metadata[(experiment_type, experiment_target)]:
-                # Get sample
-                sample = Sample()
-                sam = sample.select_by_exact_sample(session,
-                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
-                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
-                # For each region...
-                for region in sorted(accession2regions[accessions[accession]]):
-                    # Get coordinates
-                    chrom, start, end = regions[region]
-                    # Ignore non-standard chroms, scaffolds, etc.
-                    m = re.search("^chr(\S+)$", chrom)
-                    if not m.group(1) in GUDglobals.chroms: continue
-                    # Get region
-                    region = Region()
-                    reg = region.select_by_exact_location(session, chrom, start, end)
-                    if not reg:
-                        # Insert region
-                        region.bin = assign_bin(start, end)
-                        region.chrom = chrom
-                        region.start = start
-                        region.end = end
-                        session.add(region)
-                        session.commit()
-                        reg = region.select_by_exact_location(session, chrom, start, end)
-                    # Insert feature
-                    feat = copy.copy(table)
-                    feat.regionID = reg.uid
-                    feat.sourceID = sou.uid
-                    feat.sampleID = sam.uid
-                    feat.experimentID = exp.uid
-                    if feat_type == "histone":
-                        feat.histone_type = experiment_target
-                    if feat_type == "tf":
-                        feat.tf = experiment_target
-                    session.merge(feat)
-                    session.commit()
-        # Do not cluster
-        else:
-            # For each accession, biosample...
-            for accession, biosample in metadata[(experiment_type, experiment_target)]:
-                # Load BED file
-                bed_obj = pybedtools.BedTool(
-                    os.path.join(dummy_dir, "%s.bed" % accession))
-                # Get sample
-                sample = Sample()
-                sam = sample.select_by_exact_sample(session,
-                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
-                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
-                # For each feature...
-                for feature in bed_obj:
-                    # Ignore non-standard chroms, scaffolds, etc.
-                    m = re.search("^chr(\S+)$", feature[0])
-                    if not m.group(1) in GUDglobals.chroms: continue
-                    # Get coordinates
-                    chrom = feature[0]
-                    start = int(feature[1])
-                    end = int(feature[2])
-                    # Get region
-                    region = Region()
-                    reg = region.select_by_exact_location(session, chrom, start, end)
-                    if not reg:
-                        # Insert region
-                        region.bin = assign_bin(start, end)
-                        region.chrom = chrom
-                        region.start = start
-                        region.end = end
-                        session.add(region)
-                        session.commit()
-                        reg = region.select_by_exact_location(session, chrom, start, end)
-                    # Insert feature
-                    feat = copy.copy(table)
-                    feat.regionID = reg.uid
-                    feat.sourceID = sou.uid
-                    feat.sampleID = sam.uid
-                    feat.experimentID = exp.uid
-                    if feat_type == "histone":
-                        feat.histone_type = experiment_target
-                    if feat_type == "tf":
-                        feat.tf = experiment_target
-                    session.merge(feat)
-                    session.commit()
-        # Remove dummy dir
-        shutil.rmtree(dummy_dir)
+#            # Make clusters
+#            if not os.path.exists(cluster_file):
+#                process = subprocess.check_output(["regCluster", table_file,
+#                    "%s.cluster" % cluster_file, "%s.bed" % cluster_file],
+#                    stderr=subprocess.STDOUT)
+#            # For each line...
+#            for line in GUDglobals.parse_tsv_file(table_file):
+#                m = re.search("%s/(\S+).bed" % exp_dummy_dir, line[0])
+#                if m: accessions.setdefault(m.group(1), line[-1])
+#            # For each line...
+#            for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
+#                accession2regions.setdefault(line[-1], set())
+#                accession2regions[line[-1]].add(int(line[0]) - 1)
+#            # For each line...
+#            for line in GUDglobals.parse_tsv_file("%s.bed" % cluster_file):
+#                regions.append((line[0], int(line[1]), int(line[2])))
+#            # For each accession, biosample...
+#            for accession, biosample in metadata[(experiment_type, experiment_target)]:
+#                # Get sample
+#                sample = Sample()
+#                sam = sample.select_by_exact_sample(session,
+#                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+#                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
+#                # For each region...
+#                for region in sorted(accession2regions[accessions[accession]]):
+#                    # Get coordinates
+#                    chrom, start, end = regions[region]
+#                    # Ignore non-standard chroms, scaffolds, etc.
+#                    m = re.search("^chr(\S+)$", chrom)
+#                    if not m.group(1) in GUDglobals.chroms: continue
+#                    # Get region
+#                    region = Region()
+#                    reg = region.select_by_exact_location(session, chrom, start, end)
+#                    if not reg:
+#                        # Insert region
+#                        region.bin = assign_bin(start, end)
+#                        region.chrom = chrom
+#                        region.start = start
+#                        region.end = end
+#                        session.add(region)
+#                        session.commit()
+#                        reg = region.select_by_exact_location(session, chrom, start, end)
+#                    # Insert feature
+#                    feat = copy.copy(table)
+#                    feat.regionID = reg.uid
+#                    feat.sourceID = sou.uid
+#                    feat.sampleID = sam.uid
+#                    feat.experimentID = exp.uid
+#                    if feat_type == "histone":
+#                        feat.histone_type = experiment_target
+#                    if feat_type == "tf":
+#                        feat.tf = experiment_target
+#                    session.merge(feat)
+#                    session.commit()
+#        # Do not cluster
+#        else:
+#            # For each accession, biosample...
+#            for accession, biosample in metadata[(experiment_type, experiment_target)]:
+#                # Load BED file
+#                bed_obj = pybedtools.BedTool(
+#                    os.path.join(exp_dummy_dir, "%s.bed" % accession))
+#                # Get sample
+#                sample = Sample()
+#                sam = sample.select_by_exact_sample(session,
+#                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+#                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
+#                # For each feature...
+#                for feature in bed_obj:
+#                    # Ignore non-standard chroms, scaffolds, etc.
+#                    m = re.search("^chr(\S+)$", feature[0])
+#                    if not m.group(1) in GUDglobals.chroms: continue
+#                    # Get coordinates
+#                    chrom = feature[0]
+#                    start = int(feature[1])
+#                    end = int(feature[2])
+#                    # Get region
+#                    region = Region()
+#                    reg = region.select_by_exact_location(session, chrom, start, end)
+#                    if not reg:
+#                        # Insert region
+#                        region.bin = assign_bin(start, end)
+#                        region.chrom = chrom
+#                        region.start = start
+#                        region.end = end
+#                        session.add(region)
+#                        session.commit()
+#                        reg = region.select_by_exact_location(session, chrom, start, end)
+#                    # Insert feature
+#                    feat = copy.copy(table)
+#                    feat.regionID = reg.uid
+#                    feat.sourceID = sou.uid
+#                    feat.sampleID = sam.uid
+#                    feat.experimentID = exp.uid
+#                    if feat_type == "histone":
+#                        feat.histone_type = experiment_target
+#                    if feat_type == "tf":
+#                        feat.tf = experiment_target
+#                    session.merge(feat)
+#                    session.commit()
+#        # Remove dummy dir
+#        shutil.rmtree(exp_dummy_dir)
 
 #-------------#
 # Main        #
