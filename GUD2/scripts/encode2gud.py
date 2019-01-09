@@ -192,6 +192,9 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
     # For each cell/tissue, experiment, target...
     for experiment_type, experiment_target in sorted(metadata):
+        # Skip if no experiments
+        if len(metadata[(experiment_type, experiment_target)]) == 0:
+            continue
         # Initialize
         exp_dummy_dir = os.path.join(dummy_dir,
             "%s.%s" % (experiment_type, experiment_target))
@@ -255,11 +258,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     GUDglobals.write(bed_files, os.path.join(exp_dummy_dir, bed_file))
             # Make table of tables
             if not os.path.exists(table_file):
-                try:
-                    process = subprocess.check_output(["regClusterMakeTableOfTables",
-                        "uw01", bed_files, table_file], stderr=subprocess.STDOUT)
-                except:
-                    continue
+                process = subprocess.check_output(["regClusterMakeTableOfTables",
+                    "uw01", bed_files, table_file], stderr=subprocess.STDOUT)
 #            # Make clusters
 #            if not os.path.exists(cluster_file):
 #                process = subprocess.check_output(["regCluster", table_file,
