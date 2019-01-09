@@ -186,13 +186,10 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         if assembly == genome and status == "released":
             # Skip sample
             if not samples[biosample]["add"]: continue
-            # Skip accession
-            if not os.path.exists(
-                os.path.join(directory, "%s.bed.gz" % accession)):
-                continue
             # Get metadata
-            metadata.setdefault((experiment_type, experiment_target), [])
-            metadata[(experiment_type, experiment_target)].append((accession, biosample))
+            if os.path.exists(os.path.join(directory, "%s.bed.gz" % accession)):
+                metadata.setdefault((experiment_type, experiment_target), [])
+                metadata[(experiment_type, experiment_target)].append((accession, biosample))
 
     # For each cell/tissue, experiment, target...
     for experiment_type, experiment_target in sorted(metadata):
