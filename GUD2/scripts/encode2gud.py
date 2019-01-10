@@ -240,10 +240,9 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         # Cluster regions
         if cluster:
             # Initialize
-            cluster = 0
-            label2accession = {}
-            cluster2accessions = {}
             accession2sample = {}
+            label2accession = {}
+            regions = []
             bed_files = os.path.join(exp_dummy_dir, "files.txt")
             table_file = os.path.join(exp_dummy_dir, "table.txt")
             cluster_file = os.path.join(exp_dummy_dir, "clusters")
@@ -264,14 +263,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 process = subprocess.check_output(["regCluster", table_file,
                     "%s.cluster" % cluster_file, "%s.bed" % cluster_file],
                     stderr=subprocess.STDOUT)
-            # For each line...
-            for line in GUDglobals.parse_tsv_file(table_file):
-                m = re.search("%s/(\S+).bed" % exp_dummy_dir, line[0])
-                if m: label2accession.setdefault(line[-1], m.group(1))
-            # For each line...
-            for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
-                cluster2accessions.setdefault(int(line[0]), [])
-                cluster2accessions[int(line[0])].append(label2accession[line[-1]])
             # For each accession, biosample...
             for accession, biosample in metadata[(experiment_type, experiment_target)]:
                 # Get sample
@@ -283,9 +274,11 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     samples[biosample]["cancer"])
                 accession2sample.setdefault(accession, sam)
             # For each line...
+            for line in GUDglobals.parse_tsv_file(table_file):
+                m = re.search("%s/(\S+).bed" % exp_dummy_dir, line[0])
+                if m: label2accession.setdefault(line[-1], m.group(1))
+             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.bed" % cluster_file):
-                # Initialize
-                cluster += 1
                 # Get coordinates
                 chrom = line[0]
                 start = int(line[1])
@@ -305,22 +298,25 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     session.add(region)
                     session.commit()
                     reg = region.select_by_exact_location(session, chrom, start, end)
-                # For each accession...
-                for accession in cluster2accessions[cluster]:
-                    # Get sample
-                    sam = accession2sample[accession2sample[accession]]
-                    # Insert feature
-                    feat = copy.copy(table)
-                    feat.regionID = reg.uid
-                    feat.sourceID = sou.uid
-                    feat.sampleID = sam.uid
-                    feat.experimentID = exp.uid
-                    if feat_type == "histone":
-                        feat.histone_type = experiment_target
-                    if feat_type == "tf":
-                        feat.tf = experiment_target
-                    session.merge(feat)
-                    session.commit()
+                regions.append(reg)
+            # For each line...
+            for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
+                # Get region
+                reg = int(line[0]) - 1 
+                # Get sample
+                sam = accession2sample[label2accession[line[-1]]]
+                # Insert feature
+                feat = copy.copy(table)
+                feat.regionID = reg.uid
+                feat.sourceID = sou.uid
+                feat.sampleID = sam.uid
+                feat.experimentID = exp.uid
+                if feat_type == "histone":
+                    feat.histone_type = experiment_target
+                if feat_type == "tf":
+                    feat.tf = experiment_target
+                session.merge(feat)
+                session.commit()
         # Do not cluster
         else:
             # For each accession, biosample...
