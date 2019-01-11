@@ -233,7 +233,7 @@ def insert_fantom_to_gud_db(user, host, port, db,
                         tss.avg_tpm = "%.3f" % avg_tpm
                         if total_tpm > 0:
                             tss.rel_tpm = "%.3f" % (avg_tpm * 100.0 / total_tpm)
-                        except:
+                        else:
                             tss.rel_tpm = None
                         rows.append(tss)
             session.add_all(rows)
