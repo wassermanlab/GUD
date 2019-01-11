@@ -237,6 +237,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 #                exp_dummy_dir, "%s.bed" % accession), compressed=False)
 #        # Empty cache
 #        pybedtools.cleanup()
+        continue
         # Cluster regions
         if cluster:
             # Initialize
