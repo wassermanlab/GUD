@@ -229,7 +229,7 @@ def insert_fantom_to_gud_db(user, host, port, db,
                         tss.gene = gene
                         tss.tss = tss_id
                         tss.avg_tpm = "%.3f" % avg_tpm
-                        tss.rel_tpm = "%.3f" % avg_tpm * 100.0 / total_tpm
+                        tss.rel_tpm = "%.3f" % (avg_tpm * 100.0 / total_tpm)
                         rows.append(tss)
             session.add_all(rows)
             session.commit()
