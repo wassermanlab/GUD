@@ -192,8 +192,6 @@ def insert_fantom_to_gud_db(user, host, port, db,
                 # Get total TPMs in "normal" samples
                 if not treatment and not cell_line and not cancer:
                     total_tpm += float(line[i])
-            print(total_tpm)
-            exit(0)
             # For each sample...
             for name, treatment, cell_line, cancer in data:
                 # Skip if enhancer/TSS not expressed in sample
