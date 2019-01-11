@@ -144,6 +144,7 @@ def insert_fantom_to_gud_db(user, host, port, db,
             # Initialize
             data = {}
             rows = []
+            total_tpm = 0.0
             # Get coordinates
             if feat_type == "enhancer":
                 m = re.search("(chr\S+)\:(\d+)\-(\d+)", line[0])
@@ -188,6 +189,11 @@ def insert_fantom_to_gud_db(user, host, port, db,
                 cancer = samples[sample_id]["cancer"]
                 data.setdefault((name, treatment, cell_line, cancer), [])
                 data[(name, treatment, cell_line, cancer)].append(float(line[i]))
+                # Get total TPMs in "normal" samples
+                if not treatment and not cell_line and not cancer:
+                    total_tpm += float(line[i])
+            print(total_tpm)
+            exit(0)
             # For each sample...
             for name, treatment, cell_line, cancer in data:
                 # Skip if enhancer/TSS not expressed in sample
@@ -225,6 +231,7 @@ def insert_fantom_to_gud_db(user, host, port, db,
                         tss.gene = gene
                         tss.tss = tss_id
                         tss.avg_tpm = "%.3f" % avg_tpm
+                        tss.rel_tpm = "%.3f" % avg_tpm * 100.0 / total_tpm
                         rows.append(tss)
             session.add_all(rows)
             session.commit()

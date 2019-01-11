@@ -1,3 +1,5 @@
+import re
+
 from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint, Integer
@@ -39,53 +41,50 @@ class Gene(Base):
 
     @classmethod
     def select_by_location(cls, session, chrom, start, end):
-        """
-        Query objects based off of their location being within the start only
+        """Query objects based off of their location being within the start only
         motifs through that  
-         """
+        """
         bin = assign_bin(start, end)
+
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\
         filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
         filter(Region.bin == bin)
+
         return q.all()
 
     @classmethod
-    def select_all_gene_symbols(cls, session):
-        """Query all gene objects in the database and return their gene
-        symbols (name2 field).
-        """
-        all_genes = session.query(cls.name2).distinct().all()
-        return all_genes
-
-    @classmethod
     def select_by_name(cls, session, name):
-        """
-        Query refGene objects by common name. If no name is provided,
+        """Query refGene objects by common name. If no name provided,
         query all genes.
         """
         q = session.query(cls)
+
         if name:
             q = q.filter(cls.name2 == name)
+
         return q.all()
 
     @classmethod
     def select_by_names(cls, session, names=[]):
-        """
-        Query refGene objects by list of common names. If no names are
+        """Query refGene objects by list of common names. If no names
         provided, query all genes.
         """
         q = session.query(cls)
+
         if names:
             q = q.filter(cls.name2.in_(names))
+
         return q.all()
     
     @classmethod
     def select_by_uid(cls, session, uid):
         """Query refGene objects by uid returning one uid"""
         q = session.query(cls)
+
         q.filter(cls.uid == uid)
+
         return q.first()
     
     @classmethod
@@ -95,7 +94,17 @@ class Gene(Base):
         join().\
         filter(Region.uid == cls.regionID).\
         filter(cls.uid == uid)
+
         return q.first()
+
+    @classmethod
+    def get_all_gene_symbols(cls, session):
+        """Query all gene objects in the database and return their gene
+        symbols (name2 field).
+        """
+        q = session.query(cls.name2).distinct().all()
+
+        return [g[0] for g in q]
 
     def __repr__(self):
         return "<Gene(uid={}, name={}, name2={}, strand={})>".format(

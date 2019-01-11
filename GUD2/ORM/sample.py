@@ -28,20 +28,56 @@ class Sample(Base):
     )
 
     @classmethod
-    def select_by_name(cls, session, name):
+    def select_by_name(cls, session, name, treatment=False,
+        cell_line=False, cancer=False):
+        """Query objects by name of sample type. 
         """
-        Query objects by name of sample type. 
-        """
+        q = session.query(cls).filter(cls.name == name).\
+            filter(
+                cls.treatment <= int(treatment),
+                cls.cell_line <= int(cell_line),
+                cls.cancer <= int(cancer)
+            )
 
-        q = session.query(cls).filter(cls.name == name)
+        return q.first()
+
+    @classmethod
+    def select_by_names(cls, session, names, treatment=False,
+        cell_line=False, cancer=False):
+        """Query objects by names of sample type. 
+        """
+        q = session.query(cls).filter(cls.name.in_(names)).\
+            filter(
+                cls.treatment <= int(treatment),
+                cls.cell_line <= int(cell_line),
+                cls.cancer <= int(cancer)
+            )
 
         return q.all()
-    
-    @classmethod 
-    def select_by_exact_sample(cls, session, name, treatment, cell_line, cancer):
 
-        q = session.query(cls).filter(cls.name == name, cls.treatment == treatment,
-            cls.cell_line == cell_line, cls.cancer == cancer)
+    @classmethod
+    def select_by_exp_conditions(cls, session, treatment=False,
+        cell_line=False, cancer=False):
+        """Query objects by experimental conditions. 
+        """
+        q = session.query(cls).filter(
+            cls.treatment <= int(treatment),
+            cls.cell_line <= int(cell_line),
+            cls.cancer <= int(cancer)
+        )
+
+        return q.all()
+
+    @classmethod 
+    def select_by_exact_sample(cls, session, name, treatment,
+        cell_line, cancer):
+
+        q = session.query(cls).filter(
+            cls.name == name,
+            cls.treatment == treatment,
+            cls.cell_line == cell_line,
+            cls.cancer == cancer
+        )
 
         return q.first()
 
