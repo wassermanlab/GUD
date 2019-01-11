@@ -189,13 +189,15 @@ def insert_fantom_to_gud_db(user, host, port, db,
                 cancer = samples[sample_id]["cancer"]
                 data.setdefault((name, treatment, cell_line, cancer), [])
                 data[(name, treatment, cell_line, cancer)].append(float(line[i]))
+             # For each sample...
+            for name, treatment, cell_line, cancer in data:
                 # Get total TPMs in "normal" samples
                 if not treatment and not cell_line and not cancer:
-                    total_tpm += float(line[i])
+                    total_tpm += float(sum(data[name, treatment, cell_line, cancer]) /
+                        len(data[name, treatment, cell_line, cancer]))
             # For each sample...
             for name, treatment, cell_line, cancer in data:
                 # Skip if enhancer/TSS not expressed in sample
-                # avg_tpm = "%.3f" % float(sum(data[sample_id]) / len(data[sample_id]))
                 avg_tpm = float(sum(data[name, treatment, cell_line, cancer]) /
                     len(data[name, treatment, cell_line, cancer]))
                 if avg_tpm == 0: continue
