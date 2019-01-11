@@ -86,6 +86,19 @@ class Gene(Base):
         return self._coding_exons
 
     @classmethod
+    def is_unique(cls, session, name, chrom, strand, txStart,
+        txEnd, source_name):
+
+        q = session.query(cls).filter(
+            cls.regionID == regionID,
+            cls.sourceID == sourceID,
+            cls.sampleID == sampleID,
+            cls.experimentID == experimentID
+        )
+
+        return len(q.all()) == 0
+
+    @classmethod
     def select_by_bin_range(cls, session, chrom, start, end, bins=[],
         compute_bins=False):
         """Query objects by chromosomal range using the binning system to

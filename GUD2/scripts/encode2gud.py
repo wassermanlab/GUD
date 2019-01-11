@@ -352,16 +352,23 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         reg = region.select_by_exact_location(session, chrom, start, end)
                     # Insert feature
                     feat = copy.copy(table)
-                    feat.regionID = reg.uid
-                    feat.sourceID = sou.uid
-                    feat.sampleID = sam.uid
-                    feat.experimentID = exp.uid
-                    if feat_type == "histone":
-                        feat.histone_type = experiment_target
-                    if feat_type == "tf":
-                        feat.tf = experiment_target
-                    session.merge(feat)
-                    session.commit()
+                    if feat_type == "accessibility":
+                        is_unique = feat.is_unique(session,
+                            reg.uid, sou.uid, sam.uid, exp.uid)
+                    if feat_type == "histone" or feat_type == "tf":
+                        is_unique = feat.is_unique(session,
+                            reg.uid, sou.uid, sam.uid, exp.uid, experiment_target)
+                    if is_unique:
+                        feat.regionID = reg.uid
+                        feat.sourceID = sou.uid
+                        feat.sampleID = sam.uid
+                        feat.experimentID = exp.uid
+                        if feat_type == "histone":
+                            feat.histone_type = experiment_target
+                        if feat_type == "tf":
+                            feat.tf = experiment_target
+                        session.merge(feat)
+                        session.commit()
 #        # Remove dummy dir
 #        shutil.rmtree(exp_dummy_dir)
 

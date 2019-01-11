@@ -40,6 +40,18 @@ class Gene(Base):
     )
 
     @classmethod
+    def is_unique(cls, session, regionID, sourceID, strand, name):
+
+        q = session.query(cls).filter(
+            cls.regionID == regionID,
+            cls.sourceID == sourceID,
+            cls.strand == strand,
+            cls.name == name
+        )
+
+        return len(q.all()) == 0
+
+    @classmethod
     def select_by_location(cls, session, chrom, start, end):
         """Query objects based off of their location being within the start only
         motifs through that  
@@ -80,7 +92,8 @@ class Gene(Base):
     
     @classmethod
     def select_by_uid(cls, session, uid):
-        """Query refGene objects by uid returning one uid"""
+        """Query refGene objects by uid returning one uid.
+        """
         q = session.query(cls)
 
         q.filter(cls.uid == uid)
@@ -89,7 +102,8 @@ class Gene(Base):
     
     @classmethod
     def select_by_uid_joined(cls, session, uid):
-        """Query refGene objects by uid returning one uid"""
+        """Query refGene objects by uid returning one uid.
+        """
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\

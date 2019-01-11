@@ -24,7 +24,7 @@ class TSS(Base):
     gene = Column("gene", String(75), ForeignKey("genes.name2"))
     tss = Column("tss", mysql.INTEGER(unsigned=True))
     avg_tpm = Column("avg_tpm", Float, nullable=False)
-    rel_tpm = Column("rel_tpm", Float, nullable=False)
+    rel_tpm = Column("rel_tpm", Float)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),

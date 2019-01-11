@@ -33,9 +33,21 @@ class DNAAccessibility(Base):
     )
 
     @classmethod
+    def is_unique(cls, session, regionID, sourceID, sampleID,
+        experimentID):
+
+        q = session.query(cls).filter(
+            cls.regionID == regionID,
+            cls.sourceID == sourceID,
+            cls.sampleID == sampleID,
+            cls.experimentID == experimentID
+        )
+
+        return len(q.all()) == 0
+
+    @classmethod
     def select_unique(cls, session, regionID, sourceID, sampleID, experimentID):
-        """
-        Query objects by name of sample type. 
+        """Query objects by name of sample type. 
         """
         q = session.query(cls).filter(
             cls.regionID == regionID, 

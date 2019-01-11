@@ -34,6 +34,20 @@ class TFBinding(Base):
     )
 
     @classmethod
+    def is_unique(cls, session, regionID, sourceID, sampleID,
+        experimentID, histone_type):
+
+        q = session.query(cls).filter(
+            cls.regionID == regionID,
+            cls.sourceID == sourceID,
+            cls.sampleID == sampleID,
+            cls.experimentID == experimentID,
+            cls.tf == tf
+        )
+
+        return len(q.all()) == 0
+
+    @classmethod
     def select_unique(cls, session, regionID, sourceID, sampleID, experimentID, tf):
         """
         Query objects by name of sample type. 
