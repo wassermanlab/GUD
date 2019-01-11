@@ -24,7 +24,7 @@ class TSS(Base):
     gene = Column("gene", String(75), ForeignKey("genes.name2"))
     tss = Column("tss", mysql.INTEGER(unsigned=True))
     avg_tpm = Column("avg_tpm", Float, nullable=False)
-    avg_tpm = Column("rel_tpm", Float, nullable=False)
+    rel_tpm = Column("rel_tpm", Float, nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
@@ -40,7 +40,8 @@ class TSS(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID, sampleID, experimentID):
+    def is_unique(cls, session, regionID, sourceID, sampleID,
+        experimentID):
 
         q = session.query(cls).filter(
             cls.regionID == regionID,
@@ -52,11 +53,13 @@ class TSS(Base):
         return len(q.all()) == 0
 
     @classmethod
-    def select_by_sample(cls, session, sample, min_tpm=10.0):
+    def select_by_sample(cls, session, sample, min_tpm=10.0,
+        rel_tpm=0.0):
 
         q = session.query(cls).filter(
             cls.sampleID == sample,
-            cls.avg_tpm >= min_tpm
+            cls.avg_tpm >= min_tpm,
+            cls.rel_tpm >= rel_tpm
         )
 
         return q.first()
@@ -74,7 +77,6 @@ class TSS(Base):
         """Query objects by TSS (i.e. gene + tss). If no TSS is
         provided, query all TSSs.
         """
-
         q = session.query(cls)
 
         if gene and tss:
@@ -112,7 +114,6 @@ class TSS(Base):
         """Query all TSS objects in the database and return their
         samples (sampleID field).
         """
-
         samples = session.query(cls.sampleID).distinct().all()
 
         return [s[0] for s in samples]
