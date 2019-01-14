@@ -237,7 +237,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 #                exp_dummy_dir, "%s.bed" % accession), compressed=False)
 #        # Empty cache
 #        pybedtools.cleanup()
-        continue
         # Cluster regions
         if cluster:
             # Initialize
@@ -308,16 +307,23 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 sam = accession2sample[label2accession[line[-1]]]
                 # Insert feature
                 feat = copy.copy(table)
-                feat.regionID = reg.uid
-                feat.sourceID = sou.uid
-                feat.sampleID = sam.uid
-                feat.experimentID = exp.uid
-                if feat_type == "histone":
-                    feat.histone_type = experiment_target
-                if feat_type == "tf":
-                    feat.tf = experiment_target
-                session.merge(feat)
-                session.commit()
+                if feat_type == "accessibility":
+                    is_unique = feat.is_unique(session,
+                        reg.uid, sou.uid, sam.uid, exp.uid)
+                if feat_type == "histone" or feat_type == "tf":
+                    is_unique = feat.is_unique(session,
+                        reg.uid, sou.uid, sam.uid, exp.uid, experiment_target)
+                if is_unique:
+                    feat.regionID = reg.uid
+                    feat.sourceID = sou.uid
+                    feat.sampleID = sam.uid
+                    feat.experimentID = exp.uid
+                    if feat_type == "histone":
+                        feat.histone_type = experiment_target
+                    if feat_type == "tf":
+                        feat.tf = experiment_target
+                    session.add(feat)
+                    session.commit()
         # Do not cluster
         else:
             # For each accession, biosample...
@@ -368,7 +374,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                             feat.histone_type = experiment_target
                         if feat_type == "tf":
                             feat.tf = experiment_target
-                        session.merge(feat)
+                        session.add(feat)
                         session.commit()
 #        # Remove dummy dir
 #        shutil.rmtree(exp_dummy_dir)
