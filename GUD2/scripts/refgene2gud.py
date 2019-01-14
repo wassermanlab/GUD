@@ -74,11 +74,10 @@ def initialize_gud_db(user, host, port, db, genome):
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
 
-    # Create gene table
-    if not engine.has_table("gene"):
+    table = Gene()
+    if not engine.has_table(table.__tablename__):
         # Initialize
         rows = []
-        table = Gene()
         # Create table
         table.__table__.create(bind=engine)
         # Get UCSC FTP file
