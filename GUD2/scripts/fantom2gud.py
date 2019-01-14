@@ -138,6 +138,7 @@ def insert_fantom_to_gud_db(user, host, port, db,
         lines = GUDglobals.parse_tsv_file(matrix_file, gz)
         counts_start_at = 7
     print(dir(table))
+    print(table.__tablename__)
     exit(0)
     if not engine.has_table(feat_type):
         table.__table__.create(bind=engine)
