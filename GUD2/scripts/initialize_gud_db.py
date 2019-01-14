@@ -70,8 +70,9 @@ def initialize_gud_db(user, host, port, db, genome):
         # Create table
         rows = []
         table = Chrom()
-        table.metadata.bind = engine
-        table.metadata.create(engine)
+        table.__table__.create(bind=engine)
+#        table.metadata.bind = engine
+#        table.metadata.create_all(engine)
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "chrom_size")
         # Download data
@@ -94,23 +95,27 @@ def initialize_gud_db(user, host, port, db, genome):
     if not engine.has_table("regions"):
         # Create table
         table = Region()
-        table.metadata.bind = engine
-        table.metadata.create(engine)
+        table.__table__.create(bind=engine)
+#        table.metadata.bind = engine
+#        table.metadata.create_all(engine)
     if not engine.has_table("samples"):
         # Create table
         table = Sample()
-        table.metadata.bind = engine
-        table.metadata.create(engine)
+        table.__table__.create(bind=engine)
+#        table.metadata.bind = engine
+#        table.metadata.create_all(engine)
     if not engine.has_table("sources"):
         # Create table
         table = Source()
-        table.metadata.bind = engine
-        table.metadata.create(engine)
+        table.__table__.create(bind=engine)
+#        table.metadata.bind = engine
+#        table.metadata.create_all(engine)
     if not engine.has_table("experiments"):
         # Create table
         table = Experiment()
-        table.metadata.bind = engine
-        table.metadata.create(engine)
+        table.__table__.create(bind=engine)
+#        table.metadata.bind = engine
+#        table.metadata.create_all(engine)
 
 def get_ftp_dir_and_file(genome, data_type):
 
