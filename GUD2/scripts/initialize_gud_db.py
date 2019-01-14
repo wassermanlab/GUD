@@ -76,7 +76,7 @@ def initialize_gud_db(user, host, port, db, genome):
         expire_on_commit=False)
 
     table = Chrom()
-    if not engine.has_table(table.__tablename_):
+    if not engine.has_table(table.__tablename__):
         # Intialize
         rows = []
         # Create table
@@ -102,22 +102,22 @@ def initialize_gud_db(user, host, port, db, genome):
         engine.execute(table.__table__.insert(), rows)
 
     table = Region()
-    if not engine.has_table(table.__tablename_):
+    if not engine.has_table(table.__tablename__):
         # Create table
         table.__table__.create(bind=engine)
 
     table = Sample()
-    if not engine.has_table(table.__tablename_):
+    if not engine.has_table(table.__tablename__):
         # Create table
         table.__table__.create(bind=engine)
 
     table = Source()
-    if not engine.has_table(table.__tablename_):
+    if not engine.has_table(table.__tablename__):
         # Create table
         table.__table__.create(bind=engine)
 
     table = Experiment()
-    if not engine.has_table(table.__tablename_):
+    if not engine.has_table(table.__tablename__):
         # Create table
         table.__table__.create(bind=engine)
 
