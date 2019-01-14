@@ -79,9 +79,8 @@ def initialize_gud_db(user, host, port, db, genome):
         # Initialize
         rows = []
         table = Gene()
-        table.metadata.bind = engine
         # Create table
-        table.metadata.create_all(engine)
+        table.__table__.create(bind=engine)
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "gene")
         # Get source
