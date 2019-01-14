@@ -75,13 +75,12 @@ def initialize_gud_db(user, host, port, db, genome):
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
 
-    if not engine.has_table("chroms"):
-        # Create table
+    table = Chrom()
+    if not engine.has_table(table.__tablename_):
+        # Intialize
         rows = []
-        table = Chrom()
+        # Create table
         table.__table__.create(bind=engine)
-#        table.metadata.bind = engine
-#        table.metadata.create_all(engine)
         # Get UCSC FTP file
         directory, file_name = get_ftp_dir_and_file(genome, "chrom_size")
         # Download data
@@ -101,30 +100,26 @@ def initialize_gud_db(user, host, port, db, genome):
             )
         # Insert rows to table
         engine.execute(table.__table__.insert(), rows)
-    if not engine.has_table("regions"):
+
+    table = Region()
+    if not engine.has_table(table.__tablename_):
         # Create table
-        table = Region()
         table.__table__.create(bind=engine)
-#        table.metadata.bind = engine
-#        table.metadata.create_all(engine)
-    if not engine.has_table("samples"):
+
+    table = Sample()
+    if not engine.has_table(table.__tablename_):
         # Create table
-        table = Sample()
         table.__table__.create(bind=engine)
-#        table.metadata.bind = engine
-#        table.metadata.create_all(engine)
-    if not engine.has_table("sources"):
+
+    table = Source()
+    if not engine.has_table(table.__tablename_):
         # Create table
-        table = Source()
         table.__table__.create(bind=engine)
-#        table.metadata.bind = engine
-#        table.metadata.create_all(engine)
-    if not engine.has_table("experiments"):
+
+    table = Experiment()
+    if not engine.has_table(table.__tablename_):
         # Create table
-        table = Experiment()
         table.__table__.create(bind=engine)
-#        table.metadata.bind = engine
-#        table.metadata.create_all(engine)
 
 def get_ftp_dir_and_file(genome, data_type):
 
