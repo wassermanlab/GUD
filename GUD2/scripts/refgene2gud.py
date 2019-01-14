@@ -51,6 +51,16 @@ def parse_args():
 
     return args
 
+def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # Initialize GUD database: create tables
+    # and download data to populate them 
+    initialize_gud_db(args.user, args.host,
+        args.port, args.db, args.genome)
+
 def initialize_gud_db(user, host, port, db, genome):
 
     # Initialize
@@ -174,10 +184,4 @@ def handle_bytes(bytes):
 
 if __name__ == "__main__":
 
-    # Parse arguments
-    args = parse_args()
-
-    # Initialize GUD database: create tables
-    # and download data to populate them 
-    initialize_gud_db(args.user, args.host,
-        args.port, args.db, args.genome)
+    main()
