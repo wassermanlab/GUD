@@ -277,12 +277,17 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             for line in GUDglobals.parse_tsv_file(table_file):
                 m = re.search("%s/(\S+).bed" % exp_dummy_dir, line[0])
                 if m: label2accession.setdefault(line[-1], m.group(1))
-             # For each line...
-            for line in GUDglobals.parse_tsv_file("%s.bed" % cluster_file):
+            # Load BED file
+            bed_obj = pybedtools.BedTool("%s.bed" % cluster_file)
+            # For each feature...
+            for feature in bed_obj:
+                # Ignore non-standard chroms, scaffolds, etc.
+                m = re.search("^chr(\S+)$", feature[0])
+                if not m.group(1) in GUDglobals.chroms: continue
                 # Get coordinates
-                chrom = line[0]
-                start = int(line[1])
-                end = int(line[2])
+                chrom = feature[0]
+                start = int(feature[1])
+                end = int(feature[2])
                 # Ignore non-standard chroms, scaffolds, etc.
                 m = re.search("^chr(\S+)$", chrom)
                 if not m.group(1) in GUDglobals.chroms: continue
@@ -298,23 +303,23 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     session.add(region)
                     session.commit()
                     reg = region.select_by_exact_location(session, chrom, start, end)
-                regions.append(reg)
+                regions.append(reg.uid)
             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
                 # Get region
-                reg = int(line[0]) - 1 
+                reg_uid = regions[int(line[0]) - 1] 
                 # Get sample
                 sam = accession2sample[label2accession[line[-1]]]
                 # Insert feature
                 feat = copy.copy(table)
                 if feat_type == "accessibility":
                     is_unique = feat.is_unique(session,
-                        reg.uid, sou.uid, sam.uid, exp.uid)
+                        reg_uid, sou.uid, sam.uid, exp.uid)
                 if feat_type == "histone" or feat_type == "tf":
                     is_unique = feat.is_unique(session,
-                        reg.uid, sou.uid, sam.uid, exp.uid, experiment_target)
+                        reg_uid, sou.uid, sam.uid, exp.uid, experiment_target)
                 if is_unique:
-                    feat.regionID = reg.uid
+                    feat.regionID = reg_uid
                     feat.sourceID = sou.uid
                     feat.sampleID = sam.uid
                     feat.experimentID = exp.uid
