@@ -311,14 +311,17 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 reg_uid = regions[int(line[0]) - 1] 
                 # Get sample
                 sam_uid = accession2sample[label2accession[line[-1]]]
-                print(line)
-                print(reg_uid, sam_uid)
                  # Insert feature
-                feat = copy.copy(table)
                 if feat_type == "accessibility":
+                    feat = DNAAccessibility()
                     is_unique = feat.is_unique(session,
                         reg_uid, sou.uid, sam_uid, exp.uid)
-                if feat_type == "histone" or feat_type == "tf":
+                if feat_type == "histone":
+                    feat = HistoneModification()
+                    is_unique = feat.is_unique(session,
+                        reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
+                if feat_type == "tf":
+                    feat = TFBinding()
                     is_unique = feat.is_unique(session,
                         reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
                 if is_unique:
@@ -367,14 +370,19 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         session.add(region)
                         session.commit()
                         reg = region.select_by_exact_location(session, chrom, start, end)
-                    # Insert feature
-                    feat = copy.copy(table)
+                     # Insert feature
                     if feat_type == "accessibility":
+                        feat = DNAAccessibility()
                         is_unique = feat.is_unique(session,
-                            reg.uid, sou.uid, sam.uid, exp.uid)
-                    if feat_type == "histone" or feat_type == "tf":
+                            reg_uid, sou.uid, sam_uid, exp.uid)
+                    if feat_type == "histone":
+                        feat = HistoneModification()
                         is_unique = feat.is_unique(session,
-                            reg.uid, sou.uid, sam.uid, exp.uid, experiment_target)
+                            reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
+                    if feat_type == "tf":
+                        feat = TFBinding()
+                        is_unique = feat.is_unique(session,
+                            reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
                     if is_unique:
                         feat.regionID = reg.uid
                         feat.sourceID = sou.uid
