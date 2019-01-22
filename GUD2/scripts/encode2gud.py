@@ -304,7 +304,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     session.commit()
                     reg = region.select_by_exact_location(session, chrom, start, end)
                 regions.append(reg.uid)
-                break
             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
                 # Get region
@@ -335,7 +334,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         feat.tf = experiment_target
                     session.add(feat)
                     session.commit()
-                    exit(0)
         # Do not cluster
         else:
             # For each accession, biosample...
