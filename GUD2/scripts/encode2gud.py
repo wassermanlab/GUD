@@ -333,10 +333,9 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         feat.histone_type = experiment_target
                     if feat_type == "tf":
                         feat.tf = experiment_target
-                    print(feat)
                     session.add(feat)
                     session.commit()
-                exit(0)
+                    exit(0)
         # Do not cluster
         else:
             # For each accession, biosample...
