@@ -313,8 +313,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 sam_uid = accession2sample[label2accession[line[-1]]]
                 print(line)
                 print(reg_uid, sam_uid)
-                exit(0)
-                # Insert feature
+                 # Insert feature
                 feat = copy.copy(table)
                 if feat_type == "accessibility":
                     is_unique = feat.is_unique(session,
@@ -322,6 +321,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 if feat_type == "histone" or feat_type == "tf":
                     is_unique = feat.is_unique(session,
                         reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
+                print(is_unique)
+                exit(0)
                 if is_unique:
                     feat.regionID = reg_uid
                     feat.sourceID = sou.uid
