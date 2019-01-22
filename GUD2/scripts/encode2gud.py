@@ -272,7 +272,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     samples[biosample]["treatment"],
                     samples[biosample]["cell_line"],
                     samples[biosample]["cancer"])
-                accession2sample.setdefault(accession, sam)
+                accession2sample.setdefault(accession, sam.uid)
             # For each line...
             for line in GUDglobals.parse_tsv_file(table_file):
                 m = re.search("%s/(\S+).bed" % exp_dummy_dir, line[0])
@@ -309,19 +309,19 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 # Get region
                 reg_uid = regions[int(line[0]) - 1] 
                 # Get sample
-                sam = accession2sample[label2accession[line[-1]]]
+                sam_uid = accession2sample[label2accession[line[-1]]]
                 # Insert feature
                 feat = copy.copy(table)
                 if feat_type == "accessibility":
                     is_unique = feat.is_unique(session,
-                        reg_uid, sou.uid, sam.uid, exp.uid)
+                        reg_uid, sou.uid, sam_uid, exp.uid)
                 if feat_type == "histone" or feat_type == "tf":
                     is_unique = feat.is_unique(session,
-                        reg_uid, sou.uid, sam.uid, exp.uid, experiment_target)
+                        reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
                 if is_unique:
                     feat.regionID = reg_uid
                     feat.sourceID = sou.uid
-                    feat.sampleID = sam.uid
+                    feat.sampleID = sam_uid
                     feat.experimentID = exp.uid
                     if feat_type == "histone":
                         feat.histone_type = experiment_target
