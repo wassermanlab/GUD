@@ -321,8 +321,6 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 if feat_type == "histone" or feat_type == "tf":
                     is_unique = feat.is_unique(session,
                         reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
-                print(is_unique)
-                exit(0)
                 if is_unique:
                     feat.regionID = reg_uid
                     feat.sourceID = sou.uid
@@ -332,6 +330,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         feat.histone_type = experiment_target
                     if feat_type == "tf":
                         feat.tf = experiment_target
+                    print(feat)
+                    exit(0)
                     session.add(feat)
                     session.commit()
         # Do not cluster
