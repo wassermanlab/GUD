@@ -78,6 +78,15 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
     if not engine.has_table("sources"):
         raise ValueError("No sources table!")
 
+                #source entry 
+                source = Source()
+                sou = source.select_by_name(session, source_name)
+                if not sou: 
+                    source.name = source_name
+                    session.merge(source)
+                    session.commit()
+                    sou = source.select_by_name(session, source_name)
+
     # parse table
     with open(bed_file) as f:
         for line in f:
@@ -100,15 +109,6 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
                     session.merge(region)
                     session.commit()
                     reg = region.select_by_exact_location(session, chrom, start, end)
-
-                #source entry 
-                source = Source()
-                sou = source.select_by_name(session, source_name)
-                if not sou: 
-                    source.name = source_name
-                    session.merge(source)
-                    session.commit()
-                    sou = source.select_by_name(session, source_name)
 
                 #str entry 
                 STR = ShortTandemRepeat()
