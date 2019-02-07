@@ -193,6 +193,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
     # For each cell/tissue, experiment, target...
     for experiment_type, experiment_target in sorted(metadata):
+        print(experiment_type, experiment_target)
         # Initialize
         exp_dummy_dir = os.path.join(dummy_dir,
             "%s.%s" % (experiment_type.replace(" ", "_"), experiment_target))
@@ -245,7 +246,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             regions = []
             bed_files = os.path.join(exp_dummy_dir, "files.txt")
             table_file = os.path.join(exp_dummy_dir, "table.txt")
-            cluster_file = os.path.join(exp_dummy_dir, "clusters")
+            cluster_file = os.path.join(exp_dummy_dir, "cluster")
             # Create BED file list
             if not os.path.exists(bed_files):
                 # For each file...
@@ -306,34 +307,37 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 regions.append(reg.uid)
             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
-                # Get region
-                reg_uid = regions[int(line[0]) - 1] 
-                # Get sample
-                sam_uid = accession2sample[label2accession[line[-1]]]
-                 # Insert feature
-                if feat_type == "accessibility":
-                    feat = DNAAccessibility()
-                    is_unique = feat.is_unique(session,
-                        reg_uid, sou.uid, sam_uid, exp.uid)
-                if feat_type == "histone":
-                    feat = HistoneModification()
-                    is_unique = feat.is_unique(session,
-                        reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
-                if feat_type == "tf":
-                    feat = TFBinding()
-                    is_unique = feat.is_unique(session,
-                        reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
-                if is_unique:
-                    feat.regionID = reg_uid
-                    feat.sourceID = sou.uid
-                    feat.sampleID = sam_uid
-                    feat.experimentID = exp.uid
+                try:
+                    # Get region
+                    reg_uid = regions[int(line[0]) - 1] 
+                    # Get sample
+                    sam_uid = accession2sample[label2accession[line[-1]]]
+                     # Insert feature
+                    if feat_type == "accessibility":
+                        feat = DNAAccessibility()
+                        is_unique = feat.is_unique(session,
+                            reg_uid, sou.uid, sam_uid, exp.uid)
                     if feat_type == "histone":
-                        feat.histone_type = experiment_target
+                        feat = HistoneModification()
+                        is_unique = feat.is_unique(session,
+                            reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
                     if feat_type == "tf":
-                        feat.tf = experiment_target
-                    session.add(feat)
-                    session.commit()
+                        feat = TFBinding()
+                        is_unique = feat.is_unique(session,
+                            reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
+                    if is_unique:
+                        feat.regionID = reg_uid
+                        feat.sourceID = sou.uid
+                        feat.sampleID = sam_uid
+                        feat.experimentID = exp.uid
+                        if feat_type == "histone":
+                            feat.histone_type = experiment_target
+                        if feat_type == "tf":
+                            feat.tf = experiment_target
+                        session.add(feat)
+                        session.commit()
+                except:
+                    warnings.warn("\nMissed region!!!\n\t%s\n" % line)
 #        # Do not cluster
 #        else:
 #            # For each accession, biosample...
