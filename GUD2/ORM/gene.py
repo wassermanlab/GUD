@@ -122,5 +122,4 @@ class Gene(Base):
 
     def __repr__(self):
         return "<Gene(uid={}, name={}, name2={}, strand={})>".format(
-            self.uid, self.name, self.name2, self.strand,)
-
+            self.uid, self.name, self.name2, self.strand)
