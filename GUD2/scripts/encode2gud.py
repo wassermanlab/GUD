@@ -296,7 +296,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 accession2sample.setdefault(accession, sam.uid)
             # For each line...
             for line in GUDglobals.parse_tsv_file(table_file):
-                m = re.search("%s/(\w+).bed" % exp_dummy_dir, line[0])
+                m = re.search("%s.%s/(\w+).bed" % (
+                    experiment_type, experiment_target), line[0])
                 if m: label2accession.setdefault(line[-1], m.group(1))
             # Load BED file
             bed_obj = pybedtools.BedTool("%s.bed" % cluster_file)
@@ -414,8 +415,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                             feat.tf = experiment_target
                         session.add(feat)
                         session.commit()
-        # Remove dummy dir
-        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
+#        # Remove dummy dir
+#        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
 
 #-------------#
 # Main        #
