@@ -326,6 +326,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     session.commit()
                     reg = region.select_by_exact_location(session, chrom, start, end)
                 regions.append(reg.uid)
+            print(len(regions))
             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
                 # Get region
