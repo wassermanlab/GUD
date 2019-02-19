@@ -296,7 +296,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 accession2sample.setdefault(accession, sam.uid)
             # For each line...
             for line in GUDglobals.parse_tsv_file(table_file):
-                m = re.search("%s/(\S+).bed" % exp_dummy_dir, line[0])
+                m = re.search("%s/(\w+).bed" % exp_dummy_dir, line[0])
                 if m: label2accession.setdefault(line[-1], m.group(1))
             # Load BED file
             bed_obj = pybedtools.BedTool("%s.bed" % cluster_file)
