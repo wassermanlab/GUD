@@ -326,16 +326,13 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                     session.commit()
                     reg = region.select_by_exact_location(session, chrom, start, end)
                 regions.append(reg.uid)
-            print(len(regions))
             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
                 # Get region
                 reg_uid = regions[int(line[0]) - 1] 
                 # Get sample
                 sam_uid = accession2sample[label2accession[line[-1]]]
-                print(reg_uid, sam_uid)
-                exit(0)
-                 # Insert feature
+                # Insert feature
                 if feat_type == "accessibility":
                     feat = DNAAccessibility()
                     is_unique = feat.is_unique(session,
