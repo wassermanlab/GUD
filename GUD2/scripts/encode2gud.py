@@ -194,6 +194,26 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
     # For each cell/tissue, experiment, target...
     for experiment_type, experiment_target in sorted(metadata):
         print(experiment_type, experiment_target)
+        exps = [
+            ('ChIP-seq', 'H2AFZ'),
+            ('ChIP-seq', 'H2AK5ac'),
+            ('ChIP-seq', 'H2AK9ac'),
+            ('ChIP-seq', 'H2BK120ac'),
+            ('ChIP-seq', 'H2BK12ac'),
+            ('ChIP-seq', 'H2BK15ac'),
+            ('ChIP-seq', 'H2BK20ac'),
+            ('ChIP-seq', 'H2BK5ac'),
+            ('ChIP-seq', 'H3F3A'),
+            ('ChIP-seq', 'H3K14ac'),
+            ('ChIP-seq', 'H3K18ac'),
+            ('ChIP-seq', 'H3K23ac'),
+            ('ChIP-seq', 'H3K23me2'),
+            ('ChIP-seq', 'H3K27ac'),
+            ('ChIP-seq', 'H3K27me3'),
+            ('ChIP-seq', 'H3K36me3'),
+            ('ChIP-seq', 'H3K4ac')
+        ]
+        if (experiment_type, experiment_target) in exps: continue
         # Initialize
         exp_dummy_dir = os.path.join(dummy_dir,
             "%s.%s" % (experiment_type.replace(" ", "_"), experiment_target))
@@ -245,8 +265,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             label2accession = {}
             regions = []
             bed_files = os.path.join(exp_dummy_dir, "files.txt")
-            table_file = os.path.join(exp_dummy_dir, "table.txt")
-            cluster_file = os.path.join(exp_dummy_dir, "cluster")
+            table_file = os.path.join(exp_dummy_dir, "tableOfTables.txt")
+            cluster_file = os.path.join(exp_dummy_dir, "regCluster")
             # Create BED file list
             if not os.path.exists(bed_files):
                 # For each file...
