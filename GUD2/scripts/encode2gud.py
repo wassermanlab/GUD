@@ -194,26 +194,26 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
     # For each cell/tissue, experiment, target...
     for experiment_type, experiment_target in sorted(metadata):
         print(experiment_type, experiment_target)
-        exps = [
-            ('ChIP-seq', 'H2AFZ'),
-            ('ChIP-seq', 'H2AK5ac'),
-            ('ChIP-seq', 'H2AK9ac'),
-            ('ChIP-seq', 'H2BK120ac'),
-            ('ChIP-seq', 'H2BK12ac'),
-            ('ChIP-seq', 'H2BK15ac'),
-            ('ChIP-seq', 'H2BK20ac'),
-            ('ChIP-seq', 'H2BK5ac'),
-            ('ChIP-seq', 'H3F3A'),
-            ('ChIP-seq', 'H3K14ac'),
-            ('ChIP-seq', 'H3K18ac'),
-            ('ChIP-seq', 'H3K23ac'),
-            ('ChIP-seq', 'H3K23me2'),
-            ('ChIP-seq', 'H3K27ac'),
-            ('ChIP-seq', 'H3K27me3'),
-            ('ChIP-seq', 'H3K36me3'),
-            ('ChIP-seq', 'H3K4ac')
-        ]
-        if (experiment_type, experiment_target) in exps: continue
+        exp_targets = set([
+            'H2AFZ',
+            'H2AK5ac',
+            'H2AK9ac',
+            'H2BK120ac',
+            'H2BK12ac',
+            'H2BK15ac',
+            'H2BK20ac',
+            'H2BK5ac',
+            'H3F3A',
+            'H3K14ac',
+            'H3K18ac',
+            'H3K23ac',
+            'H3K23me2',
+            'H3K27ac',
+            'H3K27me3',
+            'H3K36me3',
+            'H3K4ac'
+            ])
+        if experiment_target in exp_targets: continue
         # Initialize
         exp_dummy_dir = os.path.join(dummy_dir,
             "%s.%s" % (experiment_type.replace(" ", "_"), experiment_target))
