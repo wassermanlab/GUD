@@ -332,7 +332,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 reg_uid = regions[int(line[0]) - 1] 
                 # Get sample
                 sam_uid = accession2sample[label2accession[line[-1]]]
-                print(region_uid, sam_uid)
+                print(reg_uid, sam_uid)
                 exit(0)
                  # Insert feature
                 if feat_type == "accessibility":
