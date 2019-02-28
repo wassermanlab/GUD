@@ -11,7 +11,6 @@ from sqlalchemy.orm import mapper, scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
 try: from urllib2 import unquote
 except: from urllib.parse import unquote
-import warnings
 
 # Import from GUD module
 from GUD2 import GUDglobals

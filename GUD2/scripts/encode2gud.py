@@ -296,7 +296,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 accession2sample.setdefault(accession, sam.uid)
             # For each line...
             for line in GUDglobals.parse_tsv_file(table_file):
-                m = re.search("%s/(\w+).bed" % exp_dummy_dir, line[0])
+                m = re.search("%s.%s/(\w+).bed" % (
+                    experiment_type, experiment_target), line[0])
                 if m: label2accession.setdefault(line[-1], m.group(1))
             # Load BED file
             bed_obj = pybedtools.BedTool("%s.bed" % cluster_file)
@@ -327,11 +328,67 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                 regions.append(reg.uid)
             # For each line...
             for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
-                try:
+                # Get region
+                reg_uid = regions[int(line[0]) - 1] 
+                # Get sample
+                sam_uid = accession2sample[label2accession[line[-1]]]
+                # Insert feature
+                if feat_type == "accessibility":
+                    feat = DNAAccessibility()
+                    is_unique = feat.is_unique(session,
+                        reg_uid, sou.uid, sam_uid, exp.uid)
+                if feat_type == "histone":
+                    feat = HistoneModification()
+                    is_unique = feat.is_unique(session,
+                        reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
+                if feat_type == "tf":
+                    feat = TFBinding()
+                    is_unique = feat.is_unique(session,
+                        reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
+                if is_unique:
+                    feat.regionID = reg_uid
+                    feat.sourceID = sou.uid
+                    feat.sampleID = sam_uid
+                    feat.experimentID = exp.uid
+                    if feat_type == "histone":
+                        feat.histone_type = experiment_target
+                    if feat_type == "tf":
+                        feat.tf = experiment_target
+                    session.add(feat)
+                    session.commit()
+        # Do not cluster
+        else:
+            # For each accession, biosample...
+            for accession, biosample in metadata[(experiment_type, experiment_target)]:
+                # Load BED file
+                bed_obj = pybedtools.BedTool(
+                    os.path.join(exp_dummy_dir, "%s.bed" % accession))
+                # Get sample
+                sample = Sample()
+                sam = sample.select_by_exact_sample(session,
+                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
+                # For each feature...
+                for feature in bed_obj:
+                    # Ignore non-standard chroms, scaffolds, etc.
+                    m = re.search("^chr(\S+)$", feature[0])
+                    if not m.group(1) in GUDglobals.chroms: continue
+                    # Get coordinates
+                    chrom = feature[0]
+                    start = int(feature[1])
+                    end = int(feature[2])
                     # Get region
-                    reg_uid = regions[int(line[0]) - 1] 
-                    # Get sample
-                    sam_uid = accession2sample[label2accession[line[-1]]]
+                    region = Region()
+                    reg = region.select_by_exact_location(session, chrom, start, end)
+                    if not reg:
+                        # Insert region
+                        region.bin = assign_bin(start, end)
+                        region.chrom = chrom
+                        region.start = start
+                        region.end = end
+                        session.add(region)
+                        session.commit()
+                        reg = region.select_by_exact_location(session, chrom, start, end)
                      # Insert feature
                     if feat_type == "accessibility":
                         feat = DNAAccessibility()
@@ -346,9 +403,9 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                         is_unique = feat.is_unique(session,
                             reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
                     if is_unique:
-                        feat.regionID = reg_uid
+                        feat.regionID = reg.uid
                         feat.sourceID = sou.uid
-                        feat.sampleID = sam_uid
+                        feat.sampleID = sam.uid
                         feat.experimentID = exp.uid
                         if feat_type == "histone":
                             feat.histone_type = experiment_target
@@ -356,67 +413,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
                             feat.tf = experiment_target
                         session.add(feat)
                         session.commit()
-                except:
-                    warnings.warn("\nMissed region!!!\n\t%s\n" % line)
-#        # Do not cluster
-#        else:
-#            # For each accession, biosample...
-#            for accession, biosample in metadata[(experiment_type, experiment_target)]:
-#                # Load BED file
-#                bed_obj = pybedtools.BedTool(
-#                    os.path.join(exp_dummy_dir, "%s.bed" % accession))
-#                # Get sample
-#                sample = Sample()
-#                sam = sample.select_by_exact_sample(session,
-#                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
-#                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
-#                # For each feature...
-#                for feature in bed_obj:
-#                    # Ignore non-standard chroms, scaffolds, etc.
-#                    m = re.search("^chr(\S+)$", feature[0])
-#                    if not m.group(1) in GUDglobals.chroms: continue
-#                    # Get coordinates
-#                    chrom = feature[0]
-#                    start = int(feature[1])
-#                    end = int(feature[2])
-#                    # Get region
-#                    region = Region()
-#                    reg = region.select_by_exact_location(session, chrom, start, end)
-#                    if not reg:
-#                        # Insert region
-#                        region.bin = assign_bin(start, end)
-#                        region.chrom = chrom
-#                        region.start = start
-#                        region.end = end
-#                        session.add(region)
-#                        session.commit()
-#                        reg = region.select_by_exact_location(session, chrom, start, end)
-#                     # Insert feature
-#                    if feat_type == "accessibility":
-#                        feat = DNAAccessibility()
-#                        is_unique = feat.is_unique(session,
-#                            reg_uid, sou.uid, sam_uid, exp.uid)
-#                    if feat_type == "histone":
-#                        feat = HistoneModification()
-#                        is_unique = feat.is_unique(session,
-#                            reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
-#                    if feat_type == "tf":
-#                        feat = TFBinding()
-#                        is_unique = feat.is_unique(session,
-#                            reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
-#                    if is_unique:
-#                        feat.regionID = reg.uid
-#                        feat.sourceID = sou.uid
-#                        feat.sampleID = sam.uid
-#                        feat.experimentID = exp.uid
-#                        if feat_type == "histone":
-#                            feat.histone_type = experiment_target
-#                        if feat_type == "tf":
-#                            feat.tf = experiment_target
-#                        session.add(feat)
-#                        session.commit()
 #        # Remove dummy dir
-#        shutil.rmtree(exp_dummy_dir)
+#        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
 
 #-------------#
 # Main        #
