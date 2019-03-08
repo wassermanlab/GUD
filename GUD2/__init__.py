@@ -3,18 +3,25 @@ Genomic Universal Database (GUD) module
 """
 
 __author__ = "Oriol Fornes"
-__credits__ = ["Oriol Fornes", "Phillip A. Richmond", "Tamar V. Av-Shalom",
-    "David J. Arenillas", "Rachelle A. Farkas", "Michelle Kang", 
-    "Wyeth W. Wasserman"]
+__credits__ = [
+    "Oriol Fornes",
+    "Tamar V. Av-Shalom",
+    "David J. Arenillas",
+    "Rachelle A. Farkas",
+    "Michelle Kang",
+    "Phillip A. Richmond",
+    "Wyeth W. Wasserman"
+]
 __email__ = "oriol@cmmt.ubc.ca"
 __organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
 __version__ = "0.0.1"
 
 import os, sys, re
 from Bio import SeqIO
+import csv
 import gzip
 
-__all__ = ["ORM"]
+__all__ = ["ORM", "scripts"]
 
 class Globals(object):
     """
@@ -45,11 +52,11 @@ class Globals(object):
 
         if os.path.exists(file_name):
             # Open file handle
-            if gz:
-                try: f = gzip.open(file_name, "rt")
+            if gz or file_name.endswith(".gz"):
+                try: f = gzip.open(file_name, "r")
                 except: raise ValueError("Could not open file %s" % file_name)
             else:
-                try: f = open(file_name, "rt")
+                try: f = open(file_name, "r")
                 except: raise ValueError("Could not open file %s" % file_name)
             # For each line...
             for line in f:
@@ -106,10 +113,10 @@ class Globals(object):
         if os.path.exists(file_name):
             # Open file handle
             if gz or file_name.endswith(".gz"):
-                try: f = gzip.open(file_name, "rt")
+                try: f = gzip.open(file_name, "r")
                 except: raise ValueError("Could not open file %s" % file_name)
             else:
-                try: f = open(file_name, "rt")
+                try: f = open(file_name, "r")
                 except: raise ValueError("Could not open file %s" % file_name)
             # For each SeqRecord...
             for seq_record in SeqIO.parse(f, "fasta"):
@@ -136,9 +143,10 @@ class Globals(object):
             try:
                 f = open(file_name, "a")
             except:
-                raise ValueError("Could not create file: %s" % file_name)
+                raise ValueError("Could not write to file: %s" % file_name)
             # Write
             f.write("%s\n" % content)
+            f.close()
         else:
             sys.stdout.write("%s\n" % content)
 

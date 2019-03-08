@@ -3,16 +3,41 @@ Object-Relational Mapping (ORM) classes
 """
 
 __all__ = [
-    "copy_number_variant", "chrom", "clinvar", "gene", "region", "sample", "short_tandem_repeat", 
-    "source", "experiment"
+    "base",
+    "chrom",
+    "clinvar",
+    "conservation",
+    "copy_number_variant",
+    "dna_accessibility",
+    "enhancer",
+    "experiment",
+    "gene",
+    "histone_modification",
+    "region",
+    "repeat_mask",
+    "sample",
+    "short_tandem_repeat",
+    "source",
+    "tad",
+    "tf_binding",
+    "tss"
 ]
 
-from .copy_number_variant import CNV
+from .base import Base
 from .chrom import Chrom
-from .region import Region
-from .sample import Sample
-from .source import Source
-from .experiment import Experiment 
 from .clinvar import ClinVar
+from .conservation import Conservation
+from .copy_number_variant import CNV
+from .dna_accessibility import DNAAccessibility
+from .enhancer import Enhancer
+from .experiment import Experiment
 from .gene import Gene
+from .histone_modification import HistoneModification
+from .region import Region
+from .repeat_mask import RepeatMask
+from .sample import Sample
 from .short_tandem_repeat import ShortTandemRepeat
+from .source import Source
+from .tad import TAD
+from .tf_binding import TFBinding
+from .tss import TSS
