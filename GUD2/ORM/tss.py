@@ -18,17 +18,16 @@ class TSS(Base):
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     regionID = Column("regionID", Integer, ForeignKey("regions.uid"), nullable=False)
     sourceID = Column("sourceID", Integer, ForeignKey("sources.uid"), nullable=False)
-    sampleID = Column("sampleID", Integer, ForeignKey("samples.uid"), nullable=False)
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
     experimentID = Column("experimentID", Integer, ForeignKey("experiments.uid"), nullable=False)
     gene = Column("gene", String(75), ForeignKey("genes.name2"))
     tss = Column("tss", mysql.INTEGER(unsigned=True))
-    avg_tpm = Column("avg_tpm", Float, nullable=False)
-#    rel_tpm = Column("rel_tpm", Float)
+    strand = Column("strand", mysql.CHAR(1), nullable=False)
+    samples = Column("sampleIDs", mysql.LONGBLOB, nullable=False)
+    samples = Column("avg_tpms", mysql.LONGBLOB, nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(regionID, sourceID, sampleID, experimentID),
+        UniqueConstraint(regionID, sourceID, experimentID),
 
         Index("ix_tss", regionID), # query by bin range 
         Index("ix_tss_gene", gene, tss),
