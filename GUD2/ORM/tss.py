@@ -24,13 +24,13 @@ class TSS(Base):
     gene = Column("gene", String(75), ForeignKey("genes.name2"))
     tss = Column("tss", mysql.INTEGER(unsigned=True))
     avg_tpm = Column("avg_tpm", Float, nullable=False)
-    rel_tpm = Column("rel_tpm", Float)
+#    rel_tpm = Column("rel_tpm", Float)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(regionID, sourceID, sampleID, experimentID),
 
-        Index("ix_tss", regionID), ## query by bin range 
+        Index("ix_tss", regionID), # query by bin range 
         Index("ix_tss_gene", gene, tss),
 
         {
