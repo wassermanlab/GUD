@@ -14,8 +14,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects import mysql
 
-from .chrom import Chrom
-from .base import Base
+from GUD2.ORM.base import Base
+from GUD2.ORM.chrom import Chrom
 
 class Region(Base):
 
