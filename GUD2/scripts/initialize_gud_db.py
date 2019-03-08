@@ -1,22 +1,28 @@
 #!/usr/bin/env python
 
-import os, sys, re
 import argparse
-from binning import assign_bin
 from ftplib import FTP
 import getpass
 import gzip
 from io import BytesIO
+import os
+import re
 from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy_utils import create_database, database_exists
+from sqlalchemy.orm import (
+    scoped_session,
+    sessionmaker
+)
+from sqlalchemy_utils import (
+    create_database,
+    database_exists
+)
 
 from GUD2 import GUDglobals
 from GUD2.ORM.chrom import Chrom
+from GUD2.ORM.experiment import Experiment
 from GUD2.ORM.region import Region
 from GUD2.ORM.sample import Sample
 from GUD2.ORM.source import Source
-from GUD2.ORM.experiment import Experiment
 
 #-------------#
 # Functions   #

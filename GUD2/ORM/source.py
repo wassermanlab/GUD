@@ -1,9 +1,13 @@
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String,
+    Column,
+    Index,
+    PrimaryKeyConstraint,
+    String,
     UniqueConstraint
 )
 from sqlalchemy.dialects import mysql
-from GUD2.ORM.base import Base
+
+from .base import Base
 
 class Source(Base):
 
@@ -15,9 +19,7 @@ class Source(Base):
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(name),
-
         Index("ix_source", name),
-
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -37,5 +39,8 @@ class Source(Base):
         return "{}".format(self.name)
 
     def __repr__(self):
-        return "<Source(uid={}, name={})>".format(
-            self.uid, self.name)
+        return "<Source(%s, %s)>" % \
+            (
+                "uid={}".format(self.uid),
+                "name={}".format(self.name)
+            )

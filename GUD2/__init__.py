@@ -16,10 +16,11 @@ __email__ = "oriol@cmmt.ubc.ca"
 __organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
 __version__ = "0.0.1"
 
-import os, sys, re
 from Bio import SeqIO
 import csv
 import gzip
+import os
+import sys
 
 __all__ = ["ORM", "scripts"]
 

@@ -1,9 +1,12 @@
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String, ForeignKey
+    Column,
+    Index,
+    PrimaryKeyConstraint,
+    String
 )
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import mysql
-from GUD2.ORM.base import Base
+
+from .base import Base
 
 class Chrom(Base):
     
@@ -13,13 +16,8 @@ class Chrom(Base):
     size = Column("size", mysql.INTEGER(unsigned=True), nullable=False)
 
     __table_args__ = (
-
-        PrimaryKeyConstraint(
-            chrom
-        ),
-
+        PrimaryKeyConstraint(chrom),
         Index("ix_chrom", chrom),
-
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -27,34 +25,36 @@ class Chrom(Base):
     )
 
     @classmethod
-    def chrom_sizes(cls, session): 
+    def select_by_chrom(cls, session, chrom):
         """
-        Returns the sizes of all chroms as a dict.
+        Query objects by chromosome name.
         """
 
-        chrom_sizes = {}
-        
-        q = session.query(cls)
-        
-        for c in q:
-            chrom_sizes.setdefault(c.chrom, int(c.size))
-
-        return chrom_sizes
-
-    @classmethod
-    def chrom_size(cls, session, chrom):
-        """
-        Returns the size of the given chrom.
-        """
-        
         q = session.query(cls).filter(cls.chrom == chrom)
 
-        for c in q:
-            return int(c.size)
+        return q.first()
+
+    @classmethod
+    def select_by_chroms(cls, session, chroms=[]):
+        """
+        Query objects by multiple chromosome names. If no
+        chromosome names are provided, return all objects.
+        """
+
+        q = session.query(cls).filter(cls.chrom.in_(chroms))
+
+        return q.all()
 
     def __str__(self):
-        return "{}\t{}".format(self.chrom, self.size)
+        return "{}\t{}".\
+            format(
+                self.chrom,
+                self.size
+            )
 
     def __repr__(self):
-        return "<Chrom(chrom={}, size={})>".format(
-            self.chrom, self.size)
+        return "<Chrom(%s, %s)>" % \
+            (
+                "chrom={}".format(self.chrom),
+                "size={}".format(self.size)
+            )
