@@ -8,7 +8,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects import mysql
 
-from GUD2.ORM.base import Base
+from .base import Base
 
 class Sample(Base):
 
