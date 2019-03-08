@@ -28,7 +28,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script initializes a GUD database for the given genome.")
+    parser = argparse.ArgumentParser(description="initializes a GUD database for the given genome.")
 
     parser.add_argument("genome", help="genome assembly")
 

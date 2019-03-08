@@ -144,8 +144,8 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
     if feat_type == "tf":
         table = TFBinding()
     if not engine.has_table(table.__tablename__):
-        table.metadata.bind = engine
-        table.metadata.create_all(engine)
+        # Create table
+        table.__table__.create(bind=engine)
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(metadata_file):

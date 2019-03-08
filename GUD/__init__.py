@@ -62,8 +62,8 @@ class Globals(object):
 
     def parse_csv_file(self, file_name, gz=False):
         """
-        This function parses a CSV file and yields lines one by one
-        as a list.
+        This function parses a tab-separated values (TSV) file
+        and yields lines one by one as a list.
 
         @input:
         file_name {str}
@@ -74,8 +74,7 @@ class Globals(object):
 
         # For each line... #
         for line in self.parse_file(file_name, gz):
-            line = line.split(",")
-            yield line
+            yield line.split("\t")
 
     def parse_tsv_file(self, file_name, gz=False):
         """
