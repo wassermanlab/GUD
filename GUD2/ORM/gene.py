@@ -27,9 +27,9 @@ class Gene(Base):
     name2 = Column("name2", String(75), nullable=False)
     cdsStart = Column("cdsStart", mysql.INTEGER(unsigned=True), nullable=False)
     cdsEnd = Column("cdsEnd", mysql.INTEGER(unsigned=True), nullable=False)
+    strand = Column("strand", mysql.CHAR(1), nullable=False)
     exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
     exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
