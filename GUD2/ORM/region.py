@@ -71,7 +71,7 @@ class Region(Base):
         return q
 
     @classmethod
-    def select_by_exact_region(cls, session, chrom, start, end):
+    def select_by_exact_location(cls, session, chrom, start, end):
 
         bin = assign_bin(start, end)
 
