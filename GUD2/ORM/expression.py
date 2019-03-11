@@ -70,7 +70,7 @@ class Expression(Base):
         Query objects by TSS id.
         """
 
-        q = session.query(cls).filter(cls.tssID = tssID)
+        q = session.query(cls).filter(cls.tssID == tssID)
 
         if gene and tss:
             q = q.filter(cls.gene == gene, cls.tss == tss)
