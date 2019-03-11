@@ -29,7 +29,7 @@ class TSS(Base):
     tss = Column("tss", mysql.INTEGER(unsigned=True))
     strand = Column("strand", mysql.CHAR(1), nullable=False)
     sampleIDs = Column("sampleIDs", mysql.LONGBLOB, nullable=False)
-    avg_tpms = Column("avg_tpms", mysql.LONGBLOB, nullable=False)
+    avg_expression_levels = Column("avg_expression_levels", mysql.LONGBLOB, nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
@@ -50,12 +50,14 @@ class TSS(Base):
 
     @classmethod
     def is_unique(cls, session, regionID, sourceID,
-        experimentID):
+        experimentID, gene, tss):
 
         q = session.query(cls).filter(
             cls.regionID == regionID,
             cls.sourceID == sourceID,
-            cls.experimentID == experimentID
+            cls.experimentID == experimentID,
+            cls.gene == gene,
+            cls.tss == tss
         )
 
         return len(q.all()) == 0

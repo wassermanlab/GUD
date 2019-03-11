@@ -20,7 +20,7 @@ class Expression(Base):
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     tssID = Column("tssID", Integer, ForeignKey("tss.uid"), nullable=False)
     sampleID = Column("sampleID", Integer, ForeignKey("samples.uid"), nullable=False)
-    avg_tpm = Column("avg_tpm", Float, nullable=False)
+    avg_expression_level = Column("avg_expression_level", Float, nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),

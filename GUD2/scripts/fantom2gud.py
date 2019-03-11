@@ -167,7 +167,7 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
             # Initialize
             data = {}
             sampleIDs = []
-            avg_tpms = []
+            avg_expression_levels = []
             # Get coordinates
             if feat_type == "enhancer":
                 m = re.search("(chr\S+)\:(\d+)\-(\d+)", line[0])
@@ -226,15 +226,15 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     session.commit()
                     sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
                 # Skip if feature not expressed in sample
-                avg_tpm = float(sum(data[name, treatment, cell_line, cancer]) /
+                avg_expression_level = float(sum(data[name, treatment, cell_line, cancer]) /
                     len(data[name, treatment, cell_line, cancer]))
-                if avg_tpm > 0:
+                if avg_expression_level > 0:
                     sampleIDs.append(sam.uid)
-                    avg_tpms.append("%.3f" % avg_tpm)
+                    avg_expression_levels.append("%.3f" % avg_expression_level)
             # Get TSS
             if feat_type == "tss":
                 tss = TSS()
-                if tss.is_unique(session, reg.uid, sou.uid, exp.uid):
+                if tss.is_unique(session, reg.uid, sou.uid, exp.uid, gene, tss_id):
                     tss.regionID = reg.uid
                     tss.sourceID = sou.uid
                     tss.experimentID = exp.uid
@@ -242,7 +242,7 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     tss.tss = tss_id
                     tss.strand = strand
                     tss.sampleIDs = "{},".format(",".join(map(str, sampleIDs)))
-                    tss.avg_tpms = "{},".format(",".join(avg_tpms))
+                    tss.expressions = "{},".format(",".join(avg_tpms))
                     session.add(tss)
                     session.commit()
                 tss = tss.select_by_exact_tss(session, reg.uid, sou.uid, exp.uid)
