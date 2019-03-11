@@ -230,9 +230,9 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     len(data[name, treatment, cell_line, cancer]))
                 if avg_tpm > 0:
                     sampleIDs.append(sam.uid)
-                    avg_tpms.append(avg_tpm)
+                    avg_tpms.append("%.3f" % avg_tpm)
             print("{},".format(",".join(map(str, sampleIDs))))
-            print("{},".format(",".join(map("%.3f", avg_tpms))))
+            print("{},".format(",".join(avg_tpms)))
             exit(0)
             # Get TSS
             if feat_type == "tss":
