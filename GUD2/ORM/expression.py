@@ -13,7 +13,7 @@ from binning import containing_bins, contained_bins
 
 class Expression(Base):
 
-    __tablename__ = "expression"
+    __tablename__ = "expressions"
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     tssID = Column("tssID", Integer, ForeignKey("tss.uid"), nullable=False)
