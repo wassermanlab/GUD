@@ -171,6 +171,7 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
         elif line[0].startswith("chr") or line[0].startswith("\"chr"):
             # Initialize
             data = {}
+            rows = []
             sampleIDs = []
             avg_expression_levels = []
             # Get coordinates
@@ -252,44 +253,25 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     session.commit()
                 tss = tss.select_by_exact_tss(
                     session, reg.uid, sou.uid, exp.uid, gene, tss_id)
-            print(tss)
-            exit(0)
             # For each sample...
-            for name, treatment, cell_line, cancer in data: pass
-#
-#                # Get sample
-#                sample = Sample()
-#                sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
-#                if not sam:    
-#                    sample.name = name
-#                    sample.treatment = treatment
-#                    sample.cell_line = cell_line
-#                    sample.cancer = cancer
-#                    session.add(sample)
-#                    session.commit()
-#                    sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
-##                if feat_type == "enhancer":
-##                    enhancer = Enhancer()
-##                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
-##                        enhancer.regionID = reg.uid
-##                        enhancer.sourceID = sou.uid
-##                        enhancer.sampleID = sam.uid
-##                        enhancer.experimentID = exp.uid
-##                        rows.append(enhancer)
-#                if feat_type == "tss":
-#                    tss = TSS()
-#                    if tss.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
-#                        tss.regionID = reg.uid
-#                        tss.sourceID = sou.uid
-#                        tss.sampleID = sam.uid
-#                        tss.experimentID = exp.uid
-#                        tss.strand = strand
-#                        tss.gene = gene
-#                        tss.tss = tss_id
-#                        tss.avg_tpm = "%.3f" % avg_tpm
-#                        rows.append(tss)
-#            session.add_all(rows)
-#            session.commit()
+            for i in range(len(sampleIDs)):
+#                if feat_type == "enhancer":
+#                    enhancer = Enhancer()
+#                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
+#                        enhancer.regionID = reg.uid
+#                        enhancer.sourceID = sou.uid
+#                        enhancer.sampleID = sam.uid
+#                        enhancer.experimentID = exp.uid
+#                        rows.append(enhancer)
+                if feat_type == "tss":
+                    expression = Expression()
+                    if expression.is_unique(session, tss.uid, sampleIDs[i]):
+                        expression.tssID = tss.uid
+                        expression.sampleID = sampleIDs[i]
+                        expression.avg_expression_level = avg_expression_levels[i]
+                        rows.append(expression)
+            session.add_all(rows)
+            session.commit()
 
 #-------------#
 # Main        #
