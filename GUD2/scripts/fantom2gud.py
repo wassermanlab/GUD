@@ -248,7 +248,7 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     tss.expressions = "%.3f" % avg_tpm
                     rows.append(tss)
             # For each sample...
-            for name, treatment, cell_line, cancer in data:
+            for name, treatment, cell_line, cancer in data: pass
 #
 #                # Get sample
 #                sample = Sample()
