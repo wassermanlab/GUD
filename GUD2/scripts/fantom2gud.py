@@ -231,8 +231,8 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                 if avg_tpm > 0:
                     sampleIDs.append(sam.uid)
                     avg_tpms.append(avg_tpm)
-            print("%s," % ",".join(sampleIDs))
-            print("%s," % ",".join(avg_tpms))
+            print("{},".format(",".join(sampleIDs)))
+            print("{},".format(",".join(avg_tpms)))
             exit(0)
 #            # For each sample...
 #            for name, treatment, cell_line, cancer in data:
