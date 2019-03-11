@@ -20,7 +20,6 @@ from sqlalchemy_utils import (
 from GUD2 import GUDglobals
 from GUD2.ORM.chrom import Chrom
 from GUD2.ORM.experiment import Experiment
-from GUD2.ORM.expression import Expression
 from GUD2.ORM.region import Region
 from GUD2.ORM.sample import Sample
 from GUD2.ORM.source import Source
@@ -113,11 +112,6 @@ def initialize_gud_db(user, passwd, host, port, db, genome):
         engine.execute(table.__table__.insert(), rows)
 
     table = Experiment()
-    if not engine.has_table(table.__tablename__):
-        # Create table
-        table.__table__.create(bind=engine)
-
-    table = Expression()
     if not engine.has_table(table.__tablename__):
         # Create table
         table.__table__.create(bind=engine)
