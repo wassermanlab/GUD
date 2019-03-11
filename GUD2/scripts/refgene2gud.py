@@ -127,12 +127,12 @@ def initialize_gud_db(user, passwd, host, port, db, genome):
             gene.regionID = reg.uid
             gene.sourceID = sou.uid
             gene.name = line[1]
+            gene.name2 = line[12]
             gene.cdsStart = line[6]
             gene.cdsEnd = line[7]
+            gene.strand = line[3]
             gene.exonStarts = line[9]
             gene.exonEnds = line[10]
-            gene.name2 = line[12]
-            gene.strand = line[3]
             session.merge(gene)
             session.commit()
 

@@ -19,6 +19,7 @@ except: from urllib.parse import unquote
 from GUD2 import GUDglobals
 from GUD2.ORM.enhancer import Enhancer
 from GUD2.ORM.experiment import Experiment
+from GUD2.ORM.expression import Expression
 from GUD2.ORM.region import Region
 from GUD2.ORM.sample import Sample
 from GUD2.ORM.source import Source
@@ -76,9 +77,9 @@ def main():
     args = parse_args()
 
     # Insert FANTOM data to GUD database
-    insert_fantom_to_gud_db(args.user, args.passwd, args.host,
-        args.port, args.db, args.matrix, args.samples,
-        args.feat_type, args.source)
+    insert_fantom_to_gud_db(args.user, args.passwd,
+        args.host, args.port, args.db, args.matrix,
+        args.samples, args.feat_type, args.source)
 
 def insert_fantom_to_gud_db(user, passwd, host, port, db,
     matrix_file, samples_file, feat_type, source_name):
@@ -165,8 +166,8 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
         elif line[0].startswith("chr") or line[0].startswith("\"chr"):
             # Initialize
             data = {}
-            rows = []
-            total_tpm = 0.0
+            sampleIDs = []
+            avg_tpms = []
             # Get coordinates
             if feat_type == "enhancer":
                 m = re.search("(chr\S+)\:(\d+)\-(\d+)", line[0])
@@ -211,18 +212,8 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                 cancer = samples[sample_id]["cancer"]
                 data.setdefault((name, treatment, cell_line, cancer), [])
                 data[(name, treatment, cell_line, cancer)].append(float(line[i]))
-             # For each sample...
-            for name, treatment, cell_line, cancer in data:
-                # Get total TPMs in "normal" samples
-                if not treatment and not cell_line and not cancer:
-                    total_tpm += float(sum(data[name, treatment, cell_line, cancer]) /
-                        len(data[name, treatment, cell_line, cancer]))
             # For each sample...
             for name, treatment, cell_line, cancer in data:
-                # Skip if enhancer/TSS not expressed in sample
-                avg_tpm = float(sum(data[name, treatment, cell_line, cancer]) /
-                    len(data[name, treatment, cell_line, cancer]))
-                if avg_tpm == 0: continue
                 # Get sample
                 sample = Sample()
                 sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
@@ -234,32 +225,60 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     session.add(sample)
                     session.commit()
                     sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
-                if feat_type == "enhancer":
-                    enhancer = Enhancer()
-                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
-                        enhancer.regionID = reg.uid
-                        enhancer.sourceID = sou.uid
-                        enhancer.sampleID = sam.uid
-                        enhancer.experimentID = exp.uid
-                        rows.append(enhancer)
-                if feat_type == "tss":
-                    tss = TSS()
-                    if tss.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
-                        tss.regionID = reg.uid
-                        tss.sourceID = sou.uid
-                        tss.sampleID = sam.uid
-                        tss.experimentID = exp.uid
-                        tss.strand = strand
-                        tss.gene = gene
-                        tss.tss = tss_id
-                        tss.avg_tpm = "%.3f" % avg_tpm
-                        if total_tpm > 0:
-                            tss.rel_tpm = "%.3f" % (avg_tpm * 100.0 / total_tpm)
-                        else:
-                            tss.rel_tpm = None
-                        rows.append(tss)
-            session.add_all(rows)
-            session.commit()
+                # Skip if feature not expressed in sample
+                avg_tpm = float(sum(data[name, treatment, cell_line, cancer]) /
+                    len(data[name, treatment, cell_line, cancer]))
+                if avg_tpm > 0:
+                    sampleIDs.append(sam.uid)
+                    avg_tpms.append(avg_tpm)
+            print("%s," % ",".join(sampleIDs))
+            print("%s," % ",".join(avg_tpms))
+            exit(0)
+#            # For each sample...
+#            for name, treatment, cell_line, cancer in data:
+#
+#                # Get sample
+#                sample = Sample()
+#                sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
+#                if not sam:    
+#                    sample.name = name
+#                    sample.treatment = treatment
+#                    sample.cell_line = cell_line
+#                    sample.cancer = cancer
+#                    session.add(sample)
+#                    session.commit()
+#                    sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
+##    uid = Column("uid", mysql.INTEGER(unsigned=True))
+##    regionID = Column("regionID", Integer, ForeignKey("regions.uid"), nullable=False)
+##    sourceID = Column("sourceID", Integer, ForeignKey("sources.uid"), nullable=False)
+##    experimentID = Column("experimentID", Integer, ForeignKey("experiments.uid"), nullable=False)
+##    gene = Column("gene", String(75), ForeignKey("genes.name2"))
+##    tss = Column("tss", mysql.INTEGER(unsigned=True))
+##    strand = Column("strand", mysql.CHAR(1), nullable=False)
+##    samples = Column("sampleIDs", mysql.LONGBLOB, nullable=False)
+##    samples = Column("avg_tpms", mysql.LONGBLOB, nullable=False)
+##                if feat_type == "enhancer":
+##                    enhancer = Enhancer()
+##                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
+##                        enhancer.regionID = reg.uid
+##                        enhancer.sourceID = sou.uid
+##                        enhancer.sampleID = sam.uid
+##                        enhancer.experimentID = exp.uid
+##                        rows.append(enhancer)
+#                if feat_type == "tss":
+#                    tss = TSS()
+#                    if tss.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
+#                        tss.regionID = reg.uid
+#                        tss.sourceID = sou.uid
+#                        tss.sampleID = sam.uid
+#                        tss.experimentID = exp.uid
+#                        tss.strand = strand
+#                        tss.gene = gene
+#                        tss.tss = tss_id
+#                        tss.avg_tpm = "%.3f" % avg_tpm
+#                        rows.append(tss)
+#            session.add_all(rows)
+#            session.commit()
 
 #-------------#
 # Main        #
