@@ -32,7 +32,7 @@ from .copy_number_variant import CNV
 from .dna_accessibility import DNAAccessibility
 from .enhancer import Enhancer
 from .experiment import Experiment
-from .expression import Experiments
+from .expression import Expression
 from .gene import Gene
 from .histone_modification import HistoneModification
 from .region import Region
