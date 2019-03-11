@@ -1,19 +1,25 @@
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String, ForeignKey,
-    UniqueConstraint, Integer, Float, and_, or_
+    and_,
+    or_,
+    Column,
+    Index,
+    Integer,
+    PrimaryKeyConstraint,
+    String,
+    ForeignKey,
+    UniqueConstraint
 )
 from sqlalchemy.dialects import mysql
-from GUD2.ORM.region import Region
-from GUD2.ORM.source import Source
-from GUD2.ORM.sample import Sample
-from GUD2.ORM.experiment import Experiment
-from GUD2.ORM.gene import Gene 
-from GUD2.ORM.base import Base
-from binning import containing_bins, contained_bins
+
+from .base import Base
+from .experiment import Experiment
+from .gene import Gene 
+from .region import Region
+from .source import Source
 
 class TSS(Base):
 
-    __tablename__ = "tss"
+    __tablename__ = "transcription_start_sites"
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     regionID = Column("regionID", Integer, ForeignKey("regions.uid"), nullable=False)
