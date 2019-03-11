@@ -231,9 +231,6 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                 if avg_tpm > 0:
                     sampleIDs.append(sam.uid)
                     avg_tpms.append("%.3f" % avg_tpm)
-            print("{},".format(",".join(map(str, sampleIDs))))
-            print("{},".format(",".join(avg_tpms)))
-            exit(0)
             # Get TSS
             if feat_type == "tss":
                 tss = TSS()
@@ -244,9 +241,13 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     tss.gene = gene
                     tss.tss = tss_id
                     tss.strand = strand
-                    tss.samples = "%.3f" % avg_tpm
-                    tss.expressions = "%.3f" % avg_tpm
-                    rows.append(tss)
+                    tss.samples = "{},".format(",".join(map(str, sampleIDs)))
+                    tss.expressions = "{},".format(",".join(avg_tpms))
+                    session.add(tss)
+                    session.commit()
+                tss = tss.select_by_exact_tss(session, reg.uid, sou.uid, exp.uid)
+            print(tss)
+            exit(0)
             # For each sample...
             for name, treatment, cell_line, cancer in data: pass
 #
@@ -261,15 +262,6 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
 #                    session.add(sample)
 #                    session.commit()
 #                    sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
-##    uid = Column("uid", mysql.INTEGER(unsigned=True))
-##    regionID = Column("regionID", Integer, ForeignKey("regions.uid"), nullable=False)
-##    sourceID = Column("sourceID", Integer, ForeignKey("sources.uid"), nullable=False)
-##    experimentID = Column("experimentID", Integer, ForeignKey("experiments.uid"), nullable=False)
-##    gene = Column("gene", String(75), ForeignKey("genes.name2"))
-##    tss = Column("tss", mysql.INTEGER(unsigned=True))
-##    strand = Column("strand", mysql.CHAR(1), nullable=False)
-##    samples = Column("sampleIDs", mysql.LONGBLOB, nullable=False)
-##    samples = Column("avg_tpms", mysql.LONGBLOB, nullable=False)
 ##                if feat_type == "enhancer":
 ##                    enhancer = Enhancer()
 ##                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):

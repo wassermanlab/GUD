@@ -33,8 +33,13 @@ class TSS(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(regionID, sourceID, experimentID),
-
+        UniqueConstraint(
+            regionID,
+            sourceID,
+            experimentID,
+            gene,
+            tss
+        ),
         Index("ix_tss", regionID), # query by bin range 
         Index("ix_tss_gene", gene, tss),
 
@@ -57,67 +62,53 @@ class TSS(Base):
         return len(q.all()) == 0
 
     @classmethod
-    def select_by_sample(cls, session, sample, min_tpm=10.0,
-        rel_tpm=0.0):
+    def select_by_exact_tss(cls, session, regionID,
+        sourceID, experimentID, gene, tss):
 
         q = session.query(cls).filter(
-            cls.sampleID == sample,
-            cls.avg_tpm >= min_tpm,
-            cls.rel_tpm >= rel_tpm
+            cls.regionID == regionID,
+            cls.sourceID == sourceID,
+            cls.experimentID == experimentID,
+            cls.gene == gene,
+            cls.tss == tss
         )
 
         return q.first()
 
     @classmethod
-    def select_by_samples(cls, session, sample=[], min_tpm=10.0):
-
-        q = session.query(cls).filter(cls.sampleID.in_(sample)).\
-            filter(cls.avg_tpm >= min_tpm)
-
-        return q.all()
-
-    @classmethod
-    def select_by_tss(cls, session, gene, tss, sample=[]):
-        """Query objects by TSS (i.e. gene + tss). If no TSS is
-        provided, query all TSSs.
+    def select_by_tss(cls, session, gene, tss):
         """
-        q = session.query(cls)
-
-        if gene and tss:
-            q = q.filter(cls.gene == gene, cls.tss == tss)
-
-        if sample:
-            q = q.filter(cls.sampleID.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def select_by_multiple_tss(cls, session, tss=[], sample=[]):
-        """Query objects by list of TSSs. If no TSS are provided,
-        query all TSSs. Provide TSSs as a {list} of {lists}/{tuples}
-        of length 2 in the form gene, tss.
-        """    
-        q = session.query(cls)
-
-        if tss:
-            # Initialize
-            ands = []
-            # For each gene, TSS pair...
-            for i, j in tss:
-                ands.append(and_(cls.gene == i,
-                    cls.tss == j))
-            q = q.filter(or_(*ands))
-
-        if sample:
-            q = q.filter(cls.sampleID.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def get_all_samples(cls, session):
-        """Query all TSS objects in the database and return their
-        samples (sampleID field).
+        Query objects by TSS (i.e. gene + tss).
         """
-        samples = session.query(cls.sampleID).distinct().all()
+    
+        q = session.query(cls).\
+            filter(
+                cls.gene == gene,
+                cls.tss == tss
+            )
 
-        return [s[0] for s in samples]
+        return q.first()
+
+    @classmethod
+    def select_by_multiple_tss(cls, session, tss=[]):
+        """
+        Query objects by multiple TSSs. If no TSSs
+        are provided, return all objects. Provide TSSs
+        as a two-dimensinal list (i.e. [[gene, tss], ...]).
+        """
+
+        # Initialize
+        ands = []
+
+        # For each gene, TSS pair...
+        for i, j in tss:
+            ands.append(
+                and_(
+                    cls.gene == i,
+                    cls.tss == j
+                )
+            )
+
+        q = session.query(cls).filter(or_(*ands))
+
+        return q.all()

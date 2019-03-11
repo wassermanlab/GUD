@@ -44,71 +44,71 @@ class Expression(Base):
 
         return len(q.all()) == 0
 
-    @classmethod
-    def select_by_sample(cls, session, sample, min_tpm=10.0):
-
-        q = session.query(cls).\
-            filter(
-                cls.sampleID == sample,
-                cls.avg_tpm >= min_tpm
-            )
-
-        return q.first()
-
-    @classmethod
-    def select_by_samples(cls, session, sample=[], min_tpm=10.0):
-
-        q = session.query(cls).\
-            filter(cls.avg_tpm >= min_tpm).\
-            filter(cls.sampleID.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def select_by_tss(cls, session, tss, sample=[]):
-        """
-        Query objects by TSS id.
-        """
-
-        q = session.query(cls).filter(cls.tssID == tssID)
-
-        if gene and tss:
-            q = q.filter(cls.gene == gene, cls.tss == tss)
-
-        if sample:
-            q = q.filter(cls.sampleID.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def select_by_multiple_tss(cls, session, tss=[], sample=[]):
-        """
-        Query objects by multiple TSS ids. If no TSS is
-        provided, return all objects.
-        """ 
-
-        q = session.query(cls)
-
-        if tss:
-            # Initialize
-            ands = []
-            # For each gene, TSS pair...
-            for i, j in tss:
-                ands.append(and_(cls.gene == i,
-                    cls.tss == j))
-            q = q.filter(or_(*ands))
-
-        if sample:
-            q = q.filter(cls.sampleID.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def get_all_samples(cls, session):
-        """
-        Query all TSS objects in the database and return
-        theirsamples (sampleID field).
-        """
-        samples = session.query(cls.sampleID).distinct().all()
-
-        return [s[0] for s in samples]
+#    @classmethod
+#    def select_by_sample(cls, session, sample, min_tpm=10.0):
+#
+#        q = session.query(cls).\
+#            filter(
+#                cls.sampleID == sample,
+#                cls.avg_tpm >= min_tpm
+#            )
+#
+#        return q.first()
+#
+#    @classmethod
+#    def select_by_samples(cls, session, sample=[], min_tpm=10.0):
+#
+#        q = session.query(cls).\
+#            filter(cls.avg_tpm >= min_tpm).\
+#            filter(cls.sampleID.in_(sample))
+#
+#        return q.all()
+#
+#    @classmethod
+#    def select_by_tss(cls, session, tss, sample=[]):
+#        """
+#        Query objects by TSS id.
+#        """
+#
+#        q = session.query(cls).filter(cls.tssID == tssID)
+#
+#        if gene and tss:
+#            q = q.filter(cls.gene == gene, cls.tss == tss)
+#
+#        if sample:
+#            q = q.filter(cls.sampleID.in_(sample))
+#
+#        return q.all()
+#
+#    @classmethod
+#    def select_by_multiple_tss(cls, session, tss=[], sample=[]):
+#        """
+#        Query objects by multiple TSS ids. If no TSS is
+#        provided, return all objects.
+#        """ 
+#
+#        q = session.query(cls)
+#
+#        if tss:
+#            # Initialize
+#            ands = []
+#            # For each gene, TSS pair...
+#            for i, j in tss:
+#                ands.append(and_(cls.gene == i,
+#                    cls.tss == j))
+#            q = q.filter(or_(*ands))
+#
+#        if sample:
+#            q = q.filter(cls.sampleID.in_(sample))
+#
+#        return q.all()
+#
+#    @classmethod
+#    def get_all_samples(cls, session):
+#        """
+#        Query all TSS objects in the database and return
+#        theirsamples (sampleID field).
+#        """
+#        samples = session.query(cls.sampleID).distinct().all()
+#
+#        return [s[0] for s in samples]
