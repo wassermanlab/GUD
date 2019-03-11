@@ -141,17 +141,22 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
         session.commit()
         sou = source.select_by_name(session, source_name)
 
-    # Create enhancer/TSS tables
+    # Create tables
     if feat_type == "enhancer":
         table = Enhancer()
         lines = GUDglobals.parse_csv_file(matrix_file, gz)
         counts_start_at = 1
+        if not engine.has_table(table.__tablename__):
+            table.__table__.create(bind=engine)
     if feat_type == "tss":
         table = TSS()
         lines = GUDglobals.parse_tsv_file(matrix_file, gz)
         counts_start_at = 7
-    if not engine.has_table(table.__tablename__):
-        table.__table__.create(bind=engine)
+        if not engine.has_table(table.__tablename__):
+            table.__table__.create(bind=engine)
+        table = Expression()
+        if not engine.has_table(table.__tablename__):
+            table.__table__.create(bind=engine)
 
     # For each line...
     for line in lines:
@@ -242,10 +247,11 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     tss.tss = tss_id
                     tss.strand = strand
                     tss.sampleIDs = "{},".format(",".join(map(str, sampleIDs)))
-                    tss.expressions = "{},".format(",".join(avg_tpms))
+                    tss.avg_expression_levels = "{},".format(",".join(avg_tpms))
                     session.add(tss)
                     session.commit()
-                tss = tss.select_by_exact_tss(session, reg.uid, sou.uid, exp.uid)
+                tss = tss.select_by_exact_tss(
+                    session, reg.uid, sou.uid, exp.uid, gene, tss_id)
             print(tss)
             exit(0)
             # For each sample...
