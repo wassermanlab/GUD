@@ -247,7 +247,7 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     tss.tss = tss_id
                     tss.strand = strand
                     tss.sampleIDs = "{},".format(",".join(map(str, sampleIDs)))
-                    tss.avg_expression_levels = "{},".format(",".join(avg_tpms))
+                    tss.avg_expression_levels = "{},".format(",".join(avg_expression_levels))
                     session.add(tss)
                     session.commit()
                 tss = tss.select_by_exact_tss(
