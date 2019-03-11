@@ -18,7 +18,7 @@ class Expression(Base):
     __tablename__ = "expression"
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
-    tssID = Column("tssID", Integer, ForeignKey("tss.uid"), nullable=False)
+    tssID = Column("tssID", Integer, ForeignKey("transcription_start_sites.uid"), nullable=False)
     sampleID = Column("sampleID", Integer, ForeignKey("samples.uid"), nullable=False)
     avg_expression_level = Column("avg_expression_level", Float, nullable=False)
 
