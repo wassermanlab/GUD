@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
-import os, sys, re
 import argparse
 from binning import assign_bin
 from datetime import date
 import getpass
 import pybedtools
+import re
 from sqlalchemy import create_engine
-from sqlalchemy.orm import mapper, scoped_session, sessionmaker
-from sqlalchemy_utils import create_database, database_exists
+from sqlalchemy.orm import (
+    scoped_session,
+    sessionmaker
+)
+from sqlalchemy_utils import database_exists
 try: from urllib2 import unquote
 except: from urllib.parse import unquote
 
@@ -31,7 +34,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts \"enhancer\" or \"tss\" data from FANTOM into GUD. download \"hg19_permissive_enhancers_expression_rle_tpm.csv.gz\" and \"hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz\" for enhancer and tss data, respectively.")
+    parser = argparse.ArgumentParser(description="this script inserts \"enhancer\" or \"tss\" data from the FANTOM5 consortium into GUD. download \"hg19_permissive_enhancers_expression_rle_tpm.csv.gz\" and \"hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz\" for enhancer and tss data, respectively.")
 
     parser.add_argument("matrix", help="Expression (TPM/RLE normalized) matrix across all FANTOM libraries")
     parser.add_argument("samples", help="FANTOM samples (manually-curated)")
@@ -47,13 +50,23 @@ def parse_args():
     mysql_group.add_argument("-d", "--db", default="hg19",
         help="Database name (default = \"hg19\")")
     mysql_group.add_argument("-H", "--host", default="localhost",
-        help="Host name (default = localhost)")
+        help="host name (default = localhost)")
+    mysql_group.add_argument("-p", "--pass",
+        help="Password (default = do not use)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="Port number (default = 5506)")
-    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
-        help="User name (default = current user)")
+        help="port number (default = 5506)")
+
+    user = getpass.getuser()
+    mysql_group.add_argument("-u", "--user", default=user,
+        help="user name (default = current user)")
 
     args = parser.parse_args()
+
+    # Set default
+    if not args.db:
+        args.db = args.genome
+    if not args.pass:
+        args.pass = ""
 
     return args
 
@@ -63,20 +76,20 @@ def main():
     args = parse_args()
 
     # Insert FANTOM data to GUD database
-    insert_fantom_to_gud_db(args.user, args.host, args.port,
-        args.db, args.matrix, args.samples, args.feat_type,
-        args.source)
+    insert_fantom_to_gud_db(args.user, args.pass, args.host,
+        args.port, args.db, args.matrix, args.samples,
+        args.feat_type, args.source)
 
-def insert_fantom_to_gud_db(user, host, port, db,
+def insert_fantom_to_gud_db(user, passwd, host, port, db,
     matrix_file, samples_file, feat_type, source_name):
 
     # Initialize
     samples = {}
     sample_ids = []
-    db_name = "mysql://{}:@{}:{}/{}".format(
-        user, host, port, db)
+    db_name = "mysql://{}:{}@{}:{}/{}".format(
+        user, passwd, host, port, db)
     if not database_exists(db_name):
-        create_database(db_name)
+        raise ValueError("GUD database does not exist!!!\n\t%s" % db_name)
     session = scoped_session(sessionmaker())
     engine = create_engine(db_name, echo=False)
     session.remove()

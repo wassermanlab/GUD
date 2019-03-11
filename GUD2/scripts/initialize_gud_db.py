@@ -34,7 +34,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="initializes a GUD database for the given genome.")
+    parser = argparse.ArgumentParser(description="this script initializes a GUD database for the given genome.")
 
     parser.add_argument("genome", help="genome assembly")
 
@@ -44,6 +44,8 @@ def parse_args():
         help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="host name (default = localhost)")
+    mysql_group.add_argument("-p", "--pass",
+        help="Password (default = do not use)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="port number (default = 5506)")
 
@@ -56,6 +58,8 @@ def parse_args():
     # Set default
     if not args.db:
         args.db = args.genome
+    if not args.pass:
+        args.pass = ""
 
     return args
 
@@ -65,14 +69,14 @@ def main():
     args = parse_args()
 
     # Initialize GUD database
-    initialize_gud_db(args.user, args.host,
+    initialize_gud_db(args.user, args.pass, args.host,
         args.port, args.db, args.genome)
 
-def initialize_gud_db(user, host, port, db, genome):
+def initialize_gud_db(user, passwd, host, port, db, genome):
 
     # Initialize
-    db_name = "mysql://{}:@{}:{}/{}".format(
-        user, host, port, db)
+    db_name = "mysql://{}:{}@{}:{}/{}".format(
+        user, passwd, host, port, db)
     if not database_exists(db_name):
         create_database(db_name)
     session = scoped_session(sessionmaker())
