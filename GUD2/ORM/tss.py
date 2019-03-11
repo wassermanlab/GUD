@@ -28,8 +28,8 @@ class TSS(Base):
     gene = Column("gene", String(75), ForeignKey("genes.name2"))
     tss = Column("tss", mysql.INTEGER(unsigned=True))
     strand = Column("strand", mysql.CHAR(1), nullable=False)
-    samples = Column("sampleIDs", mysql.LONGBLOB, nullable=False)
-    expressions = Column("avg_tpms", mysql.LONGBLOB, nullable=False)
+    sampleIDs = Column("sampleIDs", mysql.LONGBLOB, nullable=False)
+    avg_tpms = Column("avg_tpms", mysql.LONGBLOB, nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
@@ -42,7 +42,6 @@ class TSS(Base):
         ),
         Index("ix_tss", regionID), # query by bin range 
         Index("ix_tss_gene", gene, tss),
-
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
