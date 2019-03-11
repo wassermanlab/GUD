@@ -40,7 +40,7 @@ def parse_args():
         help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="host name (default = localhost)")
-    mysql_group.add_argument("-p", "--pass",
+    mysql_group.add_argument("-p", "--passwd",
         help="Password (default = do not use)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="port number (default = 5506)")
@@ -54,8 +54,8 @@ def parse_args():
     # Set default
     if not args.db:
         args.db = args.genome
-    if not args.pass:
-        args.pass = ""
+    if not args.passwd:
+        args.passwd = ""
 
     return args
 
@@ -66,7 +66,7 @@ def main():
 
     # Initialize GUD database: create tables
     # and download data to populate them 
-    initialize_gud_db(args.user, args.pass, args.host,
+    initialize_gud_db(args.user, args.passwd, args.host,
         args.port, args.db, args.genome)
 
 def initialize_gud_db(user, passwd, host, port, db, genome):
