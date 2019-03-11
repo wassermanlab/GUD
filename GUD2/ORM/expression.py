@@ -15,7 +15,7 @@ from .tss import TSS
 
 class Expression(Base):
 
-    __tablename__ = "expression_levels"
+    __tablename__ = "expression"
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     tssID = Column("tssID", Integer, ForeignKey("tss.uid"), nullable=False)
