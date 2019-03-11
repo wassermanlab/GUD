@@ -229,14 +229,26 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                 avg_tpm = float(sum(data[name, treatment, cell_line, cancer]) /
                     len(data[name, treatment, cell_line, cancer]))
                 if avg_tpm > 0:
-                    sampleIDs.append(str(sam.uid))
-                    avg_tpms.append("%.3f" % avg_tpm)
-            # Add empty field
-            print("{},".format(str(",".join(sampleIDs))))
-            print("{},".format(str(",".join(avg_tpms))))
+                    sampleIDs.append(sam.uid)
+                    avg_tpms.append(avg_tpm)
+            print("{},".format(",".join(map(str, sampleIDs))))
+            print("{},".format(",".join(map("%.3f", avg_tpms))))
             exit(0)
-#            # For each sample...
-#            for name, treatment, cell_line, cancer in data:
+            # Get TSS
+            if feat_type == "tss":
+                tss = TSS()
+                if tss.is_unique(session, reg.uid, sou.uid, exp.uid):
+                    tss.regionID = reg.uid
+                    tss.sourceID = sou.uid
+                    tss.experimentID = exp.uid
+                    tss.gene = gene
+                    tss.tss = tss_id
+                    tss.strand = strand
+                    tss.samples = "%.3f" % avg_tpm
+                    tss.expressions = "%.3f" % avg_tpm
+                    rows.append(tss)
+            # For each sample...
+            for name, treatment, cell_line, cancer in data:
 #
 #                # Get sample
 #                sample = Sample()
