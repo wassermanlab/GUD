@@ -1,7 +1,9 @@
 #!/usr/bin/env python
+
 import os, sys, re
 import argparse
 from binning import assign_bin
+from datetime import date
 import getpass
 import pybedtools
 from sqlalchemy import create_engine
@@ -11,15 +13,11 @@ import warnings
 
 # Import from GUD module
 from GUD import GUDglobals
-from GUD2.ORM.region import Region
-from GUD2.ORM.sample import Sample
-from GUD2.ORM.source import Source
-from GUD2.ORM.experiment import Experiment
-from GUD2.ORM.dna_accessibility import DNAAccessibility
-from GUD2.ORM.enhancer import Enhancer
-from GUD2.ORM.histone_modification import HistoneModification
-from GUD2.ORM.tad import TAD
-from GUD2.ORM.tf_binding import TFBinding
+from GUD.ORM.dna_accessibility import DnaAccessibility
+from GUD.ORM.enhancer import Enhancer
+from GUD.ORM.histone_modification import HistoneModification
+from GUD.ORM.tad import Tad
+from GUD.ORM.tf_binding import TfBinding
 
 #-------------#
 # Classes     #
@@ -98,10 +96,11 @@ def insert_bed_to_gud_db(user, host, port, db, bed_files,
     session.remove()
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
+    today = str(date.today())
 
     # Initialize table
     if feat_type == "accessibility":
-        table = DNAAccessibility()
+        table = DnaAccessibility()
     if feat_type == "enhancer":
         table = Enhancer()
     if feat_type == "histone":
@@ -113,11 +112,11 @@ def insert_bed_to_gud_db(user, host, port, db, bed_files,
             warnings.warn("\nA restriction enzyme was not provided...\n")
             warnings.warn("\nSetting \"restriction_enzyme\" field to \"Unknown\"...\n")
             restriction_enzyme = "Unknown"
-        table = TAD()
+        table = Tad()
     if feat_type == "tf":
         if not tf_name:
             raise ValueError("A TF name must be provided!")
-        table = TFBinding()
+        table = TfBinding()
     if not engine.has_table(table.__tablename__):
         try:
             table.metadata.bind = engine
@@ -136,7 +135,7 @@ def insert_bed_to_gud_db(user, host, port, db, bed_files,
             # Skip if not enough elements
             if len(line) < 3: continue
             # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[0])
+            m = re.search("^chr(\w{1,2})$", line[0])
             if not m.group(1) in GUDglobals.chroms: continue
             # Skip if not start or end
             if not line[1].isdigit(): continue
@@ -153,79 +152,25 @@ def insert_bed_to_gud_db(user, host, port, db, bed_files,
             bed_obj = bed_obj.sort().merge()
         # Sort BED object
         for chrom, start, end in bed_obj.sort():
-            # Region
-            region = Region()
-            reg = region.select_by_pos(session, chrom, start, end)
-            if not reg: 
-                region.bin = assign_bin(start, end)
-                region.chrom = chrom
-                region.start = start
-                region.end = end 
-                session.add(region) 
-            # Source
-            source = Source()
-            sou = source.select_by_name(session, source_name)
-            if not sou: 
-                source.name = source_name
-                session.add(source)
-            # Sample
-            sample = Sample()
-            samp = sample.select_exact_sample(session, name, treatment, cell_line, cancer)
-            if not samp: 
-                None
-                ## TODO
-                # sample.name = cell_or_tissue
-                # sample.treatment = 
-                # sample.cell_line = 
-                # sample.cancer = 
-                # session.add(sample)
-            # Experiment 
-            experiment = Experiment()
-            exp = experiment.select_by_name(session, name)
-            if not exp: 
-                experiment.name = experiment_type
-                session.add(experiment)
-            ## commit region, source, sample, experiment 
-            session.commit()
-            ## uids
-            reg = region.select_by_pos(session, chrom, start, end).uid
-            sou = source.select_by_name(session, source_name).uid
-            samp = sample.select_exact_sample(session, name, treatment, cell_line, cancer).uid
-            exp = experiment.select_by_name(session, name).uid
-            ## feature creation 
+            # Create model
             model = Model()
-            model.regionID = reg
-            model.sourceID = sou
-            model.sampleID = samp
-            model.experimentID = exp
-            if feat_type == "accessibility":
-                exists = DNAAccessibility().select_unique(session, reg, sou, samp, exp)
-                if not exists: 
-                    session.add(model)
-                    session.commit()
-            if feat_type == "enhancer":
-                exists = Enhancer().select_unique(session, reg, sou, samp, exp)
-                if not exists: 
-                    session.add(model)
-                    session.commit()
+            model.bin = assign_bin(int(start), int(end))
+            model.chrom = chrom
+            model.start = start
+            model.end = end
+            model.cell_or_tissue = cell_or_tissue
+            model.experiment_type = experiment_type
+            model.source_name = source_name
+            model.date = today
             if feat_type == "histone":
-                exists = HistoneModification().select_unique(session, reg, sou, samp, exp, histone_type)
-                if not exists: 
-                    model.histone_type = histone_type
-                    session.add(model)
-                    session.commit()
+                model.histone_type = histone_type
             if feat_type == "tad":
-                exists = TAD().select_unique(session, reg, sou, samp, exp, restriction_enzyme)
-                if not exists: 
-                    model.restriction_enzyme = restriction_enzyme
-                    session.add(model)
-                    session.commit()
-            if feat_type == "tf": 
-                exists = TFBinding().select_unique(session, reg, sou, samp, exp, tf_name)
-                model.tf = tf_name
-                if not exists: 
-                    session.add(model)
-                    session.commit()
+                model.restriction_enzyme = restriction_enzyme
+            if feat_type == "tf":
+                model.tf_name = tf_name
+            # Upsert model & commit
+            session.merge(model)
+            session.commit()
 
 #-------------#
 # Main        #

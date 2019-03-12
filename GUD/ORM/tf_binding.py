@@ -1,36 +1,31 @@
-from binning import containing_bins, contained_bins 
-
 from sqlalchemy import (
-    Column, Date, Index, PrimaryKeyConstraint, String
+    Column, Index, PrimaryKeyConstraint, String, ForeignKey,
+    UniqueConstraint, CheckConstraint, Integer, Float
 )
-
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
+from GUD2.ORM.region import Region
+from GUD2.ORM.source import Source
+from GUD2.ORM.sample import Sample
+from GUD2.ORM.experiment import Experiment
+from GUD2.ORM.base import Base
+from binning import containing_bins, contained_bins
 
-Base = declarative_base()
-
-class TfBinding(Base):
+class TFBinding(Base):
 
     __tablename__ = "tf_binding"
 
-    bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    chrom = Column("chrom", String(5), nullable=False)
-    start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
-    end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
-    tf_name = Column("tf_name", String(25), nullable=False)
-    cell_or_tissue = Column("cell_or_tissue", String(225), nullable=False)
-    experiment_type = Column("experiment_type", String(25), nullable=False)
-    source_name = Column("source_name", String(25), nullable=False)
-    date = Column("date", Date(), nullable=True)
+    uid = Column("uid", mysql.INTEGER(unsigned=True))
+    regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
+    sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
+    sampleID = Column("sampleID", Integer, ForeignKey('samples.uid'), nullable=False)
+    experimentID = Column("experimentID", Integer, ForeignKey('experiments.uid'), nullable=False)
+    tf = Column("tf", String(250), nullable=False)
 
     __table_args__ = (
+        PrimaryKeyConstraint(uid),
+        UniqueConstraint(regionID, sourceID, sampleID, experimentID, tf),
 
-        PrimaryKeyConstraint(
-            chrom, start, end, tf_name, cell_or_tissue,
-            experiment_type, source_name
-        ),
-
-        Index("ix_tf_binding", bin, chrom),
+        Index("ix_tf_binding", regionID), 
 
         {
             "mysql_engine": "MyISAM",
@@ -39,55 +34,36 @@ class TfBinding(Base):
     )
 
     @classmethod
-    def select_by_bin_range(cls, session, chrom, start, end,
-        sample=[], bins=[], compute_bins=False): 
-        """
-        Query objects by chromosomal range using the binning system to
-        speed up range searches. If bins are provided, use the given bins.
-        If bins are NOT provided AND compute_bins is set to True, then
-        compute the bins. Otherwise, perform the range query without the use
-        of bins.
-        """
-
-        if not bins and compute_bins:
-            bins = set(containing_bins(start, end) + contained_bins(start, end))
+    def is_unique(cls, session, regionID, sourceID, sampleID,
+        experimentID, histone_type):
 
         q = session.query(cls).filter(
-                cls.chrom == chrom, cls.end > start, cls.start < end)
+            cls.regionID == regionID,
+            cls.sourceID == sourceID,
+            cls.sampleID == sampleID,
+            cls.experimentID == experimentID,
+            cls.tf == tf
+        )
 
-        if bins:
-            q = q.filter(cls.bin.in_(list(bins)))
-
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-        
-        return q.all()
+        return len(q.all()) == 0
 
     @classmethod
-    def feature_exists(cls, session, chrom, start, end,
-        tf_name, cell_or_tissue, experiment_type, source_name): 
+    def select_unique(cls, session, regionID, sourceID, sampleID, experimentID, tf):
         """
-        Returns whether a feature exists in the database.
+        Query objects by name of sample type. 
         """
-
         q = session.query(cls).filter(
-                cls.chrom == chrom,
-                cls.start == start,
-                cls.end == end,
-                cls.tf_name == tf_name,
-                cls.cell_or_tissue == cell_or_tissue,
-                cls.experiment_type == experiment_type,
-                cls.source_name == source_name
-            )
+            cls.regionID == regionID, 
+            cls.sourceID == sourceID,
+            cls.sampleID == sampleID,
+            cls.experimentID == experimentID, 
+            cls.tf == tf)
 
-        return session.query(q.exists()).scalar()
-        
+        return q.first()
+
     def __str__(self):
-        return "{}\t{}\t{}\t{}|{}|{}|{}".format(self.chrom, self.start,
-            self.end, self.tf_name, self.cell_or_tissue,
-            self.experiment_type, self.source_name)
+        return "{}".format(self.tf)
 
     def __repr__(self):
-        return "<TFBinding(chrom={}, start={}, end={}, name={}, sample={}, experiment={}, source={})>".format(
-            self.chrom, self.start, self.end, self.tf_name,
-            self.cell_or_tissue, self.experiment_type, self.source_name)
+        return "<TFBinding(uid={}, regionID={}, sourceID={}, sampleID={}, experimentID={}, tf={})>".format(
+            self.uid, self.regionID, self.sourceID, self.sampleID, self.experimentID, self.tf)
