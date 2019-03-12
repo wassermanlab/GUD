@@ -48,12 +48,12 @@ def parse_args():
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default="hg19",
-        help="Database name (default = \"hg19\")")
+    mysql_group.add_argument("-d", "--db",
+        help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="host name (default = localhost)")
     mysql_group.add_argument("-p", "--passwd",
-        help="Password (default = do not use)")
+        help="Password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="port number (default = 5506)")
 
