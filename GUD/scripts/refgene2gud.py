@@ -2,6 +2,7 @@
 
 import argparse
 from binning import assign_bin
+from ftplib import FTP
 import getpass
 import gzip
 from io import BytesIO
