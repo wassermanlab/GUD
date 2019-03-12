@@ -9,7 +9,7 @@ Base = declarative_base()
 
 class ChromSize(Base):
     
-    __tablename__ = "chrom_size"
+    __tablename__ = "chroms"
 
     chrom = Column("chrom", String(5), nullable=False)
     size = Column("size", mysql.INTEGER(unsigned=True), nullable=False)

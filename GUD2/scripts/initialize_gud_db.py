@@ -1,11 +1,21 @@
 #!/usr/bin/env python
 
-import re
 import argparse
+from ftplib import FTP
 import getpass
+import gzip
+from io import BytesIO
+import os
+import re
 from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy_utils import create_database, database_exists
+from sqlalchemy.orm import (
+    scoped_session,
+    sessionmaker
+)
+from sqlalchemy_utils import (
+    create_database,
+    database_exists
+)
 
 # Import from GUD module
 from GUD2 import GUDglobals
@@ -27,26 +37,30 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="initializes a GUD database for the given genome.")
 
-    parser.add_argument("genome", help="Genome assembly")
+    parser.add_argument("genome", help="genome assembly")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db",
-        help="Database name (default = given genome assembly)")
+        help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
-        help="Host name (default = localhost)")
+        help="host name (default = localhost)")
+    mysql_group.add_argument("-p", "--passwd",
+        help="Password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="Port number (default = 5506)")
+        help="port number (default = 5506)")
 
     user = getpass.getuser()
     mysql_group.add_argument("-u", "--user", default=user,
-        help="User name (default = current user)")
+        help="user name (default = current user)")
 
     args = parser.parse_args()
 
     # Set default
     if not args.db:
         args.db = args.genome
+    if not args.passwd:
+        args.passwd = ""
 
     return args
 
@@ -56,14 +70,14 @@ def main():
     args = parse_args()
 
     # Initialize GUD database
-    initialize_gud_db(args.user, args.host,
+    initialize_gud_db(args.user, args.passwd, args.host,
         args.port, args.db, args.genome)
 
-def initialize_gud_db(user, host, port, db, genome):
+def initialize_gud_db(user, passwd, host, port, db, genome):
 
     # Initialize
-    db_name = "mysql://{}:@{}:{}/{}".format(
-        user, host, port, db)
+    db_name = "mysql://{}:{}@{}:{}/{}".format(
+        user, passwd, host, port, db)
     if not database_exists(db_name):
         create_database(db_name)
     session = scoped_session(sessionmaker())
@@ -72,18 +86,16 @@ def initialize_gud_db(user, host, port, db, genome):
     session.configure(bind=engine, autoflush=False,
         expire_on_commit=False)
 
-    if not engine.has_table("chroms"):
-        # Initialize
+    table = Chrom()
+    if not engine.has_table(table.__tablename__):
+        # Intialize
         rows = []
         # Create table
-        table = Chrom()
-        table.metadata.bind = engine
-        table.metadata.create_all(engine)
-        # Get UCSC FTP dir/file
-        directory, file_name = GUDglobals.get_ucsc_ftp_dir_and_file(
-            genome, "chrom_size")
-        # For each line...
-        for line in GUDglobals.fetch_lines_from_ucsc_ftp_file(
+        table.__table__.create(bind=engine)
+        # Get UCSC FTP file
+        directory, file_name = get_ftp_dir_and_file(genome, "chrom_size")
+        # Download data
+        for line in fetch_lines_from_ftp_file(
             genome, directory, file_name):
             # Split line
             line = line.split("\t")
@@ -100,29 +112,25 @@ def initialize_gud_db(user, host, port, db, genome):
         # Insert rows to table
         engine.execute(table.__table__.insert(), rows)
 
-    if not engine.has_table("region"):
+    table = Experiment()
+    if not engine.has_table(table.__tablename__):
         # Create table
-        table = Region()
-        table.metadata.bind = engine
-        table.metadata.create_all(engine)
+        table.__table__.create(bind=engine)
 
-    if not engine.has_table("sample"):
+    table = Region()
+    if not engine.has_table(table.__tablename__):
         # Create table
-        table = Sample()
-        table.metadata.bind = engine
-        table.metadata.create_all(engine)
+        table.__table__.create(bind=engine)
 
-    if not engine.has_table("source"):
+    table = Sample()
+    if not engine.has_table(table.__tablename__):
         # Create table
-        table = Source()
-        table.metadata.bind = engine
-        table.metadata.create_all(engine)
+        table.__table__.create(bind=engine)
 
-    if not engine.has_table("experiment"):
+    table = Source()
+    if not engine.has_table(table.__tablename__):
         # Create table
-        table = Experiment()
-        table.metadata.bind = engine
-        table.metadata.create_all(engine)
+        table.__table__.create(bind=engine)
 
 #-------------#
 # Main        #

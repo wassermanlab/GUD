@@ -86,39 +86,32 @@ class Gene(Base):
         return self._coding_exons
 
     @classmethod
-    def select_all_gene_symbols(cls, session):
-        """
-        Query all gene objects in the database and return their gene
-        symbols (name2 field).
-        """
+    def is_unique(cls, session, name, chrom, strand, txStart,
+        txEnd, source_name):
 
-        all_genes = session.query(cls).all()
+        q = session.query(cls).filter(
+            cls.regionID == regionID,
+            cls.sourceID == sourceID,
+            cls.sampleID == sampleID,
+            cls.experimentID == experimentID
+        )
 
-        symbols = []
-        for g in all_genes:
-            if g.name2:
-                symbols.append(g.name2)
-
-        symbols.sort()
-
-        return symbols
+        return len(q.all()) == 0
 
     @classmethod
     def select_by_bin_range(cls, session, chrom, start, end, bins=[],
         compute_bins=False):
-        """
-        Query objects by chromosomal range using the binning system to
+        """Query objects by chromosomal range using the binning system to
         speed up range searches. If bins are provided use the given bins.
         If bins are NOT provided AND compute_bins is set to True, then
         compute the bins. Otherwise perform the range query without the use
         of bins.
         """
+        q = session.query(cls).filter(
+                cls.chrom == chrom, cls.end > start, cls.start < end)
 
         if not bins and compute_bins:
             bins = set(containing_bins(start, end) + contained_bins(start, end))
-
-        q = session.query(cls).filter(
-                cls.chrom == chrom, cls.end > start, cls.start < end)
 
         if bins:
             q = q.filter(cls.bin.in_(list(bins)))
@@ -127,11 +120,9 @@ class Gene(Base):
 
     @classmethod
     def select_overlapping_range(cls, session, chrom, start, end, tissue=[]):
-        """
-        Query genes which overlap the given range, e.g. a gene which
+        """Query genes which overlap the given range, e.g. a gene which
         at least partially overlaps the given feature.
         """
-
         q = session.query(cls).filter(
                 cls.chrom == chrom, cls.start < end, cls.end > start)
 
@@ -142,11 +133,9 @@ class Gene(Base):
 
     @classmethod
     def select_by_name(cls, session, name):
-        """
-        Query refGene objects by common name. If no name is provided,
+        """Query refGene objects by common name. If no name is provided,
         query all genes.
         """
-
         q = session.query(cls)
 
         if name:
@@ -156,17 +145,24 @@ class Gene(Base):
 
     @classmethod
     def select_by_names(cls, session, names=[]):
-        """
-        Query refGene objects by list of common names. If no names are
+        """Query refGene objects by list of common names. If no names are
         provided, query all genes.
         """
-
         q = session.query(cls)
 
         if names:
             q = q.filter(cls.name2.in_(names))
 
         return q.all()
+
+    @classmethod
+    def get_all_gene_symbols(cls, session):
+        """Query all gene objects in the database and return their gene
+        symbols (name2 field).
+        """
+        genes = session.query(cls.name2).distinct().all()
+
+        return [g[0] for g in genes]
 
     def __str__(self):
         return "{}\t{}\t{}\t{}\t0\t{}".format(self.chrom, self.txStart,

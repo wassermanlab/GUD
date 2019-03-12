@@ -8,23 +8,22 @@ from GUD2.ORM.source import Source
 from GUD2.ORM.base import Base
 from binning import containing_bins, contained_bins, assign_bin
 
-class ShortTandemRepeat(Base):
+class CNV(Base):
+    __tablename__ = "copy_number_variants"
 
-    __tablename__ = "short_tandem_repeats"
-
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
+    uid = Column("uid", String(50))
     regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
     sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
-    motif = Column("motif", String(30), nullable=False)
-    pathogenicity = Column("pathogenicity", mysql.INTEGER(unsigned=True), nullable=False)
+    variant_type = Column("variant_type", String(50), nullable=False)
+    copy_number = Column("copy_number", Integer, nullable=False)
+    clinical_interpretation = Column("clinical_interpretation", String(50), nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(regionID, sourceID, pathogenicity),
 
-        Index("ix_str", regionID),
-        Index("ix_str_pathogenic", pathogenicity),
-        Index("ix_str_motif", motif),
+        Index("ix_cnv", regionID),
+        Index("ix_cnv_uid", uid),
+        Index("ix_cnv_clinical_interpretation", clinical_interpretation),
 
         {
             "mysql_engine": "MyISAM",
@@ -52,9 +51,6 @@ class ShortTandemRepeat(Base):
         Query objects based off of their location being within the start only
         motifs through that  
          """
-        # print(chrom, start, end)
-        # q = Region.select_by_bin_range(session, chrom, start, end, [], True, False)
-
         bin = assign_bin(start, end)
         
         q = session.query(cls, Region).\
@@ -62,32 +58,7 @@ class ShortTandemRepeat(Base):
         filter(Region.uid == cls.regionID).\
         filter(Region.chrom == chrom, Region.start == start, Region.end == end).\
         filter(Region.bin == bin)
-        return q.first()
-    
-    @classmethod 
-    def select_by_pathogenicity(cls, session):
-        """returns all strs that are pathogenic"""
-        q = session.query(cls).filter(cls.pathogenicity != 0)
-
-        return q.all() 
-
-    @classmethod
-    def select_by_motif(cls, session, motif, compute_rotations=False):
-        """returns all occurences of a certain motif computing 
-        rotations if requested"""
-        if compute_rotations is True: #compute the rotations
-            motif_len = len(motif)
-            motif_temp = motif 
-            motifs = []
-            for i in range(motif_len):
-                motif_temp = motif_temp[1:motif_len] + motif_temp[0]
-                motifs.append(motif_temp)    
-        else:    
-            motifs = [motif]
-
-        q = session.query(cls).filter(cls.motif.in_(motifs))
-
-        return q.all()  
+        return q.first()  
 
     @classmethod
     def select_by_uid(cls, session, uid):
@@ -98,14 +69,14 @@ class ShortTandemRepeat(Base):
         return q.first()
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID, pathogenicity):
-        q = session.query(cls).filter(cls.regionID == regionID, cls.sourceID == sourceID, cls.pathogenicity == pathogenicity)
+    def is_unique(cls, session, name):
+        q = session.query(cls).filter(cls.uid == name)
         q = q.all()
         return len(q) == 0
 
     def __str__(self):
-        return "{}\t{}".format(self.motif, self.pathogenicity)
+        return "{}\t{}".format(self.copy_number, self.clinical_significance)
 
     def __repr__(self):
-        return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={}, motif={}, pathogencity={})>".format(
-            self.uid, self.regionID, self.sourceID, self.motif, self.pathogenicity)
+        return "<CNV(uid={}, regionID={}, sourceID={}, copy_number={}, clinical_significance={}, variant_type={}yes)>".format(
+            self.uid, self.regionID, self.sourceID, self.copy_number, self.clinical_interpretation, self.variant_type)

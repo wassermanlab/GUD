@@ -26,20 +26,20 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="inserts the UCSC's \"multizNway\" table for given genome into GUD.")
 
-    parser.add_argument("genome", help="Genome assembly")
+    parser.add_argument("genome", help="genome assembly")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db",
-        help="Database name (default = given genome assembly)")
+        help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
-        help="Host name (default = localhost)")
+        help="host name (default = localhost)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="Port number (default = 5506)")
+        help="port number (default = 5506)")
 
     user = getpass.getuser()
     mysql_group.add_argument("-u", "--user", default=user,
-        help="User name (default = current user)")
+        help="user name (default = current user)")
 
     args = parser.parse_args()
 

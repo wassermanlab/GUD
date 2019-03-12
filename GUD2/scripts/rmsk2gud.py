@@ -29,20 +29,20 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="this script initializes a GUD database for the given genome.")
 
-    parser.add_argument("genome", help="Genome assembly")
+    parser.add_argument("genome", help="genome assembly")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db",
-        help="Database name (default = input genome assembly)")
+        help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
-        help="Host name (default = localhost)")
+        help="host name (default = localhost)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="Port number (default = 5506)")
-    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
-        help="User name (default = current user)")
+        help="port number (default = 5506)")
 
-    args = parser.parse_args()
+    user = getpass.getuser()
+    mysql_group.add_argument("-u", "--user", default=user,
+        help="user name (default = current user)")
 
     # Set default
     if not args.db:
@@ -86,10 +86,9 @@ def initialize_gud_db(user, host, port, db, genome):
         # Get source
         source = Source()
         sou = source.select_by_name(session, "rmsk")
-        if not sou:
-            # Insert source name
+        if not sou: 
             source.name = "rmsk"
-            session.add(source)
+            session.merge(source)
             session.commit()
             sou = source.select_by_name(session, "rmsk")
         # Download data
@@ -100,15 +99,13 @@ def initialize_gud_db(user, host, port, db, genome):
             # Ignore non-standard chroms, scaffolds, etc.
             m = re.search("^chr(\S+)$", line[5])
             if not m.group(1) in GUDglobals.chroms: continue
-
             # Get coordinates
             chrom = line[5]
             start = int(line[6])
             end = int(line[7])
             # Get region
             region = Region()
-            reg = region.select_unique(
-                session, chrom, start, end)
+            reg = region.select_by_exact_location(session, chrom, start, end)
             if not reg:
                 # Insert region
                 region.bin = assign_bin(start, end)
@@ -117,9 +114,8 @@ def initialize_gud_db(user, host, port, db, genome):
                 region.end = end
                 session.add(region)
                 session.commit()
-                reg = region.select_unique(
-                    session, chrom, start, end)
-            # Insert repeat regions
+                reg = region.select_by_exact_location(session, chrom, start, end)
+            # Insert repeat
             rmsk = RepeatMask()
             if rmsk.is_unique(session, reg.uid, sou.uid):
                 rmsk.swScore = line[1] 

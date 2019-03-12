@@ -1,22 +1,25 @@
 #!/usr/bin/env python
 
-import os, sys, re
 import argparse
 from binning import assign_bin
 from datetime import date
 import getpass
 import pybedtools
+import re
 from sqlalchemy import create_engine
-from sqlalchemy.orm import mapper, scoped_session, sessionmaker
-from sqlalchemy_utils import create_database, database_exists
+from sqlalchemy.orm import (
+    scoped_session,
+    sessionmaker
+)
+from sqlalchemy_utils import database_exists
 try: from urllib2 import unquote
 except: from urllib.parse import unquote
-import warnings
 
 # Import from GUD module
 from GUD2 import GUDglobals
 from GUD2.ORM.enhancer import Enhancer
 from GUD2.ORM.experiment import Experiment
+from GUD2.ORM.expression import Expression
 from GUD2.ORM.region import Region
 from GUD2.ORM.sample import Sample
 from GUD2.ORM.source import Source
@@ -32,7 +35,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts \"enhancer\" or \"tss\" data from FANTOM into GUD. download \"hg19_permissive_enhancers_expression_rle_tpm.csv.gz\" and \"hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz\" for enhancer and tss data, respectively.")
+    parser = argparse.ArgumentParser(description="this script inserts \"enhancer\" or \"tss\" data from the FANTOM5 consortium into GUD. download \"hg19_permissive_enhancers_expression_rle_tpm.csv.gz\" and \"hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz\" for enhancer and tss data, respectively.")
 
     parser.add_argument("matrix", help="Expression (TPM/RLE normalized) matrix across all FANTOM libraries")
     parser.add_argument("samples", help="FANTOM samples (manually-curated)")
@@ -45,16 +48,26 @@ def parse_args():
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default="hg19",
-        help="Database name (default = \"hg19\")")
+    mysql_group.add_argument("-d", "--db",
+        help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
-        help="Host name (default = localhost)")
+        help="host name (default = localhost)")
+    mysql_group.add_argument("-p", "--passwd",
+        help="Password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="Port number (default = 5506)")
-    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
-        help="User name (default = current user)")
+        help="port number (default = 5506)")
+
+    user = getpass.getuser()
+    mysql_group.add_argument("-u", "--user", default=user,
+        help="user name (default = current user)")
 
     args = parser.parse_args()
+
+    # Set default
+    if not args.db:
+        args.db = args.genome
+    if not args.passwd:
+        args.passwd = ""
 
     return args
 
@@ -64,20 +77,20 @@ def main():
     args = parse_args()
 
     # Insert FANTOM data to GUD database
-    insert_fantom_to_gud_db(args.user, args.host, args.port,
-        args.db, args.matrix, args.samples, args.feat_type,
-        args.source)
+    insert_fantom_to_gud_db(args.user, args.passwd,
+        args.host, args.port, args.db, args.matrix,
+        args.samples, args.feat_type, args.source)
 
-def insert_fantom_to_gud_db(user, host, port, db,
+def insert_fantom_to_gud_db(user, passwd, host, port, db,
     matrix_file, samples_file, feat_type, source_name):
 
     # Initialize
     samples = {}
     sample_ids = []
-    db_name = "mysql://{}:@{}:{}/{}".format(
-        user, host, port, db)
+    db_name = "mysql://{}:{}@{}:{}/{}".format(
+        user, passwd, host, port, db)
     if not database_exists(db_name):
-        create_database(db_name)
+        raise ValueError("GUD database does not exist!!!\n\t%s" % db_name)
     session = scoped_session(sessionmaker())
     engine = create_engine(db_name, echo=False)
     session.remove()
@@ -128,18 +141,23 @@ def insert_fantom_to_gud_db(user, host, port, db,
         session.commit()
         sou = source.select_by_name(session, source_name)
 
-    # Create enhancer/TSS tables
+    # Create tables
     if feat_type == "enhancer":
         table = Enhancer()
         lines = GUDglobals.parse_csv_file(matrix_file, gz)
         counts_start_at = 1
+        if not engine.has_table(table.__tablename__):
+            table.__table__.create(bind=engine)
     if feat_type == "tss":
         table = TSS()
         lines = GUDglobals.parse_tsv_file(matrix_file, gz)
-        counts_start_at = 7    
-    if not engine.has_table(feat_type):
-        table.metadata.bind = engine
-        table.metadata.create_all(engine)
+        counts_start_at = 7
+        if not engine.has_table(table.__tablename__):
+            table.__table__.create(bind=engine)
+        table = Expression()
+        if not engine.has_table(table.__tablename__):
+            table.__table__.create(bind=engine)
+
     # For each line...
     for line in lines:
         # Skip comments
@@ -154,6 +172,8 @@ def insert_fantom_to_gud_db(user, host, port, db,
             # Initialize
             data = {}
             rows = []
+            sampleIDs = []
+            avg_expression_levels = []
             # Get coordinates
             if feat_type == "enhancer":
                 m = re.search("(chr\S+)\:(\d+)\-(\d+)", line[0])
@@ -200,11 +220,6 @@ def insert_fantom_to_gud_db(user, host, port, db,
                 data[(name, treatment, cell_line, cancer)].append(float(line[i]))
             # For each sample...
             for name, treatment, cell_line, cancer in data:
-                # Skip if enhancer/TSS not expressed in sample
-                # avg_tpm = "%.3f" % float(sum(data[sample_id]) / len(data[sample_id]))
-                avg_tpm = float(sum(data[name, treatment, cell_line, cancer]) /
-                    len(data[name, treatment, cell_line, cancer]))
-                if avg_tpm == 0: continue
                 # Get sample
                 sample = Sample()
                 sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
@@ -216,26 +231,45 @@ def insert_fantom_to_gud_db(user, host, port, db,
                     session.add(sample)
                     session.commit()
                     sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
-                if feat_type == "enhancer":
-                    enhancer = Enhancer()
-                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
-                        enhancer.regionID = reg.uid
-                        enhancer.sourceID = sou.uid
-                        enhancer.sampleID = sam.uid
-                        enhancer.experimentID = exp.uid
-                        rows.append(enhancer)
+                # Skip if feature not expressed in sample
+                avg_expression_level = float(sum(data[name, treatment, cell_line, cancer]) /
+                    len(data[name, treatment, cell_line, cancer]))
+                if avg_expression_level > 0:
+                    sampleIDs.append(sam.uid)
+                    avg_expression_levels.append("%.3f" % avg_expression_level)
+            # Get TSS
+            if feat_type == "tss":
+                tss = TSS()
+                if tss.is_unique(session, reg.uid, sou.uid, exp.uid, gene, tss_id):
+                    tss.regionID = reg.uid
+                    tss.sourceID = sou.uid
+                    tss.experimentID = exp.uid
+                    tss.gene = gene
+                    tss.tss = tss_id
+                    tss.strand = strand
+                    tss.sampleIDs = "{},".format(",".join(map(str, sampleIDs)))
+                    tss.avg_expression_levels = "{},".format(",".join(avg_expression_levels))
+                    session.add(tss)
+                    session.commit()
+                tss = tss.select_by_exact_tss(
+                    session, reg.uid, sou.uid, exp.uid, gene, tss_id)
+            # For each sample...
+            for i in range(len(sampleIDs)):
+#                if feat_type == "enhancer":
+#                    enhancer = Enhancer()
+#                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
+#                        enhancer.regionID = reg.uid
+#                        enhancer.sourceID = sou.uid
+#                        enhancer.sampleID = sam.uid
+#                        enhancer.experimentID = exp.uid
+#                        rows.append(enhancer)
                 if feat_type == "tss":
-                    tss = TSS()
-                    if tss.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
-                        tss.regionID = reg.uid
-                        tss.sourceID = sou.uid
-                        tss.sampleID = sam.uid
-                        tss.experimentID = exp.uid
-                        tss.strand = strand
-                        tss.gene = gene
-                        tss.tss = tss_id
-                        tss.avg_tpm = "%.3f" % avg_tpm
-                        rows.append(tss)
+                    expression = Expression()
+                    if expression.is_unique(session, tss.uid, sampleIDs[i]):
+                        expression.tssID = tss.uid
+                        expression.sampleID = sampleIDs[i]
+                        expression.avg_expression_level = avg_expression_levels[i]
+                        rows.append(expression)
             session.add_all(rows)
             session.commit()
 

@@ -34,6 +34,12 @@ when inside `PROJECT_FOLDER` type:
 git submodule add --force git@github.com:oriolfornes/GUD.git
 ```
 
+## Build GUD database
+```
+bash initialize.sh
+bash refgene.sh
+```
+
 ## Gene representation
 ![](https://github.com/oriolfornes/GUD/blob/master/GUD-Gene.png)
 
