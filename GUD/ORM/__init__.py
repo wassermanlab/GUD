@@ -3,18 +3,43 @@ Object-Relational Mapping (ORM) classes
 """
 
 __all__ = [
-    "chrom_size", "conservation", "dna_accessibility",
-    "enhancer", "gene", "histone_modification", "repeat_mask",
-    "tad", "tf_binding", "tss"
+    "base",
+    "chrom",
+    "clinvar",
+    "conservation",
+    "copy_number_variant",
+    "dna_accessibility",
+    "enhancer",
+    "experiment",
+    "expression",
+    "gene",
+    "histone_modification",
+    "region",
+    "repeat_mask",
+    "sample",
+    "short_tandem_repeat",
+    "source",
+    "tad",
+    "tf_binding",
+    "tss"
 ]
 
-from .chrom_size import ChromSize
+from .base import Base
+from .chrom import Chrom
+from .clinvar import ClinVar
 from .conservation import Conservation
-from .dna_accessibility import DnaAccessibility
+from .copy_number_variant import CNV
+from .dna_accessibility import DNAAccessibility
 from .enhancer import Enhancer
+from .experiment import Experiment
+from .expression import Expression
 from .gene import Gene
 from .histone_modification import HistoneModification
+from .region import Region
 from .repeat_mask import RepeatMask
-from .tad import Tad
-from .tf_binding import TfBinding
-#from .tss import TSS
+from .sample import Sample
+from .short_tandem_repeat import ShortTandemRepeat
+from .source import Source
+from .tad import TAD
+from .tf_binding import TFBinding
+from .tss import TSS

@@ -3,17 +3,26 @@ Genomic Universal Database (GUD) module
 """
 
 __author__ = "Oriol Fornes"
-__credits__ = ["Oriol Fornes", "Phillip A. Richmond", "Tamar V. Av-Shalom",
-    "David J. Arenillas", "Rachelle A. Farkas", "Michelle Kang", 
-    "Wyeth W. Wasserman"]
+__credits__ = [
+    "Oriol Fornes",
+    "Tamar V. Av-Shalom",
+    "David J. Arenillas",
+    "Rachelle A. Farkas",
+    "Michelle Kang",
+    "Phillip A. Richmond",
+    "Wyeth W. Wasserman"
+]
 __email__ = "oriol@cmmt.ubc.ca"
 __organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
 __version__ = "0.0.1"
 
-import os, sys, re
+from Bio import SeqIO
+import csv
 import gzip
+import os
+import sys
 
-__all__ = ["ORM"]
+__all__ = ["ORM", "scripts"]
 
 class Globals(object):
     """
@@ -43,27 +52,24 @@ class Globals(object):
         """
 
         if os.path.exists(file_name):
-            # Initialize #
-            f = None
-            # Open file handle #
-            if gz:
-                try: f = gzip.open(file_name, "rt")
+            # Open file handle
+            if gz or file_name.endswith(".gz"):
+                try: f = gzip.open(file_name, "r")
                 except: raise ValueError("Could not open file %s" % file_name)
             else:
-                try: f = open(file_name, "rt")
+                try: f = open(file_name, "r")
                 except: raise ValueError("Could not open file %s" % file_name)
-            # For each line... #
+            # For each line...
             for line in f:
-                line = line.replace("\r", "")
-                yield line.strip("\n")
+                yield line.replace("\r", "").strip("\n")
             f.close()
         else:
             raise ValueError("File %s does not exist!" % file_name)
 
     def parse_csv_file(self, file_name, gz=False):
         """
-        This function parses a tab-separated values (TSV) file
-        and yields lines one by one as a list.
+        This function parses a CSV file and yields lines one by one
+        as a list.
 
         @input:
         file_name {str}
@@ -72,9 +78,9 @@ class Globals(object):
         @return: {list}
         """
 
-        # For each line... #
+        # For each line...
         for line in self.parse_file(file_name, gz):
-            yield line.split("\t")
+            yield line.split(",")
 
     def parse_tsv_file(self, file_name, gz=False):
         """
@@ -88,10 +94,9 @@ class Globals(object):
         @return: {list}
         """
 
-        # For each line... #
+        # For each line...
         for line in self.parse_file(file_name, gz):
-            line = line.split("\t")
-            yield line
+            yield line.split("\t")
 
     def parse_fasta_file(self, file_name, gz=False, clean=True):
         """
@@ -101,52 +106,49 @@ class Globals(object):
         @input:
         file_name {str}
         gz {bool} use the gzip module
+        clean {bool} replace non-standard amino acids by Xs
 
         @return: [header, sequence]
         """
 
-        # Initialize #
-        header = ""
-        sequence = ""
-        # For each line... #
-        for line in self.parse_file(file_name, gz):
-            if len(line) == 0: continue
-            if line.startswith("#"): continue
-            if line.startswith(">"):
-                if header != "" and sequence != "":
-                    yield header, sequence
-                header = ""
-                sequence = ""
-                m = re.search("^>(.+)", line)
-                if m: header = m.group(1)
-            elif header != "":
-                sub_sequence = line.upper()
-                if clean: sub_sequence = re.sub("[^ACDEFGHIKLMNPQRSTUVWY]", "X", sub_sequence)
-                sequence += sub_sequence
-        if header != "" and sequence != "":
-            yield header, sequence
+        if os.path.exists(file_name):
+            # Open file handle
+            if gz or file_name.endswith(".gz"):
+                try: f = gzip.open(file_name, "r")
+                except: raise ValueError("Could not open file %s" % file_name)
+            else:
+                try: f = open(file_name, "r")
+                except: raise ValueError("Could not open file %s" % file_name)
+            # For each SeqRecord...
+            for seq_record in SeqIO.parse(f, "fasta"):
+                # Initialize
+                header = seq_record.id
+                sequence = str(seq_record.seq).upper()
+                yield header, sequence
+            f.close()
+        else:
+            raise ValueError("File %s does not exist!" % file_name)
 
-#    #-------------#
-#    # Write       #
-#    #-------------#
-#
-#    def write(self, file_name=None, content=None):
-#        """
-#        This function writes {content} to a file or to stdout if no
-#        file is provided. Note that {content} will be appended at
-#        the end of the file.
-#
-#        @input:
-#        file_name {str}
-#        content {str}
-#        """
-#        if file_name is not None:
-#            try:
-#                f = open(file_name, "a")
-#                f.write("%s\n" % content)
-#            except:
-#                raise ValueError("Could create file %s" % file_name)
-#        else:
-#            sys.stdout.write("%s\n" % content)
+    #-------------#
+    # Functions   #
+    #-------------#
+
+    def write(self, file_name=None, content=None):
+        """
+        This function writes content to a file or, if no file is
+        provided, to STDOUT. Note that content will be appended
+        at the end of the file.
+        """
+
+        if file_name:
+            try:
+                f = open(file_name, "a")
+            except:
+                raise ValueError("Could not write to file: %s" % file_name)
+            # Write
+            f.write("%s\n" % content)
+            f.close()
+        else:
+            sys.stdout.write("%s\n" % content)
 
 GUDglobals = Globals()

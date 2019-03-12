@@ -3,25 +3,26 @@
 import os, sys, re
 import argparse
 from binning import assign_bin
+import copy
 from datetime import date
 import getpass
 import pybedtools
+import shutil
 from sqlalchemy import create_engine
 from sqlalchemy.orm import mapper, scoped_session, sessionmaker
-from sqlalchemy_utils import database_exists
+from sqlalchemy_utils import create_database, database_exists
+import subprocess
 import warnings
 
 # Import from GUD module
-from GUD import GUDglobals
-from GUD.ORM.dna_accessibility import DnaAccessibility
-from GUD.ORM.histone_modification import HistoneModification
-from GUD.ORM.tf_binding import TfBinding
-
-#-------------#
-# Classes     #
-#-------------#
-
-class Model(object): pass
+from GUD2 import GUDglobals
+from GUD2.ORM.experiment import Experiment
+from GUD2.ORM.dna_accessibility import DNAAccessibility
+from GUD2.ORM.histone_modification import HistoneModification
+from GUD2.ORM.region import Region
+from GUD2.ORM.sample import Sample
+from GUD2.ORM.source import Source
+from GUD2.ORM.tf_binding import TFBinding
 
 #-------------#
 # Functions   #
@@ -35,26 +36,35 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="this script inserts \"accessibility\", \"histone\" or \"tf\" data from ENCODE into GUD. arguments \"metadata\" and \"directory\" refer to the execution \"xargs -n 1 curl -O -L < file.txt\". genomic features include \"accessibility\", \"histone\" and \"tf\".")
 
-    parser.add_argument("genome", help="Genome assembly")
-    parser.add_argument("metadata", help="Metadata file")
-    parser.add_argument("directory", help="Downloads directory")
+    parser.add_argument("genome", help="genome assembly")
+    parser.add_argument("metadata", help="metadata file")
+    parser.add_argument("directory", help="downloads directory")
+    parser.add_argument("samples", help="ENCODE samples (manually-curated)")
 
     feats = ["accessibility", "histone", "tf"]
-    parser.add_argument("feat_type", choices=feats, help="Type of genomic feature", metavar="feature_type")
+    parser.add_argument("feat_type", choices=feats, metavar="feature",
+        help="Type of genomic feature")
 
     # Optional args
-    parser.add_argument("--source", default="ENCODE", help="Source name (e.g. \"PMID:22955616\"; default = \"ENCODE\")")
+    parser.add_argument("-c", "--cluster", action="store_true",
+        help="cluster regions with regCluster (default = False)")
+    parser.add_argument("--dummy-dir", default="/tmp/",
+        metavar="DUMMYDIR", help="dummy directory (default = /tmp/)")
+    parser.add_argument("--source", default="ENCODE",
+        help="source name (e.g. \"PMID:22955616\"; default = \"ENCODE\")")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db",
-        help="Database name (default = input genome assembly)")
+        help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
-        help="Host name (default = localhost)")
+        help="host name (default = localhost)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="Port number (default = 5506)")
-    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
-        help="User name (default = current user)")
+        help="port number (default = 5506)")
+
+    user = getpass.getuser()
+    mysql_group.add_argument("-u", "--user", default=user,
+        help="user name (default = current user)")
 
     args = parser.parse_args()
 
@@ -64,15 +74,28 @@ def parse_args():
 
     return args
 
+def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # Insert ENCODE data to GUD database
+    insert_encode_to_gud_db(args.user, args.host, args.port,
+        args.db, args.genome, args.metadata, args.directory,
+        args.samples, args.feat_type, args.cluster,
+        args.dummy_dir, args.source)
+
 def insert_encode_to_gud_db(user, host, port, db, genome,
-    metadata_file, directory, feat_type, source_name):
+    metadata_file, directory, samples_file, feat_type, cluster,
+    dummy_dir, source_name):
 
     # Initialize
+    samples = {}
     metadata = {}
     db_name = "mysql://{}:@{}:{}/{}".format(
         user, host, port, db)
     if not database_exists(db_name):
-        raise ValueError("GUD db does not exist: %s" % db_name)
+        create_database(db_name)
     session = scoped_session(sessionmaker())
     engine = create_engine(db_name, echo=False)
     session.remove()
@@ -80,20 +103,49 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
         expire_on_commit=False)
     today = str(date.today())
 
-    # Initialize table
+    # Get source
+    source = Source()
+    sou = source.select_by_name(session, source_name)
+    if not sou:    
+        source.name = source_name
+        session.add(source)
+        session.commit()
+        sou = source.select_by_name(session, source_name)
+
+    # Get samples
+    for line in GUDglobals.parse_tsv_file(samples_file):
+        # Initialize 
+        sample_name = line[0]
+        sample_type = line[1]
+        cell_or_tissue = line[2]
+        if line[3] == "Yes": add = True
+        else: add = False
+        if line[4] == "Yes": treatment = True
+        else: treatment = False
+        if line[5] == "Yes": cell_line = True
+        else: cell_line = False
+        if line[6] == "Yes": cancer = True
+        else: cancer = False
+        # Get sample
+        samples.setdefault(sample_name, {
+            "sample_type": sample_type,
+            "cell_or_tissue": cell_or_tissue,
+            "add": add,
+            "treatment": treatment,
+            "cell_line": cell_line,
+            "cancer": cancer
+        })
+
+    # Create table
     if feat_type == "accessibility":
-        table = DnaAccessibility()
+        table = DNAAccessibility()
     if feat_type == "histone":
         table = HistoneModification()
     if feat_type == "tf":
-        table = TfBinding()
+        table = TFBinding()
     if not engine.has_table(table.__tablename__):
-        try:
-            table.metadata.bind = engine
-            table.metadata.create_all(engine)
-        except:
-            raise ValueError("Cannot create table: %s" % table.__tablename__)
-    mapper(Model, table.__table__)
+        # Create table
+        table.__table__.create(bind=engine)
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(metadata_file):
@@ -109,7 +161,7 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 #                'File Status', 'Audit WARNING', 'Audit INTERNAL_ACTION', 'Audit NOT_COMPLIANT', 'Audit ERROR']
         accession = line[0]
         experiment_type = line[4]
-        cell_or_tissue = "%s %s" % (line[6], line[7])
+        biosample = line[6]
         experiment_target = None
         m = re.search("^(.+)-(human|mouse)$", line[12])
         if m: experiment_target = m.group(1)
@@ -118,9 +170,9 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
             treatment = "%s %s %s" % (line[9], line[10], line[11])
         assembly = line[37]
         status = line[40]
-        audit = None
-        if len(line[41]) > 0 or len(line[42]) > 0:
-            audit = "%s|%s" % (line[41], line[42])
+#        audit = None
+#        if len(line[41]) > 0 or len(line[42]) > 0:
+#            audit = "%s|%s" % (line[41], line[42])
         # Skip treated samples
         if treatment:
             warnings.warn("\nSample (%s) received treatment: \"%s\"\n\tSkipping sample...\n" % (
@@ -132,59 +184,237 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 #                accession, audit))
         # This is a released sample!
         if assembly == genome and status == "released":
-            metadata.setdefault((cell_or_tissue, experiment_type, experiment_target), [])
-            metadata[(cell_or_tissue, experiment_type, experiment_target)].append(accession)
+            # Skip sample
+            if not samples[biosample]["add"]: continue
+            # Get metadata
+            if os.path.exists(os.path.join(directory, "%s.bed.gz" % accession)):
+                metadata.setdefault((experiment_type, experiment_target), [])
+                metadata[(experiment_type, experiment_target)].append((accession, biosample))
 
-    # For each cell/tissue, experiment and target...
-    for cell_or_tissue, experiment_type, experiment_target in sorted(metadata):
+    # For each cell/tissue, experiment, target...
+    for experiment_type, experiment_target in sorted(metadata):
+        print(experiment_type, experiment_target)
+        exp_targets = set([
+            'H2AFZ',
+            'H2AK5ac',
+            'H2AK9ac',
+            'H2BK120ac',
+            'H2BK12ac',
+            'H2BK15ac',
+            'H2BK20ac',
+            'H2BK5ac',
+            'H3F3A',
+            'H3K14ac',
+            'H3K18ac',
+            'H3K23ac',
+            'H3K23me2',
+            'H3K27ac',
+            'H3K27me3',
+            'H3K36me3',
+            'H3K4ac'
+            ])
+        if experiment_target in exp_targets: continue
         # Initialize
-        lines = []
-        # For each accession...
-        for accession in sorted(metadata[(cell_or_tissue, experiment_type, experiment_target)]):                
-            # If accession file exists
-            file_name = os.path.join(directory, "%s.bed.gz" % accession)
-            if os.path.exists(file_name):
-                try:
-                    # For each line...
-                    for line in GUDglobals.parse_tsv_file(file_name, gz=True):
-                        # Skip if not enough elements
-                        if len(line) < 3: continue
-                        # Ignore non-standard chroms, scaffolds, etc.
-                        m = re.search("^chr(\w{1,2})$", line[0])
-                        if not m.group(1) in GUDglobals.chroms: continue
-                        # Skip if not start or end
-                        if not line[1].isdigit(): continue
-                        if not line[2].isdigit(): continue
-                        # If start is smaller than end
-                        if int(line[1]) < int(line[2]):
-                            lines.append("\t".join(line[:3]))
-                except:
-                    warnings.warn("\nCould not read file: \"%s\"\n\tSkipping file...\n" % file_name)
-        # If lines...
-        if lines:
-            # Create BED object
-            bed_obj = pybedtools.BedTool("\n".join(lines), from_string=True)
-            # Sort and merge
-            for chrom, start, end in bed_obj.sort().merge():
-                # Create model
-                model = Model()
-                model.bin = assign_bin(int(start), int(end))
-                model.chrom = chrom
-                model.start = start
-                model.end = end
-                model.cell_or_tissue = cell_or_tissue
-                model.experiment_type = experiment_type
-                model.source_name = source_name
-                model.date = today
-                if feat_type == "histone":
-                    model.histone_type = experiment_target
-                if feat_type == "tf":
-                    model.tf_name = experiment_target
-                # Upsert model & commit
-                session.merge(model)
+        exp_dummy_dir = os.path.join(dummy_dir,
+            "%s.%s" % (experiment_type.replace(" ", "_"), experiment_target))
+#        # Remove dummy dir
+#        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
+        # Create dummy dir
+        if not os.path.isdir(exp_dummy_dir): os.mkdir(exp_dummy_dir)
+        # Get source
+        experiment = Experiment()
+        exp = experiment.select_by_name(session, experiment_type)
+        if not exp:    
+            experiment.name = experiment_type
+            session.add(experiment)
+            session.commit()
+            exp = experiment.select_by_name(session, experiment_type)
+        # For each accession, biosample...
+        for accession, biosample in metadata[(experiment_type, experiment_target)]:
+            # Get sample
+            sample = Sample()
+            sam = sample.select_by_exact_sample(session,
+                samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+                samples[biosample]["cell_line"], samples[biosample]["cancer"])
+            if not sam:
+                # Insert sample
+                sample.name = samples[biosample]["cell_or_tissue"]
+                sample.treatment = samples[biosample]["treatment"]
+                sample.cell_line = samples[biosample]["cell_line"]
+                sample.cancer = samples[biosample]["cancer"]
+                session.add(sample)
                 session.commit()
-            # Empty cache
-            pybedtools.cleanup()
+                sam = sample.select_by_exact_sample(session,
+                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
+            # Copy BED file
+            gz_bed_file = os.path.join(directory, "%s.bed.gz" % accession)
+            bed_file = os.path.join(exp_dummy_dir, "%s.bed" % accession)
+            if not os.path.exists(bed_file):
+                os.system("zcat %s | sort -k 1,1 -k2,2n > %s" % (gz_bed_file, bed_file))
+#            bed_obj = pybedtools.BedTool(
+#                os.path.join(directory, "%s.bed.gz" % accession))
+#            bed_obj.sort().saveas(os.path.join(
+#                exp_dummy_dir, "%s.bed" % accession), compressed=False)
+#        # Empty cache
+#        pybedtools.cleanup()
+        # Cluster regions
+        if cluster:
+            # Initialize
+            accession2sample = {}
+            label2accession = {}
+            regions = []
+            bed_files = os.path.join(exp_dummy_dir, "files.txt")
+            table_file = os.path.join(exp_dummy_dir, "tableOfTables.txt")
+            cluster_file = os.path.join(exp_dummy_dir, "regCluster")
+            # Create BED file list
+            if not os.path.exists(bed_files):
+                # For each file...
+                for bed_file in os.listdir(exp_dummy_dir):
+                    # Skip non-BED files
+                    if not bed_file.endswith(".bed"): continue
+                    # Add file to list
+                    GUDglobals.write(bed_files, os.path.join(exp_dummy_dir, bed_file))
+            # Make table of tables
+            if not os.path.exists(table_file):
+                process = subprocess.check_output(["regClusterMakeTableOfTables",
+                    "uw01", bed_files, table_file], stderr=subprocess.STDOUT)
+            # Make clusters
+            if not os.path.exists("%s.cluster" % cluster_file):
+                process = subprocess.check_output(["regCluster", table_file,
+                    "%s.cluster" % cluster_file, "%s.bed" % cluster_file],
+                    stderr=subprocess.STDOUT)
+            # For each accession, biosample...
+            for accession, biosample in metadata[(experiment_type, experiment_target)]:
+                # Get sample
+                sample = Sample()
+                sam = sample.select_by_exact_sample(session,
+                    samples[biosample]["cell_or_tissue"],
+                    samples[biosample]["treatment"],
+                    samples[biosample]["cell_line"],
+                    samples[biosample]["cancer"])
+                accession2sample.setdefault(accession, sam.uid)
+            # For each line...
+            for line in GUDglobals.parse_tsv_file(table_file):
+                m = re.search("%s.%s/(\w+).bed" % (
+                    experiment_type, experiment_target), line[0])
+                if m: label2accession.setdefault(line[-1], m.group(1))
+            # Load BED file
+            bed_obj = pybedtools.BedTool("%s.bed" % cluster_file)
+            # For each feature...
+            for feature in bed_obj:
+                # Ignore non-standard chroms, scaffolds, etc.
+                m = re.search("^chr(\S+)$", feature[0])
+                if not m.group(1) in GUDglobals.chroms: continue
+                # Get coordinates
+                chrom = feature[0]
+                start = int(feature[1])
+                end = int(feature[2])
+                # Ignore non-standard chroms, scaffolds, etc.
+                m = re.search("^chr(\S+)$", chrom)
+                if not m.group(1) in GUDglobals.chroms: continue
+                # Get region
+                region = Region()
+                reg = region.select_by_exact_location(session, chrom, start, end)
+                if not reg:
+                    # Insert region
+                    region.bin = assign_bin(start, end)
+                    region.chrom = chrom
+                    region.start = start
+                    region.end = end
+                    session.add(region)
+                    session.commit()
+                    reg = region.select_by_exact_location(session, chrom, start, end)
+                regions.append(reg.uid)
+            # For each line...
+            for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
+                # Get region
+                reg_uid = regions[int(line[0]) - 1] 
+                # Get sample
+                sam_uid = accession2sample[label2accession[line[-1]]]
+                # Insert feature
+                if feat_type == "accessibility":
+                    feat = DNAAccessibility()
+                    is_unique = feat.is_unique(session,
+                        reg_uid, sou.uid, sam_uid, exp.uid)
+                if feat_type == "histone":
+                    feat = HistoneModification()
+                    is_unique = feat.is_unique(session,
+                        reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
+                if feat_type == "tf":
+                    feat = TFBinding()
+                    is_unique = feat.is_unique(session,
+                        reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
+                if is_unique:
+                    feat.regionID = reg_uid
+                    feat.sourceID = sou.uid
+                    feat.sampleID = sam_uid
+                    feat.experimentID = exp.uid
+                    if feat_type == "histone":
+                        feat.histone_type = experiment_target
+                    if feat_type == "tf":
+                        feat.tf = experiment_target
+                    session.add(feat)
+                    session.commit()
+        # Do not cluster
+        else:
+            # For each accession, biosample...
+            for accession, biosample in metadata[(experiment_type, experiment_target)]:
+                # Load BED file
+                bed_obj = pybedtools.BedTool(
+                    os.path.join(exp_dummy_dir, "%s.bed" % accession))
+                # Get sample
+                sample = Sample()
+                sam = sample.select_by_exact_sample(session,
+                    samples[biosample]["cell_or_tissue"], samples[biosample]["treatment"],
+                    samples[biosample]["cell_line"], samples[biosample]["cancer"])
+                # For each feature...
+                for feature in bed_obj:
+                    # Ignore non-standard chroms, scaffolds, etc.
+                    m = re.search("^chr(\S+)$", feature[0])
+                    if not m.group(1) in GUDglobals.chroms: continue
+                    # Get coordinates
+                    chrom = feature[0]
+                    start = int(feature[1])
+                    end = int(feature[2])
+                    # Get region
+                    region = Region()
+                    reg = region.select_by_exact_location(session, chrom, start, end)
+                    if not reg:
+                        # Insert region
+                        region.bin = assign_bin(start, end)
+                        region.chrom = chrom
+                        region.start = start
+                        region.end = end
+                        session.add(region)
+                        session.commit()
+                        reg = region.select_by_exact_location(session, chrom, start, end)
+                     # Insert feature
+                    if feat_type == "accessibility":
+                        feat = DNAAccessibility()
+                        is_unique = feat.is_unique(session,
+                            reg_uid, sou.uid, sam_uid, exp.uid)
+                    if feat_type == "histone":
+                        feat = HistoneModification()
+                        is_unique = feat.is_unique(session,
+                            reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
+                    if feat_type == "tf":
+                        feat = TFBinding()
+                        is_unique = feat.is_unique(session,
+                            reg_uid, sou.uid, sam_uid, exp.uid, experiment_target)
+                    if is_unique:
+                        feat.regionID = reg.uid
+                        feat.sourceID = sou.uid
+                        feat.sampleID = sam.uid
+                        feat.experimentID = exp.uid
+                        if feat_type == "histone":
+                            feat.histone_type = experiment_target
+                        if feat_type == "tf":
+                            feat.tf = experiment_target
+                        session.add(feat)
+                        session.commit()
+#        # Remove dummy dir
+#        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
 
 #-------------#
 # Main        #
@@ -192,10 +422,4 @@ def insert_encode_to_gud_db(user, host, port, db, genome,
 
 if __name__ == "__main__":
 
-    # Parse arguments
-    args = parse_args()
-
-    # Insert ENCODE data to GUD database
-    insert_encode_to_gud_db(args.user, args.host, args.port,
-        args.db, args.genome, args.metadata, args.directory,
-        args.feat_type, args.source)
+    main()

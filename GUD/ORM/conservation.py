@@ -1,87 +1,72 @@
-from binning import containing_bins, contained_bins 
+from binning import containing_bins, contained_bins
 
 from sqlalchemy import (
-    Column, Date, Index, PrimaryKeyConstraint, String
+    Column, Index, PrimaryKeyConstraint, ForeignKey,
+    UniqueConstraint, Integer, Float
 )
 
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.hybrid import hybrid_property
 
-Base = declarative_base()
+from GUD2.ORM.base import Base
+from GUD2.ORM.region import Region
+from GUD2.ORM.source import Source
 
 class Conservation(Base):
-        
+
     __tablename__ = "conservation"
 
-    bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    chrom = Column("chrom", String(5), nullable=False)
-    chromStart = Column("chromStart", mysql.INTEGER(unsigned=True), nullable=False)
-    chromEnd = Column("chromEnd", mysql.INTEGER(unsigned=True), nullable=False)
-#    extFile = Column("extFile", mysql.INTEGER(), nullable=False, default=0)
-#    offset = Column("offset", mysql.INTEGER(), nullable=False, default=0)
-    score = Column("score", mysql.FLOAT(unsigned=True), nullable=False)
-    source_name = Column("source_name", String(25), nullable=False)
-    date = Column("date", Date(), nullable=True) 
+    uid = Column("uid", mysql.INTEGER(unsigned=True))
+
+    regionID = Column("regionID", Integer,
+        ForeignKey("regions.uid"), nullable=False)
+
+    sourceID = Column("sourceID", Integer,
+        ForeignKey("sources.uid"), nullable=False)
+
+    score = Column("score", Float)
 
     __table_args__ = (
 
-        PrimaryKeyConstraint(
-            chrom, chromStart, chromEnd, source_name
-        ),
+        PrimaryKeyConstraint(uid),
+        UniqueConstraint(regionID, sourceID),
+        Index("ix_cons", regionID),
 
-        Index("ix_conservation", bin, chrom),
-        
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
         }
     )
 
-    # Create these properties to map columns to
-    # standard attributes
-    @hybrid_property
-    def start(self):
-        return self.chromStart
-
-    @start.setter
-    def start(self, val):
-        self.chromStart = val
-
-    @hybrid_property
-    def end(self):
-        return self.chromEnd
-
-    @end.setter
-    def end(self, val):
-        self.chromEnd = val
-
     @classmethod
-    def select_by_bin_range(cls, session, chrom, start, end, bins=[],
-        compute_bins=False): 
-        """
-        Query objects by chromosomal range using the binning system to
-        speed up range searches. If bins are provided, use the given bins.
-        If bins are NOT provided AND compute_bins is set to True, then
-        compute the bins. Otherwise, perform the range query without the use
-        of bins.
-        """
-
-        if not bins and compute_bins:
-            bins = set(containing_bins(start, end) + contained_bins(start, end))
+    def is_unique(cls, session, regionID, sourceID):
 
         q = session.query(cls).filter(
-                cls.chrom == chrom, cls.end > start, cls.start < end)
+            cls.regionID == regionID,
+            cls.sourceID == sourceID
+        )
 
-        if bins:
-            q = q.filter(cls.bin.in_(list(bins)))
+        return len(q.all()) == 0
 
-        return q.all()
+#    @classmethod
+#    def select_by_location(cls, session, chrom, start, end):
+#        """
+#        Query objects based off of their location being within
+#        the start only motifs through that  
+#        """
+#
+#        bins = set(containing_bins(start, end) + contained_bins(start, end))
+#
+#        q = session.query(cls, Region).\
+#        join().\
+#        filter(Region.uid == cls.regionID).\
+#        filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
+#        filter(Region.bin.in_(bins))
+#
+#        return q.all()
 
     def __str__(self):
-        return "{}\t{}\t{}\t.\t{}".format(self.chrom, self.start,
-            self.end, self.score)
+        return "{}".format(self.score)
 
     def __repr__(self):
-        return "<Conservation(chrom={}, start={}, end={}, score={}, source={})>".format(
-            self.chrom, self.start, self.end, self.score, self.source_name)
+        return "<Conservation(uid={}, regionID={}, sourceID={}, score={})>".format(
+            self.uid, self.regionID, self.sourceID, self.score)
