@@ -1,3 +1,7 @@
+from binning import (
+    containing_bins,
+    contained_bins
+)
 from sqlalchemy import (
     and_,
     or_,

@@ -1,17 +1,18 @@
-from binning import containing_bins, contained_bins
-
+from binning import (
+    containing_bins,
+    contained_bins
+)
 from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, ForeignKey,
     UniqueConstraint, Integer
 )
-
 from sqlalchemy.dialects import mysql
 
-from GUD2.ORM.base import Base
-from GUD2.ORM.experiment import Experiment
-from GUD2.ORM.region import Region
-from GUD2.ORM.sample import Sample
-from GUD2.ORM.source import Source
+from .base import Base
+from .experiment import Experiment
+from .region import Region
+from .sample import Sample
+from .source import Source
 
 class Enhancer(Base):
 

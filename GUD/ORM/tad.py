@@ -1,14 +1,18 @@
+from binning import (
+    containing_bins,
+    contained_bins
+)
 from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint, Integer, Float
 )
 from sqlalchemy.dialects import mysql
-from GUD2.ORM.region import Region
-from GUD2.ORM.source import Source
-from GUD2.ORM.sample import Sample
-from GUD2.ORM.experiment import Experiment
-from GUD2.ORM.base import Base
-from binning import containing_bins, contained_bins
+
+from .base import Base
+from .experiment import Experiment
+from .region import Region
+from .sample import Sample
+from .source import Source
 
 class TAD(Base):
 

@@ -16,14 +16,14 @@ try: from urllib2 import unquote
 except: from urllib.parse import unquote
 
 # Import from GUD module
-from GUD2 import GUDglobals
-from GUD2.ORM.enhancer import Enhancer
-from GUD2.ORM.experiment import Experiment
-from GUD2.ORM.expression import Expression
-from GUD2.ORM.region import Region
-from GUD2.ORM.sample import Sample
-from GUD2.ORM.source import Source
-from GUD2.ORM.tss import TSS
+from GUD import GUDglobals
+from GUD.ORM.enhancer import Enhancer
+from GUD.ORM.experiment import Experiment
+from GUD.ORM.expression import Expression
+from GUD.ORM.region import Region
+from GUD.ORM.sample import Sample
+from GUD.ORM.source import Source
+from GUD.ORM.tss import TSS
 
 #-------------#
 # Functions   #
