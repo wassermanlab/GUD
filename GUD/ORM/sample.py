@@ -14,17 +14,10 @@ class Sample(Base):
 
     __tablename__ = "samples"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True),
-        nullable=False)
-
+    uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
     name = Column("name", String(250), nullable=False)
-
-    treatment = Column("treatment", Boolean,
-        nullable=False)
-
-    cell_line = Column("cell_line", Boolean,
-        nullable=False)
-
+    treatment = Column("treatment", Boolean, nullable=False)
+    cell_line = Column("cell_line", Boolean, nullable=False)
     cancer = Column("cancer", Boolean, nullable=False)
 
     __table_args__ = (
@@ -101,6 +94,7 @@ class Sample(Base):
         return q.first()
 
     def __str__(self):
+
         return "{}\t{}\t{}\t{}".\
             format(
                 self.name,
@@ -110,6 +104,7 @@ class Sample(Base):
             )
 
     def __repr__(self):
+
         return "<Sample(%s, %s, %s, %s, %s)>" % \
             (
                 "uid={}".format(self.uid),

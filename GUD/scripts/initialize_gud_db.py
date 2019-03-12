@@ -18,12 +18,12 @@ from sqlalchemy_utils import (
 )
 
 # Import from GUD module
-from GUD2 import GUDglobals
-from GUD2.ORM.chrom import Chrom
-from GUD2.ORM.experiment import Experiment
-from GUD2.ORM.region import Region
-from GUD2.ORM.sample import Sample
-from GUD2.ORM.source import Source
+from GUD import GUDglobals
+from GUD.ORM.chrom import Chrom
+from GUD.ORM.experiment import Experiment
+from GUD.ORM.region import Region
+from GUD.ORM.sample import Sample
+from GUD.ORM.source import Source
 
 #-------------#
 # Functions   #

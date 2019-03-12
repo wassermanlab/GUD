@@ -18,11 +18,9 @@ class Source(Base):
     name = Column("name", String(250), nullable=False)
 
     __table_args__ = (
-      
         PrimaryKeyConstraint(uid),
         UniqueConstraint(name),
         Index("ix_source", name),
-      
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -46,7 +44,7 @@ class Source(Base):
 
     def __str__(self):
 
-      return "{}".format(self.name)
+        return "{}".format(self.name)
 
     def __repr__(self):
 

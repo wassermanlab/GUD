@@ -13,8 +13,7 @@ class Chrom(Base):
     __tablename__ = "chroms"
 
     chrom = Column("chrom", String(5), nullable=False)
-    size = Column("size", mysql.INTEGER(unsigned=True),
-        nullable=False)
+    size = Column("size", mysql.INTEGER(unsigned=True), nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(chrom),
@@ -47,6 +46,7 @@ class Chrom(Base):
         return q.all()
 
     def __str__(self):
+
         return "{}\t{}".\
             format(
                 self.chrom,
@@ -54,6 +54,7 @@ class Chrom(Base):
             )
 
     def __repr__(self):
+
         return "<Chrom(%s, %s)>" % \
             (
                 "chrom={}".format(self.chrom),

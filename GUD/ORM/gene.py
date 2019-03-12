@@ -130,6 +130,7 @@ class Gene(Base):
         return [g[0] for g in q]
 
     def __repr__(self):
+
         return "<Gene(%s, %s, %s, %s)>" % \
             (
                 "uid={}".format(self.uid),

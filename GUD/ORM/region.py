@@ -86,6 +86,7 @@ class Region(Base):
         return q.first()
 
     def __str__(self):
+
         return "{}\t{}\t{}\t{}".\
             format(
                 self.bin,
@@ -95,6 +96,7 @@ class Region(Base):
             )
 
     def __repr__(self):
+
         return "<Region(%s, %s, %s, %s, %s)>" % \
             (
                 "uid={}".format(self.uid),

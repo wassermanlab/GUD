@@ -13,8 +13,7 @@ class Experiment(Base):
 
     __tablename__ = "experiments"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True),
-        nullable=False)
+    uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
     name = Column("name", String(250), nullable=False)
 
     __table_args__ = (
@@ -49,9 +48,11 @@ class Experiment(Base):
         return q.all()
 
     def __str__(self):
+
         return "{}".format(self.name)
 
     def __repr__(self):
+
         return "<Experiment(%s, %s)>" % \
             (
                 "uid={}".format(self.uid),

@@ -15,14 +15,14 @@ import subprocess
 import warnings
 
 # Import from GUD module
-from GUD2 import GUDglobals
-from GUD2.ORM.experiment import Experiment
-from GUD2.ORM.dna_accessibility import DNAAccessibility
-from GUD2.ORM.histone_modification import HistoneModification
-from GUD2.ORM.region import Region
-from GUD2.ORM.sample import Sample
-from GUD2.ORM.source import Source
-from GUD2.ORM.tf_binding import TFBinding
+from GUD import GUDglobals
+from GUD.ORM.experiment import Experiment
+from GUD.ORM.dna_accessibility import DNAAccessibility
+from GUD.ORM.histone_modification import HistoneModification
+from GUD.ORM.region import Region
+from GUD.ORM.sample import Sample
+from GUD.ORM.source import Source
+from GUD.ORM.tf_binding import TFBinding
 
 #-------------#
 # Functions   #

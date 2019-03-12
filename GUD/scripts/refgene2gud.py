@@ -15,10 +15,10 @@ from sqlalchemy.orm import (
 from sqlalchemy_utils import database_exists
 
 # Import from GUD module
-from GUD2 import GUDglobals
-from GUD2.ORM.gene import Gene
-from GUD2.ORM.region import Region
-from GUD2.ORM.source import Source
+from GUD import GUDglobals
+from GUD.ORM.gene import Gene
+from GUD.ORM.region import Region
+from GUD.ORM.source import Source
 
 #-------------#
 # Functions   #
