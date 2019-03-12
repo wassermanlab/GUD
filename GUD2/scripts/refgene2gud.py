@@ -2,7 +2,6 @@
 
 import argparse
 from binning import assign_bin
-from ftplib import FTP
 import getpass
 import gzip
 from io import BytesIO
@@ -15,6 +14,7 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy_utils import database_exists
 
+# Import from GUD module
 from GUD2 import GUDglobals
 from GUD2.ORM.gene import Gene
 from GUD2.ORM.region import Region

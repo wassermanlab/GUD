@@ -9,11 +9,12 @@ from sqlalchemy.dialects import mysql
 from .base import Base
 
 class Chrom(Base):
-    
+
     __tablename__ = "chroms"
 
     chrom = Column("chrom", String(5), nullable=False)
-    size = Column("size", mysql.INTEGER(unsigned=True), nullable=False)
+    size = Column("size", mysql.INTEGER(unsigned=True),
+        nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(chrom),

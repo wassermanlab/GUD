@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
 
+# Import from GUD module
 from GUD2 import GUDglobals
 from GUD2.ORM.repeat_mask import RepeatMask
 from GUD2.ORM.region import Region
@@ -48,6 +49,16 @@ def parse_args():
         args.db = args.genome
 
     return args
+
+def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # Initialize GUD database: create tables
+    # and download data to populate them 
+    initialize_gud_db(args.user, args.host,
+        args.port, args.db, args.genome)
 
 def initialize_gud_db(user, host, port, db, genome):
 
@@ -170,10 +181,4 @@ def handle_bytes(bytes):
 
 if __name__ == "__main__":
 
-    # Parse arguments
-    args = parse_args()
-
-    # Initialize GUD database: create tables
-    # and download data to populate them 
-    initialize_gud_db(args.user, args.host,
-        args.port, args.db, args.genome)
+    main()
