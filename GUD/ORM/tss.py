@@ -37,20 +37,6 @@ class TSS(Base):
         nullable=False
     )
 
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
-        nullable=False
-    )
-
-    experimentID = Column(
-        "experimentID",
-        Integer,
-        ForeignKey("experiments.uid"),
-        nullable=False
-    )
-
     gene = Column(
         "gene",
         String(75),
@@ -73,12 +59,26 @@ class TSS(Base):
         mysql.LONGBLOB, nullable=False
     )
 
+    experimentID = Column(
+        "experimentID",
+        Integer,
+        ForeignKey("experiments.uid"),
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(
             regionID,
-            sourceID,
             experimentID,
+            sourceID
         ),
         Index("ix_regionID", regionID), # query by bin range
         Index("ix_gene_tss", gene, tss),

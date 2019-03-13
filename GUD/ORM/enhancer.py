@@ -34,13 +34,6 @@ class Enhancer(Base):
         nullable=False
     )
 
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
-        nullable=False
-    )
-
     sampleID = Column(
         "sampleID",
         Integer,
@@ -53,17 +46,24 @@ class Enhancer(Base):
         Integer,
         ForeignKey("experiments.uid"),
         nullable=False
-    ) 
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(
             regionID,
-            sourceID,
             sampleID,
-            experimentID
+            experimentID,
+            sourceID
         ),
-        Index("ix_regionID", regionID),
+        Index("ix_regionID", regionID), # query by bin range
         Index("ix_sampleID", sampleID),
         {
             "mysql_engine": "MyISAM",
@@ -72,29 +72,29 @@ class Enhancer(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID,
-        sampleID, experimentID):
+    def is_unique(cls, session, regionID, sampleID,
+        experimentID, sourceID):
 
         q = session.query(cls).\
             filter(
                 cls.regionID == regionID,
-                cls.sourceID == sourceID,
                 cls.sampleID == sampleID,
-                cls.experimentID == experimentID
+                cls.experimentID == experimentID,
+                cls.sourceID == sourceID
             )
 
         return len(q.all()) == 0
 
     @classmethod
     def select_unique(cls, session, regionID,
-        sourceID, sampleID, experimentID):
+        sampleID, experimentID, sourceID):
 
         q = session.query(cls).\
             filter(
                 cls.regionID == regionID,
-                cls.sourceID == sourceID,
                 cls.sampleID == sampleID,
-                cls.experimentID == experimentID
+                cls.experimentID == experimentID,
+                cls.sourceID == sourceID
             )
 
         return q.first()
@@ -105,7 +105,7 @@ class Enhancer(Base):
             (
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
-                "sourceID={}".format(self.sourceID),
                 "sampleID={}".format(self.sampleID),
-                "experimentID={}".format(self.experimentID)
+                "experimentID={}".format(self.experimentID),
+                "sourceID={}".format(self.sourceID)
             )

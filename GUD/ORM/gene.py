@@ -32,13 +32,6 @@ class Gene(Base):
         nullable=False
     )
 
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
-        nullable=False
-    )
-
     name = Column(
         "name",
         String(75),
@@ -75,12 +68,19 @@ class Gene(Base):
         nullable=False
     )
 
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(
             regionID,
-            sourceID,
-            name
+            name,
+            sourceID
         ),
         Index("ix_regionID", regionID), # query by bin range
         Index("ix_name", name),
@@ -92,29 +92,27 @@ class Gene(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID,
-        strand, name):
+    def is_unique(cls, session, regionID, name,
+        sourceID):
 
         q = session.query(cls).\
             filter(
                 cls.regionID == regionID,
-                cls.sourceID == sourceID,
-                cls.strand == strand,
-                cls.name == name
+                cls.name == name,
+                cls.sourceID == sourceID
             )
 
         return len(q.all()) == 0
 
     @classmethod
     def select_unique(cls, session, regionID,
-        sourceID, strand, name):
+        name, sourceID):
 
         q = session.query(cls).\
             filter(
                 cls.regionID == regionID,
-                cls.sourceID == sourceID,
-                cls.strand == strand,
-                cls.name == name
+                cls.name == name,
+                cls.sourceID == sourceID
             )
 
         return q.first()
@@ -202,10 +200,9 @@ class Gene(Base):
 
     def __repr__(self):
 
-        return "<Gene(%s, %s, %s, %s)>" % \
+        return "<Gene(%s, %s, %s)>" % \
             (
                 "uid={}".format(self.uid),
                 "name={}".format(self.name),
                 "name2={}".format(self.name2),
-                "strand={}".format(self.strand)
             )

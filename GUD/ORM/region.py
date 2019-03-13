@@ -132,21 +132,21 @@ class Region(Base):
 
         return q
 
-    @classmethod
-    def select_by_exact_location(cls, session, chrom,
-        start, end):
-
-        bin = assign_bin(start, end)
-
-        q = session.query(cls).\
-            filter(
-                cls.bin == bin,
-                cls.chrom == chrom,
-                cls.start == start,
-                cls.end == end
-            )
-
-        return q.first()
+#    @classmethod
+#    def select_by_exact_location(cls, session, chrom,
+#        start, end):
+#
+#        bin = assign_bin(start, end)
+#
+#        q = session.query(cls).\
+#            filter(
+#                cls.bin == bin,
+#                cls.chrom == chrom,
+#                cls.start == start,
+#                cls.end == end
+#            )
+#
+#        return q.first()
 
     def __str__(self):
 
