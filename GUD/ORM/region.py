@@ -94,7 +94,7 @@ class Region(Base):
             filter(
                 cls.chrom == chrom,
                 cls.start == int(start),
-                cls.end == int(end)
+                cls.end == int(end),
                 cls.strand == strand
             )
 
