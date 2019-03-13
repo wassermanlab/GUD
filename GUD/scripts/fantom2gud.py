@@ -255,7 +255,7 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
             for i in range(len(sampleIDs)):
                 if feat_type == "enhancer":
                     enhancer = Enhancer()
-                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
+                    if enhancer.is_unique(session, reg.uid, sou.uid, sampleIDs[i], exp.uid):
                         enhancer.regionID = reg.uid
                         enhancer.sourceID = sou.uid
                         enhancer.sampleID = sam.uid
