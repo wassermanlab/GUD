@@ -177,17 +177,20 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
             # Get coordinates
             if feat_type == "enhancer":
                 m = re.search("(chr\S+)\:(\d+)\-(\d+)", line[0])
+                chrom = m.group(1)
+                start = int(m.group(2))
+                end = int(m.group(3))
+                strand = None
             if feat_type == "tss":
                 m = re.search("(chr\S+)\:(\d+)\.\.(\d+),(\S)", line[0])
-                n = re.search("p(\d+)@(\w+)", line[1])
-            chrom = m.group(1)
-            start = int(m.group(2))
-            end = int(m.group(3))
-            if feat_type == "tss":
+                chrom = m.group(1)
+                start = int(m.group(2))
+                end = int(m.group(3))
                 strand = m.group(4)
-                if n:
-                    gene = n.group(2)
-                    tss_id = n.group(1)
+                m = re.search("p(\d+)@(\w+)", line[1])
+                if m:
+                    gene = m.group(2)
+                    tss_id = m.group(1)
                 else:
                     gene = None
                     tss_id = 1
@@ -196,15 +199,16 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
             if not m.group(1) in GUDglobals.chroms: continue
             # Get region
             region = Region()
-            if region.is_unique(session, chrom, start, end):
+            if region.is_unique(session, chrom, start, end, strand):
                 # Insert region
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
                 region.start = start
                 region.end = end
+                region.strand = strand
                 session.add(region)
                 session.commit()
-            reg = region.select_unique(session, chrom, start, end)
+            reg = region.select_unique(session, chrom, start, end, strand)
             # For each sample...
             for i in range(counts_start_at, len(line)):
                 # Skip sample
@@ -238,19 +242,17 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
             # Get TSS
             if feat_type == "tss":
                 tss = TSS()
-                if tss.is_unique(session, reg.uid, sou.uid, exp.uid, gene, tss_id):
+                if tss.is_unique(session, reg.uid, sou.uid, exp.uid):
                     tss.regionID = reg.uid
                     tss.sourceID = sou.uid
                     tss.experimentID = exp.uid
                     tss.gene = gene
                     tss.tss = tss_id
-                    tss.strand = strand
                     tss.sampleIDs = "{},".format(",".join(map(str, sampleIDs)))
                     tss.avg_expression_levels = "{},".format(",".join(avg_expression_levels))
                     session.add(tss)
                     session.commit()
-                tss = tss.select_unique(
-                    session, reg.uid, sou.uid, exp.uid, gene, tss_id)
+                tss = tss.select_unique(session, reg.uid, sou.uid, exp.uid)
             # For each sample...
             for i in range(len(sampleIDs)):
                 if feat_type == "enhancer":
