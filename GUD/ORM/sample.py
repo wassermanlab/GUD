@@ -14,16 +14,56 @@ class Sample(Base):
 
     __tablename__ = "samples"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
-    name = Column("name", String(250), nullable=False)
-    treatment = Column("treatment", Boolean, nullable=False)
-    cell_line = Column("cell_line", Boolean, nullable=False)
-    cancer = Column("cancer", Boolean, nullable=False)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True),
+        nullable=False
+    )
+
+    name = Column(
+        "name",
+        String(250),
+        nullable=False
+    )
+
+    treatment = Column(
+        "treatment",
+        Boolean,
+        nullable=False
+    )
+
+    cell_line = Column(
+        "cell_line",
+        Boolean,
+        nullable=False
+    )
+
+    cancer = Column(
+        "cancer",
+        Boolean,
+        nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(name, treatment, cell_line, cancer),
-        Index("ix_sample", name, mysql_prefix="FULLTEXT"),
+        UniqueConstraint(
+            name,
+            treatment,
+            cell_line,
+            cancer
+        ),
+        Index("ix_name", name),
+        Index(
+            "ix_name_fulltext",
+            name,
+            mysql_prefix="FULLTEXT"
+        ),
+        Index(
+            "ix_treatment_cell_line_cancer",
+            treatment,
+            cell_line,
+            cancer
+        ),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -31,30 +71,62 @@ class Sample(Base):
     )
 
     @classmethod
-    def select_by_name(cls, session, name, treatment=False,
-        cell_line=False, cancer=False):
-        """
-        Query objects by sample name. 
-        """
+    def is_unique(cls, session, name, treatment,
+        cell_line, cancer):
 
-        q = session.query(cls).filter(cls.name == name).\
+        q = session.query(cls).\
             filter(
-                cls.treatment <= int(treatment),
-                cls.cell_line <= int(cell_line),
-                cls.cancer <= int(cancer)
+                cls.name == name,
+                cls.treatment == int(treatment),
+                cls.cell_line == int(cell_line),
+                cls.cancer == int(cancer)
+            )
+
+        return len(q.all()) == 0
+
+    @classmethod
+    def select_unique(cls, session, name, treatment,
+        cell_line, cancer):
+
+        q = session.query(cls).\
+            filter(
+                cls.name == name,
+                cls.treatment == int(treatment),
+                cls.cell_line == int(cell_line),
+                cls.cancer == int(cancer)
             )
 
         return q.first()
 
     @classmethod
-    def select_by_names(cls, session, names=[], treatment=False,
-        cell_line=False, cancer=False):
+    def select_by_name(cls, session, name,
+        treatment=False, cell_line=False,
+        cancer=False):
         """
-        Query objects by multiple sample names. If no
-        experiment names are provided, return all objects.
+        Query objects by sample name. 
         """
 
-        q = session.query(cls).filter(cls.name.in_(names)).\
+        q = session.query(cls).\
+            filter(
+                cls.name == name,
+                cls.treatment <= int(treatment),
+                cls.cell_line <= int(cell_line),
+                cls.cancer <= int(cancer)
+            )
+
+        return q.all()
+
+    @classmethod
+    def select_by_names(cls, session, names=[],
+        treatment=False, cell_line=False,
+        cancer=False):
+        """
+        Query objects by multiple sample names.
+        If no names are provided, return all objects.
+        """
+
+        q = session.query(cls).\
+            filter(cls.name.in_(names)).\
             filter(
                 cls.treatment <= int(treatment),
                 cls.cell_line <= int(cell_line),
@@ -64,8 +136,9 @@ class Sample(Base):
         return q.all()
 
     @classmethod
-    def select_by_exp_conditions(cls, session, treatment=False,
-        cell_line=False, cancer=False):
+    def select_by_exp_conditions(cls, session,
+        treatment=False, cell_line=False,
+        cancer=False):
         """
         Query objects by experimental conditions. 
         """
@@ -78,20 +151,6 @@ class Sample(Base):
             )
 
         return q.all()
-
-    @classmethod 
-    def select_by_exact_sample(cls, session, name, treatment,
-        cell_line, cancer):
-
-        q = session.query(cls).\
-            filter(
-                cls.name == name,
-                cls.treatment == treatment,
-                cls.cell_line == cell_line,
-                cls.cancer == cancer
-            )
-
-        return q.first()
 
     def __str__(self):
 

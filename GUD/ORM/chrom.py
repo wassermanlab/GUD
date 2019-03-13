@@ -39,18 +39,24 @@ class Chrom(Base):
         Query objects by chromosome name.
         """
 
-        q = session.query(cls).filter(cls.chrom == chrom)
+        q = session.query(cls).\
+            filter(
+                cls.chrom == chrom
+            )
 
         return q.first()
 
     @classmethod
     def select_by_chroms(cls, session, chroms=[]):
         """
-        Query objects by multiple chromosome names. If no
-        chromosome names are provided, return all objects.
+        Query objects by multiple chromosome names.
+        If no names are provided, return all objects.
         """
 
-        q = session.query(cls).filter(cls.chrom.in_(chroms))
+        q = session.query(cls).\
+            filter(
+                cls.chrom.in_(chroms)
+            )
 
         return q.all()
 

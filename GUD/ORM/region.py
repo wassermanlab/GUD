@@ -51,11 +51,21 @@ class Region(Base):
         nullable=False
     )
 
+    strand = Column(
+        "strand",
+        mysql.CHAR(1)
+    )
+
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(chrom, start, end),
+        UniqueConstraint(
+            chrom,
+            start,
+            end,
+            strand
+        ),
         CheckConstraint("end > start"),
-        Index("ix_region", bin, chrom),
+        Index("ix_bin_chrom", bin, chrom),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -63,15 +73,43 @@ class Region(Base):
     )
 
     @classmethod
-    def select_by_bin_range(cls, session, chrom, start,
-        end, bins=[], compute_bins=False, as_list=True):
+    def is_unique(cls, session, chrom, start, end,
+        strand=None):
+
+        q = session.query(cls).\
+            filter(
+                cls.chrom == chrom,
+                cls.start == int(start),
+                cls.end == int(end),
+                cls.strand == strand
+            )
+
+        return len(q.all()) == 0
+
+    @classmethod
+    def select_unique(cls, session, chrom, start, end,
+        strand=None):
+
+        q = session.query(cls).\
+            filter(
+                cls.chrom == chrom,
+                cls.start == int(start),
+                cls.end == int(end)
+                cls.strand == strand
+            )
+
+        return q.first()
+
+    @classmethod
+    def select_by_bin_range(cls, session, chrom,
+        start, end, bins=[], compute_bins=False,
+        as_list=True):
         """
-        Query objects by chromosomal range using the bin
-        system to speed up range searches. If bins are
-        provided, use them. If bins are not provided and
-        compute_bins is set to True, then compute the bins.
-        Otherwise, perform the range query without the use
-        of bins (this is a very slow process!).
+        Query objects using the bin system to speed
+        up range searches. If no bins are provided
+        and compute_bins is set to True, then compute
+        them. Otherwise, perform the query without
+        using the bin system (EXTREMELY slow!).
         """
 
         if not bins and compute_bins:
@@ -112,12 +150,13 @@ class Region(Base):
 
     def __str__(self):
 
-        return "{}\t{}\t{}\t{}".\
+        return "{}\t{}\t{}\t{}\t{}".\
             format(
                 self.bin,
                 self.chrom,
                 self.start,
-                self.end
+                self.end,
+                self.strand
             )
 
     def __repr__(self):
@@ -128,5 +167,6 @@ class Region(Base):
                 "bin={}".format(self.bin),
                 "chrom={}".format(self.chrom),
                 "start={}".format(self.start),
-                "end={}".format(self.end)
+                "end={}".format(self.end),
+                "strand={}".format(self.strand)
             )

@@ -63,12 +63,6 @@ class Gene(Base):
         nullable=False
     )
 
-    strand = Column(
-        "strand",
-        mysql.CHAR(1),
-        nullable=False
-    )
-
     exonStarts = Column(
         "exonStarts",
         mysql.LONGBLOB,
@@ -86,12 +80,11 @@ class Gene(Base):
         UniqueConstraint(
             regionID,
             sourceID,
-            strand,
             name
         ),
-        Index("ix_gene", regionID),
-        Index("ix_gene_acce", name),
-        Index("ix_gene_name", name2),
+        Index("ix_regionID", regionID), # query by bin range
+        Index("ix_name", name),
+        Index("ix_name2", name2),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -113,8 +106,22 @@ class Gene(Base):
         return len(q.all()) == 0
 
     @classmethod
-    def select_by_location(cls, session, chrom, start,
-        end):
+    def select_unique(cls, session, regionID,
+        sourceID, strand, name):
+
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID,
+                cls.strand == strand,
+                cls.name == name
+            )
+
+        return q.first()
+
+    @classmethod
+    def select_by_location(cls, session, chrom,
+        start, end):
         """
         Query objects by genomic location.
         """
@@ -138,15 +145,18 @@ class Gene(Base):
         Query objects by gene symbol.
         """
 
-        q = session.query(cls).filter(cls.name2 == name)
+        q = session.query(cls).\
+            filter(
+                cls.name2 == name
+            )
 
         return q.all()
 
     @classmethod
     def select_by_names(cls, session, names=[]):
         """
-        Query objects by multiple gene symbols. If no
-        gene symbols are provided, return all objects.
+        Query objects by multiple gene symbols.
+        If no genes are provided, return all objects.
         """
 
         q = session.query(cls)

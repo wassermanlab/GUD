@@ -196,8 +196,7 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
             if not m.group(1) in GUDglobals.chroms: continue
             # Get region
             region = Region()
-            reg = region.select_by_exact_location(session, chrom, start, end)
-            if not reg:
+            if region.is_unique(session, chrom, start, end):
                 # Insert region
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
@@ -205,7 +204,7 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                 region.end = end
                 session.add(region)
                 session.commit()
-                reg = region.select_by_exact_location(session, chrom, start, end)
+            reg = region.select_unique(session, chrom, start, end)
             # For each sample...
             for i in range(counts_start_at, len(line)):
                 # Skip sample
@@ -222,15 +221,14 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
             for name, treatment, cell_line, cancer in data:
                 # Get sample
                 sample = Sample()
-                sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
-                if not sam:    
+                if sample.is_unique(session, name,treatment, cell_line, cancer):    
                     sample.name = name
                     sample.treatment = treatment
                     sample.cell_line = cell_line
                     sample.cancer = cancer
                     session.add(sample)
                     session.commit()
-                    sam = sample.select_by_exact_sample(session, name, treatment, cell_line, cancer)
+                sam = sample.select_unique(session, name, treatment, cell_line, cancer)
                 # Skip if feature not expressed in sample
                 avg_expression_level = float(sum(data[name, treatment, cell_line, cancer]) /
                     len(data[name, treatment, cell_line, cancer]))
@@ -251,18 +249,18 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     tss.avg_expression_levels = "{},".format(",".join(avg_expression_levels))
                     session.add(tss)
                     session.commit()
-                tss = tss.select_by_exact_tss(
+                tss = tss.select_unique(
                     session, reg.uid, sou.uid, exp.uid, gene, tss_id)
             # For each sample...
             for i in range(len(sampleIDs)):
-#                if feat_type == "enhancer":
-#                    enhancer = Enhancer()
-#                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
-#                        enhancer.regionID = reg.uid
-#                        enhancer.sourceID = sou.uid
-#                        enhancer.sampleID = sam.uid
-#                        enhancer.experimentID = exp.uid
-#                        rows.append(enhancer)
+                if feat_type == "enhancer":
+                    enhancer = Enhancer()
+                    if enhancer.is_unique(session, reg.uid, sou.uid, sam.uid, exp.uid):
+                        enhancer.regionID = reg.uid
+                        enhancer.sourceID = sou.uid
+                        enhancer.sampleID = sam.uid
+                        enhancer.experimentID = exp.uid
+                        rows.append(enhancer)
                 if feat_type == "tss":
                     expression = Expression()
                     if expression.is_unique(session, tss.uid, sampleIDs[i]):

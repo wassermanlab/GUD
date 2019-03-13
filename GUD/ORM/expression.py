@@ -17,16 +17,36 @@ class Expression(Base):
 
     __tablename__ = "expression"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    tssID = Column("tssID", Integer, ForeignKey("transcription_start_sites.uid"), nullable=False)
-    sampleID = Column("sampleID", Integer, ForeignKey("samples.uid"), nullable=False)
-    avg_expression_level = Column("avg_expression_level", Float, nullable=False)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    tssID = Column(
+        "tssID",
+        Integer,
+        ForeignKey("transcription_start_sites.uid"),
+        nullable=False
+    )
+
+    sampleID = Column(
+        "sampleID",
+        Integer,
+        ForeignKey("samples.uid"),
+        nullable=False
+    )
+
+    avg_expression_level = Column(
+        "avg_expression_level",
+        Float,
+        nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(tssID, sampleID),
-        Index("ix_expression", tssID),
-        Index("ix_expression_sample", sampleID),
+        Index("ix_tssID", tssID),
+        Index("ix_sampleID", sampleID),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -44,6 +64,18 @@ class Expression(Base):
 
         return len(q.all()) == 0
 
+    @classmethod
+    def select_unique(cls, session, tssID, sampleID):
+
+        q = session.query(cls).\
+            filter(
+                cls.tssID == tssID,
+                cls.sampleID == sampleID
+            )
+
+        return q.first()
+
+    
 #    @classmethod
 #    def select_by_sample(cls, session, sample, min_tpm=10.0):
 #

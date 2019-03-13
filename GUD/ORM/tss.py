@@ -25,21 +25,53 @@ class TSS(Base):
 
     __tablename__ = "transcription_start_sites"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    regionID = Column("regionID", Integer,
-        ForeignKey("regions.uid"), nullable=False)
-    sourceID = Column("sourceID", Integer,
-        ForeignKey("sources.uid"), nullable=False)
-    experimentID = Column("experimentID", Integer,
-        ForeignKey("experiments.uid"), nullable=False)
-    gene = Column("gene", String(75),
-        ForeignKey("genes.name2"))
-    tss = Column("tss", mysql.INTEGER(unsigned=True))
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
-    sampleIDs = Column("sampleIDs", mysql.LONGBLOB,
-        nullable=False)
-    avg_expression_levels = Column("avg_expression_levels",
-        mysql.LONGBLOB, nullable=False)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    regionID = Column(
+        "regionID",
+        Integer,
+        ForeignKey("regions.uid"),
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
+    experimentID = Column(
+        "experimentID",
+        Integer,
+        ForeignKey("experiments.uid"),
+        nullable=False
+    )
+
+    gene = Column(
+        "gene",
+        String(75),
+        ForeignKey("genes.name2")
+    )
+
+    tss = Column(
+        "tss",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    sampleIDs = Column(
+        "sampleIDs",
+        mysql.LONGBLOB,
+        nullable=False
+    )
+
+    avg_expression_levels = Column(
+        "avg_expression_levels",
+        mysql.LONGBLOB, nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
@@ -47,28 +79,25 @@ class TSS(Base):
             regionID,
             sourceID,
             experimentID,
-            gene,
-            tss
         ),
-        Index("ix_tss", regionID), # query by bin range 
-        Index("ix_tss_gene", gene, tss),
+        Index("ix_regionID", regionID), # query by bin range
+        Index("ix_gene_tss", gene, tss),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
         }
     )
 
+
     @classmethod
     def is_unique(cls, session, regionID, sourceID,
-        experimentID, gene, tss):
+        experimentID):
 
         q = session.query(cls).\
             filter(
                 cls.regionID == regionID,
                 cls.sourceID == sourceID,
-                cls.experimentID == experimentID,
-                cls.gene == gene,
-                cls.tss == tss
+                cls.experimentID == experimentID
             )
 
         return len(q.all()) == 0
@@ -76,15 +105,13 @@ class TSS(Base):
 
     @classmethod
     def select_unique(cls, session, regionID,
-        sourceID, experimentID, gene, tss):
+        sourceID, experimentID):
 
         q = session.query(cls).\
             filter(
                 cls.regionID == regionID,
                 cls.sourceID == sourceID,
-                cls.experimentID == experimentID,
-                cls.gene == gene,
-                cls.tss == tss
+                cls.experimentID == experimentID
             )
 
         return q.first()
@@ -117,8 +144,9 @@ class TSS(Base):
     def select_by_multiple_tss(cls, session, tss=[]):
         """
         Query objects by multiple TSSs. If no TSSs
-        are provided, return all objects. Provide TSSs
-        as a two-dimensinal list (i.e. [[gene, tss], ...]).
+        are provided, return all objects. TSSs are
+        to be provided as a two-dimensional list in
+        the form: [[geneA, tss1], [geneA, tss2], ...]
         """
 
         # Initialize
