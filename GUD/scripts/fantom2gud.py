@@ -258,7 +258,7 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
                     if enhancer.is_unique(session, reg.uid, sou.uid, sampleIDs[i], exp.uid):
                         enhancer.regionID = reg.uid
                         enhancer.sourceID = sou.uid
-                        enhancer.sampleID = sam.uid
+                        enhancer.sampleID = sampleIDs[i]
                         enhancer.experimentID = exp.uid
                         rows.append(enhancer)
                 if feat_type == "tss":
