@@ -20,20 +20,75 @@ class Gene(Base):
 
     __tablename__ = "genes"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    regionID = Column("regionID", Integer, ForeignKey("regions.uid"), nullable=False)
-    sourceID = Column("sourceID", Integer, ForeignKey("sources.uid"), nullable=False)
-    name = Column("name", String(75), nullable=False)
-    name2 = Column("name2", String(75), nullable=False)
-    cdsStart = Column("cdsStart", mysql.INTEGER(unsigned=True), nullable=False)
-    cdsEnd = Column("cdsEnd", mysql.INTEGER(unsigned=True), nullable=False)
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
-    exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
-    exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    regionID = Column(
+        "regionID",
+        Integer,
+        ForeignKey("regions.uid"),
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
+    name = Column(
+        "name",
+        String(75),
+        nullable=False
+    )
+
+    name2 = Column(
+        "name2",
+        String(75),
+        nullable=False
+    )
+
+    cdsStart = Column(
+        "cdsStart",
+        mysql.INTEGER(unsigned=True),
+        nullable=False
+    )
+
+    cdsEnd = Column(
+        "cdsEnd",
+        mysql.INTEGER(unsigned=True),
+        nullable=False
+    )
+
+    strand = Column(
+        "strand",
+        mysql.CHAR(1),
+        nullable=False
+    )
+
+    exonStarts = Column(
+        "exonStarts",
+        mysql.LONGBLOB,
+        nullable=False
+    )
+
+    exonEnds = Column(
+        "exonEnds",
+        mysql.LONGBLOB,
+        nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(regionID, sourceID, strand, name),
+        UniqueConstraint(
+            regionID,
+            sourceID,
+            strand,
+            name
+        ),
         Index("ix_gene", regionID),
         Index("ix_gene_acce", name),
         Index("ix_gene_name", name2),
@@ -44,7 +99,8 @@ class Gene(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID, strand, name):
+    def is_unique(cls, session, regionID, sourceID,
+        strand, name):
 
         q = session.query(cls).\
             filter(
@@ -57,7 +113,8 @@ class Gene(Base):
         return len(q.all()) == 0
 
     @classmethod
-    def select_by_location(cls, session, chrom, start, end):
+    def select_by_location(cls, session, chrom, start,
+        end):
         """
         Query objects by genomic location.
         """
@@ -66,7 +123,11 @@ class Gene(Base):
 
         q = session.query(cls, Region).join().\
             filter(Region.uid == cls.regionID).\
-            filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
+            filter(
+                Region.chrom == chrom,
+                Region.end > start,
+                Region.start < end
+            ).\
             filter(Region.bin == bin)
 
         return q.all()

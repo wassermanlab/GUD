@@ -21,11 +21,40 @@ class Region(Base):
 
     __tablename__ = "regions"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    chrom = Column("chrom", String(5), ForeignKey("chroms.chrom"), nullable=False)
-    start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
-    end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
+        """
+        Query objects by multiple chromosome names. If no
+        chromosome names are provided, return all objects.
+        """
+
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    bin = Column(
+        "bin",
+        mysql.SMALLINT(unsigned=True),
+        nullable=False
+    )
+
+    chrom = Column(
+        "chrom",
+        String(5),
+        ForeignKey("chroms.chrom"),
+        nullable=False
+    )
+
+    start = Column(
+        "start",
+        mysql.INTEGER(unsigned=True),
+        nullable=False
+    )
+
+    end = Column(
+        "end",
+        mysql.INTEGER(unsigned=True),
+        nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
@@ -39,8 +68,8 @@ class Region(Base):
     )
 
     @classmethod
-    def select_by_bin_range(cls, session, chrom, start, end,
-        bins=[], compute_bins=False, return_list=True):
+    def select_by_bin_range(cls, session, chrom, start,
+        end, bins=[], compute_bins=False, as_list=True):
         """
         Query objects by chromosomal range using the bin
         system to speed up range searches. If bins are
@@ -65,13 +94,14 @@ class Region(Base):
         if bins:
             q = q.filter(cls.bin.in_(bins))
 
-        if return_list:
+        if as_list:
             return q.all()
 
         return q
 
     @classmethod
-    def select_by_exact_location(cls, session, chrom, start, end):
+    def select_by_exact_location(cls, session, chrom,
+        start, end):
 
         bin = assign_bin(start, end)
 

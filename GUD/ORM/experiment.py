@@ -13,8 +13,17 @@ class Experiment(Base):
 
     __tablename__ = "experiments"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
-    name = Column("name", String(250), nullable=False)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True),
+        nullable=False
+    )
+
+    name = Column(
+        "name",
+        String(250),
+        nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),

@@ -23,7 +23,7 @@ class Sample(Base):
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(name, treatment, cell_line, cancer),
-        Index("ix_sample", name),
+        Index("ix_sample", name, mysql_prefix="FULLTEXT"),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"

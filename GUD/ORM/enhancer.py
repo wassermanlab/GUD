@@ -3,8 +3,12 @@ from binning import (
     contained_bins
 )
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, ForeignKey,
-    UniqueConstraint, Integer
+    Column,
+    Index,
+    PrimaryKeyConstraint,
+    ForeignKey,
+    UniqueConstraint,
+    Integer
 )
 from sqlalchemy.dialects import mysql
 
@@ -18,19 +22,49 @@ class Enhancer(Base):
 
     __tablename__ = "enhancers"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    regionID = Column("regionID", Integer, ForeignKey("regions.uid"), nullable=False)
-    sourceID = Column("sourceID", Integer, ForeignKey("sources.uid"), nullable=False)
-    sampleID = Column("sampleID", Integer, ForeignKey("samples.uid"), nullable=False)
-    experimentID = Column("experimentID", Integer, ForeignKey("experiments.uid"), nullable=False) 
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    regionID = Column(
+        "regionID",
+        Integer,
+        ForeignKey("regions.uid"),
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
+    sampleID = Column(
+        "sampleID",
+        Integer,
+        ForeignKey("samples.uid"),
+        nullable=False
+    )
+
+    experimentID = Column(
+        "experimentID",
+        Integer,
+        ForeignKey("experiments.uid"),
+        nullable=False
+    ) 
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(regionID, sourceID, sampleID, experimentID),
-
+        UniqueConstraint(
+            regionID,
+            sourceID,
+            sampleID,
+            experimentID
+        ),
         Index("ix_enhancer", regionID),
         Index("ix_enhancer_sample", sampleID),
-
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -38,16 +72,42 @@ class Enhancer(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID, sampleID, experimentID):
+    def is_unique(cls, session, regionID, sourceID,
+        sampleID, experimentID):
 
-        q = session.query(cls).filter(
-            cls.regionID == regionID,
-            cls.sourceID == sourceID,
-            cls.sampleID == sampleID,
-            cls.experimentID == experimentID
-        )
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID,
+                cls.sampleID == sampleID,
+                cls.experimentID == experimentID
+            )
 
         return len(q.all()) == 0
+
+    @classmethod
+    def select_unique(cls, session, regionID, sourceID,
+        sampleID, experimentID):
+
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID,
+                cls.sampleID == sampleID,
+                cls.experimentID == experimentID
+            )
+
+        return q.first()
+
+    @classmethod
+    def select_by_uid(cls, session, uid):
+
+        q = session.query(cls).\
+            filter(
+                cls.uid == uid
+            )
+
+        return q.first()
 
 #    @classmethod
 #    def select_by_location(cls, session, chrom, start, end, samples=[]):
@@ -85,5 +145,12 @@ class Enhancer(Base):
 #        return q.first()
 
     def __repr__(self):
-        return "<Enhancer(uid={}, regionID={}, sourceID={}, sampleID={}, experimentID={})>".format(
-            self.uid, self.regionID, self.sourceID, self.sampleID, self.experimentID)
+
+        return "<Enhancer(%s, %s, %s, %s, %s)>" % \
+            (
+                "uid={}".format(self.uid),
+                "regionID={}".format(self.regionID),
+                "sourceID={}".format(self.sourceID),
+                "sampleID={}".format(self.sampleID),
+                "experimentID={}".format(self.experimentID)
+            )

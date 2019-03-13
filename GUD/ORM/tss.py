@@ -26,14 +26,20 @@ class TSS(Base):
     __tablename__ = "transcription_start_sites"
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
-    regionID = Column("regionID", Integer, ForeignKey("regions.uid"), nullable=False)
-    sourceID = Column("sourceID", Integer, ForeignKey("sources.uid"), nullable=False)
-    experimentID = Column("experimentID", Integer, ForeignKey("experiments.uid"), nullable=False)
-    gene = Column("gene", String(75), ForeignKey("genes.name2"))
+    regionID = Column("regionID", Integer,
+        ForeignKey("regions.uid"), nullable=False)
+    sourceID = Column("sourceID", Integer,
+        ForeignKey("sources.uid"), nullable=False)
+    experimentID = Column("experimentID", Integer,
+        ForeignKey("experiments.uid"), nullable=False)
+    gene = Column("gene", String(75),
+        ForeignKey("genes.name2"))
     tss = Column("tss", mysql.INTEGER(unsigned=True))
     strand = Column("strand", mysql.CHAR(1), nullable=False)
-    sampleIDs = Column("sampleIDs", mysql.LONGBLOB, nullable=False)
-    avg_expression_levels = Column("avg_expression_levels", mysql.LONGBLOB, nullable=False)
+    sampleIDs = Column("sampleIDs", mysql.LONGBLOB,
+        nullable=False)
+    avg_expression_levels = Column("avg_expression_levels",
+        mysql.LONGBLOB, nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
@@ -56,27 +62,40 @@ class TSS(Base):
     def is_unique(cls, session, regionID, sourceID,
         experimentID, gene, tss):
 
-        q = session.query(cls).filter(
-            cls.regionID == regionID,
-            cls.sourceID == sourceID,
-            cls.experimentID == experimentID,
-            cls.gene == gene,
-            cls.tss == tss
-        )
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID,
+                cls.experimentID == experimentID,
+                cls.gene == gene,
+                cls.tss == tss
+            )
 
         return len(q.all()) == 0
 
+
     @classmethod
-    def select_by_exact_tss(cls, session, regionID,
+    def select_unique(cls, session, regionID,
         sourceID, experimentID, gene, tss):
 
-        q = session.query(cls).filter(
-            cls.regionID == regionID,
-            cls.sourceID == sourceID,
-            cls.experimentID == experimentID,
-            cls.gene == gene,
-            cls.tss == tss
-        )
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID,
+                cls.experimentID == experimentID,
+                cls.gene == gene,
+                cls.tss == tss
+            )
+
+        return q.first()
+
+    @classmethod
+    def select_by_uid(cls, session, uid):
+
+        q = session.query(cls).\
+            filter(
+                cls.uid == uid
+            )
 
         return q.first()
 
