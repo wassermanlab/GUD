@@ -21,11 +21,6 @@ class Region(Base):
 
     __tablename__ = "regions"
 
-        """
-        Query objects by multiple chromosome names. If no
-        chromosome names are provided, return all objects.
-        """
-
     uid = Column(
         "uid",
         mysql.INTEGER(unsigned=True)
