@@ -111,18 +111,19 @@ def initialize_gud_db(user, passwd, host, port, db, genome):
             chrom = line[2]
             start = int(line[4])
             end = int(line[5])
+            strand = line[3]
             # Get region
             region = Region()
-            reg = region.select_by_exact_location(session, chrom, start, end)
-            if not reg:
+            if region.is_unique(session, chrom, start, end, strand):
                 # Insert region
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
                 region.start = start
                 region.end = end
+                region.strand = strand
                 session.add(region)
                 session.commit()
-                reg = region.select_by_exact_location(session, chrom, start, end)
+            reg = region.select_unique(session, chrom, start, end, strand)
             # Insert gene
             gene = Gene()
             gene.regionID = reg.uid
@@ -131,7 +132,7 @@ def initialize_gud_db(user, passwd, host, port, db, genome):
             gene.name2 = line[12]
             gene.cdsStart = line[6]
             gene.cdsEnd = line[7]
-            gene.strand = line[3]
+#            gene.strand = line[3]
             gene.exonStarts = line[9]
             gene.exonEnds = line[10]
             session.merge(gene)
