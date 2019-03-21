@@ -5,6 +5,7 @@ from binning import assign_bin
 import copy
 import getpass
 import pybedtools
+import os
 import re
 import shutil
 from sqlalchemy import create_engine
