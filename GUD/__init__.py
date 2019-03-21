@@ -135,12 +135,12 @@ class Globals(object):
         fh = self._get_file_handle(file_name, gz)
 
         # For each SeqRecord...
-            for seq_record in SeqIO.parse(fh, "fasta"):
-                # Initialize
-                header = seq_record.id
-                sequence = str(seq_record.seq).upper()
+        for seq_record in SeqIO.parse(fh, "fasta"):
+            # Initialize
+            header = seq_record.id
+            sequence = str(seq_record.seq).upper()
 
-                yield header, sequence
+            yield header, sequence
 
         fh.close()
 
