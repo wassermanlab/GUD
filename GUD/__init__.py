@@ -97,7 +97,7 @@ class Globals(object):
         fh = self._get_file_handle(file_name, gz)
 
         # For each line...
-        for line in csv.reader(fh, delimiter):
+        for line in csv.reader(fh, delimiter=delimiter):
             yield line
 
         fh.close()
