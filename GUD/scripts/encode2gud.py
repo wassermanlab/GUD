@@ -196,7 +196,7 @@ def insert_encode_to_gud_db(user, passwd, host, port, db,
         if not os.path.isdir(exp_dummy_dir): os.mkdir(exp_dummy_dir)
         # Get experiment
         experiment = Experiment()
-        if experiment.is_unique(session, experiment_type)
+        if experiment.is_unique(session, experiment_type):
             experiment.name = experiment_type
             session.add(experiment)
             session.commit()
