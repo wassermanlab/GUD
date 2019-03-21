@@ -31,7 +31,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts \"gene\" definitions from the UCSC's \"RefSeq\" table for the given genome into GUD.")
+    parser = argparse.ArgumentParser(description="this script inserts \"gene\" definitions from the UCSC's \"RefSeq\" table into GUD.")
 
     parser.add_argument("genome", help="genome assembly")
 
@@ -42,7 +42,7 @@ def parse_args():
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="host name (default = localhost)")
     mysql_group.add_argument("-p", "--passwd",
-        help="Password (default = ignore this option)")
+        help="password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="port number (default = 5506)")
 

@@ -5,10 +5,10 @@ from binning import (
 from sqlalchemy import (
     Column,
     Index,
+    Integer,
     PrimaryKeyConstraint,
     ForeignKey,
-    UniqueConstraint,
-    Integer
+    UniqueConstraint
 )
 from sqlalchemy.dialects import mysql
 

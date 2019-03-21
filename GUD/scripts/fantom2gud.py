@@ -37,23 +37,25 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="this script inserts \"enhancer\" or \"tss\" data from the FANTOM5 consortium into GUD. download \"hg19_permissive_enhancers_expression_rle_tpm.csv.gz\" and \"hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz\" for enhancer and tss data, respectively.")
 
-    parser.add_argument("matrix", help="Expression (TPM/RLE normalized) matrix across all FANTOM libraries")
+    parser.add_argument("matrix", help="expression (TPM/RLE normalized) matrix across all FANTOM libraries")
     parser.add_argument("samples", help="FANTOM samples (manually-curated)")
 
     feats = ["enhancer", "tss"]
-    parser.add_argument("feat_type", choices=feats, help="Type of genomic feature", metavar="feature_type")
+    parser.add_argument("feat_type", choices=feats,
+        help="type of genomic feature", metavar="feature_type")
 
     # Optional args
-    parser.add_argument("--source", default="FANTOM", help="Source name (e.g. \"PMID:24670763\" for TSSs or \"PMID:24670764\" for enhancers; default = \"FANTOM\")")
+    parser.add_argument("--source", default="FANTOM",
+        help="source name (default = \"FANTOM\")")
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db", default="hg19",
-        help="Database name (default = \"hg19\")")
+        help="database name (default = \"hg19\")")
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="host name (default = localhost)")
     mysql_group.add_argument("-p", "--passwd",
-        help="Password (default = ignore this option)")
+        help="password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="port number (default = 5506)")
 
@@ -125,21 +127,19 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
 
     # Get experiment
     experiment = Experiment()
-    exp = experiment.select_by_name(session, "CAGE")
-    if not exp:    
+    if experiment.is_unique(session, "CAGE"):    
         experiment.name = "CAGE"
         session.add(experiment)
         session.commit()
-        exp = experiment.select_by_name(session, "CAGE")
+    exp = experiment.select_by_name(session, "CAGE")
 
     # Get source
     source = Source()
-    sou = source.select_by_name(session, source_name)
-    if not sou:    
+    if source.is_unique(session, source_name):    
         source.name = source_name
         session.add(source)
         session.commit()
-        sou = source.select_by_name(session, source_name)
+    sou = source.select_by_name(session, source_name)
 
     # Create tables
     if feat_type == "enhancer":
