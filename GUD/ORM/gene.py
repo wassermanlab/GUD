@@ -2,6 +2,7 @@ from binning import (
     assign_bin
 )
 from sqlalchemy import (
+    and_,
     Column,
     ForeignKey,
     Index,
@@ -13,6 +14,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects import mysql
 
 from .base import Base
+from .gud_feature import GUDFeature
 from .region import Region
 from .source import Source
 
@@ -20,23 +22,71 @@ class Gene(Base):
 
     __tablename__ = "genes"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    regionID = Column("regionID", Integer, ForeignKey("regions.uid"), nullable=False)
-    sourceID = Column("sourceID", Integer, ForeignKey("sources.uid"), nullable=False)
-    name = Column("name", String(75), nullable=False)
-    name2 = Column("name2", String(75), nullable=False)
-    cdsStart = Column("cdsStart", mysql.INTEGER(unsigned=True), nullable=False)
-    cdsEnd = Column("cdsEnd", mysql.INTEGER(unsigned=True), nullable=False)
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
-    exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
-    exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    regionID = Column(
+        "regionID",
+        Integer,
+        ForeignKey("regions.uid"),
+        nullable=False
+    )
+
+    name = Column(
+        "name",
+        String(75),
+        nullable=False
+    )
+
+    name2 = Column(
+        "name2",
+        String(75),
+        nullable=False
+    )
+
+    cdsStart = Column(
+        "cdsStart",
+        mysql.INTEGER(unsigned=True),
+        nullable=False
+    )
+
+    cdsEnd = Column(
+        "cdsEnd",
+        mysql.INTEGER(unsigned=True),
+        nullable=False
+    )
+
+    exonStarts = Column(
+        "exonStarts",
+        mysql.LONGBLOB,
+        nullable=False
+    )
+
+    exonEnds = Column(
+        "exonEnds",
+        mysql.LONGBLOB,
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(regionID, sourceID, strand, name),
-        Index("ix_gene", regionID),
-        Index("ix_gene_acce", name),
-        Index("ix_gene_name", name2),
+        UniqueConstraint(
+            regionID,
+            name,
+            sourceID
+        ),
+        Index("ix_regionID", regionID), # query by bin range
+        Index("ix_name", name),
+        Index("ix_name2", name2),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -44,79 +94,163 @@ class Gene(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID, strand, name):
+    def is_unique(cls, session, regionID, name,
+        sourceID):
 
         q = session.query(cls).\
             filter(
                 cls.regionID == regionID,
-                cls.sourceID == sourceID,
-                cls.strand == strand,
-                cls.name == name
+                cls.name == name,
+                cls.sourceID == sourceID
             )
 
         return len(q.all()) == 0
 
     @classmethod
-    def select_by_location(cls, session, chrom, start, end):
+    def select_unique(cls, session, regionID,
+        name, sourceID):
+
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.name == name,
+                cls.sourceID == sourceID
+            )
+
+        return q.first()
+
+    @classmethod
+    def select_by_location(cls, session, chrom,
+        start, end, as_gud_feature=False):
         """
         Query objects by genomic location.
         """
 
-        bin = assign_bin(start, end)
+        bins = Region._compute_bins(start, end)
 
-        q = session.query(cls, Region).join().\
-            filter(Region.uid == cls.regionID).\
-            filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
-            filter(Region.bin == bin)
+        q = session.query(cls, Region, Source).\
+            join().\
+            filter(
+                Region.uid == cls.regionID
+            ).\
+            filter(
+                and_(
+                    Region.chrom == chrom,
+                    Region.start < end,
+                    Region.end > start
+                )
+            ).\
+            filter(Region.bin.in_(bins))
 
+        if as_gud_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_gud_feature(feat)
+                )
+
+            return feats
+    
         return q.all()
 
     @classmethod
-    def select_by_name(cls, session, name):
+    def select_by_name(cls, session, name,
+        as_gud_feature=False):
         """
         Query objects by gene symbol.
         """
 
-        q = session.query(cls).filter(cls.name2 == name)
+        q = session.query(cls, Region, Source).\
+            join().\
+            filter(Region.uid == cls.regionID).\
+            filter(cls.name2 == name)
+
+        if as_gud_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_gud_feature(feat)
+                )
+
+            return feats
 
         return q.all()
 
     @classmethod
-    def select_by_names(cls, session, names=[]):
+    def select_by_names(cls, session, names=[],
+        as_gud_feature=False):
         """
-        Query objects by multiple gene symbols. If no
-        gene symbols are provided, return all objects.
+        Query objects by multiple gene symbols.
+        If no genes are provided, return all objects.
         """
 
-        q = session.query(cls)
+        q = session.query(cls, Region, Source).join()
 
         if names:
             q = q.filter(cls.name2.in_(names))
 
+        if as_gud_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_gud_feature(feat)
+                )
+
+            return feats
+
         return q.all()
 
     @classmethod
-    def select_by_uid(cls, session, uid):
+    def select_by_uid(cls, session, uid,
+        as_gud_feature=False):
         """
         Query objects by uid.
         """
 
-        q = session.query(cls).\
+        q = session.query(cls, Region, Source).\
+            join().\
             filter(cls.uid == uid)
+
+        if as_gud_feature:
+            return cls.__as_gud_feature(q.first())
 
         return q.first()
 
     @classmethod
-    def select_by_uid_joined(cls, session, uid):
+    def select_by_uid(cls, session, uids=[],
+        as_gud_feature=False):
         """
-        Query objects by uid.
+        Query objects by multiple uids.
+        If no uids are provided, return all objects.
         """
 
-        q = session.query(cls, Region).join().\
-            filter(Region.uid == cls.regionID).\
-            filter(cls.uid == uid)
+        q = session.query(cls, Region, Source).join()
+        
+        if uids:
+            q = q.filter(cls.uid.in_(uids))
 
-        return q.first()
+        if as_gud_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_gud_feature(feat)
+                )
+
+            return feats
+
+        return q.all()
 
     @classmethod
     def get_all_gene_symbols(cls, session):
@@ -129,11 +263,49 @@ class Gene(Base):
 
         return [g[0] for g in q]
 
+    def __as_gud_feature(feat):
+
+        # Initialize
+        exonStarts = []
+        exonEnds = []
+
+        # For each exon start...
+        for i in str(feat.Gene.exonStarts).split(","):
+            if i.isdigit():
+                exonStarts.append(int(i))
+        
+        # For each exon end...
+        for i in str(feat.Gene.exonEnds).split(","):
+            if i.isdigit():
+                exonStarts.append(int(i))
+
+        # Define qualifiers
+        qualifiers = {
+            "name": feat.Gene.name,
+            "cdsStart": int(feat.Gene.cdsStart),
+            "cdsEnd": int(feat.Gene.cdsEnd),
+            "exonStarts": exonStarts,
+            "exonEnds": exonEnds,
+            "source" : feat.Source.name,            
+        }
+
+        return GUDFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand = feat.Region.strand,
+            feat_type = "Gene",
+            feat_id = feat.Gene.name2,
+            qualifiers = qualifiers
+        )
+
     def __repr__(self):
+
         return "<Gene(%s, %s, %s, %s)>" % \
             (
                 "uid={}".format(self.uid),
+                "regionID={}".format(self.regionID),
                 "name={}".format(self.name),
                 "name2={}".format(self.name2),
-                "strand={}".format(self.strand)
+                "sourceID={}".format(self.sourceID),
             )

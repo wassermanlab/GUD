@@ -17,13 +17,13 @@ from sqlalchemy_utils import (
     database_exists
 )
 
-# Import from GUD module
-from GUD2 import GUDglobals
-from GUD2.ORM.chrom import Chrom
-from GUD2.ORM.experiment import Experiment
-from GUD2.ORM.region import Region
-from GUD2.ORM.sample import Sample
-from GUD2.ORM.source import Source
+# Import from GUD
+from GUD import GUDglobals
+from GUD.ORM.chrom import Chrom
+from GUD.ORM.experiment import Experiment
+from GUD.ORM.region import Region
+from GUD.ORM.sample import Sample
+from GUD.ORM.source import Source
 
 #-------------#
 # Functions   #
@@ -45,8 +45,8 @@ def parse_args():
         help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="host name (default = localhost)")
-    mysql_group.add_argument("-p", "--passwd",
-        help="Password (default = ignore this option)")
+    mysql_group.add_argument("-p", "--pwd", metavar="PASS",
+        help="password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="port number (default = 5506)")
 
@@ -59,8 +59,8 @@ def parse_args():
     # Set default
     if not args.db:
         args.db = args.genome
-    if not args.passwd:
-        args.passwd = ""
+    if not args.pwd:
+        args.pwd = ""
 
     return args
 
@@ -70,14 +70,14 @@ def main():
     args = parse_args()
 
     # Initialize GUD database
-    initialize_gud_db(args.user, args.passwd, args.host,
+    initialize_gud_db(args.user, args.pwd, args.host,
         args.port, args.db, args.genome)
 
-def initialize_gud_db(user, passwd, host, port, db, genome):
+def initialize_gud_db(user, pwd, host, port, db, genome):
 
     # Initialize
     db_name = "mysql://{}:{}@{}:{}/{}".format(
-        user, passwd, host, port, db)
+        user, pwd, host, port, db)
     if not database_exists(db_name):
         create_database(db_name)
     session = scoped_session(sessionmaker())
@@ -132,10 +132,56 @@ def initialize_gud_db(user, passwd, host, port, db, genome):
         # Create table
         table.__table__.create(bind=engine)
 
+def get_ftp_dir_and_file(genome, data_type):
+
+    # Initialize
+    ftp = FTP("hgdownload.soe.ucsc.edu")
+    ftp.login()
+
+    # Change into "genome" folder
+    try:
+        ftp.cwd(os.path.join("goldenPath", genome))
+    except:
+        raise ValueError("Cannot connect to FTP goldenPath folder: %s" % genome)
+
+    # Fetch bigZips and database files
+    if data_type == "chrom_size":
+        return "bigZips", "%s.chrom.sizes" % genome
+
+def fetch_lines_from_ftp_file(genome, directory, file_name):
+
+    # Initialize
+    global BIO
+    ftp = FTP("hgdownload.soe.ucsc.edu")
+    ftp.login()
+    BIO = BytesIO()
+
+    # Change into "genome" "directory" folder
+    try:
+        ftp.cwd(os.path.join("goldenPath", genome, directory))
+    except:
+        raise ValueError("Cannot connect to FTP goldenPath folder: %s/%s" % (genome, directory))
+
+    # If valid file...
+    if file_name in ftp.nlst():
+        # Retrieve FTP file
+        ftp.retrbinary("RETR %s" % file_name, callback=handle_bytes)
+        BIO.seek(0) # Go back to the start
+        # If compressed file...
+        if file_name.endswith(".gz"):
+            f = gzip.GzipFile(fileobj=BIO, mode="rb")
+        else:
+            f = BIO
+        # For each line...
+        for line in f:
+            yield line.decode("UTF-8").strip("\n")
+
+def handle_bytes(bytes):
+
+    BIO.write(bytes)
+
 #-------------#
 # Main        #
 #-------------#
 
-if __name__ == "__main__":
-
-    main()
+if __name__ == "__main__": main()

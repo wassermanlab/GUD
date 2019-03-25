@@ -1,3 +1,7 @@
+from binning import (
+    containing_bins,
+    contained_bins
+)
 from sqlalchemy import (
     and_,
     or_,
@@ -21,58 +25,104 @@ class TSS(Base):
 
     __tablename__ = "transcription_start_sites"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    regionID = Column("regionID", Integer, ForeignKey("regions.uid"), nullable=False)
-    sourceID = Column("sourceID", Integer, ForeignKey("sources.uid"), nullable=False)
-    experimentID = Column("experimentID", Integer, ForeignKey("experiments.uid"), nullable=False)
-    gene = Column("gene", String(75), ForeignKey("genes.name2"))
-    tss = Column("tss", mysql.INTEGER(unsigned=True))
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
-    sampleIDs = Column("sampleIDs", mysql.LONGBLOB, nullable=False)
-    avg_expression_levels = Column("avg_expression_levels", mysql.LONGBLOB, nullable=False)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    regionID = Column(
+        "regionID",
+        Integer,
+        ForeignKey("regions.uid"),
+        nullable=False
+    )
+
+    gene = Column(
+        "gene",
+        String(75),
+        ForeignKey("genes.name2")
+    )
+
+    tss = Column(
+        "tss",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    sampleIDs = Column(
+        "sampleIDs",
+        mysql.LONGBLOB,
+        nullable=False
+    )
+
+    avg_expression_levels = Column(
+        "avg_expression_levels",
+        mysql.LONGBLOB, nullable=False
+    )
+
+    experimentID = Column(
+        "experimentID",
+        Integer,
+        ForeignKey("experiments.uid"),
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(
             regionID,
-            sourceID,
             experimentID,
-            gene,
-            tss
+            sourceID
         ),
-        Index("ix_tss", regionID), # query by bin range 
-        Index("ix_tss_gene", gene, tss),
+        Index("ix_regionID", regionID), # query by bin range
+        Index("ix_gene_tss", gene, tss),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
         }
     )
 
+
     @classmethod
     def is_unique(cls, session, regionID, sourceID,
-        experimentID, gene, tss):
+        experimentID):
 
-        q = session.query(cls).filter(
-            cls.regionID == regionID,
-            cls.sourceID == sourceID,
-            cls.experimentID == experimentID,
-            cls.gene == gene,
-            cls.tss == tss
-        )
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID,
+                cls.experimentID == experimentID
+            )
 
         return len(q.all()) == 0
 
-    @classmethod
-    def select_by_exact_tss(cls, session, regionID,
-        sourceID, experimentID, gene, tss):
 
-        q = session.query(cls).filter(
-            cls.regionID == regionID,
-            cls.sourceID == sourceID,
-            cls.experimentID == experimentID,
-            cls.gene == gene,
-            cls.tss == tss
-        )
+    @classmethod
+    def select_unique(cls, session, regionID,
+        sourceID, experimentID):
+
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID,
+                cls.experimentID == experimentID
+            )
+
+        return q.first()
+
+    @classmethod
+    def select_by_uid(cls, session, uid):
+
+        q = session.query(cls).\
+            filter(
+                cls.uid == uid
+            )
 
         return q.first()
 
@@ -94,8 +144,9 @@ class TSS(Base):
     def select_by_multiple_tss(cls, session, tss=[]):
         """
         Query objects by multiple TSSs. If no TSSs
-        are provided, return all objects. Provide TSSs
-        as a two-dimensinal list (i.e. [[gene, tss], ...]).
+        are provided, return all objects. TSSs are
+        to be provided as a two-dimensional list in
+        the form: [[geneA, tss1], [geneA, tss2], ...]
         """
 
         # Initialize

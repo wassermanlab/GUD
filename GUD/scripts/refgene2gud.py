@@ -2,6 +2,7 @@
 
 import argparse
 from binning import assign_bin
+from ftplib import FTP
 import getpass
 import gzip
 from io import BytesIO
@@ -15,10 +16,10 @@ from sqlalchemy.orm import (
 from sqlalchemy_utils import database_exists
 
 # Import from GUD module
-from GUD2 import GUDglobals
-from GUD2.ORM.gene import Gene
-from GUD2.ORM.region import Region
-from GUD2.ORM.source import Source
+from GUD import GUDglobals
+from GUD.ORM.gene import Gene
+from GUD.ORM.region import Region
+from GUD.ORM.source import Source
 
 #-------------#
 # Functions   #
@@ -30,7 +31,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts \"gene\" definitions from the UCSC's \"RefSeq\" table for the given genome into GUD.")
+    parser = argparse.ArgumentParser(description="inserts \"gene\" definitions from the UCSC's \"RefSeq\" table into GUD.")
 
     parser.add_argument("genome", help="genome assembly")
 
@@ -40,8 +41,8 @@ def parse_args():
         help="database name (default = given genome assembly)")
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="host name (default = localhost)")
-    mysql_group.add_argument("-p", "--passwd",
-        help="Password (default = ignore this option)")
+    mysql_group.add_argument("-p", "--pwd", metavar="PASS",
+        help="password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="port number (default = 5506)")
 
@@ -54,8 +55,8 @@ def parse_args():
     # Set default
     if not args.db:
         args.db = args.genome
-    if not args.passwd:
-        args.passwd = ""
+    if not args.pwd:
+        args.pwd = ""
 
     return args
 
@@ -66,14 +67,14 @@ def main():
 
     # Initialize GUD database: create tables
     # and download data to populate them 
-    initialize_gud_db(args.user, args.passwd, args.host,
+    initialize_gud_db(args.user, args.pwd, args.host,
         args.port, args.db, args.genome)
 
-def initialize_gud_db(user, passwd, host, port, db, genome):
+def initialize_gud_db(user, pwd, host, port, db, genome):
 
     # Initialize
     db_name = "mysql://{}:{}@{}:{}/{}".format(
-        user, passwd, host, port, db)
+        user, pwd, host, port, db)
     if not database_exists(db_name):
         raise ValueError("GUD database does not exist!!!\n\t%s" % db_name)
     session = scoped_session(sessionmaker())
@@ -110,18 +111,19 @@ def initialize_gud_db(user, passwd, host, port, db, genome):
             chrom = line[2]
             start = int(line[4])
             end = int(line[5])
+            strand = line[3]
             # Get region
             region = Region()
-            reg = region.select_by_exact_location(session, chrom, start, end)
-            if not reg:
+            if region.is_unique(session, chrom, start, end, strand):
                 # Insert region
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
                 region.start = start
                 region.end = end
+                region.strand = strand
                 session.add(region)
                 session.commit()
-                reg = region.select_by_exact_location(session, chrom, start, end)
+            reg = region.select_unique(session, chrom, start, end, strand)
             # Insert gene
             gene = Gene()
             gene.regionID = reg.uid
@@ -130,7 +132,7 @@ def initialize_gud_db(user, passwd, host, port, db, genome):
             gene.name2 = line[12]
             gene.cdsStart = line[6]
             gene.cdsEnd = line[7]
-            gene.strand = line[3]
+#            gene.strand = line[3]
             gene.exonStarts = line[9]
             gene.exonEnds = line[10]
             session.merge(gene)
@@ -182,12 +184,11 @@ def fetch_lines_from_ftp_file(genome, directory, file_name):
             yield line.decode("UTF-8").strip("\n")
 
 def handle_bytes(bytes):
+
     BIO.write(bytes)
 
 #-------------#
 # Main        #
 #-------------#
 
-if __name__ == "__main__":
-
-    main()
+if __name__ == "__main__": main()

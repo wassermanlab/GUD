@@ -1,12 +1,16 @@
+from binning import (
+    containing_bins,
+    contained_bins
+)
 from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint, Integer, Float
 )
 from sqlalchemy.dialects import mysql
-from GUD2.ORM.region import Region
-from GUD2.ORM.source import Source
-from GUD2.ORM.base import Base
-from binning import containing_bins, contained_bins
+
+from .base import Base
+from .region import Region
+from .source import Source
 
 class RepeatMask(Base):
 

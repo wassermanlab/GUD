@@ -1,4 +1,6 @@
 from sqlalchemy import (
+    and_,
+    or_,
     Column,
     Float,
     ForeignKey,
@@ -17,16 +19,36 @@ class Expression(Base):
 
     __tablename__ = "expression"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    tssID = Column("tssID", Integer, ForeignKey("transcription_start_sites.uid"), nullable=False)
-    sampleID = Column("sampleID", Integer, ForeignKey("samples.uid"), nullable=False)
-    avg_expression_level = Column("avg_expression_level", Float, nullable=False)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    tssID = Column(
+        "tssID",
+        Integer,
+        ForeignKey("transcription_start_sites.uid"),
+        nullable=False
+    )
+
+    sampleID = Column(
+        "sampleID",
+        Integer,
+        ForeignKey("samples.uid"),
+        nullable=False
+    )
+
+    avg_expression_level = Column(
+        "avg_expression_level",
+        Float,
+        nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(tssID, sampleID),
-        Index("ix_expression", tssID),
-        Index("ix_expression_sample", sampleID),
+        Index("ix_tssID", tssID),
+        Index("ix_sampleID", sampleID),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -44,26 +66,43 @@ class Expression(Base):
 
         return len(q.all()) == 0
 
-#    @classmethod
-#    def select_by_sample(cls, session, sample, min_tpm=10.0):
-#
-#        q = session.query(cls).\
-#            filter(
-#                cls.sampleID == sample,
-#                cls.avg_tpm >= min_tpm
-#            )
-#
-#        return q.first()
-#
-#    @classmethod
-#    def select_by_samples(cls, session, sample=[], min_tpm=10.0):
-#
-#        q = session.query(cls).\
-#            filter(cls.avg_tpm >= min_tpm).\
-#            filter(cls.sampleID.in_(sample))
-#
-#        return q.all()
-#
+    @classmethod
+    def select_unique(cls, session, tssID, sampleID):
+
+        q = session.query(cls).\
+            filter(
+                cls.tssID == tssID,
+                cls.sampleID == sampleID
+            )
+
+        return q.first()
+
+    @classmethod
+    def select_by_sample(cls,
+        session, sample, min_tpm=100.0):
+
+        q = session.query(cls, TSS, Sample).\
+            join().\
+            filter(TSS.uid == cls.tssID).\
+            filter(Sample.uid == cls.sampleID).\
+            filter(Sample.name == sample).\
+            filter(cls.avg_expression_level >= min_tpm)
+
+        return q.first()
+
+    @classmethod
+    def select_by_samples(cls,
+        session, sample=[], min_tpm=100.0):
+    
+        q = session.query(cls, TSS, Sample).\
+            join().\
+            filter(TSS.uid == cls.tssID).\
+            filter(Sample.uid == cls.sampleID).\
+            filter(Sample.name.in_(sample)).\
+            filter(cls.avg_expression_level >= min_tpm)
+
+        return q.all()
+
 #    @classmethod
 #    def select_by_tss(cls, session, tss, sample=[]):
 #        """
