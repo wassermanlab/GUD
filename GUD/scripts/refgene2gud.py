@@ -31,7 +31,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts \"gene\" definitions from the UCSC's \"RefSeq\" table into GUD.")
+    parser = argparse.ArgumentParser(description="inserts \"gene\" definitions from the UCSC's \"RefSeq\" table into GUD.")
 
     parser.add_argument("genome", help="genome assembly")
 
@@ -184,12 +184,11 @@ def fetch_lines_from_ftp_file(genome, directory, file_name):
             yield line.decode("UTF-8").strip("\n")
 
 def handle_bytes(bytes):
+
     BIO.write(bytes)
 
 #-------------#
 # Main        #
 #-------------#
 
-if __name__ == "__main__":
-
-    main()
+if __name__ == "__main__": main()

@@ -37,7 +37,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts \"accessibility\", \"histone\" or \"tf\" data from the ENCODE consortium into GUD. arguments \"metadata\" and \"directory\" refer to the execution \"xargs -n 1 curl -O -L < file.txt\". genomic features include \"accessibility\", \"histone\" and \"tf\".")
+    parser = argparse.ArgumentParser(description="inserts \"accessibility\", \"histone\" or \"tf\" data from the ENCODE consortium into GUD. arguments \"metadata\" and \"directory\" refer to the execution \"xargs -n 1 curl -O -L < file.txt\". genomic features include \"accessibility\", \"histone\" and \"tf\".")
 
     parser.add_argument("genome", help="genome assembly")
     parser.add_argument("metadata", help="metadata file")
@@ -410,6 +410,4 @@ def insert_encode_to_gud_db(user, passwd, host, port, db,
 # Main        #
 #-------------#
 
-if __name__ == "__main__":
-
-    main()
+if __name__ == "__main__": main()

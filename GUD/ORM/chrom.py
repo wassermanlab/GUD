@@ -53,12 +53,40 @@ class Chrom(Base):
         If no names are provided, return all objects.
         """
 
-        q = session.query(cls).\
-            filter(
-                cls.chrom.in_(chroms)
-            )
+        q = session.query(cls)
+
+        if chroms:
+            q = q.filter(cls.chrom.in_(chroms))
 
         return q.all()
+
+    @classmethod
+    def chrom_size(cls, session, chrom):
+        """
+        Return the size of the given chrom.
+        """
+        
+        q = cls.select_by_chroms(session, chrom)
+
+        for c in q:
+            return int(c.size)
+
+    @classmethod
+    def chrom_sizes(cls, session, chroms=[]): 
+        """
+        Return the size of the given chroms as a
+        dict. If no chroms are provided, return the
+        size of all chroms.
+        """
+
+        sizes = {}
+
+        q = cls.select_by_chroms(session, chroms)
+        
+        for c in q:
+            sizes.setdefault(c.chrom, int(c.size))
+
+        return sizes
 
     def __str__(self):
 

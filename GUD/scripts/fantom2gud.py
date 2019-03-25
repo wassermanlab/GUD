@@ -35,7 +35,7 @@ def parse_args():
     line using argparse.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts \"enhancer\" or \"tss\" data from the FANTOM5 consortium into GUD. download \"hg19_permissive_enhancers_expression_rle_tpm.csv.gz\" and \"hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz\" for enhancer and tss data, respectively.")
+    parser = argparse.ArgumentParser(description="inserts \"enhancer\" or \"tss\" data from the FANTOM5 consortium into GUD. download \"hg19_permissive_enhancers_expression_rle_tpm.csv.gz\" and \"hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz\" for enhancer and tss data, respectively.")
 
     parser.add_argument("matrix", help="expression (TPM/RLE normalized) matrix across all FANTOM libraries")
     parser.add_argument("samples", help="FANTOM samples (manually-curated)")
@@ -277,6 +277,4 @@ def insert_fantom_to_gud_db(user, passwd, host, port, db,
 # Main        #
 #-------------#
 
-if __name__ == "__main__":
-
-    main()
+if __name__ == "__main__": main()

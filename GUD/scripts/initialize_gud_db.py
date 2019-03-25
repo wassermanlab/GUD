@@ -17,7 +17,7 @@ from sqlalchemy_utils import (
     database_exists
 )
 
-# Import from GUD module
+# Import from GUD
 from GUD import GUDglobals
 from GUD.ORM.chrom import Chrom
 from GUD.ORM.experiment import Experiment
@@ -46,7 +46,7 @@ def parse_args():
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="host name (default = localhost)")
     mysql_group.add_argument("-p", "--passwd",
-        help="Password (default = ignore this option)")
+        help="password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="port number (default = 5506)")
 
@@ -184,6 +184,4 @@ def handle_bytes(bytes):
 # Main        #
 #-------------#
 
-if __name__ == "__main__":
-
-    main()
+if __name__ == "__main__": main()
