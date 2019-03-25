@@ -9,7 +9,7 @@ from GUD import GUDglobals
 from GUD.ORM.chrom import Chrom
 from GUD.ORM.expression import Expression
 from GUD.ORM.gene import Gene
-from GUD.ORM.seq_feature import SeqFeature
+from GUD.ORM.gud_feature import GUDFeature
 from GUD.ORM.tss import TSS
 
 #-------------#
@@ -39,9 +39,11 @@ def parse_args():
         help="require expression in all input sample(s) (default = False)")
     parser.add_argument("-g", "--group", action="store_true",
         help="group expression by gene (default = False)")
-    parser.add_argument("-m", "--min-exp", type=float, default=GUDglobals.min_exp,
+    parser.add_argument("--min-exp",  metavar="", type=float,
+        default=GUDglobals.min_exp,
         help="min. expression in input sample(s) (in TPM; default = %s)" % GUDglobals.min_exp)
-    parser.add_argument("-p", "--min-percent-exp", type=float, default=GUDglobals.min_percent_exp,
+    parser.add_argument("--min-percent-exp",  metavar="", type=float,
+        default=GUDglobals.min_percent_exp,
         help="min. percentage of expression in input sample(s) (default = %s)" % GUDglobals.min_percent_exp)
 
     # MySQL args
@@ -50,7 +52,7 @@ def parse_args():
         help="database name (default = \"%s\")" % GUDglobals.db_name)
     mysql_group.add_argument("-H", "--host", default=GUDglobals.db_host,
         help="host name (default = \"%s\")" % GUDglobals.db_host)
-    mysql_group.add_argument("-p", "--passwd", metavar="PASS",
+    mysql_group.add_argument("-p", "--pwd", metavar="PASS",
         help="password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=GUDglobals.db_port,
         help="port number (default = \"%s\")" % GUDglobals.db_port)
@@ -88,13 +90,10 @@ def main():
     else:
         raise ValueError("No sample(s) was provided!")
 
-    print(samples)
-    exit(0)
-
     # Establish SQLalchemy session with GUD
     session = GUDglobals.establish_GUD_session(
         args.user,
-        args.passwd,
+        args.pwd,
         args.host,
         args.port,
         args.db
@@ -105,7 +104,7 @@ def main():
         session,
         samples,
         args.min_exp,
-        args.perc_exp,
+        args.min_percent_exp,
         args.all,
         args.group
     )
@@ -131,7 +130,7 @@ def main():
 #    os.remove(dummy_file)
 
 def get_differentially_expressed_tss(session,
-    sample=[], min_tpm=0.0, perc_tpm=0.0,
+    sample=[], min_tpm=100.0, min_percent_exp=25.0,
     exp_in_all_samples=False, group_by_gene=False):
     """
     Identifies TSSs differentially expressed in samples.
@@ -143,11 +142,18 @@ def get_differentially_expressed_tss(session,
     tss_samples = {}
     tss_expression = {}
 
-    feats = TSS.select_by_sample(session, sample, min_tpm)
+    # Expression condition
+    exp_condition = "OR"
+    if exp_in_all_samples:
+        exp_condition = "AND"
+
+    genes = set(Gene.get_all_gene_symbols(session))
+
+    feats = Expression.select_by_samples(
+        session, sample, min_tpm)
     print(len(feats))
-
-    gene_symbols = set(Gene.select_all_gene_symbols(session))
-
+    exit(0)
+    
     # For each TSS...
     for tss in feats:
         # Exclude non gene TSSs

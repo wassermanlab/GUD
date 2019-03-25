@@ -19,8 +19,8 @@ def parse_args():
     line and returns an {argparse} object.
     """
 
-    parser = argparse.ArgumentParser(description="delimits a gene region.")
-
+    parser = argparse.ArgumentParser(description="delimits a region for a gene based on TAD boundaries, nearby genes, or +/- N kb centered around that gene.")
+    
     parser.add_argument("--dummy-dir", default="/tmp/",
         help="dummy directory (default = /tmp/)")
 
@@ -30,8 +30,8 @@ def parse_args():
     gene_group.add_argument("--gene-file",
         help="file containing a list of gene symbols")
 
-    parser.add_argument("-l", "--limit-by", default="tad",
-        help="limit gene region by: 1) TAD boundaries (i.e. \"tad\"; default); 2) boundaries of nearby genes (i.e. \"gene\"); or 3) +/- N kb around that gene body (e.g. use 1000 for 1 Mb)")
+    parser.add_argument("-l", default="tad",
+        help="limit the gene region based on TAD boundaries (i.e. \"tad\"; default), nearby genes (i.e. \"gene\"), or +/- N kb centered around that gene (e.g. use 1000 for 1 Mb)")
 
     sample_group = parser.add_mutually_exclusive_group()
     sample_group.add_argument("--sample", default=[], nargs="*",
@@ -45,7 +45,7 @@ def parse_args():
         help="database name (default = \"%s\")" % GUDglobals.db_name)
     mysql_group.add_argument("-H", "--host", default=GUDglobals.db_host,
         help="host name (default = \"%s\")" % GUDglobals.db_host)
-    mysql_group.add_argument("-p", "--passwd", metavar="PASS",
+    mysql_group.add_argument("-p", "--pwd", metavar="PASS",
         help="password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=GUDglobals.db_port,
         help="port number (default = \"%s\")" % GUDglobals.db_port)
@@ -93,7 +93,7 @@ def main():
     # Establish SQLalchemy session with GUD
     session = GUDglobals.establish_GUD_session(
         args.user,
-        args.passwd,
+        args.pwd,
         args.host,
         args.port,
         args.db
@@ -106,7 +106,8 @@ def main():
             session,
             gene,
             samples,
-            args.limit_by)
+            limit_by = args.l
+        )
         # Write
         GUDglobals.write(dummy_file, region)
 
@@ -167,13 +168,13 @@ def get_gene_region(
     if chrom:
         # If limit by kb...
         if limit_by.isdigit():
-            region_start = \
+            region_start =\
                 gene_start - int(limit_by) * 1000
-            region_end = \
+            region_end =\
                 gene_end + int(limit_by) * 1000
         # ... Instead, if limit by TAD...
         elif limit_by == "tad":
-            region_start, region_end = \
+            region_start, region_end =\
                 get_region_coordinates_by_tad(
                     session,
                     chrom,
@@ -185,7 +186,7 @@ def get_gene_region(
                 )
         # ... Instead, if limit by gene...
         elif limit_by == "gene":
-            region_start, region_end = \
+            region_start, region_end =\
                 get_region_coordinates_by_gene(
                     session,
                     gene,

@@ -1,4 +1,6 @@
 from sqlalchemy import (
+    and_,
+    or_,
     Column,
     Float,
     ForeignKey,
@@ -75,27 +77,32 @@ class Expression(Base):
 
         return q.first()
 
+    @classmethod
+    def select_by_sample(cls,
+        session, sample, min_tpm=100.0):
+
+        q = session.query(cls, TSS, Sample).\
+            join().\
+            filter(TSS.uid == cls.tssID).\
+            filter(Sample.uid == cls.sampleID).\
+            filter(Sample.name == sample).\
+            filter(cls.avg_expression_level >= min_tpm)
+
+        return q.first()
+
+    @classmethod
+    def select_by_samples(cls,
+        session, sample=[], min_tpm=100.0):
     
-#    @classmethod
-#    def select_by_sample(cls, session, sample, min_tpm=10.0):
-#
-#        q = session.query(cls).\
-#            filter(
-#                cls.sampleID == sample,
-#                cls.avg_tpm >= min_tpm
-#            )
-#
-#        return q.first()
-#
-#    @classmethod
-#    def select_by_samples(cls, session, sample=[], min_tpm=10.0):
-#
-#        q = session.query(cls).\
-#            filter(cls.avg_tpm >= min_tpm).\
-#            filter(cls.sampleID.in_(sample))
-#
-#        return q.all()
-#
+        q = session.query(cls, TSS, Sample).\
+            join().\
+            filter(TSS.uid == cls.tssID).\
+            filter(Sample.uid == cls.sampleID).\
+            filter(Sample.name.in_(sample)).\
+            filter(cls.avg_expression_level >= min_tpm)
+
+        return q.all()
+
 #    @classmethod
 #    def select_by_tss(cls, session, tss, sample=[]):
 #        """

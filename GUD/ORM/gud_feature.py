@@ -6,21 +6,24 @@ from Bio.SeqFeature import (
 
 class GUDFeature(SeqFeature):
     """
-    Implements a GUD Feature object.
-    
-    Based on Biopython's Sequence Feature object.
+    Implements a GUD Feature object based on
+    the Biopython's Sequence Feature object.
 
     Attributes:
-    location - the location of the feature on the sequence (FeatureLocation)
-    type - the specified type of the feature (ie. CDS, exon, repeat...)
-    location_operator - a string specifying how this SeqFeature may be related to others. For example, in the example GenBank feature shown below, the location_operator would be "join". This is a proxy for feature.location.operator and only applies to compound locations.
-    strand - A value specifying on which strand (of a DNA sequence, for instance) the feature deals with. 1 indicates the plus strand, -1 indicates the minus strand, 0 indicates stranded but unknown (? in GFF3), while the default of None indicates that strand doesn't apply (dot in GFF3, e.g. features on proteins). Note this is a shortcut for accessing the strand property of the feature's location.
-    id - A string identifier for the feature.
-    ref - A reference to another sequence. This could be an accession number for some different sequence. Note this is a shortcut for the reference property of the feature's location.
-    ref_db - A different database for the reference accession number. Note this is a shortcut for the reference property of the location
-    qualifiers - A dictionary of qualifiers on the feature. These are analogous to the qualifiers from a GenBank feature table. The keys of the dictionary are qualifier names, the values are the qualifier values. As of Biopython 1.69 this is an ordered dictionary.
+    chrom {str} chromosome of the feature
+    location {FeatureLocation} location of the
+    feature on the genome
+    type {str} the specified type of feature
+    (e.g. gene, TSS, repeat...)
+    strand {int} on the DNA sequence. \"1\"
+    indicates the plus strand; \"-1\" the minus
+    strand; \"0\" for unknown or not applicable
+    strand
+    id {str} identifier for the feature
+    qualifiers {dict} qualifiers of the feature
+    profile {array} of scores per nucleotide
     """
-
+    
     def __init__(
         self,
         chrom,

@@ -62,7 +62,7 @@ def parse_args():
         help="database name (default = \"hg19\")")
     mysql_group.add_argument("-H", "--host", default="localhost",
         help="host name (default = localhost)")
-    mysql_group.add_argument("-p", "--passwd",
+    mysql_group.add_argument("-p", "--pwd", metavar="PASS",
         help="password (default = ignore this option)")
     mysql_group.add_argument("-P", "--port", default=5506, type=int,
         help="port number (default = 5506)")
@@ -76,8 +76,8 @@ def parse_args():
     # Set default
     if not args.db:
         args.db = args.genome
-    if not args.passwd:
-        args.passwd = ""
+    if not args.pwd:
+        args.pwd = ""
 
     return args
 
@@ -87,13 +87,13 @@ def main():
     args = parse_args()
 
     # Insert ENCODE data to GUD database
-    insert_encode_to_gud_db(args.user, args.passwd,
+    insert_encode_to_gud_db(args.user, args.pwd,
         args.host, args.port, args.db, args.genome,
         args.metadata, args.directory, args.samples,
         args.feat_type, args.cluster, args.dummy_dir,
         args.source)
 
-def insert_encode_to_gud_db(user, passwd, host, port, db,
+def insert_encode_to_gud_db(user, pwd, host, port, db,
     genome, metadata_file, directory, samples_file,
     feat_type, cluster, dummy_dir, source_name):
 
@@ -101,7 +101,7 @@ def insert_encode_to_gud_db(user, passwd, host, port, db,
     samples = {}
     metadata = {}
     db_name = "mysql://{}:{}@{}:{}/{}".format(
-        user, passwd, host, port, db)
+        user, pwd, host, port, db)
     if not database_exists(db_name):
         raise ValueError("GUD database does not exist!!!\n\t%s" % db_name)
     session = scoped_session(sessionmaker())
