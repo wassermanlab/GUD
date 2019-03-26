@@ -1,6 +1,3 @@
-from binning import (
-    assign_bin
-)
 from sqlalchemy import (
     and_,
     Column,
@@ -14,7 +11,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects import mysql
 
 from .base import Base
-from .gud_feature import GUDFeature
+from .genomic_feature import GenomicFeature
 from .region import Region
 from .source import Source
 
@@ -121,7 +118,7 @@ class Gene(Base):
 
     @classmethod
     def select_by_location(cls, session, chrom,
-        start, end, as_gud_feature=False):
+        start, end, as_genomic_feature=False):
         """
         Query objects by genomic location.
         """
@@ -142,14 +139,14 @@ class Gene(Base):
             ).\
             filter(Region.bin.in_(bins))
 
-        if as_gud_feature:
+        if as_genomic_feature:
 
             feats = []
 
             # For each feature...
             for feat in q.all():
                 feats.append(
-                    cls.__as_gud_feature(feat)
+                    cls.__as_genomic_feature(feat)
                 )
 
             return feats
@@ -158,7 +155,7 @@ class Gene(Base):
 
     @classmethod
     def select_by_name(cls, session, name,
-        as_gud_feature=False):
+        as_genomic_feature=False):
         """
         Query objects by gene symbol.
         """
@@ -168,14 +165,14 @@ class Gene(Base):
             filter(Region.uid == cls.regionID).\
             filter(cls.name2 == name)
 
-        if as_gud_feature:
+        if as_genomic_feature:
 
             feats = []
 
             # For each feature...
             for feat in q.all():
                 feats.append(
-                    cls.__as_gud_feature(feat)
+                    cls.__as_genomic_feature(feat)
                 )
 
             return feats
@@ -184,7 +181,7 @@ class Gene(Base):
 
     @classmethod
     def select_by_names(cls, session, names=[],
-        as_gud_feature=False):
+        as_genomic_feature=False):
         """
         Query objects by multiple gene symbols.
         If no genes are provided, return all objects.
@@ -195,14 +192,14 @@ class Gene(Base):
         if names:
             q = q.filter(cls.name2.in_(names))
 
-        if as_gud_feature:
+        if as_genomic_feature:
 
             feats = []
 
             # For each feature...
             for feat in q.all():
                 feats.append(
-                    cls.__as_gud_feature(feat)
+                    cls.__as_genomic_feature(feat)
                 )
 
             return feats
@@ -211,7 +208,7 @@ class Gene(Base):
 
     @classmethod
     def select_by_uid(cls, session, uid,
-        as_gud_feature=False):
+        as_genomic_feature=False):
         """
         Query objects by uid.
         """
@@ -220,14 +217,16 @@ class Gene(Base):
             join().\
             filter(cls.uid == uid)
 
-        if as_gud_feature:
-            return cls.__as_gud_feature(q.first())
+        if as_genomic_feature:
+            return cls.__as_genomic_feature(
+                q.first()
+            )
 
         return q.first()
 
     @classmethod
     def select_by_uid(cls, session, uids=[],
-        as_gud_feature=False):
+        as_genomic_feature=False):
         """
         Query objects by multiple uids.
         If no uids are provided, return all objects.
@@ -238,14 +237,14 @@ class Gene(Base):
         if uids:
             q = q.filter(cls.uid.in_(uids))
 
-        if as_gud_feature:
+        if as_genomic_feature:
 
             feats = []
 
             # For each feature...
             for feat in q.all():
                 feats.append(
-                    cls.__as_gud_feature(feat)
+                    cls.__as_genomic_feature(feat)
                 )
 
             return feats
@@ -263,7 +262,7 @@ class Gene(Base):
 
         return [g[0] for g in q]
 
-    def __as_gud_feature(feat):
+    def __as_genomic_feature(feat):
 
         # Initialize
         exonStarts = []
@@ -289,7 +288,7 @@ class Gene(Base):
             "source" : feat.Source.name,            
         }
 
-        return GUDFeature(
+        return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),
             int(feat.Region.end),

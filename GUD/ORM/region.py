@@ -15,7 +15,6 @@ from sqlalchemy import (
 from sqlalchemy.dialects import mysql
 
 from .base import Base
-from .gud_feature import GUDFeature
 from .chrom import Chrom
 
 class Region(Base):
@@ -103,8 +102,7 @@ class Region(Base):
 
     @classmethod
     def select_by_bin_range(cls, session, chrom,
-        start, end, bins=[], compute_bins=False,
-        as_gud_feature=False):
+        start, end, bins=[], compute_bins=False):
         """
         Query objects using the bin system to speed
         up range searches. If no bins are provided
@@ -125,18 +123,6 @@ class Region(Base):
 
         if bins:
             q = q.filter(cls.bin.in_(bins))
-
-        if as_gud_feature:
-
-            feats = []
-
-            # For each feature...
-            for feat in q.all():
-                feats.append(
-                    cls.__as_gud_feature(feat)
-                )
-
-            return feats
 
         return q.all()
 
@@ -164,17 +150,6 @@ class Region(Base):
 #            )
 #
 #        return q.first()
-
-    def __as_gud_feature(feature):
-
-        return GUDFeature(
-            feature.chrom,
-            int(feature.start),
-            int(feature.end),
-            strand = feature.strand,
-            feat_type = "Region",
-            feat_id = self.uid
-        )
 
     def __str__(self):
 

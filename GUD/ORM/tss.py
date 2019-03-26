@@ -1,7 +1,3 @@
-from binning import (
-    containing_bins,
-    contained_bins
-)
 from sqlalchemy import (
     and_,
     or_,
@@ -17,7 +13,8 @@ from sqlalchemy.dialects import mysql
 
 from .base import Base
 from .experiment import Experiment
-from .gene import Gene 
+from .gene import Gene
+from .genomic_feature import GenomicFeature
 from .region import Region
 from .source import Source
 
@@ -164,3 +161,50 @@ class TSS(Base):
         q = session.query(cls).filter(or_(*ands))
 
         return q.all()
+
+    def __as_genomic_feature(feat):
+
+        # Initialize
+        exonStarts = []
+        exonEnds = []
+
+        # For each exon start...
+        for i in str(feat.Gene.exonStarts).split(","):
+            if i.isdigit():
+                exonStarts.append(int(i))
+        
+        # For each exon end...
+        for i in str(feat.Gene.exonEnds).split(","):
+            if i.isdigit():
+                exonStarts.append(int(i))
+
+        # Define qualifiers
+        qualifiers = {
+            "name": feat.Gene.name,
+            "cdsStart": int(feat.Gene.cdsStart),
+            "cdsEnd": int(feat.Gene.cdsEnd),
+            "exonStarts": exonStarts,
+            "exonEnds": exonEnds,
+            "source" : feat.Source.name,            
+        }
+
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand = feat.Region.strand,
+            feat_type = "Gene",
+            feat_id = feat.Gene.name2,
+            qualifiers = qualifiers
+        )
+
+#    def __repr__(self):
+#
+#        return "<TSS(%s, %s, %s, %s)>" % \
+#            (
+#                "uid={}".format(self.uid),
+#                "regionID={}".format(self.regionID),
+#                "name={}".format(self.name),
+#                "name2={}".format(self.name2),
+#                "sourceID={}".format(self.sourceID),
+#            )
