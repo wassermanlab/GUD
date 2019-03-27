@@ -15,8 +15,6 @@ from sqlalchemy import (
 from sqlalchemy.dialects import mysql
 
 from .base import Base
-from .gud_feature import GUDFeature
-from .chrom import Chrom
 
 class Region(Base):
 
@@ -77,8 +75,8 @@ class Region(Base):
     def is_unique(cls, session, chrom, start, end,
         strand=None):
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.chrom == chrom,
                 cls.start == int(start),
                 cls.end == int(end),
@@ -91,8 +89,8 @@ class Region(Base):
     def select_unique(cls, session, chrom, start, end,
         strand=None):
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.chrom == chrom,
                 cls.start == int(start),
                 cls.end == int(end),
@@ -103,21 +101,20 @@ class Region(Base):
 
     @classmethod
     def select_by_bin_range(cls, session, chrom,
-        start, end, bins=[], compute_bins=False,
-        as_gud_feature=False):
+        start, end, bins=[], compute_bins=False):
         """
         Query objects using the bin system to speed
         up range searches. If no bins are provided
-        and compute_bins is set to True, then compute
-        them. Otherwise, perform the query without
+        and compute_bins is True, then compute the
+        bins. Otherwise, perform the query without
         using the bin system (EXTREMELY slow!).
         """
 
         if not bins and compute_bins:
             bins = cls._compute_bins(start, end)
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.chrom == chrom,
                 cls.end > start,
                 cls.start < end
@@ -125,18 +122,6 @@ class Region(Base):
 
         if bins:
             q = q.filter(cls.bin.in_(bins))
-
-        if as_gud_feature:
-
-            feats = []
-
-            # For each feature...
-            for feat in q.all():
-                feats.append(
-                    cls.__as_gud_feature(feat)
-                )
-
-            return feats
 
         return q.all()
 
@@ -164,28 +149,6 @@ class Region(Base):
 #            )
 #
 #        return q.first()
-
-    def __as_gud_feature(feature):
-
-        return GUDFeature(
-            feature.chrom,
-            int(feature.start),
-            int(feature.end),
-            strand = feature.strand,
-            feat_type = "Region",
-            feat_id = self.uid
-        )
-
-    def __str__(self):
-
-        return "{}\t{}\t{}\t{}\t{}".\
-            format(
-                self.bin,
-                self.chrom,
-                self.start,
-                self.end,
-                self.strand
-            )
 
     def __repr__(self):
 

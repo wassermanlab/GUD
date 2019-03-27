@@ -9,7 +9,8 @@ from GUD import GUDglobals
 from GUD.ORM.chrom import Chrom
 from GUD.ORM.expression import Expression
 from GUD.ORM.gene import Gene
-from GUD.ORM.gud_feature import GUDFeature
+from GUD.ORM.genomic_feature import GenomicFeature
+from GUD.ORM.sample import Sample
 from GUD.ORM.tss import TSS
 
 #-------------#
@@ -36,13 +37,14 @@ def parse_args():
     # MySQL args
     mysql_group = parser.add_argument_group("exp. arguments")
     parser.add_argument("-a", "--all", action="store_true",
-        help="require expression in all input sample(s) (default = False)")
-    parser.add_argument("-g", "--group", action="store_true",
-        help="group expression by gene (default = False)")
-    parser.add_argument("--min-exp",  metavar="", type=float,
+        help="require expression in all sample(s) (default = False)")
+    parser.add_argument("--max-genes", metavar="", type=int,
+        default=GUDglobals.max_genes,
+        help="max. number of genes to return (default = %s)" % GUDglobals.max_genes)
+    parser.add_argument("--min-exp", metavar="", type=float,
         default=GUDglobals.min_exp,
         help="min. expression in input sample(s) (in TPM; default = %s)" % GUDglobals.min_exp)
-    parser.add_argument("--min-percent-exp",  metavar="", type=float,
+    parser.add_argument("--min-percent-exp", metavar="", type=float,
         default=GUDglobals.min_percent_exp,
         help="min. percentage of expression in input sample(s) (default = %s)" % GUDglobals.min_percent_exp)
 
@@ -85,8 +87,8 @@ def main():
         samples = args.sample
     elif args.sample_file:
         sample_file = os.path.abspath(args.sample_file)
-        for s in GUDglobals.parse_file(sample_file):
-            samples.append(s)
+        for sample in GUDglobals.parse_file(sample_file):
+            samples.append(sample)
     else:
         raise ValueError("No sample(s) was provided!")
 
@@ -100,113 +102,117 @@ def main():
     )
 
     # Get TSSs
-    tss = get_differentially_expressed_tss(
+    diff_exp_tss = get_differentially_expressed_tss(
         session,
         samples,
         args.min_exp,
         args.min_percent_exp,
-        args.all,
-        args.group
+        args.all
     )
 
-    # For each TSS...
-    for i in sorted(tss, key=lambda x: tss[x][0], reverse=True):
-        print(i, tss[i][0])
-#        # If group by gene...
-#        if args.group:
+    # If differentially expressed TSSs...
+    if diff_exp_tss:
 
-#        # Write
-#        OTglobals.write(dummy_file, region)
-#
-#    # If output file...
-#    if args.out_file:
-#        shutil.copy(dummy_file, os.path.abspath(args.out_file))
-#    # ... Else, print on stdout
-#    else:
-#        for line in OTglobals.parse_file(dummy_file):
-#            OTglobals.write(None, line)
-#
-#    # Delete dummy file
-#    os.remove(dummy_file)
+        # For each TSS...
+        for tss in diff_exp_tss[:args.max_genes]:
+            # Write
+            GUDglobals.write(dummy_file, tss)
+
+        # If output file...
+        if args.out_file:
+            shutil.copy(
+                dummy_file,
+                os.path.abspath(args.out_file)
+            )
+        # ... Else, print on stdout...
+        else:
+            for line in GUDglobals.parse_file(dummy_file):
+                GUDglobals.write(None, line)
+
+        # Delete dummy file
+        os.remove(dummy_file)
+
+    else:
+        raise ValueError("No differentially expressed gene(s) found!!!")
 
 def get_differentially_expressed_tss(session,
-    sample=[], min_tpm=100.0, min_percent_exp=25.0,
-    exp_in_all_samples=False, group_by_gene=False):
+    samples=[], min_tpm=100, min_percent_exp=25,
+    exp_in_all_samples=False):
     """
-    Identifies TSSs differentially expressed in samples.
-    """
+    Identifies TSSs differentially expressed in
+    samples.
+    """    
 
     # Initialize
-    de_tss = {}
-    all_tss = {}
-    tss_samples = {}
-    tss_expression = {}
+    name2uid = {}
+    uid2name = {}
+    tssIDs = set()
+    sample2tss = []
+    diff_exp_tss = []
 
-    # Expression condition
-    exp_condition = "OR"
-    if exp_in_all_samples:
-        exp_condition = "AND"
+    # For each sample...
+    for feat in Sample.select_by_names(session):
+        uid2name.setdefault(feat.uid, feat.name)
+        name2uid.setdefault(feat.name, feat.uid)
 
+    # Get genes
     genes = set(Gene.get_all_gene_symbols(session))
 
-    feats = Expression.select_by_samples(
-        session, sample, min_tpm)
-    print(len(feats))
-    exit(0)
-    
+    # For each sample...
+    for sample in samples:
+        sample2tss.append(set())
     # For each TSS...
-    for tss in feats:
-        # Exclude non gene TSSs
-        if tss.gene not in gene_symbols: continue
-        # Add TSS sample
-        tss_samples.setdefault((tss.gene, tss.tss), set())
-        tss_samples[(tss.gene, tss.tss)].add(tss.cell_or_tissue)
-
-    # Require expression in all samples
+    for tss in Expression.select_by_samples(
+        session, samples, min_tpm):
+        # Get index
+        i = samples.index(tss.Sample.name)
+        sample2tss[i].add(tss.Expression.tssID)
+        tssIDs.add(tss.Expression.tssID)
+    # If required expression in all samples...
     if exp_in_all_samples:
+        tssIDs = list(set.intersection(*sample2tss))
+    # ... Else...
+    else:
+        tssIDs = list(tssIDs)
+
+    # If there are TSS IDs...
+    if tssIDs:
         # For each TSS...
-        for tss in frozenset(tss_samples):
-            # For each sample...
-            for s in sample:
-                # If TSS not expressed in sample...
-                if s not in tss_samples[tss]:
-                    tss_samples.pop(tss, None)
-                    break
+        for tss in TSS.select_by_uids(session,
+            tssIDs, as_genomic_feature=True):
+            # Initialize
+            expression = {}
+            background_exp = 0.0
+            foreground_exp = 0.0
+            # For each sampleID
+            for i in range(len(tss.qualifiers["sampleIDs"])):
+                if tss.qualifiers["sampleIDs"][i] in uid2name:
+                    expression.setdefault(
+                        uid2name[tss.qualifiers["sampleIDs"][i]],
+                        tss.qualifiers["avg_expression_levels"][i]
+                    )
+                    background_exp += tss.qualifiers["avg_expression_levels"][i]
+                    if uid2name[tss.qualifiers["sampleIDs"][i]] in samples:
+                        foreground_exp += tss.qualifiers["avg_expression_levels"][i]
+            # If expressed...
+            if background_exp > 0:
+                # Get percent exp. in samples
+                percent_exp = (foreground_exp * 100.0) / background_exp
+                # If differentially expressed...
+                if percent_exp >= min_percent_exp:
+                    tss.qualifiers.setdefault("expression", expression)
+                    tss.qualifiers.setdefault("percent_exp", percent_exp)
+                    diff_exp_tss.append(tss)
 
-    feats = TSS.select_by_multiple_tss(session, tss_samples.keys())
-    print(len(feats))
+    # Sort TSSs by percent exp.
+    diff_exp_tss.sort(
+        key=lambda x: x.qualifiers["percent_exp"],
+        reverse=True
+    )
 
-    # For each TSS...
-    for tss in feats:
-        # Add TSS
-        tss_expression.setdefault((tss.gene, tss.tss), [0.0, 0.0])
-        if tss.cell_or_tissue in sample:
-            tss_expression[(tss.gene, tss.tss)][0] += tss.avg_tpm
-        tss_expression[(tss.gene, tss.tss)][1] += tss.avg_tpm
-        all_tss.setdefault((tss.gene, tss.tss), [])
-        all_tss[(tss.gene, tss.tss)].append(tss)
+    return diff_exp_tss
 
-    # For each TSS...
-    for i in tss_expression:
-        # Skip if not differentially expressed
-        ptpm = tss_expression[i][0] * 100 / tss_expression[i][1]
-        if ptpm < perc_tpm: continue
-        # For each TSS...
-        for tss in all_tss[i]:
-            # If group by gene...
-            if group_by_gene:
-                de_tss.setdefault((tss.gene), [ptpm, {}, set()])
-                de_tss[tss.gene][1].setdefault(tss.cell_or_tissue, [0.0, 0.0])
-                de_tss[tss.gene][1][tss.cell_or_tissue][0] += tss.avg_tpm
-                de_tss[tss.gene][1][tss.cell_or_tissue][1] = de_tss[tss.gene][1][tss.cell_or_tissue][0] * 100 / tss_expression[i][1]
-                de_tss[tss.gene][2].add(tss.tss)
-            # ... Else...
-            else:
-                de_tss.setdefault((tss.gene, tss.tss), [ptpm, {}])
-                de_tss[(tss.gene, tss.tss)][1].setdefault(tss.cell_or_tissue, [tss.avg_tpm,
-                    tss.avg_tpm * 100 / tss_expression[i][1]])
 
-    return de_tss
 
 #-------------#
 # Main        #

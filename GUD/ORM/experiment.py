@@ -38,20 +38,16 @@ class Experiment(Base):
     @classmethod
     def is_unique(cls, session, name):
 
-        q = session.query(cls).\
-            filter(
-                cls.name == name
-            )
+        q = session.query(cls)\
+            .filter(cls.name == name)
 
         return len(q.all()) == 0
 
     @classmethod
     def select_unique(cls, session, name):
 
-        q = session.query(cls).\
-            filter(
-                cls.name == name
-            )
+        q = session.query(cls)\
+            .filter(cls.name == name)
 
         return q.first()
 
@@ -61,10 +57,8 @@ class Experiment(Base):
         Query objects by experiment name.
         """
 
-        q = session.query(cls).\
-            filter(
-                cls.name == name
-            )
+        q = session.query(cls)\
+            .filter(cls.name == name)
 
         return q.first()
 
@@ -72,19 +66,16 @@ class Experiment(Base):
     def select_by_names(cls, session, names=[]):
         """
         Query objects by multiple experiment names.
-        If no names are provided, return all objects.
+        If no names are provided, return all
+        objects.
         """
 
-        q = session.query(cls).\
-            filter(
-                cls.name.in_(names)
-            )
+        q = session.query(cls)
+        
+        if names:
+            q = q.filter(cls.name.in_(names))
 
         return q.all()
-
-    def __str__(self):
-
-        return "{}".format(self.name)
 
     def __repr__(self):
 

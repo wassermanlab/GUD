@@ -4,10 +4,10 @@ from Bio.SeqFeature import (
     SeqFeature
 )
 
-class GUDFeature(SeqFeature):
+class GenomicFeature(SeqFeature):
     """
-    Implements a GUD Feature object based on
-    the Biopython's Sequence Feature object.
+    Implements a Genomic Feature object based
+    on the Biopython's Sequence Feature object.
 
     Attributes:
     chrom {str} chromosome of the feature
@@ -125,7 +125,7 @@ class GUDFeature(SeqFeature):
         return "{}\t{}\t{}\t{}\t{}\t{}".\
             format(
                 self.chrom,
-                self.start_1_based,
+                self.start, # 0-based for BED format
                 self.end,
                 self.id,
                 self.score,

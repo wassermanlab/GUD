@@ -38,10 +38,8 @@ class Source(Base):
     @classmethod
     def is_unique(cls, session, name):
 
-        q = session.query(cls).\
-            filter(
-                cls.name == name
-            )
+        q = session.query(cls)\
+            .filter(cls.name == name)
 
         return len(q.all()) == 0
 
@@ -56,16 +54,25 @@ class Source(Base):
         Query objects by source name. 
         """
 
-        q = session.query(cls).\
-            filter(
-                cls.name == name
-            )
+        q = session.query(cls)\
+            .filter(cls.name == name)
 
         return q.first()
 
-    def __str__(self):
+    @classmethod
+    def select_by_names(cls, session, names=[]):
+        """
+        Query objects by multiple source names.
+        If no names are provided, return all
+        objects.
+        """
 
-        return "{}".format(self.name)
+        q = session.query(cls)
+
+        if names:
+            q = q.filter(cls.name.in_(names))
+
+        return q.all()
 
     def __repr__(self):
 

@@ -74,8 +74,8 @@ class Sample(Base):
     def is_unique(cls, session, name, treatment,
         cell_line, cancer):
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.name == name,
                 cls.treatment == int(treatment),
                 cls.cell_line == int(cell_line),
@@ -88,8 +88,8 @@ class Sample(Base):
     def select_unique(cls, session, name, treatment,
         cell_line, cancer):
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.name == name,
                 cls.treatment == int(treatment),
                 cls.cell_line == int(cell_line),
@@ -106,8 +106,8 @@ class Sample(Base):
         Query objects by sample name. 
         """
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.name == name,
                 cls.treatment <= int(treatment),
                 cls.cell_line <= int(cell_line),
@@ -122,16 +122,19 @@ class Sample(Base):
         cancer=False):
         """
         Query objects by multiple sample names.
-        If no names are provided, return all objects.
+        If no names are provided, return all
+        objects.
         """
 
-        q = session.query(cls).\
-            filter(cls.name.in_(names)).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.treatment <= int(treatment),
                 cls.cell_line <= int(cell_line),
                 cls.cancer <= int(cancer)
             )
+
+        if names:
+            q = q.filter(cls.name.in_(names))
 
         return q.all()
 
@@ -143,24 +146,14 @@ class Sample(Base):
         Query objects by experimental conditions. 
         """
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.treatment <= int(treatment),
                 cls.cell_line <= int(cell_line),
                 cls.cancer <= int(cancer)
             )
 
         return q.all()
-
-    def __str__(self):
-
-        return "{}\t{}\t{}\t{}".\
-            format(
-                self.name,
-                self.treatment,
-                self.cell_line,
-                self.cancer
-            )
 
     def __repr__(self):
 

@@ -50,6 +50,7 @@ class Globals(object):
 
     # Defaults for selecting differentially
     # expressed genes
+    max_genes = 10
     min_exp = 100.0 # in TPM
     min_percent_exp = 25.0 # in %
 

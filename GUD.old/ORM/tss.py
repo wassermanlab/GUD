@@ -13,6 +13,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 
 from GUD.ORM.gene import Gene
+from .genomic_feature import GenomicFeature
 
 Base = declarative_base()
 
