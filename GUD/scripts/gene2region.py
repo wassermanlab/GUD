@@ -2,12 +2,51 @@
 
 import argparse
 import os
+import sys
 
 # Import from GUD
 from GUD import GUDglobals
 from GUD.ORM.chrom import Chrom
 from GUD.ORM.gene import Gene
 from GUD.ORM.genomic_feature import GenomicFeature
+from GUD.ORM.tad import TAD
+
+__doc__ = """
+usage: gene2region.py (--gene [STR ...] | --gene-file FILE)
+                      [-h] [-d] [--dummy-dir DIR] [-o FILE]
+                      [[--sample [STR ...] | --sample-file FILE]]
+                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+
+delimits a region for the given genes based on TADs, nearby genes,
+or distance (in kb).
+
+  --gene [STR ...]    gene(s) (e.g. "TH")
+  --gene-file FILE    file containing a list of genes
+
+optional arguments:
+  -h, --help          show this help message and exit
+  -d, --delimit-by    delimit the gene region based on TADs (i.e.
+                      "tad"; default), nearby genes (i.e. "gene"),
+                      or distance (i.e. +/- N kb)
+  --dummy-dir DIR     dummy directory (default = "/tmp/")
+  -o FILE             output file (default = stdout)
+  --sample [STR ...]  sample(s) for GUD features (e.g. "brain")
+  --sample-file FILE  file containing a list of samples for GUD
+                      features
+
+mysql arguments:
+  -d STR, --db STR    database name (default = "%s")
+  -H STR, --host STR  host name (default = "%s")
+  -p STR, --pwd STR   password (default = ignore this option)
+  -P STR, --port STR  port number (default = %s)
+  -u STR, --user STR  user name (default = "%s")
+""" % \
+(
+    GUDglobals.db_name,
+    GUDglobals.db_host,
+    GUDglobals.db_port,
+    GUDglobals.db_user
+)
 
 #-------------#
 # Functions   #
@@ -15,49 +54,85 @@ from GUD.ORM.genomic_feature import GenomicFeature
 
 def parse_args():
     """
-    This function parses arguments provided via command
-    line and returns an {argparse} object.
+    This function parses arguments provided via
+    the command line and returns an {argparse}
+    object.
     """
 
-    parser = argparse.ArgumentParser(description="delimits a region for a gene based on TAD boundaries, nearby genes, or +/- N kb centered around that gene.")
+    parser = argparse.ArgumentParser(
+        add_help=False,
+    )
     
-    parser.add_argument("--dummy-dir", default="/tmp/",
-        help="dummy directory (default = /tmp/)")
+    # Optional args
+    optional_group = parser.add_argument_group(
+        "optional arguments"
+    )
+    optional_group.add_argument(
+        "-h", "--help",
+        action="store_true"
+    )
+    optional_group.add_argument(
+        "-d", "--delimit-by",
+        default="tad"
+    )
+    optional_group.add_argument(
+        "--dummy-dir",
+        default="/tmp/"
+    )
+    optional_group.add_argument("-o")
 
-    gene_group = parser.add_mutually_exclusive_group(required=True)
-    gene_group.add_argument("--gene", nargs="*",
-        help="gene symbol(s) (e.g. \"TH\")")
-    gene_group.add_argument("--gene-file",
-        help="file containing a list of gene symbols")
-
-    parser.add_argument("-l", default="tad",
-        help="limit the gene region based on TAD boundaries (i.e. \"tad\"; default), nearby genes (i.e. \"gene\"), or +/- N kb centered around that gene (e.g. use 1000 for 1 Mb)")
-
-    sample_group = parser.add_mutually_exclusive_group()
-    sample_group.add_argument("--sample", default=[], nargs="*",
-        help="sample(s) (restrict to features in sample(s); e.g. \"brain\")")
-    sample_group.add_argument("--sample-file",
-        help="file containing a list of samples")
+    # Sample args
+    sample_group = parser\
+        .add_mutually_exclusive_group()
+    sample_group.add_argument(
+        "--sample", nargs="*"
+    )
+    sample_group.add_argument("--sample-file")
 
     # MySQL args
-    mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=GUDglobals.db_name,
-        help="database name (default = \"%s\")" % GUDglobals.db_name)
-    mysql_group.add_argument("-H", "--host", default=GUDglobals.db_host,
-        help="host name (default = \"%s\")" % GUDglobals.db_host)
-    mysql_group.add_argument("-p", "--pwd", metavar="PASS",
-        help="password (default = ignore this option)")
-    mysql_group.add_argument("-P", "--port", default=GUDglobals.db_port,
-        help="port number (default = \"%s\")" % GUDglobals.db_port)
-    mysql_group.add_argument("-u", "--user", default=GUDglobals.db_user,
-        help="user name (default = \"%s\")" % GUDglobals.db_user)
+    mysql_group = parser.add_argument_group(
+        "mysql arguments"
+    )
+    mysql_group.add_argument(
+        "-d", "--db",
+        default=GUDglobals.db_name,
+    )
+    mysql_group.add_argument(
+        "-H", "--host",
+        default=GUDglobals.db_host
+    )
+    mysql_group.add_argument("-p", "--pwd")
+    mysql_group.add_argument(
+        "-P", "--port",
+        default=GUDglobals.db_port
+    )
+    mysql_group.add_argument(
+        "-u", "--user",
+        default=GUDglobals.db_user
+    )
 
-    # Output args
-    out_group = parser.add_argument_group("output arguments")
-    out_group.add_argument("-o", "--out-file",
-        help="output file (default = stdout)")
+    if "-h" in sys.argv or "--help" in sys.argv:
+        print(__doc__)
+        exit(0)
+
+    # Mandatory arguments
+    gene_group = parser\
+        .add_mutually_exclusive_group(
+            required=True
+        )
+    gene_group.add_argument(
+        "--gene", nargs="*"
+    )
+    gene_group.add_argument("--gene-file")
 
     args = parser.parse_args()
+
+    if not args.delimit_by.isdigit():
+        if args.delimit_by not in [
+            "tad", "gene"
+        ]:
+            print(__doc__)
+            exit(0)
 
     return args
 
@@ -69,16 +144,21 @@ def main():
     # Initialize
     dummy_file = os.path.join(
         os.path.abspath(args.dummy_dir),
-        "%s.%s.bed" % (os.path.basename(__file__),
-        os.getpid()))
+        "%s.%s.bed" % (
+            os.path.basename(__file__),
+            os.getpid()
+        )
+    )
 
     # Fetch genes
     genes = []
     if args.gene:
         genes = args.gene
     else:
-        gene_file = os.path.abspath(args.gene_file)
-        for g in GUDglobals.parse_file(gene_file):
+        gene_file = os.path.abspath(
+            args.gene_file)
+        for g in GUDglobals.parse_file(
+            gene_file):
             genes.append(g)
 
     # Fetch samples
@@ -86,8 +166,11 @@ def main():
     if args.sample:
         samples = args.sample
     elif args.sample_file:
-        sample_file = os.path.abspath(args.sample_file)
-        for s in GUDglobals.parse_file(sample_file):
+        sample_file = os.path.abspath(
+            args.sample_file)
+        for s in GUDglobals.parse_file(
+            sample_file
+        ):
             samples.append(s)
 
     # Establish SQLalchemy session with GUD
@@ -106,7 +189,7 @@ def main():
             session,
             gene,
             samples,
-            limit_by = args.l
+            args.delimit_by
         )
         # Write
         GUDglobals.write(dummy_file, region)
@@ -119,14 +202,21 @@ def main():
         )
     # ... Else, print on stdout...
     else:
-        for line in GUDglobals.parse_file(dummy_file):
+        for line in GUDglobals.parse_file(
+            dummy_file
+        ):
             GUDglobals.write(None, line)
 
     # Delete dummy file
     os.remove(dummy_file)
     
-def get_gene_region(
-    session, gene, samples=[], limit_by="tad"):
+def get_gene_region(session, gene, samples=[],
+    delimit_by="tad"):
+    """
+    Delimits a region for the given gene based
+    on TAD boundaries, nearby genes, or +/- N
+    kb.
+    """
 
     # Initialize
     chrom = None
@@ -139,12 +229,15 @@ def get_gene_region(
         gene, as_genomic_feature=True)
     # If genes are not valid...
     if not genes:
-        raise ValueError("Gene name \"%s\" is not valid!" % gene)
+        raise ValueError(
+            "Gene \"%s\" is not valid!" % gene
+        )
 
     # For each gene...
     for g in genes:
 
-        # Ignore non-standard chroms, scaffolds, etc.
+        # Ignore non-standard chroms,
+        # scaffolds, etc.
         if g.chrom in chrom_sizes:
 
             # If first gene...
@@ -155,30 +248,34 @@ def get_gene_region(
                 region_start = 0
                 region_end = chrom_sizes[chrom]
 
-            # If gene's chromosome is different from previous genes...
+            # If gene is on a different chrom...
             if g.chrom != chrom:
-                raise ValueError("Gene name \"%s\" is in multiple chromosomes!" % gene)
+                raise ValueError(
+                    "Gene \"%s\" is in different chromosomes!" % gene
+                )
 
-            # If start position is upstream from previous start...
+            # If start position is upstream
+            # from previous...
             if g.start < gene_start:
                 gene_start = g.start
 
-            # If end position is downstream from previous end...
+            # If end position is downstream
+            # from previous...
             if g.end > gene_end:
                 gene_end = g.end
 
     # If chrom...
     if chrom:
 
-        # If limit by kb...
-        if limit_by.isdigit():
-            region_start =\
-                gene_start - int(limit_by) * 1000
-            region_end =\
-                gene_end + int(limit_by) * 1000
+        # If delimit by distance...
+        if delimit_by.isdigit():
+            region_start = gene_start -\
+                int(delimit_by) * 1000
+            region_end = gene_end +\
+                int(delimit_by) * 1000
 
-        # ... Instead, if limit by TAD...
-        elif limit_by == "tad":
+        # Instead, if delimit by TADs...
+        elif delimit_by == "tad":
             region_start, region_end =\
                 get_region_coordinates_by_tad(
                     session,
@@ -190,8 +287,8 @@ def get_gene_region(
                     samples
                 )
 
-        # ... Instead, if limit by gene...
-        elif limit_by == "gene":
+        # Instead, if delimit by genes...
+        elif delimit_by == "gene":
             region_start, region_end =\
                 get_region_coordinates_by_gene(
                     session,
@@ -203,7 +300,7 @@ def get_gene_region(
                     region_end
                 )
 
-        # Define region
+        # Get genomic feature of region
         gene_region = GenomicFeature(
             chrom,
             region_start,
@@ -214,14 +311,25 @@ def get_gene_region(
 
         return gene_region
 
-    raise ValueError("Gene name \"%s\" is not in a valid chromosome!" % gene)
+    raise ValueError("Gene \"%s\" is not in a valid chromosome!" % gene)
 
-#def get_region_coordinates_by_tad(session, chrom, gene_start, gene_end,
-#    region_start, region_end, sample=[]):
+#def get_region_coordinates_by_tad(session,
+#    chrom, gene_start, gene_end, region_start,
+#    region_end, samples=[]):
+#    """
+#    Delimits a region for the given gene based
+#    on TAD boundaries.
+#    """
 #
 #    # Get TADs encompassing the gene
-#    tads = GUDglobals.Tad.select_encompasing_range(session, chrom, gene_start,
-#        gene_end, sample=sample)
+#    tads = Tad.select_by_location(
+#        session,
+#        chrom,
+#        gene_start,
+#        gene_end,
+#        samples,
+#        as_genomic_feature = True
+#    )
 #    # If TADs could not be found...
 #    if not tads:
 #        # Get TADs overlapping the gene
@@ -253,6 +361,10 @@ def get_gene_region(
 def get_region_coordinates_by_gene(session,
     gene, chrom, gene_start, gene_end,
     region_start, region_end):
+    """
+    Delimits a region for the given gene based
+    on nearby genes.
+    """
 
     # Get genes within chromosome
     genes = Gene.select_by_location(
@@ -268,11 +380,14 @@ def get_region_coordinates_by_gene(session,
         # Skip the gene
         if g.id == gene: continue
         # Get the closest upstream gene end
-        # to the gene's start 
-        if g.end <= gene_start and g.end > region_start:
+        # to the gene's start
+        if g.end <= gene_start\
+        and g.end > region_start:
             region_start = g.end
-        # Get the closest downstream gene start to the gene's end 
-        if g.start >= gene_end and g.start < region_end:
+        # Get the closest downstream gene
+        # start to the gene's end
+        if g.start >= gene_end\
+        and g.start < region_end:
             region_end = g.start
 
     return region_start, region_end

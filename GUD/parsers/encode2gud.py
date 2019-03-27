@@ -7,6 +7,7 @@ import getpass
 import pybedtools
 import os
 import re
+import sys
 import shutil
 from sqlalchemy import create_engine
 from sqlalchemy.orm import (
@@ -27,57 +28,116 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 #from GUD.ORM.tf_binding import TFBinding
 
+__doc__ = """
+usage: encode2gud.py  genome metadata directory samples feat_type
+                      [-h] [-c] [--dummy-dir DIR] [--source STR]
+                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+
+inserts ENCODE features into GUD. "metadata" and "directory" refer
+to "xargs -n 1 curl -O -L < file.txt". types of genomic features
+include "accessibility", "histone" and "tf".
+
+  genome              genome assembly
+  metadata            metadata file
+  directory           downloads directory
+  samples             ENCODE samples (manually-curated)
+  feat_type           type of genomic feature
+
+optional arguments:
+  -h, --help          show this help message and exit
+  -c, --cluster       cluster genome regions by UCSC's regCluster
+                      (default = False)
+  --dummy-dir DIR     dummy directory (default = "/tmp/")
+  --source STR        source name (default = "ENCODE")
+
+mysql arguments:
+  -d STR, --db STR    database name (default = "%s")
+  -H STR, --host STR  host name (default = "localhost")
+  -p STR, --pwd STR   password (default = ignore this option)
+  -P STR, --port STR  port number (default = %s)
+  -u STR, --user STR  user name (default = current user)
+""" % \
+(
+    GUDglobals.db_name,
+    GUDglobals.db_port
+)
+
+
 #-------------#
 # Functions   #
 #-------------#
 
 def parse_args():
     """
-    This function parses arguments provided via the command
-    line using argparse.
+    This function parses arguments provided via
+    the command line and returns an {argparse}
+    object.
     """
 
-    parser = argparse.ArgumentParser(description="inserts \"accessibility\", \"histone\" or \"tf\" data from the ENCODE consortium into GUD. arguments \"metadata\" and \"directory\" refer to the execution \"xargs -n 1 curl -O -L < file.txt\". genomic features include \"accessibility\", \"histone\" and \"tf\".")
+    parser = argparse.ArgumentParser(
+        add_help=False,
+    )
 
-    parser.add_argument("genome", help="genome assembly")
-    parser.add_argument("metadata", help="metadata file")
-    parser.add_argument("directory", help="downloads directory")
-    parser.add_argument("samples", help="ENCODE samples (manually-curated)")
-
-    feats = ["accessibility", "histone", "tf"]
-    parser.add_argument("feat_type", choices=feats,
-        help="type of genomic feature", metavar="feature_type")
-
-    # Optional args
-    parser.add_argument("-c", "--cluster", action="store_true",
-        help="cluster regions with regCluster (default = False)")
-    parser.add_argument("--dummy-dir", default="/tmp/",
-        metavar="DUMMYDIR", help="dummy directory (default = /tmp/)")
-    parser.add_argument("--source", default="ENCODE",
-        help="source name (e.g. \"PMID:22955616\"; default = \"ENCODE\")")
+  # Optional args
+    optional_group = parser.add_argument_group(
+        "optional arguments"
+    )
+    optional_group.add_argument(
+        "-h", "--help",
+        action="store_true"
+    )
+    optional_group.add_argument(
+        "-c", "--cluster",
+        action="store_true"
+    )
+    optional_group.add_argument(
+        "--dummy-dir",
+        default="/tmp/"
+    )
+    optional_group.add_argument(
+        "--source",
+        default="ENCODE"
+    )
 
     # MySQL args
-    mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default="hg19",
-        help="database name (default = \"hg19\")")
-    mysql_group.add_argument("-H", "--host", default="localhost",
-        help="host name (default = localhost)")
-    mysql_group.add_argument("-p", "--pwd", metavar="PASS",
-        help="password (default = ignore this option)")
-    mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="port number (default = 5506)")
+    mysql_group = parser.add_argument_group(
+        "mysql arguments"
+    )
+    mysql_group.add_argument(
+        "-d", "--db",
+        default=GUDglobals.db_name,
+    )
+    mysql_group.add_argument(
+        "-H", "--host",
+        default="localhost"
+    )
+    mysql_group.add_argument("-p", "--pwd")
+    mysql_group.add_argument(
+        "-P", "--port",
+        default=GUDglobals.db_port
+    )
+    mysql_group.add_argument(
+        "-u", "--user",
+        default=getpass.getuser()
+    )
 
-    user = getpass.getuser()
-    mysql_group.add_argument("-u", "--user", default=user,
-        help="user name (default = current user)")
+    if "-h" in sys.argv or "--help" in sys.argv:
+        print(__doc__)
+        exit(0)
+
+    # Mandatory arguments
+    parser.add_argument("genome")
+    parser.add_argument("metadata")
+    parser.add_argument("directory")
+    parser.add_argument("samples")
+
+    feats = ["accessibility", "histone", "tf"]
+    parser.add_argument(
+        "feat_type",
+        choices=feats
+    )
 
     args = parser.parse_args()
-
-    # Set default
-    if not args.db:
-        args.db = args.genome
-    if not args.pwd:
-        args.pwd = ""
 
     return args
 
@@ -87,28 +147,46 @@ def main():
     args = parse_args()
 
     # Insert ENCODE data to GUD database
-    insert_encode_to_gud_db(args.user, args.pwd,
-        args.host, args.port, args.db, args.genome,
-        args.metadata, args.directory, args.samples,
-        args.feat_type, args.cluster, args.dummy_dir,
-        args.source)
+    insert_encode_to_gud_db(
+        args.user,
+        args.pwd,
+        args.host,
+        args.port,
+        args.db,
+        args.genome,
+        args.metadata,
+        args.directory,
+        args.samples,
+        args.feat_type,
+        args.cluster,
+        args.dummy_dir,
+        args.source
+    )
 
-def insert_encode_to_gud_db(user, pwd, host, port, db,
-    genome, metadata_file, directory, samples_file,
-    feat_type, cluster, dummy_dir, source_name):
+def insert_encode_to_gud_db(user, pwd, host,
+    port, db, genome, metadata_file, directory,
+    samples_file, feat_type, cluster, dummy_dir,
+    source_name):
 
     # Initialize
     samples = {}
     metadata = {}
     db_name = "mysql://{}:{}@{}:{}/{}".format(
-        user, pwd, host, port, db)
+        user, pwd, host, port, db
+    )
     if not database_exists(db_name):
         raise ValueError("GUD database does not exist!!!\n\t%s" % db_name)
     session = scoped_session(sessionmaker())
-    engine = create_engine(db_name, echo=False)
+    engine = create_engine(
+        db_name,
+        echo=False
+    )
     session.remove()
-    session.configure(bind=engine, autoflush=False,
-        expire_on_commit=False)
+    session.configure(
+        bind=engine,
+        autoflush=False,
+        expire_on_commit=False
+    )
 
     # Get source
     source = Source()
@@ -116,10 +194,15 @@ def insert_encode_to_gud_db(user, pwd, host, port, db,
         source.name = source_name
         session.add(source)
         session.commit()
-    sou = source.select_by_name(session, source_name)
+    sou = source.select_by_name(
+        session,
+        source_name
+    )
 
     # Get samples
-    for line in GUDglobals.parse_tsv_file(samples_file):
+    for line in GUDglobals.parse_tsv_file(
+        samples_file
+    ):
         # Initialize 
         sample_name = line[0]
         sample_type = line[1]
@@ -154,7 +237,9 @@ def insert_encode_to_gud_db(user, pwd, host, port, db,
         table.__table__.create(bind=engine)
 
     # For each line...
-    for line in GUDglobals.parse_tsv_file(metadata_file):
+    for line in GUDglobals.parse_tsv_file(
+        metadata_file
+    ):
         # Initialize
         accession = line[0]
         experiment_type = line[4]
@@ -163,8 +248,10 @@ def insert_encode_to_gud_db(user, pwd, host, port, db,
         m = re.search("^(.+)-(human|mouse)$", line[12])
         if m: experiment_target = m.group(1)
         treatment = None
-        if len(line[9]) > 0 or len(line[10]) > 0 or len(line[11]) > 0:
-            treatment = "%s %s %s" % (line[9], line[10], line[11])
+        if line[9] or line[10] or line[11]:
+            treatment = "%s %s %s" % (
+                line[9], line[10], line[11]
+            )
         assembly = line[37]
         status = line[40]
         # Skip treated samples
@@ -173,70 +260,130 @@ def insert_encode_to_gud_db(user, pwd, host, port, db,
                 (accession, treatment)
             )
             continue
-#        # Warn audits
-#        if audit:
-#            warnings.warn("\nAudition for sample (%s) detected a problem: \"%s\"\n\tConsider skipping...\n" % (
-#                accession, audit))
         # This is a released sample!
         if assembly == genome and status == "released":
             # Skip sample
             if not samples[biosample]["add"]: continue
             # Get metadata
-            if os.path.exists(os.path.join(directory, "%s.bed.gz" % accession)):
-                metadata.setdefault((experiment_type, experiment_target), [])
-                metadata[(experiment_type, experiment_target)].append((accession, biosample))
+            if os.path.exists(
+                os.path.join(
+                    directory,
+                    "%s.bed.gz" % accession
+                )
+            ):
+                k = (
+                    experiment_type,
+                    experiment_target
+                )
+                metadata.setdefault(k, [])
+                metadata[k].append((accession, biosample))
 
-    # For each cell/tissue, experiment, target...
-    for experiment_type, experiment_target in sorted(metadata):
+    # For each experiment, target...
+    for k in sorted(metadata):
         # Initialize
+        experiment_type = k[0]
+        experiment_target = k[1]
         exp_dummy_dir = os.path.join(dummy_dir,
-            "%s.%s" % (experiment_type.replace(" ", "_"), experiment_target))
+            "%s.%s" % (
+                experiment_type.replace(" ", "_"),
+                experiment_target
+            )
+        )
 #        # Remove dummy dir
-#        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
+#        if os.path.isdir(exp_dummy_dir):
+#            shutil.rmtree(exp_dummy_dir)
         # Create dummy dir
-        if not os.path.isdir(exp_dummy_dir): os.mkdir(exp_dummy_dir)
+        if not os.path.isdir(exp_dummy_dir):
+            os.mkdir(exp_dummy_dir)
         # Get experiment
         experiment = Experiment()
-        if experiment.is_unique(session, experiment_type):
+        if experiment.is_unique(
+            session,
+            experiment_type
+        ):
             experiment.name = experiment_type
             session.add(experiment)
             session.commit()
-        exp = experiment.select_by_name(session, experiment_type)
+        exp = experiment.select_by_name(
+            session,
+            experiment_type
+        )
         # For each accession, biosample...
-        for accession, biosample in metadata[(experiment_type, experiment_target)]:
+        for accession, biosample in metadata[k]:
             # Copy BED file
-            gz_bed_file = os.path.join(directory, "%s.bed.gz" % accession)
-            bed_file = os.path.join(exp_dummy_dir, "%s.bed" % accession)
+            gz_bed_file = os.path.join(
+                directory,
+                "%s.bed.gz" % accession
+            )
+            bed_file = os.path.join(
+                exp_dummy_dir,
+                "%s.bed" % accession
+            )
             if not os.path.exists(bed_file):
-                os.system("zcat %s | sort -k 1,1 -k2,2n > %s" % (gz_bed_file, bed_file))
+                os.system("zcat %s | sort -k 1,1 -k2,2n > %s"\
+                    % (gz_bed_file, bed_file)
+                )
         # Cluster regions
         if cluster:
             # Initialize
             accession2sample = {}
             label2accession = {}
             regions = []
-            bed_files = os.path.join(exp_dummy_dir, "files.txt")
-            table_file = os.path.join(exp_dummy_dir, "tableOfTables.txt")
-            cluster_file = os.path.join(exp_dummy_dir, "regCluster")
+            bed_files = os.path.join(
+                exp_dummy_dir,
+                "files.txt"
+            )
+            table_file = os.path.join(
+                exp_dummy_dir,
+                "tableOfTables.txt"
+            )
+            cluster_file = os.path.join(
+                exp_dummy_dir,
+                "regCluster"
+            )
             # Create BED file list
             if not os.path.exists(bed_files):
                 # For each file...
-                for bed_file in os.listdir(exp_dummy_dir):
+                for bed_file in os.listdir(
+                    exp_dummy_dir
+                ):
                     # Skip non-BED files
-                    if not bed_file.endswith(".bed"): continue
+                    if not bed_file.endswith(".bed"):
+                        continue
                     # Add file to list
-                    GUDglobals.write(bed_files, os.path.join(exp_dummy_dir, bed_file))
+                    GUDglobals.write(
+                        bed_files,
+                        os.path.join(
+                            exp_dummy_dir,
+                            bed_file
+                        )
+                    )
             # Make table of tables
             if not os.path.exists(table_file):
-                process = subprocess.check_output(["regClusterMakeTableOfTables",
-                    "uw01", bed_files, table_file], stderr=subprocess.STDOUT)
+                process = subprocess.check_output(
+                    [
+                        "regClusterMakeTableOfTables",
+                        "uw01",
+                        bed_files,
+                        table_file
+                    ],
+                    stderr=subprocess.STDOUT
+                )
             # Make clusters
-            if not os.path.exists("%s.cluster" % cluster_file):
-                process = subprocess.check_output(["regCluster", table_file,
-                    "%s.cluster" % cluster_file, "%s.bed" % cluster_file],
-                    stderr=subprocess.STDOUT)
+            if not os.path.exists(
+                "%s.cluster" % cluster_file
+            ):
+                process = subprocess.check_output(
+                    [
+                        "regCluster",
+                        table_file,
+                        "%s.cluster" % cluster_file,
+                        "%s.bed" % cluster_file
+                    ],
+                    stderr=subprocess.STDOUT
+                )
             # For each accession, biosample...
-            for accession, biosample in metadata[(experiment_type, experiment_target)]:
+            for accession, biosample in metadata[k]:
                 # Get sample
                 sample = Sample()
                 if sample.is_unique(
@@ -246,40 +393,68 @@ def insert_encode_to_gud_db(user, pwd, host, port, db,
                     samples[biosample]["cell_line"],
                     samples[biosample]["cancer"]
                 ):
-                    sample.name = samples[biosample]["cell_or_tissue"]
-                    sample.treatment = samples[biosample]["treatment"]
-                    sample.cell_line = samples[biosample]["cell_line"]
-                    sample.cancer = samples[biosample]["cancer"]
+                    sample.name =\
+                        samples[biosample]["cell_or_tissue"]
+                    sample.treatment =\
+                        samples[biosample]["treatment"]
+                    sample.cell_line =\
+                        samples[biosample]["cell_line"]
+                    sample.cancer =\
+                        samples[biosample]["cancer"]
                     session.add(sample)
                     session.commit()
-                sam = sample.select_unique(session,
+                sam = sample.select_unique(
+                    session,
                     samples[biosample]["cell_or_tissue"],
                     samples[biosample]["treatment"],
                     samples[biosample]["cell_line"],
-                    samples[biosample]["cancer"])
-                accession2sample.setdefault(accession, sam.uid)
+                    samples[biosample]["cancer"]
+                )
+                accession2sample.setdefault(
+                    accession,
+                    sam.uid
+                )
             # For each line...
-            for line in GUDglobals.parse_tsv_file(table_file):
-                m = re.search("%s.%s/(\w+).bed" % (
-                    experiment_type, experiment_target), line[0])
-                if m: label2accession.setdefault(line[-1], m.group(1))
+            for line in GUDglobals.parse_tsv_file(
+                table_file
+            ):
+                m = re.search("%s.%s/(\w+).bed" %\
+                    (
+                        experiment_type,
+                        experiment_target
+                    ),
+                    line[0]
+                )
+                if m:
+                    label2accession.setdefault(
+                        line[-1],
+                        m.group(1)
+                    )
             # Load BED file
-            bed_obj = pybedtools.BedTool("%s.bed" % cluster_file)
-            # For each feature...
-            for feature in bed_obj:
+            bed_obj = pybedtools.BedTool(
+                "%s.bed" % cluster_file
+            )
+            # For each line...
+            for line in bed_obj:
                 # Ignore non-standard chroms, scaffolds, etc.
-                m = re.search("^chr(\S+)$", feature[0])
-                if not m.group(1) in GUDglobals.chroms: continue
+                m = re.search("^chr(\S+)$", line[0])
+                if not m.group(1) in GUDglobals.chroms:
+                    continue
                 # Get coordinates
-                chrom = feature[0]
-                start = int(feature[1])
-                end = int(feature[2])
+                chrom = line[0]
+                start = int(line[1])
+                end = int(line[2])
                 # Ignore non-standard chroms, scaffolds, etc.
                 m = re.search("^chr(\S+)$", chrom)
                 if not m.group(1) in GUDglobals.chroms: continue
                 # Get region
                 region = Region()
-                if region.is_unique(session, chrom, start, end):
+                if region.is_unique(
+                    session,
+                    chrom,
+                    start,
+                    end
+                ):
                     # Insert region
                     region.bin = assign_bin(start, end)
                     region.chrom = chrom
@@ -287,10 +462,17 @@ def insert_encode_to_gud_db(user, pwd, host, port, db,
                     region.end = end
                     session.add(region)
                     session.commit()
-                reg = region.select_unique(session, chrom, start, end)
+                reg = region.select_unique(
+                    session,
+                    chrom,
+                    start,
+                    end
+                )
                 regions.append(reg.uid)
             # For each line...
-            for line in GUDglobals.parse_tsv_file("%s.cluster" % cluster_file):
+            for line in GUDglobals.parse_tsv_file(
+                "%s.cluster" % cluster_file
+            ):
                 # Get region
                 reg_uid = regions[int(line[0]) - 1] 
                 # Get sample
