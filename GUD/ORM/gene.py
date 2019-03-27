@@ -1,5 +1,4 @@
 from sqlalchemy import (
-    and_,
     Column,
     ForeignKey,
     Index,
@@ -94,8 +93,8 @@ class Gene(Base):
     def is_unique(cls, session, regionID, name,
         sourceID):
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.regionID == regionID,
                 cls.name == name,
                 cls.sourceID == sourceID
@@ -107,8 +106,8 @@ class Gene(Base):
     def select_unique(cls, session, regionID,
         name, sourceID):
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.regionID == regionID,
                 cls.name == name,
                 cls.sourceID == sourceID
@@ -125,19 +124,18 @@ class Gene(Base):
 
         bins = Region._compute_bins(start, end)
 
-        q = session.query(cls, Region, Source).\
-            join().\
-            filter(
-                Region.uid == cls.regionID
-            ).\
-            filter(
-                and_(
-                    Region.chrom == chrom,
-                    Region.start < end,
-                    Region.end > start
-                )
-            ).\
-            filter(Region.bin.in_(bins))
+        q = session.query(cls, Region, Source)\
+            .join()\
+            .filter(
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID,
+            )\
+            .filter(
+                Region.chrom == chrom,
+                Region.start < end,
+                Region.end > start
+            )\
+            .filter(Region.bin.in_(bins))
 
         if as_genomic_feature:
 
@@ -160,10 +158,13 @@ class Gene(Base):
         Query objects by gene symbol.
         """
 
-        q = session.query(cls, Region, Source).\
-            join().\
-            filter(Region.uid == cls.regionID).\
-            filter(cls.name2 == name)
+        q = session.query(cls, Region, Source)\
+            .join()\
+            .filter(
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID,
+            )\
+            .filter(cls.name2 == name)
 
         if as_genomic_feature:
 
@@ -184,10 +185,16 @@ class Gene(Base):
         as_genomic_feature=False):
         """
         Query objects by multiple gene symbols.
-        If no genes are provided, return all objects.
+        If no genes are provided, return all
+        objects.
         """
 
-        q = session.query(cls, Region, Source).join()
+        q = session.query(cls, Region, Source)\
+            .join()\
+            .filter(
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID,
+            )\
 
         if names:
             q = q.filter(cls.name2.in_(names))
@@ -206,50 +213,52 @@ class Gene(Base):
 
         return q.all()
 
-    @classmethod
-    def select_by_uid(cls, session, uid,
-        as_genomic_feature=False):
-        """
-        Query objects by uid.
-        """
-
-        q = session.query(cls, Region, Source).\
-            join().\
-            filter(cls.uid == uid)
-
-        if as_genomic_feature:
-            return cls.__as_genomic_feature(
-                q.first()
-            )
-
-        return q.first()
-
-    @classmethod
-    def select_by_uid(cls, session, uids=[],
-        as_genomic_feature=False):
-        """
-        Query objects by multiple uids.
-        If no uids are provided, return all objects.
-        """
-
-        q = session.query(cls, Region, Source).join()
-        
-        if uids:
-            q = q.filter(cls.uid.in_(uids))
-
-        if as_genomic_feature:
-
-            feats = []
-
-            # For each feature...
-            for feat in q.all():
-                feats.append(
-                    cls.__as_genomic_feature(feat)
-                )
-
-            return feats
-
-        return q.all()
+#    @classmethod
+#    def select_by_uid(cls, session, uid,
+#        as_genomic_feature=False):
+#        """
+#        Query objects by uid.
+#        """
+#
+#        q = session.query(cls, Region, Source).\
+#            join().\
+#            filter(cls.uid == uid)
+#
+#        if as_genomic_feature:
+#            return cls.__as_genomic_feature(
+#                q.first()
+#            )
+#
+#        return q.first()
+#
+#    @classmethod
+#    def select_by_uids(cls, session, uids=[],
+#        as_genomic_feature=False):
+#        """
+#        Query objects by multiple uids.
+#        If no uids are provided, return all
+#        objects.
+#        """
+#
+#        q = session.query(cls, Region, Source).\
+#            join()
+#        
+#        if uids:
+#            q = q.filter(cls.uid.in_(uids))
+#
+#        if as_genomic_feature:
+#
+#            feats = []
+#
+#            # For each feature...
+#            for feat in q.all():
+#                feats.append(
+#                    cls.__as_genomic_feature(feat)
+#                )
+#
+#            return feats
+#
+#        return q.all()
 
     @classmethod
     def get_all_gene_symbols(cls, session):
@@ -300,7 +309,7 @@ class Gene(Base):
 
     def __repr__(self):
 
-        return "<Gene(%s, %s, %s, %s)>" % \
+        return "<Gene(%s, %s, %s, %s, %s)>" % \
             (
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),

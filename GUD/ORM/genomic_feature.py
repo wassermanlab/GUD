@@ -125,7 +125,7 @@ class GenomicFeature(SeqFeature):
         return "{}\t{}\t{}\t{}\t{}\t{}".\
             format(
                 self.chrom,
-                self.start_1_based,
+                self.start, # 0-based for BED format
                 self.end,
                 self.id,
                 self.score,

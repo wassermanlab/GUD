@@ -7,7 +7,7 @@ import os
 from GUD import GUDglobals
 from GUD.ORM.chrom import Chrom
 from GUD.ORM.gene import Gene
-from GUD.ORM.gud_feature import GUDFeature
+from GUD.ORM.genomic_feature import GenomicFeature
 
 #-------------#
 # Functions   #
@@ -126,7 +126,7 @@ def main():
     os.remove(dummy_file)
     
 def get_gene_region(
-    session, gene, sample=[], limit_by="tad"):
+    session, gene, samples=[], limit_by="tad"):
 
     # Initialize
     chrom = None
@@ -134,17 +134,19 @@ def get_gene_region(
     # Get chromosome sizes
     chrom_sizes = Chrom.chrom_sizes(session)
 
-    # Fetch all genes with the given gene name
-    genes = Gene.select_by_name(
-        session, gene, as_gud_feature=True)
+    # Get all genes with the given name
+    genes = Gene.select_by_name(session,
+        gene, as_genomic_feature=True)
     # If genes are not valid...
     if not genes:
-        raise ValueError("Gene name is not a valid: %s" % gene)
+        raise ValueError("Gene name \"%s\" is not valid!" % gene)
 
     # For each gene...
     for g in genes:
+
         # Ignore non-standard chroms, scaffolds, etc.
         if g.chrom in chrom_sizes:
+
             # If first gene...
             if not chrom:
                 chrom = g.chrom
@@ -152,26 +154,29 @@ def get_gene_region(
                 gene_end = 0
                 region_start = 0
                 region_end = chrom_sizes[chrom]
+
             # If gene's chromosome is different from previous genes...
             if g.chrom != chrom:
-                warnings.warn("\"{}\" chrom (i.e. \"{}\") is different from that of previous genes (i.e. \"{}\")!".format(
-                    g.id, g.chrom, chrom))
-                return None
+                raise ValueError("Gene name \"%s\" is in multiple chromosomes!" % gene)
+
             # If start position is upstream from previous start...
             if g.start < gene_start:
                 gene_start = g.start
+
             # If end position is downstream from previous end...
             if g.end > gene_end:
                 gene_end = g.end
 
     # If chrom...
     if chrom:
+
         # If limit by kb...
         if limit_by.isdigit():
             region_start =\
                 gene_start - int(limit_by) * 1000
             region_end =\
                 gene_end + int(limit_by) * 1000
+
         # ... Instead, if limit by TAD...
         elif limit_by == "tad":
             region_start, region_end =\
@@ -182,8 +187,9 @@ def get_gene_region(
                     gene_end,
                     region_start,
                     region_end,
-                    sample
+                    samples
                 )
+
         # ... Instead, if limit by gene...
         elif limit_by == "gene":
             region_start, region_end =\
@@ -196,20 +202,19 @@ def get_gene_region(
                     region_start,
                     region_end
                 )
+
         # Define region
-        gene_region = GUDFeature(
+        gene_region = GenomicFeature(
             chrom,
             region_start,
             region_end,
-            feat_type = "GeneRegion",
+            feat_type = "Region",
             feat_id = "%s" % gene
         )
 
         return gene_region
 
-    warnings.warn("\"{}\" is not on a valid chrom!".format(gene))
-
-    return None
+    raise ValueError("Gene name \"%s\" is not in a valid chromosome!" % gene)
 
 #def get_region_coordinates_by_tad(session, chrom, gene_start, gene_end,
 #    region_start, region_end, sample=[]):
@@ -255,7 +260,7 @@ def get_region_coordinates_by_gene(session,
         chrom,
         region_start,
         region_end,
-        as_gud_feature = True
+        as_genomic_feature = True
     )
 
     # For each gene...

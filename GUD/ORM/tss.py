@@ -1,3 +1,4 @@
+import re
 from sqlalchemy import (
     and_,
     or_,
@@ -85,13 +86,12 @@ class TSS(Base):
         }
     )
 
-
     @classmethod
     def is_unique(cls, session, regionID, sourceID,
         experimentID):
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.regionID == regionID,
                 cls.sourceID == sourceID,
                 cls.experimentID == experimentID
@@ -104,8 +104,8 @@ class TSS(Base):
     def select_unique(cls, session, regionID,
         sourceID, experimentID):
 
-        q = session.query(cls).\
-            filter(
+        q = session.query(cls)\
+            .filter(
                 cls.regionID == regionID,
                 cls.sourceID == sourceID,
                 cls.experimentID == experimentID
@@ -114,97 +114,158 @@ class TSS(Base):
         return q.first()
 
     @classmethod
-    def select_by_uid(cls, session, uid):
+    def select_by_uid(cls, session, uid,
+        as_genomic_feature=False):
+        """
+        Query objects by uid.
+        """
 
-        q = session.query(cls).\
-            filter(
-                cls.uid == uid
+        q = session.query(
+                cls,
+                Experiment,
+                Region,
+                Source
+            )\
+            .join()\
+            .filter(
+                Experiment.uid == cls.experimentID,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID
+            ).filter(cls.uid == uid)
+
+        if as_genomic_feature:
+            return cls.__as_genomic_feature(
+                q.first()
             )
 
         return q.first()
 
     @classmethod
-    def select_by_tss(cls, session, gene, tss):
+    def select_by_uids(cls, session, uids=[],
+        as_genomic_feature=False):
         """
-        Query objects by TSS (i.e. gene + tss).
+        Query objects by multiple uids.
+        If no uids are provided, return all
+        objects.
         """
-    
-        q = session.query(cls).\
-            filter(
-                cls.gene == gene,
-                cls.tss == tss
+
+        q = session.query(
+                cls,
+                Experiment,
+                Region,
+                Source
+            )\
+            .join()\
+            .filter(
+                Experiment.uid == cls.experimentID,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID
             )
 
-        return q.first()
+        if uids:
+            q = q.filter(cls.uid.in_(uids))
 
-    @classmethod
-    def select_by_multiple_tss(cls, session, tss=[]):
-        """
-        Query objects by multiple TSSs. If no TSSs
-        are provided, return all objects. TSSs are
-        to be provided as a two-dimensional list in
-        the form: [[geneA, tss1], [geneA, tss2], ...]
-        """
+        if as_genomic_feature:
 
-        # Initialize
-        ands = []
+            feats = []
 
-        # For each gene, TSS pair...
-        for i, j in tss:
-            ands.append(
-                and_(
-                    cls.gene == i,
-                    cls.tss == j
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
                 )
-            )
 
-        q = session.query(cls).filter(or_(*ands))
+            return feats
 
         return q.all()
+#
+#    @classmethod
+#    def select_by_multiple_tss(cls, session, tss=[]):
+#        """
+#        Query objects by multiple TSSs. If no TSSs
+#        are provided, return all objects. TSSs are
+#        to be provided as a two-dimensional list in
+#        the form: [[geneA, tss1], [geneA, tss2], ...]
+#        """
+#
+#        # Initialize
+#        ands = []
+#
+#        # For each gene, TSS pair...
+#        for i, j in tss:
+#            ands.append(
+#                and_(
+#                    cls.gene == i,
+#                    cls.tss == j
+#                )
+#            )
+#
+#        q = session.query(cls).filter(or_(*ands))
+#
+#        return q.all()
 
     def __as_genomic_feature(feat):
 
         # Initialize
-        exonStarts = []
-        exonEnds = []
+        isfloat = re.compile("\d+(\.\d+)?")
+        sampleIDs = []
+        avg_expression_levels = []
 
         # For each exon start...
-        for i in str(feat.Gene.exonStarts).split(","):
+        for i in str(feat.TSS.sampleIDs).split(","):
             if i.isdigit():
-                exonStarts.append(int(i))
+                sampleIDs.append(int(i))
         
         # For each exon end...
-        for i in str(feat.Gene.exonEnds).split(","):
-            if i.isdigit():
-                exonStarts.append(int(i))
+        for i in str(feat.TSS.avg_expression_levels).split(","):
+            if isfloat.match(i):
+                avg_expression_levels.append(float(i))
 
         # Define qualifiers
         qualifiers = {
-            "name": feat.Gene.name,
-            "cdsStart": int(feat.Gene.cdsStart),
-            "cdsEnd": int(feat.Gene.cdsEnd),
-            "exonStarts": exonStarts,
-            "exonEnds": exonEnds,
+            "gene": feat.TSS.gene,
+            "tss": feat.TSS.tss,
+            "sampleIDs": sampleIDs,
+            "avg_expression_levels": avg_expression_levels,
+            "experiment": feat.Experiment.name,
             "source" : feat.Source.name,            
         }
+
+        if feat.TSS.gene:
+            feat_id = "p%s@%s" % (
+                feat.TSS.tss,
+                feat.TSS.gene
+            )
+        else:
+            feat_id = "p@%s:%s..%s,%s" % (
+                feat.Region.chrom,
+                int(feat.Region.start),
+                int(feat.Region.end),
+                feat.Region.strand
+            )
 
         return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),
             int(feat.Region.end),
             strand = feat.Region.strand,
-            feat_type = "Gene",
-            feat_id = feat.Gene.name2,
+            feat_type = "TSS",
+            feat_id = feat_id,
             qualifiers = qualifiers
         )
 
-#    def __repr__(self):
-#
-#        return "<TSS(%s, %s, %s, %s)>" % \
-#            (
-#                "uid={}".format(self.uid),
-#                "regionID={}".format(self.regionID),
-#                "name={}".format(self.name),
-#                "name2={}".format(self.name2),
-#                "sourceID={}".format(self.sourceID),
-#            )
+    def __repr__(self):
+
+        return "<TSS(%s, %s, %s, %s, %s, %s, %s, %s)>" % \
+            (
+                "uid={}".format(self.uid),
+                "regionID={}".format(self.regionID),
+                "gene={}".format(self.gene),
+                "tss={}".format(self.tss),
+                "sampleIDs={}".format(self.sampleIDs),
+                "avg_expression_levels={}".format(
+                    self.avg_expression_levels
+                ),
+                "experimentID={}".format(self.experimentID),
+                "sourceID={}".format(self.sourceID)
+            )

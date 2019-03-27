@@ -39,10 +39,8 @@ class Chrom(Base):
         Query objects by chromosome name.
         """
 
-        q = session.query(cls).\
-            filter(
-                cls.chrom == chrom
-            )
+        q = session.query(cls)\
+            .filter(cls.chrom == chrom)
 
         return q.first()
 
@@ -50,7 +48,8 @@ class Chrom(Base):
     def select_by_chroms(cls, session, chroms=[]):
         """
         Query objects by multiple chromosome names.
-        If no names are provided, return all objects.
+        If no names are provided, return all
+        objects.
         """
 
         q = session.query(cls)
@@ -75,8 +74,8 @@ class Chrom(Base):
     def chrom_sizes(cls, session, chroms=[]): 
         """
         Return the size of the given chroms as a
-        dict. If no chroms are provided, return the
-        size of all chroms.
+        dict. If no chroms are provided, return
+        the size of all chroms.
         """
 
         sizes = {}
@@ -87,14 +86,6 @@ class Chrom(Base):
             sizes.setdefault(c.chrom, int(c.size))
 
         return sizes
-
-    def __str__(self):
-
-        return "{}\t{}".\
-            format(
-                self.chrom,
-                self.size
-            )
 
     def __repr__(self):
 
