@@ -25,28 +25,28 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="identifies gene(s) differentially expressed in sample(s).")
 
+    
     parser.add_argument("--dummy-dir", default="/tmp/",
         help="dummy directory (default = /tmp/)")
-
     sample_group = parser.add_mutually_exclusive_group(required=True)
     sample_group.add_argument("--sample", default=[], nargs="*",
         help="sample(s) (e.g. \"brain\")")
     sample_group.add_argument("--sample-file",
         help="file containing a list of samples")
 
-    # MySQL args
-    mysql_group = parser.add_argument_group("exp. arguments")
-    parser.add_argument("-a", "--all", action="store_true",
+    # Expression args
+    exp_group = parser.add_argument_group("exp. arguments")
+    exp_group.add_argument("-a", "--all", action="store_true",
         help="require expression in all sample(s) (default = False)")
-    parser.add_argument("--max-genes", metavar="", type=int,
-        default=GUDglobals.max_genes,
-        help="max. number of genes to return (default = %s)" % GUDglobals.max_genes)
-    parser.add_argument("--min-exp", metavar="", type=float,
-        default=GUDglobals.min_exp,
-        help="min. expression in input sample(s) (in TPM; default = %s)" % GUDglobals.min_exp)
-    parser.add_argument("--min-percent-exp", metavar="", type=float,
+    exp_group.add_argument("--max-tss", metavar="", type=int,
+        default=GUDglobals.max_tss,
+        help="max. number of TSS to return (default = %s)" % GUDglobals.max_tss)
+    exp_group.add_argument("--min-tpm-exp", metavar="", type=float,
+        default=GUDglobals.min_tpm_exp,
+        help="min. expression in input sample(s) for TSS (in TPM; default = %s)" % GUDglobals.min_tpm_exp)
+    exp_group.add_argument("--min-percent-exp", metavar="", type=float,
         default=GUDglobals.min_percent_exp,
-        help="min. percentage of expression in input sample(s) (default = %s)" % GUDglobals.min_percent_exp)
+        help="min. percentage of expression in input sample(s) for TSS (default = %s)" % GUDglobals.min_percent_exp)
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")

@@ -21,14 +21,14 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="delimits a region for a gene based on TAD boundaries, nearby genes, or +/- N kb centered around that gene.")
     
-    parser.add_argument("--dummy-dir", default="/tmp/",
-        help="dummy directory (default = /tmp/)")
-
     gene_group = parser.add_mutually_exclusive_group(required=True)
     gene_group.add_argument("--gene", nargs="*",
         help="gene symbol(s) (e.g. \"TH\")")
     gene_group.add_argument("--gene-file",
         help="file containing a list of gene symbols")
+
+    parser.add_argument("--dummy-dir", default="/tmp/",
+        help="dummy directory (default = /tmp/)")
 
     parser.add_argument("-l", default="tad",
         help="limit the gene region based on TAD boundaries (i.e. \"tad\"; default), nearby genes (i.e. \"gene\"), or +/- N kb centered around that gene (e.g. use 1000 for 1 Mb)")
