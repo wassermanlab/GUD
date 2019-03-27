@@ -1,3 +1,3 @@
 """
-Python scripts to query GUD
+Contains Python parsers to populate GUD
 """
