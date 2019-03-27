@@ -3,6 +3,7 @@
 import argparse
 import os
 import shutil
+import sys
 
 # Import from GUD
 from GUD import GUDglobals
@@ -13,58 +14,131 @@ from GUD.ORM.genomic_feature import GenomicFeature
 from GUD.ORM.sample import Sample
 from GUD.ORM.tss import TSS
 
+__doc__ = """
+usage: sample2gene.py (--sample [STR ...] | --sample-file FILE)
+                      [-h] [--dummy-dir DIR] [-o FILE]
+                      [-a] [--percent FLT] [--tpm FLT] [--tss INT]
+                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+
+identifies one or more genes differentially expressed in samples.
+
+  --sample [STR ...]  sample(s) (e.g. "brain")
+  --sample-file FILE  file containing a list of samples
+
+optional arguments:
+  -h, --help          show this help message and exit
+  --dummy-dir DIR     dummy directory (default = "/tmp/")
+  -o FILE             output file (default = stdout)
+
+expression arguments:
+  -a, --all           expression in all samples (default = False)
+  --percent FLT       percentage of expression for TSS in input
+                      samples (default = %s)
+  --tpm FLT           expression levels (in TPM) for TSS in input
+                      samples (default = %s)
+  --tss INT           number of TSSs to return (default = %s)
+
+mysql arguments:
+  -d STR, --db STR    database name (default = "%s")
+  -H STR, --host STR  host name (default = "%s")
+  -p STR, --pwd STR   password (default = ignore this option)
+  -P STR, --port STR  port number (default = %s)
+  -u STR, --user STR  user name (default = "%s")
+""" % \
+(
+    GUDglobals.min_percent_exp,
+    GUDglobals.min_tpm_exp,
+    GUDglobals.max_tss,
+    GUDglobals.db_name,
+    GUDglobals.db_host,
+    GUDglobals.db_port,
+    GUDglobals.db_user
+)
+
 #-------------#
 # Functions   #
 #-------------#
 
 def parse_args():
     """
-    This function parses arguments provided via command
-    line and returns an {argparse} object.
+    This function parses arguments provided via
+    the command line and returns an {argparse}
+    object.
     """
 
-    parser = argparse.ArgumentParser(description="identifies gene(s) differentially expressed in sample(s).")
+    parser = argparse.ArgumentParser(
+        add_help=False,
+    )
 
-    
-    parser.add_argument("--dummy-dir", default="/tmp/",
-        help="dummy directory (default = /tmp/)")
-    sample_group = parser.add_mutually_exclusive_group(required=True)
-    sample_group.add_argument("--sample", default=[], nargs="*",
-        help="sample(s) (e.g. \"brain\")")
-    sample_group.add_argument("--sample-file",
-        help="file containing a list of samples")
+    # Optional args
+    optional_group = parser.add_argument_group(
+        "optional arguments"
+    )
+    optional_group.add_argument(
+        "-h", "--help",
+        action="store_true"
+    )
+    optional_group.add_argument(
+        "--dummy-dir",
+        default="/tmp/"
+    )
+    optional_group.add_argument("-o")
 
     # Expression args
-    exp_group = parser.add_argument_group("exp. arguments")
-    exp_group.add_argument("-a", "--all", action="store_true",
-        help="require expression in all sample(s) (default = False)")
-    exp_group.add_argument("--max-tss", metavar="", type=int,
+    exp_group = parser.add_argument_group(
+        "expression arguments"
+    )
+    exp_group.add_argument(
+        "-a", "--all",
+        action="store_true"
+    )
+    exp_group.add_argument(
+        "--percent", type=float,
+        default=GUDglobals.min_percent_exp
+    )
+    exp_group.add_argument(
+        "--tpm", type=float,
+        default=GUDglobals.min_tpm_exp
+    )
+    exp_group.add_argument(
+        "--tss", type=int,
         default=GUDglobals.max_tss,
-        help="max. number of TSS to return (default = %s)" % GUDglobals.max_tss)
-    exp_group.add_argument("--min-tpm-exp", metavar="", type=float,
-        default=GUDglobals.min_tpm_exp,
-        help="min. expression in input sample(s) for TSS (in TPM; default = %s)" % GUDglobals.min_tpm_exp)
-    exp_group.add_argument("--min-percent-exp", metavar="", type=float,
-        default=GUDglobals.min_percent_exp,
-        help="min. percentage of expression in input sample(s) for TSS (default = %s)" % GUDglobals.min_percent_exp)
+    )
 
     # MySQL args
-    mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=GUDglobals.db_name,
-        help="database name (default = \"%s\")" % GUDglobals.db_name)
-    mysql_group.add_argument("-H", "--host", default=GUDglobals.db_host,
-        help="host name (default = \"%s\")" % GUDglobals.db_host)
-    mysql_group.add_argument("-p", "--pwd", metavar="PASS",
-        help="password (default = ignore this option)")
-    mysql_group.add_argument("-P", "--port", default=GUDglobals.db_port,
-        help="port number (default = \"%s\")" % GUDglobals.db_port)
-    mysql_group.add_argument("-u", "--user", default=GUDglobals.db_user,
-        help="user name (default = \"%s\")" % GUDglobals.db_user)
+    mysql_group = parser.add_argument_group(
+        "mysql arguments"
+    )
+    mysql_group.add_argument(
+        "-d", "--db",
+        default=GUDglobals.db_name,
+    )
+    mysql_group.add_argument(
+        "-H", "--host",
+        default=GUDglobals.db_host
+    )
+    mysql_group.add_argument("-p", "--pwd")
+    mysql_group.add_argument(
+        "-P", "--port",
+        default=GUDglobals.db_port
+    )
+    mysql_group.add_argument(
+        "-u", "--user",
+        default=GUDglobals.db_user
+    )
 
-    # Output args
-    out_group = parser.add_argument_group("output arguments")
-    out_group.add_argument("-o", "--out-file",
-        help="output file (default = stdout)")
+    if "-h" in sys.argv or "--help" in sys.argv:
+        print(__doc__)
+        exit(0)
+
+    # Mandatory arguments
+    sample_group = parser.add_mutually_exclusive_group(
+        required=True
+    )
+    sample_group.add_argument(
+        "--sample", nargs="*"
+    )
+    sample_group.add_argument("--sample-file")
 
     args = parser.parse_args()
 
@@ -105,8 +179,8 @@ def main():
     diff_exp_tss = get_differentially_expressed_tss(
         session,
         samples,
-        args.min_exp,
-        args.min_percent_exp,
+        args.tpm,
+        args.percent,
         args.all
     )
 
@@ -114,15 +188,15 @@ def main():
     if diff_exp_tss:
 
         # For each TSS...
-        for tss in diff_exp_tss[:args.max_genes]:
+        for tss in diff_exp_tss[:args.tss]:
             # Write
             GUDglobals.write(dummy_file, tss)
 
         # If output file...
-        if args.out_file:
+        if args.o:
             shutil.copy(
                 dummy_file,
-                os.path.abspath(args.out_file)
+                os.path.abspath(args.o)
             )
         # ... Else, print on stdout...
         else:
@@ -136,12 +210,12 @@ def main():
         raise ValueError("No differentially expressed gene(s) found!!!")
 
 def get_differentially_expressed_tss(session,
-    samples=[], min_tpm=100, min_percent_exp=25,
+    samples=[], tpm_exp=100, percent_exp=25,
     exp_in_all_samples=False):
     """
-    Identifies TSSs differentially expressed in
-    samples.
-    """    
+    Identifies TSSs from genes differentially
+    expressed in samples.
+    """
 
     # Initialize
     name2uid = {}
@@ -163,7 +237,7 @@ def get_differentially_expressed_tss(session,
         sample2tss.append(set())
     # For each TSS...
     for tss in Expression.select_by_samples(
-        session, samples, min_tpm):
+        session, samples, tpm_exp):
         # Get index
         i = samples.index(tss.Sample.name)
         sample2tss[i].add(tss.Expression.tssID)
@@ -180,29 +254,43 @@ def get_differentially_expressed_tss(session,
         # For each TSS...
         for tss in TSS.select_by_uids(session,
             tssIDs, as_genomic_feature=True):
-            # Initialize
-            expression = {}
-            background_exp = 0.0
-            foreground_exp = 0.0
-            # For each sampleID
-            for i in range(len(tss.qualifiers["sampleIDs"])):
-                if tss.qualifiers["sampleIDs"][i] in uid2name:
-                    expression.setdefault(
-                        uid2name[tss.qualifiers["sampleIDs"][i]],
-                        tss.qualifiers["avg_expression_levels"][i]
-                    )
-                    background_exp += tss.qualifiers["avg_expression_levels"][i]
-                    if uid2name[tss.qualifiers["sampleIDs"][i]] in samples:
-                        foreground_exp += tss.qualifiers["avg_expression_levels"][i]
-            # If expressed...
-            if background_exp > 0:
-                # Get percent exp. in samples
-                percent_exp = (foreground_exp * 100.0) / background_exp
-                # If differentially expressed...
-                if percent_exp >= min_percent_exp:
-                    tss.qualifiers.setdefault("expression", expression)
-                    tss.qualifiers.setdefault("percent_exp", percent_exp)
-                    diff_exp_tss.append(tss)
+            # If gene TSS...
+            if tss.qualifiers["gene"] in genes:
+                # Initialize
+                expression = {}
+                bg_exp = 0.0 # background exp.
+                fg_exp = 0.0 # foreground exp.
+                # For each sampleID
+                for i in range(len(tss.qualifiers["sampleIDs"])):
+                    # Initialize
+                    sampleID = tss.qualifiers["sampleIDs"][i]
+                    avg_exp = tss.qualifiers["avg_expression_levels"][i]
+                    # If sample...
+                    if sampleID in uid2name:
+                        expression.setdefault(
+                            uid2name[sampleID],
+                            [avg_exp, None]
+                        )
+                        bg_exp += avg_exp
+                        if uid2name[sampleID] in samples:
+                            fg_exp += avg_exp
+                # If expressed...
+                if bg_exp > 0:
+                    # For each sample...
+                    for sample in expression:
+                        expression[sample][1] = \
+                            expression[sample][0] * 100.0 / bg_exp
+                    # If differentially expressed...
+                    if (fg_exp * 100.0) / bg_exp >= percent_exp:
+                        tss.qualifiers.setdefault(
+                            "expression",
+                            expression
+                        )
+                        tss.qualifiers.setdefault(
+                            "percent_exp",
+                            (fg_exp * 100.0) / bg_exp
+                        )
+                        diff_exp_tss.append(tss)
 
     # Sort TSSs by percent exp.
     diff_exp_tss.sort(
@@ -211,8 +299,6 @@ def get_differentially_expressed_tss(session,
     )
 
     return diff_exp_tss
-
-
 
 #-------------#
 # Main        #

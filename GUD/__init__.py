@@ -44,7 +44,6 @@ class Globals(object):
     # the Wasserman lab
     db_name = "hg19"
     db_host = "ontarget.cmmt.ubc.ca"
-    db_pass = None
     db_port = 5506
     db_user = "ontarget_r"
 
@@ -54,7 +53,17 @@ class Globals(object):
     min_tpm_exp = 100.0
     min_percent_exp = 25.0
 
-    # Valid histone modifications
+    # Valid experiments
+    experiments = [
+        "ATAC-seq",
+        "CAGE",
+        "ChIP-seq",
+        "DNase-seq",
+        "FAIRE-seq",
+        "GRO-seq"
+    ]
+
+    # Valid histone marks
     histone_types = [
         "H2A.Z",
         "H3K4me1",

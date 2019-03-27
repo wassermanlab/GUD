@@ -72,8 +72,8 @@ class DNAAccessibility(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID, sampleID,
-        experimentID, sourceID):
+    def is_unique(cls, session, regionID,
+        sampleID, experimentID, sourceID):
 
         q = session.query(cls).\
             filter(
