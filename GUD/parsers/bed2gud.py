@@ -397,104 +397,95 @@ def insert_bed_to_gud_db(user, pwd, host, port,
         bed_obj = pybedtools.BedTool(
             "\n".join(lines),
             from_string=True
-        )
-        
-        # Cluster...
-        if cluster:
-            # 2 be implemented
-            # copy from encode2gud
-            pass
+        )        
+        # Sort BED object
+        for chrom, start, end in bed_obj.sort():
+            # Get region
+            region = Region()
+            if region.is_unique(
+                session,
+                chrom,
+                start,
+                end
+            ):
+                # Insert region
+                region.bin = assign_bin(start, end)
+                region.chrom = chrom
+                region.start = start
+                region.end = end
+                session.add(region)
+                session.commit()
+            reg = region.select_unique(
+                session,
+                chrom,
+                start,
+                end
+            )
 
-        # Do not cluster...
-        else:
-            # Sort BED object
-            for chrom, start, end in bed_obj.sort():
-                # Get region
-                region = Region()
-                if region.is_unique(
+            if feat_type == "accessibility":
+                feat = DNAAccessibility()
+                is_unique = feat.is_unique(
                     session,
-                    chrom,
-                    start,
-                    end
-                ):
-                    # Insert region
-                    region.bin = assign_bin(start, end)
-                    region.chrom = chrom
-                    region.start = start
-                    region.end = end
-                    session.add(region)
-                    session.commit()
-                reg = region.select_unique(
-                    session,
-                    chrom,
-                    start,
-                    end
+                    reg_uid,
+                    sam_uid,
+                    exp.uid,
+                    sou.uid
                 )
 
-                if feat_type == "accessibility":
-                    feat = DNAAccessibility()
-                    is_unique = feat.is_unique(
-                        session,
-                        reg_uid,
-                        sam_uid,
-                        exp.uid,
-                        sou.uid
-                    )
+            if feat_type == "enhancer":
+                feat = Enhancer()
+                is_unique = feat.is_unique(
+                    session,
+                    reg_uid,
+                    sam_uid,
+                    exp.uid,
+                    sou.uid
+                )
 
-                if feat_type == "enhancer":
-                    feat = Enhancer()
-                    is_unique = feat.is_unique(
-                        session,
-                        reg_uid,
-                        sam_uid,
-                        exp.uid,
-                        sou.uid
-                    )
+            if feat_type == "histone":
+                feat = Enhancer()
+                is_unique = feat.is_unique(
+                    session,
+                    reg_uid,
+                    sam_uid,
+                    exp.uid,
+                    sou.uid
+                )
 
+            if feat_type == "tad":
+                feat = Enhancer()
+                is_unique = feat.is_unique(
+                    session,
+                    reg_uid,
+                    sam_uid,
+                    exp.uid,
+                    sou.uid,
+
+                )
+
+            if feat_type == "tf":
+                feat = Enhancer()
+                is_unique = feat.is_unique(
+                    session,
+                    reg_uid,
+                    sam_uid,
+                    exp.uid,
+                    sou.uid
+                )
+
+            if is_unique:
+                feat.regionID = reg_uid
+                feat.sampleID = sam_uid
+                feat.experimentID = exp.uid
+                feat.sourceID = sou.uid
                 if feat_type == "histone":
-                    feat = Enhancer()
-                    is_unique = feat.is_unique(
-                        session,
-                        reg_uid,
-                        sam_uid,
-                        exp.uid,
-                        sou.uid
-                    )
-
+                    feat.histone_type = histone_type
                 if feat_type == "tad":
-                    feat = Enhancer()
-                    is_unique = feat.is_unique(
-                        session,
-                        reg_uid,
-                        sam_uid,
-                        exp.uid,
-                        sou.uid,
-                        
-                    )
-
+                    feat.restriction_enzyme = restriction_enzyme
                 if feat_type == "tf":
-                    feat = Enhancer()
-                    is_unique = feat.is_unique(
-                        session,
-                        reg_uid,
-                        sam_uid,
-                        exp.uid,
-                        sou.uid
-                    )
-
-                if is_unique:
-                    feat.regionID = reg_uid
-                    feat.sampleID = sam_uid
-                    feat.experimentID = exp.uid
-                    feat.sourceID = sou.uid
-                    if feat_type == "histone":
-                        feat.histone_type = histone_type
-                    if feat_type == "tad":
-                        feat.restriction_enzyme = restriction_enzyme
-                    if feat_type == "tf":
-                        feat.tf = tf_name
-                    session.add(feat)
-                    session.commit()
+                    feat.tf = tf_name
+                session.add(feat)
+                session.commit()
 
 #-------------#
 # Main        #
