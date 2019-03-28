@@ -230,7 +230,7 @@ def get_gene_region(session, gene, samples=[],
     # If genes are not valid...
     if not genes:
         raise ValueError(
-            "Gene \"%s\" is not valid!" % gene
+            "Gene \"%s\" is not valid!!!" % gene
         )
 
     # For each gene...
@@ -251,7 +251,7 @@ def get_gene_region(session, gene, samples=[],
             # If gene is on a different chrom...
             if g.chrom != chrom:
                 raise ValueError(
-                    "Gene \"%s\" is in different chromosomes!" % gene
+                    "Gene \"%s\" is mapped to different chromosomes!!!" % gene
                 )
 
             # If start position is upstream
@@ -311,7 +311,9 @@ def get_gene_region(session, gene, samples=[],
 
         return gene_region
 
-    raise ValueError("Gene \"%s\" is not in a valid chromosome!" % gene)
+    raise ValueError(
+        "Gene \"%s\" is not in a valid chromosome!!!" % gene
+    )
 
 #def get_region_coordinates_by_tad(session,
 #    chrom, gene_start, gene_end, region_start,

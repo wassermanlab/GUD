@@ -26,12 +26,12 @@ from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
-#from GUD.ORM.tf_binding import TFBinding
+from GUD.ORM.tf_binding import TFBinding
 
 __doc__ = """
-usage: encode2gud.py  genome metadata directory samples feat_type
-                      [-h] [-c] [--dummy-dir DIR] [--source STR]
-                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+usage: encode2gud.py genome metadata directory samples feat_type
+                     [-h] [-c] [--dummy-dir DIR] [--source STR]
+                     [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
 
 inserts ENCODE features into GUD. "metadata" and "directory" refer
 to "xargs -n 1 curl -O -L < file.txt". types of genomic features
@@ -73,6 +73,13 @@ def parse_args():
     the command line and returns an {argparse}
     object.
     """
+
+    # Initialize
+    feat_types = [
+        "accessibility",
+        "histone",
+        "tf"
+    ]
 
     parser = argparse.ArgumentParser(
         add_help=False,
@@ -130,11 +137,9 @@ def parse_args():
     parser.add_argument("metadata")
     parser.add_argument("directory")
     parser.add_argument("samples")
-
-    feats = ["accessibility", "histone", "tf"]
     parser.add_argument(
         "feat_type",
-        choices=feats
+        choices=feat_types
     )
 
     args = parser.parse_args()
@@ -165,8 +170,8 @@ def main():
 
 def insert_encode_to_gud_db(user, pwd, host,
     port, db, genome, metadata_file, directory,
-    samples_file, feat_type, cluster, dummy_dir,
-    source_name):
+    samples_file, feat_type, cluster=False,
+    dummy_dir="/tmp/", source_name="ENCODE"):
 
     # Initialize
     samples = {}

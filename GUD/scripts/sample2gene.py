@@ -164,7 +164,9 @@ def main():
         for sample in GUDglobals.parse_file(sample_file):
             samples.append(sample)
     else:
-        raise ValueError("No sample(s) was provided!")
+        raise ValueError(
+            "No samples were provided!!!"
+        )
 
     # Establish SQLalchemy session with GUD
     session = GUDglobals.establish_GUD_session(
@@ -207,7 +209,9 @@ def main():
         os.remove(dummy_file)
 
     else:
-        raise ValueError("No differentially expressed gene(s) found!!!")
+        raise ValueError(
+            "No differentially expressed genes found!!!"
+        )
 
 def get_differentially_expressed_tss(session,
     samples=[], tpm_exp=100, percent_exp=25,
@@ -242,9 +246,17 @@ def get_differentially_expressed_tss(session,
         i = samples.index(tss.Sample.name)
         sample2tss[i].add(tss.Expression.tssID)
         tssIDs.add(tss.Expression.tssID)
+        # Enables search for cell line
+        # specific TSSs
+        uid2name.setdefault(
+            tss.Sample.uid, tss.Sample.name)
+        name2uid.setdefault(
+            tss.Sample.name, tss.Sample.uid)
     # If required expression in all samples...
     if exp_in_all_samples:
-        tssIDs = list(set.intersection(*sample2tss))
+        tssIDs = list(
+            set.intersection(*sample2tss)
+        )
     # ... Else...
     else:
         tssIDs = list(tssIDs)
@@ -261,10 +273,14 @@ def get_differentially_expressed_tss(session,
                 bg_exp = 0.0 # background exp.
                 fg_exp = 0.0 # foreground exp.
                 # For each sampleID
-                for i in range(len(tss.qualifiers["sampleIDs"])):
+                for i in range(
+                    len(tss.qualifiers["sampleIDs"])
+                ):
                     # Initialize
-                    sampleID = tss.qualifiers["sampleIDs"][i]
-                    avg_exp = tss.qualifiers["avg_expression_levels"][i]
+                    sampleID = tss\
+                        .qualifiers["sampleIDs"][i]
+                    avg_exp = tss\
+                        .qualifiers["avg_expression_levels"][i]
                     # If sample...
                     if sampleID in uid2name:
                         expression.setdefault(
