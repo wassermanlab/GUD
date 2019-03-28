@@ -28,9 +28,10 @@ from GUD.ORM.tad import TAD
 from GUD.ORM.tf_binding import TFBinding
 
 usage_msg = """
-usage: bed2gud.py file feat_type experiment sample source
-                  [-h] [-c] [--dummy-dir DIR]
-                  [[--histone STR] | [--enzyme STR] | [--tf STR]]
+usage: bed2gud.py --file [FILE ...] --feature STR
+                  --experiment STR --sample STR --source STR 
+                  [-h] [--histone STR | --enzyme STR | --tf STR]
+                  [--cancer] [--cell-line] [--treatment]
                   [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
 """
 
@@ -40,17 +41,14 @@ inserts genomic features from BED file into GUD. types of genomic
 features include "accessibility", "enhancer", "histone", "tad" or
 "tf".
 
-  file                BED file(s)
-  feat_type           type of genomic feature
-  experiment          genomic experiment (e.g. "GRO-seq")
-  sample              sample (e.g. "brain")
-  source              source name (e.g. "PMID:29449408")
+  --file [FILE ...]   BED file(s)
+  --feature STR       type of genomic feature (e.g. "enhancer")
+  --experiment STR    experiment (e.g. "GRO-seq")
+  --sample STR        sample (e.g. "B cell")
+  --source STR        source (e.g. "PMID:29449408")
 
 optional arguments:
   -h, --help          show this help message and exit
-  -c, --cluster       cluster genome regions by UCSC's regCluster
-                      (default = False)
-  --dummy-dir DIR     dummy directory (default = "/tmp/")
   --histone STR       histone type (e.g. "H3K27ac")
   --enzyme STR        restriction enzyme (e.g. "HindIII")
   --tf STR            TF name (e.g. "FOS")
@@ -88,6 +86,13 @@ def parse_args():
         add_help=False,
     )
 
+    # Mandatory arguments
+    parser.add_argument("--file", nargs="*")
+    parser.add_argument("--feature")
+    parser.add_argument("--experiment")
+    parser.add_argument("--sample")
+    parser.add_argument("--source")
+
     # Optional args
     optional_group = parser.add_argument_group(
         "optional arguments"
@@ -95,14 +100,6 @@ def parse_args():
     optional_group.add_argument(
         "-h", "--help",
         action="store_true"
-    )
-    optional_group.add_argument(
-        "-c", "--cluster",
-        action="store_true"
-    )
-    optional_group.add_argument(
-        "--dummy-dir",
-        default="/tmp/"
     )
     optional_group.add_argument("--histone")
     optional_group.add_argument("--enzyme")
@@ -147,17 +144,6 @@ def parse_args():
         default=getpass.getuser()
     )
 
-    if "-h" in sys.argv or "--help" in sys.argv:
-        print(help_msg)
-        exit(0)
-
-    # Mandatory arguments
-    parser.add_argument("file", nargs="*")
-    parser.add_argument("feat_type")
-    parser.add_argument("experiment")
-    parser.add_argument("sample")
-    parser.add_argument("source")
-
     args = parser.parse_args()
 
     check_args(args)
@@ -178,6 +164,33 @@ def check_args(args):
         "tf"
     ]
 
+    # Print help
+    if (
+        "-h" in sys.argv or \
+        "--help" in sys.argv
+    ):
+        print(help_msg)
+        exit(0)
+
+    # Check mandatory arguments
+    if (
+        not args.file or \
+        not args.feature or \
+        not args.experiment or \
+        not args.sample or \
+        not args.source
+    ):
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "arguments \"--file\" \"--feature\" \"--experiment\" \"--sample\" \"--source\" are required\n"
+                ]
+            )
+        )
+        exit(0)
+
     # Check for invalid feature
     if args.feat_type not in feats:
         print(": "\
@@ -197,51 +210,51 @@ def check_args(args):
 
     # Check feature type histone
     if args.feat_type == "histone":
-        if args.histone: continue
         # Histone not provided!
-        print(": "\
-            .join(
-                [
-                    "%s\nbed2gud.py" % usage_msg,
-                    "error",
-                    "argument \"--histone\"",
-                    "missing argument\n"
-                ]
+        if not args.histone:
+            print(": "\
+                .join(
+                    [
+                        "%s\nbed2gud.py" % usage_msg,
+                        "error",
+                        "argument \"--histone\"",
+                        "missing argument\n"
+                    ]
+                )
             )
-        )
-        exit(0)
+            exit(0)
 
     # Check feature type TAD
     if args.feat_type == "tad":
-        if args.enzyme: continue
         # Enzyme not provided!
-        print(": "\
-            .join(
-                [
-                    "%s\nbed2gud.py" % usage_msg,
-                    "error",
-                    "argument \"--enzyme\"",
-                    "missing argument\n"
-                ]
+        if not args.enzyme:
+            print(": "\
+                .join(
+                    [
+                        "%s\nbed2gud.py" % usage_msg,
+                        "error",
+                        "argument \"--enzyme\"",
+                        "missing argument\n"
+                    ]
+                )
             )
-        )
-        exit(0)
+            exit(0)
 
     # Check feature type TF
     if args.feat_type == "tf":
-        if args.tf: continue
         # TF not provided!
-        print(": "\
-            .join(
-                [
-                    "%s\nbed2gud.py" % usage_msg,
-                    "error",
-                    "argument \"--tf\"",
-                    "missing argument\n"
-                ]
+        if not args.tf:
+            print(": "\
+                .join(
+                    [
+                        "%s\nbed2gud.py" % usage_msg,
+                        "error",
+                        "argument \"--tf\"",
+                        "missing argument\n"
+                    ]
+                )
             )
-        )
-        exit(0)
+            exit(0)
 
 def main():
 
@@ -256,19 +269,21 @@ def main():
         args.port,
         args.db,
         args.file,
-        args.feat_type,
+        args.feature,
         args.experiment,
         args.sample,
         args.source,
         args.histone,
         args.enzyme,
-        args.tf
+        args.tf,
+        args.cancer,
+        args.cell_line,
+        args.treatment
     )
 
 def insert_bed_to_gud_db(user, pwd, host, port,
     db, bed_files, feat_type, experiment_type,
-    sample_name, source_name, cluster=False,
-    dummy_dir="/tmp/" histone_type=None,
+    sample_name, source_name, histone_type=None,
     restriction_enzyme=None, tf_name=None,
     cancer=False, cell_line=False,
     treatment=False):
@@ -449,7 +464,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                         reg_uid,
                         sam_uid,
                         exp.uid,
-                        sou.uid
+                        sou.uid,
+                        
                     )
 
                 if feat_type == "tf":

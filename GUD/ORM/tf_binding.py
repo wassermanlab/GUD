@@ -19,7 +19,7 @@ from .region import Region
 from .sample import Sample
 from .source import Source
 
-class HistoneModification(Base):
+class TFBinding(Base):
 
     __tablename__ = "tf_binding"
 

@@ -14,15 +14,18 @@ from GUD.ORM.genomic_feature import GenomicFeature
 from GUD.ORM.sample import Sample
 from GUD.ORM.tss import TSS
 
-__doc__ = """
+usage_msg = """
 usage: sample2gene.py (--sample [STR ...] | --sample-file FILE)
                       [-h] [--dummy-dir DIR] [-o FILE]
                       [-a] [--percent FLT] [--tpm FLT] [--tss INT]
                       [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+"""
+
+help_msg = """%s
 
 identifies one or more genes differentially expressed in samples.
 
-  --sample [STR ...]  sample(s) (e.g. "brain")
+  --sample [STR ...]  sample(s) (e.g. "B cell")
   --sample-file FILE  file containing a list of samples
 
 optional arguments:
@@ -46,6 +49,7 @@ mysql arguments:
   -u STR, --user STR  user name (default = "%s")
 """ % \
 (
+    usage_msg,
     GUDglobals.min_percent_exp,
     GUDglobals.min_tpm_exp,
     GUDglobals.max_tss,
@@ -70,6 +74,14 @@ def parse_args():
         add_help=False,
     )
 
+    # Mandatory arguments
+    sample_group = parser\
+        .add_mutually_exclusive_group()
+    sample_group.add_argument(
+        "--sample", nargs="*"
+    )
+    sample_group.add_argument("--sample-file")
+
     # Optional args
     optional_group = parser.add_argument_group(
         "optional arguments"
@@ -93,15 +105,15 @@ def parse_args():
         action="store_true"
     )
     exp_group.add_argument(
-        "--percent", type=float,
+        "--percent",
         default=GUDglobals.min_percent_exp
     )
     exp_group.add_argument(
-        "--tpm", type=float,
+        "--tpm",
         default=GUDglobals.min_tpm_exp
     )
     exp_group.add_argument(
-        "--tss", type=int,
+        "--tss",
         default=GUDglobals.max_tss,
     )
 
@@ -127,22 +139,91 @@ def parse_args():
         default=GUDglobals.db_user
     )
 
-    if "-h" in sys.argv or "--help" in sys.argv:
-        print(__doc__)
-        exit(0)
-
-    # Mandatory arguments
-    sample_group = parser.add_mutually_exclusive_group(
-        required=True
-    )
-    sample_group.add_argument(
-        "--sample", nargs="*"
-    )
-    sample_group.add_argument("--sample-file")
-
     args = parser.parse_args()
 
+    check_args(args)
+
     return args
+
+def check_args(args):
+    """
+    This function checks an {argparse} object.
+    """
+
+    # Print help
+    if (
+        "-h" in sys.argv or \
+        "--help" in sys.argv
+    ):
+        print(help_msg)
+        exit(0)
+    
+    # Check mandatory arguments
+    if (
+        not args.sample and \
+        not args.sample_file
+    ):
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "one of the arguments \"--sample\" \"--sample-file\" is required\n"
+                ]
+            )
+        )
+        exit(0)
+
+    # Check for invalid percent
+    try:
+        args.percent = float(args.percent)
+    except:
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "argument \"--percent\"",
+                    "invalid float value",
+                    "\"%s\"\n" % args.percent
+                ]
+            )
+        )
+        exit(0)
+        
+    # Check for invalid TPM
+    try:
+        args.tpm = float(args.tpm)
+    except:
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "argument \"--tpm\"",
+                    "invalid float value",
+                    "\"%s\"\n" % args.tpm
+                ]
+            )
+        )
+        exit(0)
+
+    # Check for invalid TSS
+    try:
+        args.tss = int(args.tss)
+    except:
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "argument \"--tss\"",
+                    "invalid int value",
+                    "\"%s\"\n" % args.tss
+                ]
+            )
+        )
+        exit(0)
 
 def main():
 

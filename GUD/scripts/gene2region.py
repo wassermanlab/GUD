@@ -20,7 +20,7 @@ usage: gene2region.py (--gene [STR ...] | --gene-file FILE)
 delimits a region for the given genes based on TADs, nearby genes,
 or distance (in kb).
 
-  --gene [STR ...]    gene(s) (e.g. "TH")
+  --gene [STR ...]    gene(s) (e.g. "CD19")
   --gene-file FILE    file containing a list of genes
 
 optional arguments:
@@ -30,7 +30,7 @@ optional arguments:
                       or distance (i.e. +/- N kb)
   --dummy-dir DIR     dummy directory (default = "/tmp/")
   -o FILE             output file (default = stdout)
-  --sample [STR ...]  sample(s) for GUD features (e.g. "brain")
+  --sample [STR ...]  sample(s) for GUD features (e.g. "B cell")
   --sample-file FILE  file containing a list of samples for GUD
                       features
 
