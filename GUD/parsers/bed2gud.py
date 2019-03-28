@@ -298,7 +298,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
         print(": "\
             .join(
                 [
-                    "%s\nbed2gud.py" % usage_msg,
+                    "\nbed2gud.py",
                     "error",
                     "GUD database does not exist",
                     "\"%s\"\n" % db_name

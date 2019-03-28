@@ -232,7 +232,7 @@ def insert_encode_to_gud_db(user, pwd, host,
         print(": "\
             .join(
                 [
-                    "bed2gud.py",
+                    "\nbed2gud.py",
                     "error",
                     "GUD database does not exist",
                     "\"%s\"\n" % db_name
