@@ -429,8 +429,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 feat = DNAAccessibility()
                 is_unique = feat.is_unique(
                     session,
-                    reg_uid,
-                    sam_uid,
+                    reg.uid,
+                    sam.uid,
                     exp.uid,
                     sou.uid
                 )
@@ -439,8 +439,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 feat = Enhancer()
                 is_unique = feat.is_unique(
                     session,
-                    reg_uid,
-                    sam_uid,
+                    reg.uid,
+                    sam.uid,
                     exp.uid,
                     sou.uid
                 )
@@ -449,8 +449,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 feat = Enhancer()
                 is_unique = feat.is_unique(
                     session,
-                    reg_uid,
-                    sam_uid,
+                    reg.uid,
+                    sam.uid,
                     exp.uid,
                     sou.uid
                 )
@@ -459,8 +459,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 feat = Enhancer()
                 is_unique = feat.is_unique(
                     session,
-                    reg_uid,
-                    sam_uid,
+                    reg.uid,
+                    sam.uid,
                     exp.uid,
                     sou.uid,
 
@@ -470,15 +470,15 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 feat = Enhancer()
                 is_unique = feat.is_unique(
                     session,
-                    reg_uid,
-                    sam_uid,
+                    reg.uid,
+                    sam.uid,
                     exp.uid,
                     sou.uid
                 )
             # Insert feature to GUD
             if is_unique:
-                feat.regionID = reg_uid
-                feat.sampleID = sam_uid
+                feat.regionID = reg.uid
+                feat.sampleID = sam.uid
                 feat.experimentID = exp.uid
                 feat.sourceID = sou.uid
                 if feat_type == "histone":
