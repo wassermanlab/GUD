@@ -446,7 +446,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 )
             # Get histone feature
             if feat_type == "histone":
-                feat = Enhancer()
+                feat = HistoneModification()
                 is_unique = feat.is_unique(
                     session,
                     reg.uid,
@@ -456,7 +456,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 )
             # Get TAD feature
             if feat_type == "tad":
-                feat = Enhancer()
+                feat = TAD()
                 is_unique = feat.is_unique(
                     session,
                     reg.uid,
@@ -467,7 +467,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 )
             # Get TF feature
             if feat_type == "tf":
-                feat = Enhancer()
+                feat = TFBinding()
                 is_unique = feat.is_unique(
                     session,
                     reg.uid,
