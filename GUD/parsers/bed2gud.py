@@ -409,6 +409,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 end
             ):
                 # Insert region
+                print(start, end)
+                exit(0)
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
                 region.start = start
