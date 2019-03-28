@@ -165,10 +165,7 @@ def check_args(args):
     ]
 
     # Print help
-    if (
-        "-h" in sys.argv or \
-        "--help" in sys.argv
-    ):
+    if args.help:
         print(help_msg)
         exit(0)
 

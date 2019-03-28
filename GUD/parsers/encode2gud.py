@@ -28,20 +28,24 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
 
-__doc__ = """
-usage: encode2gud.py genome metadata directory samples feat_type
+usage_msg = """
+usage: encode2gud.py --genome STR --metadata FILE
+                     --data-dir DIR --samples FILE --feature STR
                      [-h] [-c] [--dummy-dir DIR] [--source STR]
                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+"""
 
-inserts ENCODE features into GUD. "metadata" and "directory" refer
-to "xargs -n 1 curl -O -L < file.txt". types of genomic features
-include "accessibility", "histone" and "tf".
+help_msg = """%s
 
-  genome              genome assembly
-  metadata            metadata file
-  directory           downloads directory
-  samples             ENCODE samples (manually-curated)
-  feat_type           type of genomic feature
+inserts ENCODE features into GUD. "--metadata" and "--data-dir"
+refer to executing "xargs -n 1 curl -O -L < file.txt". types of
+genomic features include "accessibility", "histone", or "tf".
+
+  --genome STR        genome assembly
+  --metadata FILE     metadata file
+  --data-dir DIR      directory where data was downloaded
+  --samples FILE      ENCODE samples (manually-curated)
+  --feature STR       type of genomic feature
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -85,7 +89,22 @@ def parse_args():
         add_help=False,
     )
 
-  # Optional args
+"""
+  --genome STR        genome assembly
+  --metadata FILE     metadata file
+  --data-dir DIR      directory where data was downloaded
+  --samples FILE      ENCODE samples (manually-curated)
+  --feature STR       type of genomic feature
+"""
+
+    # Mandatory arguments
+    parser.add_argument("--genome")
+    parser.add_argument("--metadata")
+    parser.add_argument("--data-dir")
+    parser.add_argument("--samples")
+    parser.add_argument("--feature")
+
+    # Optional args
     optional_group = parser.add_argument_group(
         "optional arguments"
     )
@@ -131,16 +150,6 @@ def parse_args():
     if "-h" in sys.argv or "--help" in sys.argv:
         print(__doc__)
         exit(0)
-
-    # Mandatory arguments
-    parser.add_argument("genome")
-    parser.add_argument("metadata")
-    parser.add_argument("directory")
-    parser.add_argument("samples")
-    parser.add_argument(
-        "feat_type",
-        choices=feat_types
-    )
 
     args = parser.parse_args()
 
