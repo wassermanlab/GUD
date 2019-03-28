@@ -15,7 +15,7 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.tss import TSS
 
 usage_msg = """
-usage: sample2gene.py (--sample [STR ...] | --sample-file FILE)
+usage: sample2gene.py --sample [STR ...] | --sample-file FILE
                       [-h] [--dummy-dir DIR] [-o FILE]
                       [-a] [--percent FLT] [--tpm FLT] [--tss INT]
                       [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]

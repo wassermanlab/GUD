@@ -256,6 +256,10 @@ def check_args(args):
             )
             exit(0)
 
+    # Check MySQL password
+    if not args.pwd:
+        args.pwd = ""
+
 def main():
 
     # Parse arguments
