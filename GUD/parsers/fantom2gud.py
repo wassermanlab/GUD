@@ -171,7 +171,7 @@ def insert_fantom_to_gud_db(user, pwd, host, port, db,
         elif line[0].startswith("chr") or line[0].startswith("\"chr"):
             # Initialize
             data = {}
-            rows = []
+            features = []
             sampleIDs = []
             avg_expression_levels = []
             # Get coordinates
@@ -262,15 +262,15 @@ def insert_fantom_to_gud_db(user, pwd, host, port, db,
                         enhancer.sourceID = sou.uid
                         enhancer.sampleID = sampleIDs[i]
                         enhancer.experimentID = exp.uid
-                        rows.append(enhancer)
+                        features.append(enhancer)
                 if feat_type == "tss":
                     expression = Expression()
                     if expression.is_unique(session, tss.uid, sampleIDs[i]):
                         expression.tssID = tss.uid
                         expression.sampleID = sampleIDs[i]
                         expression.avg_expression_level = avg_expression_levels[i]
-                        rows.append(expression)
-            session.add_all(rows)
+                        features.append(expression)
+            session.add_all(features)
             session.commit()
 
 #-------------#

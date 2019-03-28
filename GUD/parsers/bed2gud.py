@@ -294,6 +294,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
 
     # Initialize
     lines = []
+    features = []
     db_name = "mysql://{}:{}@{}:{}/{}".format(
         user, pwd, host, port, db
     )
@@ -489,8 +490,9 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                     feat.restriction_enzyme = restriction_enzyme
                 if feat_type == "tf":
                     feat.tf = tf_name
-                session.add(feat)
-                session.commit()
+                features.append(feat)    
+    session.add_all(features)
+    session.commit()
 
 #-------------#
 # Main        #
