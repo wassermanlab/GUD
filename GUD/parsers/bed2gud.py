@@ -192,7 +192,7 @@ def check_args(args):
         exit(0)
 
     # Check for invalid feature
-    if args.feat_type not in feats:
+    if args.feature not in feats:
         print(": "\
             .join(
                 [
@@ -209,7 +209,7 @@ def check_args(args):
         exit(0)
 
     # Check feature type histone
-    if args.feat_type == "histone":
+    if args.feature == "histone":
         # Histone not provided!
         if not args.histone:
             print(": "\
@@ -225,7 +225,7 @@ def check_args(args):
             exit(0)
 
     # Check feature type TAD
-    if args.feat_type == "tad":
+    if args.feature == "tad":
         # Enzyme not provided!
         if not args.enzyme:
             print(": "\
@@ -241,7 +241,7 @@ def check_args(args):
             exit(0)
 
     # Check feature type TF
-    if args.feat_type == "tf":
+    if args.feature == "tf":
         # TF not provided!
         if not args.tf:
             print(": "\
