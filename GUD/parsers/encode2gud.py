@@ -62,6 +62,7 @@ mysql arguments:
   -u STR, --user STR  user name (default = current user)
 """ % \
 (
+    usage_msg,
     GUDglobals.db_name,
     GUDglobals.db_port
 )
@@ -78,24 +79,9 @@ def parse_args():
     object.
     """
 
-    # Initialize
-    feat_types = [
-        "accessibility",
-        "histone",
-        "tf"
-    ]
-
     parser = argparse.ArgumentParser(
         add_help=False,
     )
-
-"""
-  --genome STR        genome assembly
-  --metadata FILE     metadata file
-  --data-dir DIR      directory where data was downloaded
-  --samples FILE      ENCODE samples (manually-curated)
-  --feature STR       type of genomic feature
-"""
 
     # Mandatory arguments
     parser.add_argument("--genome")
@@ -147,13 +133,68 @@ def parse_args():
         default=getpass.getuser()
     )
 
-    if "-h" in sys.argv or "--help" in sys.argv:
-        print(__doc__)
-        exit(0)
-
     args = parser.parse_args()
 
+    check_args(args)
+
     return args
+
+def check_args(args):
+    """
+    This function checks an {argparse} object.
+    """
+
+    # Initialize
+    feats = [
+        "accessibility",
+        "histone",
+        "tf"
+    ]
+
+    # Print help
+    if args.help:
+        print(help_msg)
+        exit(0)
+
+    # Check mandatory arguments
+    if (
+        not args.genome or \
+        not args.metadata or \
+        not args.data_dir or \
+        not args.samples or \
+        not args.feature
+    ):
+        print(": "\
+            .join(
+                [
+                    "%s\nencode2gud.py" % usage_msg,
+                    "error",
+                    "arguments \"--genome\" \"--metadata\" \"--data-dir\" \"--samples\" \"--feature\" are required\n"
+                ]
+            )
+        )
+        exit(0)
+
+    # Check for invalid feature
+    if args.feature not in feats:
+        print(": "\
+            .join(
+                [
+                    "%s\nencode2gud.py" % usage_msg,
+                    "error",
+                    "argument \"feature\"",
+                    "invalid choice",
+                    "\"%s\" (choose from" % args.feature,
+                    "%s)\n" % " "\
+                    .join(["\"%s\"" % i for i in feats])
+                ]
+            )
+        )
+        exit(0)
+
+    # Check MySQL password
+    if not args.pwd:
+        args.pwd = ""
 
 def main():
 
@@ -169,16 +210,16 @@ def main():
         args.db,
         args.genome,
         args.metadata,
-        args.directory,
+        args.data_dir,
         args.samples,
-        args.feat_type,
+        args.feature,
         args.cluster,
         args.dummy_dir,
         args.source
     )
 
 def insert_encode_to_gud_db(user, pwd, host,
-    port, db, genome, metadata_file, directory,
+    port, db, genome, metadata_file, data_dir,
     samples_file, feat_type, cluster=False,
     dummy_dir="/tmp/", source_name="ENCODE"):
 
@@ -281,7 +322,7 @@ def insert_encode_to_gud_db(user, pwd, host,
             # Get metadata
             if os.path.exists(
                 os.path.join(
-                    directory,
+                    data_dir,
                     "%s.bed.gz" % accession
                 )
             ):
@@ -326,7 +367,7 @@ def insert_encode_to_gud_db(user, pwd, host,
         for accession, biosample in metadata[k]:
             # Copy BED file
             gz_bed_file = os.path.join(
-                directory,
+                data_dir,
                 "%s.bed.gz" % accession
             )
             bed_file = os.path.join(
@@ -491,7 +532,7 @@ def insert_encode_to_gud_db(user, pwd, host,
                 reg_uid = regions[int(line[0]) - 1] 
                 # Get sample
                 sam_uid = accession2sample[label2accession[line[-1]]]
-                # Insert feature
+                # Get accessibility feature
                 if feat_type == "accessibility":
                     feat = DNAAccessibility()
                     is_unique = feat.is_unique(
@@ -501,35 +542,38 @@ def insert_encode_to_gud_db(user, pwd, host,
                         exp.uid,
                         sou.uid
                     )
-#                if feat_type == "histone":
-#                    feat = HistoneModification()
-#                    is_unique = feat.is_unique(
-#                        session,
-#                        reg_uid,
-#                        sam_uid,
-#                        exp.uid,
-#                        sou.uid,
-#                        experiment_target
-#                    )
-#                if feat_type == "tf":
-#                    feat = TFBinding()
-#                    is_unique = feat.is_unique(
-#                        session,
-#                        reg_uid,
-#                        sam_uid,
-#                        exp.uid,
-#                        sou.uid,
-#                        experiment_target
-#                    )
+                # Get histone feature
+                if feat_type == "histone":
+                    feat = HistoneModification()
+                    is_unique = feat.is_unique(
+                        session,
+                        reg_uid,
+                        sam_uid,
+                        exp.uid,
+                        sou.uid,
+                        experiment_target
+                    )
+                # Get TF feature
+                if feat_type == "tf":
+                    feat = TFBinding()
+                    is_unique = feat.is_unique(
+                        session,
+                        reg_uid,
+                        sam_uid,
+                        exp.uid,
+                        sou.uid,
+                        experiment_target
+                    )
+                # Insert feature to GUD
                 if is_unique:
                     feat.regionID = reg_uid
                     feat.sampleID = sam_uid
                     feat.experimentID = exp.uid
                     feat.sourceID = sou.uid
-#                    if feat_type == "histone":
-#                        feat.histone_type = experiment_target
-#                    if feat_type == "tf":
-#                        feat.tf = experiment_target
+                    if feat_type == "histone":
+                        feat.histone_type = experiment_target
+                    if feat_type == "tf":
+                        feat.tf = experiment_target
                     session.add(feat)
                     session.commit()
 #        # Do not cluster

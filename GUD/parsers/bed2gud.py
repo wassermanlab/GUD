@@ -195,10 +195,10 @@ def check_args(args):
                 [
                     "%s\nbed2gud.py" % usage_msg,
                     "error",
-                    "argument \"feat_type\"",
+                    "argument \"feature\"",
                     "invalid choice",
-                    "\"%s\" (choose from" % args.feat_type,
-                    "%s)\n" % ", "\
+                    "\"%s\" (choose from" % args.feature,
+                    "%s)\n" % " "\
                     .join(["\"%s\"" % i for i in feats])
                 ]
             )
