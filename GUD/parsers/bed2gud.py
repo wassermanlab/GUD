@@ -452,7 +452,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                     reg.uid,
                     sam.uid,
                     exp.uid,
-                    sou.uid
+                    sou.uid,
+                    histone_type
                 )
             # Get TAD feature
             if feat_type == "tad":
@@ -463,7 +464,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                     sam.uid,
                     exp.uid,
                     sou.uid,
-
+                    restriction_enzyme
                 )
             # Get TF feature
             if feat_type == "tf":
@@ -473,7 +474,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                     reg.uid,
                     sam.uid,
                     exp.uid,
-                    sou.uid
+                    sou.uid,
+                    tf_name
                 )
             # Insert feature to GUD
             if is_unique:
