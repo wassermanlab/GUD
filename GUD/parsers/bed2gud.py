@@ -366,8 +366,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
         table = Enhancer()
     if feat_type == "histone":
         table = HistoneModification()
-    if feat_type == "TAD":
-        table = TFBinding()
+    if feat_type == "tad":
+        table = TAD()
     if feat_type == "tf":
         table = TFBinding()
     if not engine.has_table(table.__tablename__):
