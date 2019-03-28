@@ -352,7 +352,6 @@ def insert_encode_to_gud_db(user, pwd, host,
                 metadata.setdefault(k, [])
                 metadata[k].append((accession, biosample))
 
-    exit(0)
     # For each experiment, target...
     for k in sorted(metadata):
         # Initialize
