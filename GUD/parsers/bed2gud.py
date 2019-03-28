@@ -13,7 +13,6 @@ from sqlalchemy.orm import (
     sessionmaker
 )
 from sqlalchemy_utils import database_exists
-import warnings
 
 # Import from GUD module
 from GUD import GUDglobals
@@ -198,7 +197,7 @@ def check_args(args):
                     "argument \"feature\"",
                     "invalid choice",
                     "\"%s\" (choose from" % args.feature,
-                    "%s)\n" % " "\
+                    " %s)\n" % " "\
                     .join(["\"%s\"" % i for i in feats])
                 ]
             )
@@ -296,7 +295,17 @@ def insert_bed_to_gud_db(user, pwd, host, port,
         user, pwd, host, port, db
     )
     if not database_exists(db_name):
-        raise ValueError("GUD database does not exist!!!\n\t%s" % db_name)
+        print(": "\
+            .join(
+                [
+                    "%s\nbed2gud.py" % usage_msg,
+                    "error",
+                    "GUD database does not exist",
+                    "\"%s\"\n" % db_name
+                ]
+            )
+        )
+        exit(0)
     session = scoped_session(sessionmaker())
     engine = create_engine(
         db_name,

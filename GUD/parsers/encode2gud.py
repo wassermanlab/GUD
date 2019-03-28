@@ -16,7 +16,6 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy_utils import database_exists
 import subprocess
-import warnings
 
 # Import from GUD module
 from GUD import GUDglobals
@@ -185,7 +184,7 @@ def check_args(args):
                     "argument \"feature\"",
                     "invalid choice",
                     "\"%s\" (choose from" % args.feature,
-                    "%s)\n" % " "\
+                    " %s)\n" % " "\
                     .join(["\"%s\"" % i for i in feats])
                 ]
             )
@@ -230,7 +229,17 @@ def insert_encode_to_gud_db(user, pwd, host,
         user, pwd, host, port, db
     )
     if not database_exists(db_name):
-        raise ValueError("GUD database does not exist!!!\n\t%s" % db_name)
+        print(": "\
+            .join(
+                [
+                    "bed2gud.py",
+                    "error",
+                    "GUD database does not exist",
+                    "\"%s\"\n" % db_name
+                ]
+            )
+        )
+        exit(0)
     session = scoped_session(sessionmaker())
     engine = create_engine(
         db_name,
@@ -311,8 +320,18 @@ def insert_encode_to_gud_db(user, pwd, host,
         status = line[40]
         # Skip treated samples
         if treatment:
-            warnings.warn("Skipping treated sample %s (%s)\n" % \
-                (accession, treatment)
+            print(": "\
+                .join(
+                    [
+                        "bed2gud.py",
+                        "warning",
+                        "treated sample",
+                        "\"%s\" (\"%s\")" % (
+                            accession,
+                            treatment
+                        )
+                    ]
+                )
             )
             continue
         # This is a released sample!
@@ -333,6 +352,7 @@ def insert_encode_to_gud_db(user, pwd, host,
                 metadata.setdefault(k, [])
                 metadata[k].append((accession, biosample))
 
+    exit(0)
     # For each experiment, target...
     for k in sorted(metadata):
         # Initialize
