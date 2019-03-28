@@ -413,19 +413,68 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 )
 
                 if feat_type == "accessibility":
-                    pass
+                    feat = DNAAccessibility()
+                    is_unique = feat.is_unique(
+                        session,
+                        reg_uid,
+                        sam_uid,
+                        exp.uid,
+                        sou.uid
+                    )
 
                 if feat_type == "enhancer":
-                    pass
+                    feat = Enhancer()
+                    is_unique = feat.is_unique(
+                        session,
+                        reg_uid,
+                        sam_uid,
+                        exp.uid,
+                        sou.uid
+                    )
 
                 if feat_type == "histone":
-                    pass
+                    feat = Enhancer()
+                    is_unique = feat.is_unique(
+                        session,
+                        reg_uid,
+                        sam_uid,
+                        exp.uid,
+                        sou.uid
+                    )
 
                 if feat_type == "tad":
-                    pass
+                    feat = Enhancer()
+                    is_unique = feat.is_unique(
+                        session,
+                        reg_uid,
+                        sam_uid,
+                        exp.uid,
+                        sou.uid
+                    )
 
                 if feat_type == "tf":
-                    pass
+                    feat = Enhancer()
+                    is_unique = feat.is_unique(
+                        session,
+                        reg_uid,
+                        sam_uid,
+                        exp.uid,
+                        sou.uid
+                    )
+
+                if is_unique:
+                    feat.regionID = reg_uid
+                    feat.sampleID = sam_uid
+                    feat.experimentID = exp.uid
+                    feat.sourceID = sou.uid
+                    if feat_type == "histone":
+                        feat.histone_type = histone_type
+                    if feat_type == "tad":
+                        feat.restriction_enzyme = restriction_enzyme
+                    if feat_type == "tf":
+                        feat.tf = tf_name
+                    session.add(feat)
+                    session.commit()
 
 #-------------#
 # Main        #

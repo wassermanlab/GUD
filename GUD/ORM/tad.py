@@ -1,3 +1,7 @@
+from binning import (
+    containing_bins,
+    contained_bins
+)
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -45,16 +49,16 @@ class TAD(Base):
         nullable=False
     )
 
-    restriction_enzyme = Column(
-        "restriction_enzyme",
-        String(25),
-        nullable=False
-    )
-
     sourceID = Column(
         "sourceID",
         Integer,
         ForeignKey("sources.uid"),
+        nullable=False
+    )
+
+    restriction_enzyme = Column(
+        "restriction_enzyme",
+        String(25),
         nullable=False
     )
 
@@ -64,8 +68,9 @@ class TAD(Base):
             regionID,
             sampleID,
             experimentID,
-            restriction_enzyme,
-            sourceID
+            sourceID,
+            restriction_enzyme
+
         ),
         Index("ix_regionID", regionID), # query by bin range
         Index("ix_sampleID", sampleID),
@@ -77,32 +82,32 @@ class TAD(Base):
 
     @classmethod
     def is_unique(cls, session, regionID,
-        sampleID, experimentID,
-        restriction_enzyme, sourceID):
+        sampleID, experimentID, sourceID,
+        restriction_enzyme):
 
         q = session.query(cls).\
             filter(
                 cls.regionID == regionID,
                 cls.sampleID == sampleID,
                 cls.experimentID == experimentID,
-                cls.restriction_enzyme == restriction_enzyme,
-                cls.sourceID == sourceID
+                cls.sourceID == sourceID,
+                cls.restriction_enzyme == restriction_enzyme
             )
 
         return len(q.all()) == 0
 
     @classmethod
     def select_unique(cls, session, regionID,
-        sampleID, experimentID,
-        restriction_enzyme, sourceID):
+        sampleID, experimentID, sourceID,
+        restriction_enzyme):
 
         q = session.query(cls).\
             filter(
                 cls.regionID == regionID,
                 cls.sampleID == sampleID,
                 cls.experimentID == experimentID,
-                cls.restriction_enzyme == restriction_enzyme,
-                cls.sourceID == sourceID
+                cls.sourceID == sourceID,
+                cls.restriction_enzyme == restriction_enzyme
             )
 
         return q.first()
@@ -115,6 +120,6 @@ class TAD(Base):
                 "regionID={}".format(self.regionID),
                 "sampleID={}".format(self.sampleID),
                 "experimentID={}".format(self.experimentID),
-                "restriction_enzyme={}".format(self.restriction_enzyme),
-                "sourceID={}".format(self.sourceID)
+                "sourceID={}".format(self.sourceID),
+                "restriction_enzyme={}".format(self.restriction_enzyme)
             )
