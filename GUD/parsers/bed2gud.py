@@ -409,9 +409,10 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 end
             ):
                 # Insert region
-                print(start, end)
-                exit(0)
-                region.bin = assign_bin(start, end)
+                region.bin = assign_bin(
+                    int(start),
+                    int(end)
+                )
                 region.chrom = chrom
                 region.start = start
                 region.end = end
@@ -423,7 +424,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                 start,
                 end
             )
-
+            # Get accessibility feature
             if feat_type == "accessibility":
                 feat = DNAAccessibility()
                 is_unique = feat.is_unique(
@@ -433,7 +434,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                     exp.uid,
                     sou.uid
                 )
-
+            # Get enhancer feature
             if feat_type == "enhancer":
                 feat = Enhancer()
                 is_unique = feat.is_unique(
@@ -443,7 +444,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                     exp.uid,
                     sou.uid
                 )
-
+            # Get histone feature
             if feat_type == "histone":
                 feat = Enhancer()
                 is_unique = feat.is_unique(
@@ -453,7 +454,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                     exp.uid,
                     sou.uid
                 )
-
+            # Get TAD feature
             if feat_type == "tad":
                 feat = Enhancer()
                 is_unique = feat.is_unique(
@@ -464,7 +465,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                     sou.uid,
 
                 )
-
+            # Get TF feature
             if feat_type == "tf":
                 feat = Enhancer()
                 is_unique = feat.is_unique(
@@ -474,7 +475,7 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                     exp.uid,
                     sou.uid
                 )
-
+            # Insert feature to GUD
             if is_unique:
                 feat.regionID = reg_uid
                 feat.sampleID = sam_uid
