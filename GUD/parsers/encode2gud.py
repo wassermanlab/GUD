@@ -363,7 +363,6 @@ def insert_encode_to_gud_db(user, pwd, host,
                 experiment_target
             )
         )
-        if experiment_type == "DNase-seq": continue
 #        # Remove dummy dir
 #        if os.path.isdir(exp_dummy_dir):
 #            shutil.rmtree(exp_dummy_dir)
@@ -500,6 +499,8 @@ def insert_encode_to_gud_db(user, pwd, host,
                     ),
                     line[0]
                 )
+                print(line[0], m.group(1))
+                exit(0)
                 if m:
                     label2accession.setdefault(
                         line[-1],
