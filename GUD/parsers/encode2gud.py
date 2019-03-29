@@ -609,8 +609,6 @@ def insert_encode_to_gud_db(user, pwd, host,
                 # If BED file exists...
                 bed_file = os.path.join(
                     exp_dummy_dir, "%s.bed" % accession)
-                print(bed_file)
-                continue
                 if os.path.exists(bed_file):
                     # Initialize
                     sample_name = samples[biosample]["cell_or_tissue"]

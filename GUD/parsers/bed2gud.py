@@ -3,7 +3,6 @@
 import argparse
 from binning import assign_bin
 import getpass
-import pybedtools
 import os
 import re
 import sys
@@ -261,35 +260,36 @@ def main():
     # Parse arguments
     args = parse_args()
 
-    # Insert BED file to GUD database
-    insert_bed_to_gud_db(
-        args.user,
-        args.pwd,
-        args.host,
-        args.port,
-        args.db,
-        args.file,
-        args.feature,
-        args.experiment,
-        args.sample,
-        args.source,
-        args.histone,
-        args.enzyme,
-        args.tf,
-        args.cancer,
-        args.cell_line,
-        args.treatment
-    )
+    # For each BED file...
+    for bed_file in args.file:
+        # Insert BED file to GUD database
+        insert_bed_to_gud_db(
+            args.user,
+            args.pwd,
+            args.host,
+            args.port,
+            args.db,
+            bed_file,
+            args.feature,
+            args.experiment,
+            args.sample,
+            args.source,
+            args.histone,
+            args.enzyme,
+            args.tf,
+            args.cancer,
+            args.cell_line,
+            args.treatment
+        )
 
 def insert_bed_to_gud_db(user, pwd, host, port,
-    db, bed_files, feat_type, experiment_type,
+    db, bed_file, feat_type, experiment_type,
     sample_name, source_name, histone_type=None,
     restriction_enzyme=None, tf_name=None,
     cancer=False, cell_line=False,
     treatment=False):
 
     # Initialize
-    lines = []
     features = []
     db_name = "mysql://{}:{}@{}:{}/{}".format(
         user, pwd, host, port, db
@@ -381,32 +381,23 @@ def insert_bed_to_gud_db(user, pwd, host, port,
         # Create table
         table.__table__.create(bind=engine)
 
-    # For each BED file...
-    for bed_file in bed_files:
-        # For each line...
-        for line in GUDglobals.parse_tsv_file(bed_file):
-            # Skip if not enough elements
-            if len(line) < 3: continue
-            # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[0])
-            if not m.group(1) in GUDglobals.chroms:
-                continue
-            # Skip if not start or end
-            if not line[1].isdigit(): continue
-            if not line[2].isdigit(): continue
-            # If valid genomic coordinates...
-            if int(line[1]) < int(line[2]):
-                lines.append("\t".join(line[:3]))
-
-    # If lines...
-    if lines:
-        # Create BED object
-        bed_obj = pybedtools.BedTool(
-            "\n".join(lines),
-            from_string=True
-        )        
-        # Sort BED object
-        for chrom, start, end in bed_obj.sort():
+    # For each line...
+    for line in GUDglobals.parse_tsv_file(bed_file):
+        # Skip if not enough elements
+        if len(line) < 3: continue
+        # Ignore non-standard chroms, scaffolds, etc.
+        m = re.search("^chr(\S+)$", line[0])
+        if not m.group(1) in GUDglobals.chroms:
+            continue
+        # Skip if not start or end
+        if not line[1].isdigit(): continue
+        if not line[2].isdigit(): continue
+        # Initialize
+        chrom = line[0]
+        start = int(line[1])
+        end = int(line[2])
+        # If valid genomic coordinates...
+        if start < end:
             # Get region
             region = Region()
             if region.is_unique(
