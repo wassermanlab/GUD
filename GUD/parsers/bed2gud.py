@@ -295,17 +295,14 @@ def insert_bed_to_gud_db(user, pwd, host, port,
         user, pwd, host, port, db
     )
     if not database_exists(db_name):
-        print(": "\
-            .join(
-                [
-                    "\nbed2gud.py",
-                    "error",
-                    "GUD database does not exist",
-                    "\"%s\"\n" % db_name
-                ]
-            )
+        initialize_gud_db(
+            user,
+            pwd,
+            host,
+            port,
+            db,
+            genome
         )
-        exit(0)
     session = scoped_session(sessionmaker())
     engine = create_engine(
         db_name,
@@ -385,7 +382,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
     for line in GUDglobals.parse_tsv_file(bed_file):
         # Skip if not enough elements
         if len(line) < 3: continue
-        # Ignore non-standard chroms, scaffolds, etc.
+        # Ignore non-standard chroms,
+        # scaffolds, etc.
         m = re.search("^chr(\S+)$", line[0])
         if not m.group(1) in GUDglobals.chroms:
             continue
@@ -487,7 +485,8 @@ def insert_bed_to_gud_db(user, pwd, host, port,
                     feat.restriction_enzyme = restriction_enzyme
                 if feat_type == "tf":
                     feat.tf = tf_name
-                features.append(feat)    
+                features.append(feat)
+
     session.add_all(features)
     session.commit()
 

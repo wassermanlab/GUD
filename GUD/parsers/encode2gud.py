@@ -24,6 +24,7 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
 from .bed2gud import insert_bed_to_gud_db
+from .initialize import initialize_gud_db
 
 usage_msg = """
 usage: encode2gud.py --genome STR --metadata FILE
@@ -227,17 +228,14 @@ def insert_encode_to_gud_db(user, pwd, host,
         user, pwd, host, port, db
     )
     if not database_exists(db_name):
-        print(": "\
-            .join(
-                [
-                    "\nbed2gud.py",
-                    "error",
-                    "GUD database does not exist",
-                    "\"%s\"\n" % db_name
-                ]
-            )
+        initialize_gud_db(
+            user,
+            pwd,
+            host,
+            port,
+            db,
+            genome
         )
-        exit(0)
     session = scoped_session(sessionmaker())
     engine = create_engine(
         db_name,

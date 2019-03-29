@@ -76,7 +76,14 @@ def initialize_gud_db(user, pwd, host, port, db, genome):
     db_name = "mysql://{}:{}@{}:{}/{}".format(
         user, pwd, host, port, db)
     if not database_exists(db_name):
-        raise ValueError("GUD database does not exist!!!\n\t%s" % db_name)
+        initialize_gud_db(
+            user,
+            pwd,
+            host,
+            port,
+            db,
+            genome
+        )
     session = scoped_session(sessionmaker())
     engine = create_engine(db_name, echo=False)
     session.remove()
