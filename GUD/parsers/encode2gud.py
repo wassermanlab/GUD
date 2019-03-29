@@ -424,6 +424,9 @@ def insert_encode_to_gud_db(user, pwd, host,
                     # Skip non-BED files
                     if not bed_file.endswith(".bed"):
                         continue
+                    # Skip regCluster BED file
+                    if bed_file == "regCluster.bed":
+                        continue
                     # Add file to list
                     GUDglobals.write(
                         bed_files,
