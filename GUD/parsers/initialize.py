@@ -276,6 +276,8 @@ def get_ftp_dir_and_file(genome, data_type):
     # Fetch bigZips and database files
     if data_type == "chrom_size":
         return "bigZips", "%s.chrom.sizes" % genome
+    if data_type == "gene":
+        return "database", "refGene.txt.gz"
 
 def fetch_lines_from_ftp_file(genome, directory, file_name):
 

@@ -199,8 +199,8 @@ def main():
     # Parse arguments
     args = parse_args()
 
-    # Insert ENCODE data to GUD database
-    insert_encode_to_gud_db(
+    # Insert ENCODE data
+    encode_to_gud(
         args.user,
         args.pwd,
         args.host,
@@ -216,8 +216,8 @@ def main():
         args.source
     )
 
-def insert_encode_to_gud_db(user, pwd, host,
-    port, db, genome, metadata_file, data_dir,
+def encode_to_gud(user, pwd, host, port, db,
+    genome, metadata_file, data_dir,
     samples_file, feat_type, cluster=False,
     dummy_dir="/tmp/", source_name="ENCODE"):
 
@@ -624,23 +624,31 @@ def insert_encode_to_gud_db(user, pwd, host,
                     exp_dummy_dir, "%s.bed" % accession)
                 if os.path.exists(bed_file):
                     # Initialize
-                    sample_name = samples[biosample]["cell_or_tissue"]
                     histone_type = None
-                    restriction_enzyme = None
                     tf_name = None
                     if feat_type == "histone":
                         histone_type = experiment_target
                     if feat_type == "tf":
                         tf_name = experiment_target
-                    cancer = samples[biosample]["cancer"]
-                    cell_line = samples[biosample]["cell_line"]
-                    treatment = samples[biosample]["treatment"]
                     # Insert BED file to GUD database
-                    insert_bed_to_gud_db(user, pwd, host, port,
-                        db, bed_file, feat_type, exp.name,
-                        sample_name, sou.name, histone_type,
-                        restriction_enzyme, tf_name,
-                        cancer, cell_line, treatment)
+                    insert_bed_to_gud_db(
+                        user,
+                        pwd,
+                        host,
+                        port,
+                        db,
+                        bed_file,
+                        feat_type,
+                        exp.name,
+                        samples[biosample]["cell_or_tissue"],
+                        sou.name,
+                        histone_type,
+                        None,
+                        tf_name,
+                        samples[biosample]["cancer"],
+                        samples[biosample]["cell_line"],
+                        samples[biosample]["treatment"]
+                    )
 #        # Remove dummy dir
 #        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
 
