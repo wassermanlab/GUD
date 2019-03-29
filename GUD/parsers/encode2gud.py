@@ -606,24 +606,28 @@ def insert_encode_to_gud_db(user, pwd, host,
         else:
             # For each accession, biosample...
             for accession, biosample in metadata[k]:
-                # Initialize
+                # If BED file exists...
                 bed_file = os.path.join(
                     exp_dummy_dir, "%s.bed" % accession)
-                sample_name = samples[biosample]["cell_or_tissue"]
-                if feat_type == "histone":
-                    histone_type = experiment_target
-                if feat_type == "tf":
-                    tf_name = experiment_target
-                cancer = samples[biosample]["cancer"]
-                cell_line = samples[biosample]["cell_line"]
-                treatment = samples[biosample]["treatment"]
-                # Insert BED file to GUD database
-                insert_bed_to_gud_db(user, pwd, host, port,
-                    db, bed_file, feat_type, exp.name,
-                    sample_name, sou.name, histone_type=None,
-                    restriction_enzyme=None, tf_name=None,
-                    cancer=False, cell_line=False,
-                    treatment=False)
+                print(bed_file)
+                continue
+                if os.path.exists(bed_file):
+                    # Initialize
+                    sample_name = samples[biosample]["cell_or_tissue"]
+                    if feat_type == "histone":
+                        histone_type = experiment_target
+                    if feat_type == "tf":
+                        tf_name = experiment_target
+                    cancer = samples[biosample]["cancer"]
+                    cell_line = samples[biosample]["cell_line"]
+                    treatment = samples[biosample]["treatment"]
+                    # Insert BED file to GUD database
+                    insert_bed_to_gud_db(user, pwd, host, port,
+                        db, bed_file, feat_type, exp.name,
+                        sample_name, sou.name, histone_type=None,
+                        restriction_enzyme=None, tf_name=None,
+                        cancer=False, cell_line=False,
+                        treatment=False)
 #        # Remove dummy dir
 #        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
 
