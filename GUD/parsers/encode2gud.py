@@ -488,6 +488,7 @@ def insert_encode_to_gud_db(user, pwd, host,
                     accession,
                     sam.uid
                 )
+            print(table_file)
             # For each line...
             for line in GUDglobals.parse_tsv_file(
                 table_file
