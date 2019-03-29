@@ -25,6 +25,43 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tss import TSS
 
+usage_msg = """
+usage: fantom2gud.py  --matrix FILE --samples FILE --feature STR
+                      [-h] [--source STR]
+                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+"""
+
+help_msg = """%s
+
+inserts "enhancer" and "tss" features from the FANTOM5 consortium
+into GUD. "--matrix" refers to:
+
+    1) "hg19_permissive_enhancers_expression_rle_tpm.csv.gz"; and
+    2) "hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz"
+
+  --matrix FILE       expression matrix TPM/RLE normalized across
+                      all FANTOM libraries
+  --samples FILE      FANTOM samples (manually-curated)
+  --feature STR       type of genomic feature
+
+optional arguments:
+  -h, --help          show this help message and exit
+  --source STR        source name (default = "FANTOM")
+
+mysql arguments:
+  -d STR, --db STR    database name (default = "%s")
+  -H STR, --host STR  host name (default = "localhost")
+  -p STR, --pwd STR   password (default = ignore this option)
+  -P STR, --port STR  port number (default = %s)
+  -u STR, --user STR  user name (default = current user)
+""" % \
+(
+    usage_msg,
+    GUDglobals.db_name,
+    GUDglobals.db_port
+)
+
+
 #-------------#
 # Functions   #
 #-------------#
