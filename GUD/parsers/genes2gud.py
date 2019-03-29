@@ -255,10 +255,8 @@ def refgene_to_gud(user, pwd, host, port, db,
             gene.cdsEnd = line[7]
             gene.exonStarts = line[9]
             gene.exonEnds = line[10]
-            features.append(gene)
-
-    session.add_all(features)
-    session.commit()
+            session.add(gene)
+            session.commit()
 
 #-------------#
 # Main        #
