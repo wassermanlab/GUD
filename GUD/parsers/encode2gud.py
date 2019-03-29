@@ -33,7 +33,7 @@ usage: encode2gud.py --genome STR --metadata FILE
                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
 """
 
-help_msg = """%s
+help_msg = """%sa
 
 inserts ENCODE features into GUD. "--metadata" and "--data-dir"
 refer to executing "xargs -n 1 curl -O -L < file.txt". types of
