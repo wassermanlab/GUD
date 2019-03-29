@@ -2,12 +2,9 @@
 
 import argparse
 from binning import assign_bin
-import copy
 import getpass
-import pybedtools
 import os
 import re
-import sys
 import shutil
 from sqlalchemy import create_engine
 from sqlalchemy.orm import (
@@ -511,23 +508,14 @@ def insert_encode_to_gud_db(user, pwd, host,
                         line[-1],
                         m.group(1)
                     )
-            # Load BED file
-            bed_obj = pybedtools.BedTool(
-                "%s.bed" % cluster_file
-            )
             # For each line...
-            for line in bed_obj:
-                # Ignore non-standard chroms, scaffolds, etc.
-                m = re.search("^chr(\S+)$", line[0])
-                if not m.group(1) in GUDglobals.chroms:
-                    continue
+            for line in GUDglobals.parse_tsv_file(
+                "%s.cluster" % cluster_file
+            ):
                 # Get coordinates
                 chrom = line[0]
                 start = int(line[1])
                 end = int(line[2])
-                # Ignore non-standard chroms, scaffolds, etc.
-                m = re.search("^chr(\S+)$", chrom)
-                if not m.group(1) in GUDglobals.chroms: continue
                 # Get region
                 region = Region()
                 if region.is_unique(
