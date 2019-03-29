@@ -393,9 +393,31 @@ def insert_encode_to_gud_db(user, pwd, host,
                 "%s.bed" % accession
             )
             if not os.path.exists(bed_file):
-                os.system("zcat %s | sort -k 1,1 -k2,2n > %s"\
-                    % (gz_bed_file, bed_file)
-                )
+                os.system(
+                    """
+                    zcat %s |\
+                    grep "^(chr)?([0-9]{1,2}|[MXY])" |\
+                    sort -k 1,1 -k2,2n |\
+                    awk -v chrs="%s" \
+                    '{\
+                        split(chrs,arr," ");\
+                        for(i in arr){\
+                            dict[arr[i]] = "";\
+                        };\
+                        if($1 in dict){\
+                            if($2<$3){\
+                                print $1"\t"$2"\t"$3;
+                            }
+                        }   
+                    }' > %s""" % (
+                        gz_bed_file,
+                        " ".join(
+                            GUDglobals.chroms +\
+                            ["chr%s" % c for c in GUDglobals.chroms]
+                        ),
+                        bed_file
+                    )
+                )    
         # Cluster regions
         if cluster:
             # Initialize
@@ -510,12 +532,10 @@ def insert_encode_to_gud_db(user, pwd, host,
             for line in GUDglobals.parse_tsv_file(
                 "%s.cluster" % cluster_file
             ):
-                print(line)
-                exit(0)
                 # Get coordinates
-                chrom = line[0]
-                start = int(line[1])
-                end = int(line[2])
+                chrom = line[1]
+                start = int(line[2])
+                end = int(line[3])
                 # Get region
                 region = Region()
                 if region.is_unique(
