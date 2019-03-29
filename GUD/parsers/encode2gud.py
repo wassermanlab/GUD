@@ -491,7 +491,6 @@ def insert_encode_to_gud_db(user, pwd, host,
                     accession,
                     sam.uid
                 )
-            print(table_file)
             # For each line...
             for line in GUDglobals.parse_tsv_file(
                 table_file
@@ -503,13 +502,11 @@ def insert_encode_to_gud_db(user, pwd, host,
                     ),
                     line[0]
                 )
-                print(line[0], m.group(1))
                 if m:
                     label2accession.setdefault(
                         line[-1],
                         m.group(1)
                     )
-            exit(0)
             # Load BED file
             bed_obj = pybedtools.BedTool(
                 "%s.bed" % cluster_file
