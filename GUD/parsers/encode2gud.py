@@ -510,6 +510,8 @@ def insert_encode_to_gud_db(user, pwd, host,
             for line in GUDglobals.parse_tsv_file(
                 "%s.cluster" % cluster_file
             ):
+                print(line)
+                exit(0)
                 # Get coordinates
                 chrom = line[0]
                 start = int(line[1])
