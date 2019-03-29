@@ -612,6 +612,9 @@ def insert_encode_to_gud_db(user, pwd, host,
                 if os.path.exists(bed_file):
                     # Initialize
                     sample_name = samples[biosample]["cell_or_tissue"]
+                    histone_type = None
+                    restriction_enzyme = None
+                    tf_name = None
                     if feat_type == "histone":
                         histone_type = experiment_target
                     if feat_type == "tf":
@@ -624,10 +627,9 @@ def insert_encode_to_gud_db(user, pwd, host,
                     # Insert BED file to GUD database
                     insert_bed_to_gud_db(user, pwd, host, port,
                         db, bed_file, feat_type, exp.name,
-                        sample_name, sou.name, histone_type=None,
-                        restriction_enzyme=None, tf_name=None,
-                        cancer=False, cell_line=False,
-                        treatment=False)
+                        sample_name, sou.name, histone_type,
+                        restriction_enzyme, tf_name,
+                        cancer, cell_line, treatment)
 #        # Remove dummy dir
 #        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
 
