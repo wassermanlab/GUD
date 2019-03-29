@@ -305,6 +305,9 @@ def insert_encode_to_gud_db(user, pwd, host,
     for line in GUDglobals.parse_tsv_file(
         metadata_file
     ):
+        # Skip first line
+        if line[0] == "File accession":
+            continue
         # Initialize
         accession = line[0]
         experiment_type = line[4]
