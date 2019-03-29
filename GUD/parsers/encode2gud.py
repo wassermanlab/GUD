@@ -619,8 +619,6 @@ def insert_encode_to_gud_db(user, pwd, host,
                         histone_type = experiment_target
                     if feat_type == "tf":
                         tf_name = experiment_target
-                    print(histone_type, tf_name)
-                    exit(0)
                     cancer = samples[biosample]["cancer"]
                     cell_line = samples[biosample]["cell_line"]
                     treatment = samples[biosample]["treatment"]
