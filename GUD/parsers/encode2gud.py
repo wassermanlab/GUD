@@ -500,12 +500,12 @@ def insert_encode_to_gud_db(user, pwd, host,
                     line[0]
                 )
                 print(line[0], m.group(1))
-                exit(0)
                 if m:
                     label2accession.setdefault(
                         line[-1],
                         m.group(1)
                     )
+            exit(0)
             # Load BED file
             bed_obj = pybedtools.BedTool(
                 "%s.bed" % cluster_file
