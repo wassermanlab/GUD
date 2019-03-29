@@ -33,7 +33,7 @@ usage: bed2gud.py --file [FILE ...] --feature STR
                   [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
 """
 
-help_msg = """%s
+help_msg = """%sa
 
 inserts genomic features from BED file into GUD. types of genomic
 features include "accessibility", "enhancer", "histone", "tad" or
