@@ -3,34 +3,77 @@ from binning import (
     contained_bins
 )
 from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String, ForeignKey,
-    UniqueConstraint, CheckConstraint, Integer, Float
+    Column,
+    ForeignKey,
+    Index,
+    Integer,
+    PrimaryKeyConstraint,
+    String,
+    UniqueConstraint
 )
 from sqlalchemy.dialects import mysql
 
 from .base import Base
-from .region import Region
-from .source import Source
-from .sample import Sample
 from .experiment import Experiment
+from .region import Region
+from .sample import Sample
+from .source import Source
 
 class HistoneModification(Base):
 
-    __tablename__ = "histone_modification"
+    __tablename__ = "histone_modifications"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
-    sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
-    sampleID = Column("sampleID", Integer, ForeignKey('samples.uid'), nullable=False)
-    experimentID = Column("experimentID", Integer, ForeignKey('experiments.uid'), nullable=False)
-    histone_type = Column("histone_type", String(25), nullable=False)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    regionID = Column(
+        "regionID",
+        Integer,
+        ForeignKey("regions.uid"),
+        nullable=False
+    )
+
+    sampleID = Column(
+        "sampleID",
+        Integer,
+        ForeignKey("samples.uid"),
+        nullable=False
+    )
+
+    experimentID = Column(
+        "experimentID",
+        Integer,
+        ForeignKey("experiments.uid"),
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
+    histone_type = Column(
+        "histone_type",
+        String(25),
+        nullable=False
+    )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(regionID, sourceID, sampleID, experimentID, histone_type),
+        UniqueConstraint(
+            regionID,
+            sampleID,
+            experimentID,
+            sourceID,
+            histone_type
 
-        Index("ix_tf_binding", regionID),
-
+        ),
+        Index("ix_regionID", regionID), # query by bin range
+        Index("ix_sampleID", sampleID),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -38,36 +81,45 @@ class HistoneModification(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID, sampleID,
-        experimentID, histone_type):
+    def is_unique(cls, session, regionID,
+        sampleID, experimentID, sourceID,
+        histone_type):
 
-        q = session.query(cls).filter(
-            cls.regionID == regionID,
-            cls.sourceID == sourceID,
-            cls.sampleID == sampleID,
-            cls.experimentID == experimentID,
-            cls.histone_type == histone_type
-        )
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sampleID == sampleID,
+                cls.experimentID == experimentID,
+                cls.sourceID == sourceID,
+                cls.histone_type == histone_type
+            )
 
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, regionID, sourceID, sampleID, experimentID, histone_type):
-        """
-        Query objects by name of sample type. 
-        """
-        q = session.query(cls).filter(
-            cls.regionID == regionID, 
-            cls.sourceID == sourceID,
-            cls.sampleID == sampleID,
-            cls.experimentID == experimentID, 
-            cls.histone_type == histone_type)
+    def select_unique(cls, session, regionID,
+        sampleID, experimentID, sourceID,
+        histone_type):
+
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sampleID == sampleID,
+                cls.experimentID == experimentID,
+                cls.sourceID == sourceID,
+                cls.histone_type == histone_type
+            )
 
         return q.first()
 
-    def __str__(self):
-        return "{}".format(self.histone_type)
-
     def __repr__(self):
-        return "<HistoneModification(uid={}, regionID={}, sourceID={}, sampleID={}, experimentID={}, histone_type={})>".format(
-            self.uid, self.regionID, self.sourceID, self.sampleID, self.experimentID, self.histone_type)
+
+        return "<HistoneModification(%s, %s, %s, %s, %s, %s)>" % \
+            (
+                "uid={}".format(self.uid),
+                "regionID={}".format(self.regionID),
+                "sampleID={}".format(self.sampleID),
+                "experimentID={}".format(self.experimentID),
+                "sourceID={}".format(self.sourceID),
+                "histone_type={}".format(self.histone_type)
+            )

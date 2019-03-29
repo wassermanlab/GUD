@@ -14,15 +14,18 @@ from GUD.ORM.genomic_feature import GenomicFeature
 from GUD.ORM.sample import Sample
 from GUD.ORM.tss import TSS
 
-__doc__ = """
-usage: sample2gene.py (--sample [STR ...] | --sample-file FILE)
+usage_msg = """
+usage: sample2gene.py --sample [STR ...] | --sample-file FILE
                       [-h] [--dummy-dir DIR] [-o FILE]
                       [-a] [--percent FLT] [--tpm FLT] [--tss INT]
                       [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+"""
+
+help_msg = """%s
 
 identifies one or more genes differentially expressed in samples.
 
-  --sample [STR ...]  sample(s) (e.g. "brain")
+  --sample [STR ...]  sample(s) (e.g. "B cell")
   --sample-file FILE  file containing a list of samples
 
 optional arguments:
@@ -46,6 +49,7 @@ mysql arguments:
   -u STR, --user STR  user name (default = "%s")
 """ % \
 (
+    usage_msg,
     GUDglobals.min_percent_exp,
     GUDglobals.min_tpm_exp,
     GUDglobals.max_tss,
@@ -70,6 +74,14 @@ def parse_args():
         add_help=False,
     )
 
+    # Mandatory arguments
+    sample_group = parser\
+        .add_mutually_exclusive_group()
+    sample_group.add_argument(
+        "--sample", nargs="*"
+    )
+    sample_group.add_argument("--sample-file")
+
     # Optional args
     optional_group = parser.add_argument_group(
         "optional arguments"
@@ -93,15 +105,15 @@ def parse_args():
         action="store_true"
     )
     exp_group.add_argument(
-        "--percent", type=float,
+        "--percent",
         default=GUDglobals.min_percent_exp
     )
     exp_group.add_argument(
-        "--tpm", type=float,
+        "--tpm",
         default=GUDglobals.min_tpm_exp
     )
     exp_group.add_argument(
-        "--tss", type=int,
+        "--tss",
         default=GUDglobals.max_tss,
     )
 
@@ -127,22 +139,91 @@ def parse_args():
         default=GUDglobals.db_user
     )
 
-    if "-h" in sys.argv or "--help" in sys.argv:
-        print(__doc__)
-        exit(0)
-
-    # Mandatory arguments
-    sample_group = parser.add_mutually_exclusive_group(
-        required=True
-    )
-    sample_group.add_argument(
-        "--sample", nargs="*"
-    )
-    sample_group.add_argument("--sample-file")
-
     args = parser.parse_args()
 
+    check_args(args)
+
     return args
+
+def check_args(args):
+    """
+    This function checks an {argparse} object.
+    """
+
+    # Print help
+    if (
+        "-h" in sys.argv or \
+        "--help" in sys.argv
+    ):
+        print(help_msg)
+        exit(0)
+    
+    # Check mandatory arguments
+    if (
+        not args.sample and \
+        not args.sample_file
+    ):
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "one of the arguments \"--sample\" \"--sample-file\" is required\n"
+                ]
+            )
+        )
+        exit(0)
+
+    # Check for invalid percent
+    try:
+        args.percent = float(args.percent)
+    except:
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "argument \"--percent\"",
+                    "invalid float value",
+                    "\"%s\"\n" % args.percent
+                ]
+            )
+        )
+        exit(0)
+        
+    # Check for invalid TPM
+    try:
+        args.tpm = float(args.tpm)
+    except:
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "argument \"--tpm\"",
+                    "invalid float value",
+                    "\"%s\"\n" % args.tpm
+                ]
+            )
+        )
+        exit(0)
+
+    # Check for invalid TSS
+    try:
+        args.tss = int(args.tss)
+    except:
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "argument \"--tss\"",
+                    "invalid int value",
+                    "\"%s\"\n" % args.tss
+                ]
+            )
+        )
+        exit(0)
 
 def main():
 
@@ -164,7 +245,9 @@ def main():
         for sample in GUDglobals.parse_file(sample_file):
             samples.append(sample)
     else:
-        raise ValueError("No sample(s) was provided!")
+        raise ValueError(
+            "No samples were provided!!!"
+        )
 
     # Establish SQLalchemy session with GUD
     session = GUDglobals.establish_GUD_session(
@@ -207,7 +290,9 @@ def main():
         os.remove(dummy_file)
 
     else:
-        raise ValueError("No differentially expressed gene(s) found!!!")
+        raise ValueError(
+            "No differentially expressed genes found!!!"
+        )
 
 def get_differentially_expressed_tss(session,
     samples=[], tpm_exp=100, percent_exp=25,
@@ -242,9 +327,17 @@ def get_differentially_expressed_tss(session,
         i = samples.index(tss.Sample.name)
         sample2tss[i].add(tss.Expression.tssID)
         tssIDs.add(tss.Expression.tssID)
+        # Enables search for cell line
+        # specific TSSs
+        uid2name.setdefault(
+            tss.Sample.uid, tss.Sample.name)
+        name2uid.setdefault(
+            tss.Sample.name, tss.Sample.uid)
     # If required expression in all samples...
     if exp_in_all_samples:
-        tssIDs = list(set.intersection(*sample2tss))
+        tssIDs = list(
+            set.intersection(*sample2tss)
+        )
     # ... Else...
     else:
         tssIDs = list(tssIDs)
@@ -261,10 +354,14 @@ def get_differentially_expressed_tss(session,
                 bg_exp = 0.0 # background exp.
                 fg_exp = 0.0 # foreground exp.
                 # For each sampleID
-                for i in range(len(tss.qualifiers["sampleIDs"])):
+                for i in range(
+                    len(tss.qualifiers["sampleIDs"])
+                ):
                     # Initialize
-                    sampleID = tss.qualifiers["sampleIDs"][i]
-                    avg_exp = tss.qualifiers["avg_expression_levels"][i]
+                    sampleID = tss\
+                        .qualifiers["sampleIDs"][i]
+                    avg_exp = tss\
+                        .qualifiers["avg_expression_levels"][i]
                     # If sample...
                     if sampleID in uid2name:
                         expression.setdefault(

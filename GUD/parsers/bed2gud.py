@@ -1,31 +1,73 @@
 #!/usr/bin/env python
-import os, sys, re
+
 import argparse
 from binning import assign_bin
 import getpass
-import pybedtools
+import os
+import re
+import sys
 from sqlalchemy import create_engine
-from sqlalchemy.orm import mapper, scoped_session, sessionmaker
+from sqlalchemy.orm import (
+    scoped_session,
+    sessionmaker
+)
 from sqlalchemy_utils import database_exists
-import warnings
 
 # Import from GUD module
 from GUD import GUDglobals
-from GUD2.ORM.region import Region
-from GUD2.ORM.sample import Sample
-from GUD2.ORM.source import Source
-from GUD2.ORM.experiment import Experiment
-from GUD2.ORM.dna_accessibility import DNAAccessibility
-from GUD2.ORM.enhancer import Enhancer
-from GUD2.ORM.histone_modification import HistoneModification
-from GUD2.ORM.tad import TAD
-from GUD2.ORM.tf_binding import TFBinding
+from GUD.ORM.dna_accessibility import DNAAccessibility
+from GUD.ORM.enhancer import Enhancer
+from GUD.ORM.experiment import Experiment
+from GUD.ORM.histone_modification import HistoneModification
+from GUD.ORM.region import Region
+from GUD.ORM.sample import Sample
+from GUD.ORM.source import Source
+from GUD.ORM.tad import TAD
+from GUD.ORM.tf_binding import TFBinding
 
-#-------------#
-# Classes     #
-#-------------#
+usage_msg = """
+usage: bed2gud.py --file [FILE ...] --feature STR
+                  --experiment STR --sample STR --source STR 
+                  [-h] [--histone STR | --enzyme STR | --tf STR]
+                  [--cancer] [--cell-line] [--treatment]
+                  [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+"""
 
-class Model(object): pass
+help_msg = """%s
+
+inserts genomic features from BED file into GUD. types of genomic
+features include "accessibility", "enhancer", "histone", "tad" or
+"tf".
+
+  --file [FILE ...]   BED file(s)
+  --feature STR       type of genomic feature (e.g. "enhancer")
+  --experiment STR    experiment (e.g. "GRO-seq")
+  --sample STR        sample (e.g. "B cell")
+  --source STR        source (e.g. "PMID:29449408")
+
+optional arguments:
+  -h, --help          show this help message and exit
+  --histone STR       histone type (e.g. "H3K27ac")
+  --enzyme STR        restriction enzyme (e.g. "HindIII")
+  --tf STR            TF name (e.g. "FOS")
+
+sample arguments:
+  --cancer            label sample as cancer (default = False)
+  --cell-line         label sample as cell line (default = False)
+  --treatment         label sample as treated (default = False)
+
+mysql arguments:
+  -d STR, --db STR    database name (default = "%s")
+  -H STR, --host STR  host name (default = "localhost")
+  -p STR, --pwd STR   password (default = ignore this option)
+  -P STR, --port STR  port number (default = %s)
+  -u STR, --user STR  user name (default = current user)
+""" % \
+(
+    usage_msg,
+    GUDglobals.db_name,
+    GUDglobals.db_port
+)
 
 #-------------#
 # Functions   #
@@ -33,211 +75,423 @@ class Model(object): pass
 
 def parse_args():
     """
-    This function parses arguments provided via the command
-    line using argparse.
+    This function parses arguments provided via
+    the command line and returns an {argparse}
+    object.
     """
 
-    parser = argparse.ArgumentParser(description="this script inserts \"accessibility\", \"enhancer\", \"histone\", \"tad\" or \"tf\" data from input BED file into GUD. genomic features include \"accessibility\", \"enhancer\", \"histone\", \"tad\" and \"tf\".")
+    parser = argparse.ArgumentParser(
+        add_help=False,
+    )
 
-    parser.add_argument("files", nargs="*", help="BED file(s)", metavar="file")
-
-    feats = ["accessibility", "enhancer", "histone", "tad", "tf"]
-    parser.add_argument("feat_type", choices=feats, help="Type of genomic feature",
-        metavar="feature_type")
-
-    parser.add_argument("sample", help="Sample name (e.g. \"lung fibroblasts\")")
-    parser.add_argument("exp_type", help="Type of experiment (e.g. \"CAGE\")")
-    parser.add_argument("source", help="Source name (e.g. \"PMID:29449408\")")
+    # Mandatory arguments
+    parser.add_argument("--file", nargs="*")
+    parser.add_argument("--feature")
+    parser.add_argument("--experiment")
+    parser.add_argument("--sample")
+    parser.add_argument("--source")
 
     # Optional args
-    parser.add_argument("--histone", help="Histone type (e.g. \"H3K27ac\")")
-    parser.add_argument("--enzyme", help="Restriction enzyme (e.g. \"HindIII\")")
-    parser.add_argument("--tf-name", help="TF name (e.g. \"FOS\")")
-    parser.add_argument("--merge", action="store_true", 
-        help="Merge overlapping or \"book-ended\" features (default = False)")
+    optional_group = parser.add_argument_group(
+        "optional arguments"
+    )
+    optional_group.add_argument(
+        "-h", "--help",
+        action="store_true"
+    )
+    optional_group.add_argument("--histone")
+    optional_group.add_argument("--enzyme")
+    optional_group.add_argument("--tf")
+
+    # Sample args
+    sample_group = parser.add_argument_group(
+        "sample arguments"
+    )
+    sample_group.add_argument(
+        "--cancer",
+        action="store_true"
+    )
+    sample_group.add_argument(
+        "--cell-line",
+        action="store_true"
+    )
+    sample_group.add_argument(
+        "--treatment",
+        action="store_true"
+    )
 
     # MySQL args
-    mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default="hg19",
-        help="Database name (default = \"hg19\")")
-    mysql_group.add_argument("-H", "--host", default="localhost",
-        help="Host name (default = \"localhost\")")
-    mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="Port number (default = 5506)")
-    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
-        help="User name (default = current user)")
+    mysql_group = parser.add_argument_group(
+        "mysql arguments"
+    )
+    mysql_group.add_argument(
+        "-d", "--db",
+        default=GUDglobals.db_name,
+    )
+    mysql_group.add_argument(
+        "-H", "--host",
+        default="localhost"
+    )
+    mysql_group.add_argument("-p", "--pwd")
+    mysql_group.add_argument(
+        "-P", "--port",
+        default=GUDglobals.db_port
+    )
+    mysql_group.add_argument(
+        "-u", "--user",
+        default=getpass.getuser()
+    )
 
     args = parser.parse_args()
 
-    if args.feat_type == "histone" and not args.histone:
-        raise ValueError("A histone type must be provided!")
-
-    if args.feat_type == "tad" and not args.enzyme:
-        warnings.warn("\nA restriction enzyme was not provided...\n")
-        warnings.warn("\nSetting \"restriction_enzyme\" field to \"Unknown\"...\n")
-        args.enzyme = "Unknown"
-
-    if args.feat_type == "tf" and not args.tf_name:
-        raise ValueError("A TF name must be provided!")
+    check_args(args)
 
     return args
 
-def insert_bed_to_gud_db(user, host, port, db, bed_files,
-    feat_type, cell_or_tissue, experiment_type, source_name,
-    histone_type=None, restriction_enzyme=None, tf_name=None,
-    merge=False):
+def check_args(args):
+    """
+    This function checks an {argparse} object.
+    """
 
     # Initialize
-    lines = []
-    db_name = "mysql://{}:@{}:{}/{}".format(
-        user, host, port, db)
-    if not database_exists(db_name):
-        raise ValueError("GUD db does not exist: %s" % db_name)
-    session = scoped_session(sessionmaker())
-    engine = create_engine(db_name, echo=False)
-    session.remove()
-    session.configure(bind=engine, autoflush=False,
-        expire_on_commit=False)
+    feats = [
+        "accessibility",
+        "enhancer",
+        "histone",
+        "tad",
+        "tf"
+    ]
 
-    # Initialize table
+    # Print help
+    if args.help:
+        print(help_msg)
+        exit(0)
+
+    # Check mandatory arguments
+    if (
+        not args.file or \
+        not args.feature or \
+        not args.experiment or \
+        not args.sample or \
+        not args.source
+    ):
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "arguments \"--file\" \"--feature\" \"--experiment\" \"--sample\" \"--source\" are required\n"
+                ]
+            )
+        )
+        exit(0)
+
+    # Check for invalid feature
+    if args.feature not in feats:
+        print(": "\
+            .join(
+                [
+                    "%s\nbed2gud.py" % usage_msg,
+                    "error",
+                    "argument \"feature\"",
+                    "invalid choice",
+                    "\"%s\" (choose from" % args.feature,
+                    " %s)\n" % " "\
+                    .join(["\"%s\"" % i for i in feats])
+                ]
+            )
+        )
+        exit(0)
+
+    # Check feature type histone
+    if args.feature == "histone":
+        # Histone not provided!
+        if not args.histone:
+            print(": "\
+                .join(
+                    [
+                        "%s\nbed2gud.py" % usage_msg,
+                        "error",
+                        "argument \"--histone\"",
+                        "missing argument\n"
+                    ]
+                )
+            )
+            exit(0)
+
+    # Check feature type TAD
+    if args.feature == "tad":
+        # Enzyme not provided!
+        if not args.enzyme:
+            print(": "\
+                .join(
+                    [
+                        "%s\nbed2gud.py" % usage_msg,
+                        "error",
+                        "argument \"--enzyme\"",
+                        "missing argument\n"
+                    ]
+                )
+            )
+            exit(0)
+
+    # Check feature type TF
+    if args.feature == "tf":
+        # TF not provided!
+        if not args.tf:
+            print(": "\
+                .join(
+                    [
+                        "%s\nbed2gud.py" % usage_msg,
+                        "error",
+                        "argument \"--tf\"",
+                        "missing argument\n"
+                    ]
+                )
+            )
+            exit(0)
+
+    # Check MySQL password
+    if not args.pwd:
+        args.pwd = ""
+
+def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # For each BED file...
+    for bed_file in args.file:
+        # Insert BED file to GUD database
+        insert_bed_to_gud_db(
+            args.user,
+            args.pwd,
+            args.host,
+            args.port,
+            args.db,
+            bed_file,
+            args.feature,
+            args.experiment,
+            args.sample,
+            args.source,
+            args.histone,
+            args.enzyme,
+            args.tf,
+            args.cancer,
+            args.cell_line,
+            args.treatment
+        )
+
+def insert_bed_to_gud_db(user, pwd, host, port,
+    db, bed_file, feat_type, experiment_type,
+    sample_name, source_name, histone_type=None,
+    restriction_enzyme=None, tf_name=None,
+    cancer=False, cell_line=False,
+    treatment=False):
+
+    # Initialize
+    features = []
+    db_name = "mysql://{}:{}@{}:{}/{}".format(
+        user, pwd, host, port, db
+    )
+    if not database_exists(db_name):
+        initialize_gud_db(
+            user,
+            pwd,
+            host,
+            port,
+            db,
+            genome
+        )
+    session = scoped_session(sessionmaker())
+    engine = create_engine(
+        db_name,
+        echo=False
+    )
+    session.remove()
+    session.configure(
+        bind=engine,
+        autoflush=False,
+        expire_on_commit=False
+    )
+
+    # Get experiment
+    experiment = Experiment()
+    if experiment.is_unique(
+        session,
+        experiment_type
+    ):
+        experiment.name = experiment_type
+        session.add(experiment)
+        session.commit()
+    exp = experiment.select_by_name(
+        session,
+        experiment_type
+    )
+
+    # Get sample
+    sample = Sample()
+    if sample.is_unique(
+        session,
+        sample_name,
+        int(treatment),
+        int(cell_line),
+        int(cancer)
+    ):
+        sample.name = sample_name
+        sample.treatment = int(treatment)
+        sample.cell_line = int(cell_line)
+        sample.cancer = int(cancer)
+        session.add(sample)
+        session.commit()
+    sam = sample.select_unique(
+        session,
+        sample_name,
+        int(treatment),
+        int(cell_line),
+        int(cancer)
+    )
+
+    # Get source
+    source = Source()
+    if source.is_unique(session, source_name):    
+        source.name = source_name
+        session.add(source)
+        session.commit()
+    sou = source.select_by_name(
+        session,
+        source_name
+    )
+
+    # Create table
     if feat_type == "accessibility":
         table = DNAAccessibility()
     if feat_type == "enhancer":
         table = Enhancer()
     if feat_type == "histone":
-        if not histone_type:
-            raise ValueError("A histone type must be provided!")
         table = HistoneModification()
     if feat_type == "tad":
-        if not restriction_enzyme:
-            warnings.warn("\nA restriction enzyme was not provided...\n")
-            warnings.warn("\nSetting \"restriction_enzyme\" field to \"Unknown\"...\n")
-            restriction_enzyme = "Unknown"
         table = TAD()
     if feat_type == "tf":
-        if not tf_name:
-            raise ValueError("A TF name must be provided!")
         table = TFBinding()
     if not engine.has_table(table.__tablename__):
-        try:
-            table.metadata.bind = engine
-            table.metadata.create_all(engine)
-        except:
-            raise ValueError("Cannot create table: %s" % table.__tablename__)
-    mapper(Model, table.__table__)
+        # Create table
+        table.__table__.create(bind=engine)
 
-    # For each BED file...
-    for bed_file in bed_files:
-        # Get lines
-        if bed_file.endswith(".gz"): gz = True
-        else: gz = False
-        # For each line...
-        for line in GUDglobals.parse_tsv_file(bed_file, gz=gz):
-            # Skip if not enough elements
-            if len(line) < 3: continue
-            # Ignore non-standard chroms, scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[0])
-            if not m.group(1) in GUDglobals.chroms: continue
-            # Skip if not start or end
-            if not line[1].isdigit(): continue
-            if not line[2].isdigit(): continue
-            # If start is smaller than end
-            if int(line[1]) < int(line[2]):
-                lines.append("\t".join(line[:3]))
-    # If lines...
-    if lines:
-        # Create BED object
-        bed_obj = pybedtools.BedTool("\n".join(lines), from_string=True)
-        # If merge...
-        if merge:
-            bed_obj = bed_obj.sort().merge()
-        # Sort BED object
-        for chrom, start, end in bed_obj.sort():
-            # Region
+    # For each line...
+    for line in GUDglobals.parse_tsv_file(bed_file):
+        # Skip if not enough elements
+        if len(line) < 3: continue
+        # Ignore non-standard chroms,
+        # scaffolds, etc.
+        m = re.search("^chr(\S+)$", line[0])
+        if not m.group(1) in GUDglobals.chroms:
+            continue
+        # Skip if not start or end
+        if not line[1].isdigit(): continue
+        if not line[2].isdigit(): continue
+        # Initialize
+        chrom = line[0]
+        start = int(line[1])
+        end = int(line[2])
+        # If valid genomic coordinates...
+        if start < end:
+            # Get region
             region = Region()
-            reg = region.select_by_pos(session, chrom, start, end)
-            if not reg: 
-                region.bin = assign_bin(start, end)
+            if region.is_unique(
+                session,
+                chrom,
+                start,
+                end
+            ):
+                # Insert region
+                region.bin = assign_bin(
+                    int(start),
+                    int(end)
+                )
                 region.chrom = chrom
                 region.start = start
-                region.end = end 
-                session.add(region) 
-            # Source
-            source = Source()
-            sou = source.select_by_name(session, source_name)
-            if not sou: 
-                source.name = source_name
-                session.add(source)
-            # Sample
-            sample = Sample()
-            samp = sample.select_exact_sample(session, name, treatment, cell_line, cancer)
-            if not samp: 
-                None
-                ## TODO
-                # sample.name = cell_or_tissue
-                # sample.treatment = 
-                # sample.cell_line = 
-                # sample.cancer = 
-                # session.add(sample)
-            # Experiment 
-            experiment = Experiment()
-            exp = experiment.select_by_name(session, name)
-            if not exp: 
-                experiment.name = experiment_type
-                session.add(experiment)
-            ## commit region, source, sample, experiment 
-            session.commit()
-            ## uids
-            reg = region.select_by_pos(session, chrom, start, end).uid
-            sou = source.select_by_name(session, source_name).uid
-            samp = sample.select_exact_sample(session, name, treatment, cell_line, cancer).uid
-            exp = experiment.select_by_name(session, name).uid
-            ## feature creation 
-            model = Model()
-            model.regionID = reg
-            model.sourceID = sou
-            model.sampleID = samp
-            model.experimentID = exp
+                region.end = end
+                session.add(region)
+                session.commit()
+            reg = region.select_unique(
+                session,
+                chrom,
+                start,
+                end
+            )
+            # Get accessibility feature
             if feat_type == "accessibility":
-                exists = DNAAccessibility().select_unique(session, reg, sou, samp, exp)
-                if not exists: 
-                    session.add(model)
-                    session.commit()
+                feat = DNAAccessibility()
+                is_unique = feat.is_unique(
+                    session,
+                    reg.uid,
+                    sam.uid,
+                    exp.uid,
+                    sou.uid
+                )
+            # Get enhancer feature
             if feat_type == "enhancer":
-                exists = Enhancer().select_unique(session, reg, sou, samp, exp)
-                if not exists: 
-                    session.add(model)
-                    session.commit()
+                feat = Enhancer()
+                is_unique = feat.is_unique(
+                    session,
+                    reg.uid,
+                    sam.uid,
+                    exp.uid,
+                    sou.uid
+                )
+            # Get histone feature
             if feat_type == "histone":
-                exists = HistoneModification().select_unique(session, reg, sou, samp, exp, histone_type)
-                if not exists: 
-                    model.histone_type = histone_type
-                    session.add(model)
-                    session.commit()
+                feat = HistoneModification()
+                is_unique = feat.is_unique(
+                    session,
+                    reg.uid,
+                    sam.uid,
+                    exp.uid,
+                    sou.uid,
+                    histone_type
+                )
+            # Get TAD feature
             if feat_type == "tad":
-                exists = TAD().select_unique(session, reg, sou, samp, exp, restriction_enzyme)
-                if not exists: 
-                    model.restriction_enzyme = restriction_enzyme
-                    session.add(model)
-                    session.commit()
-            if feat_type == "tf": 
-                exists = TFBinding().select_unique(session, reg, sou, samp, exp, tf_name)
-                model.tf = tf_name
-                if not exists: 
-                    session.add(model)
-                    session.commit()
+                feat = TAD()
+                is_unique = feat.is_unique(
+                    session,
+                    reg.uid,
+                    sam.uid,
+                    exp.uid,
+                    sou.uid,
+                    restriction_enzyme
+                )
+            # Get TF feature
+            if feat_type == "tf":
+                feat = TFBinding()
+                is_unique = feat.is_unique(
+                    session,
+                    reg.uid,
+                    sam.uid,
+                    exp.uid,
+                    sou.uid,
+                    tf_name
+                )
+            # Insert feature to GUD
+            if is_unique:
+                feat.regionID = reg.uid
+                feat.sampleID = sam.uid
+                feat.experimentID = exp.uid
+                feat.sourceID = sou.uid
+                if feat_type == "histone":
+                    feat.histone_type = histone_type
+                if feat_type == "tad":
+                    feat.restriction_enzyme = restriction_enzyme
+                if feat_type == "tf":
+                    feat.tf = tf_name
+                features.append(feat)
+
+    session.add_all(features)
+    session.commit()
 
 #-------------#
 # Main        #
 #-------------#
 
-if __name__ == "__main__":
-
-    # Parse arguments
-    args = parse_args()
-
-    # Insert BED file to GUD database
-    insert_bed_to_gud_db(args.user, args.host, args.port,
-        args.db, args.files, args.feat_type, args.sample,
-        args.exp_type, args.source, args.histone,
-        args.enzyme, args.tf_name, args.merge)
+if __name__ == "__main__": main()
