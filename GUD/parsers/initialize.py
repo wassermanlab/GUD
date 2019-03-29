@@ -32,7 +32,7 @@ usage: initialize.py --genome STR [-h]
 
 help_msg = """%s
 
-initializes a GUD database for the given genome.
+initializes a GUD database for the given genome.a
 
   --genome STR        genome assembly
 
