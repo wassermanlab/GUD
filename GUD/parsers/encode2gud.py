@@ -392,11 +392,16 @@ def insert_encode_to_gud_db(user, pwd, host,
                 exp_dummy_dir,
                 "%s.bed" % accession
             )
+            # Why Oriol, why?!
+            # Because:
+            # 1) ignores non-standard
+            #    chroms (e.g. scaffolds); and
+            # 2) ensures that start < end.
             if not os.path.exists(bed_file):
                 os.system(
                     """
                     zcat %s |\
-                    grep "^(chr)?([0-9]{1,2}|[MXY])" |\
+                    grep -P "^(chr)?([0-9]{1,2}|[MXY])" |\
                     sort -k 1,1 -k2,2n |\
                     awk -v chrs="%s" \
                     '{\
@@ -417,7 +422,7 @@ def insert_encode_to_gud_db(user, pwd, host,
                         ),
                         bed_file
                     )
-                )    
+                )
         # Cluster regions
         if cluster:
             # Initialize
