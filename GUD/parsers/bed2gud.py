@@ -263,8 +263,8 @@ def main():
 
     # For each BED file...
     for bed_file in args.file:
-        # Insert BED file to GUD database
-        insert_bed_to_gud_db(
+        # Insert BED file
+        bed_to_gud_db(
             args.user,
             args.pwd,
             args.host,
@@ -283,8 +283,8 @@ def main():
             args.treatment
         )
 
-def insert_bed_to_gud_db(user, pwd, host, port,
-    db, bed_file, feat_type, experiment_type,
+def bed_to_gud_db(user, pwd, host, port, db,
+    bed_file, feat_type, experiment_type,
     sample_name, source_name, histone_type=None,
     restriction_enzyme=None, tf_name=None,
     cancer=False, cell_line=False,
