@@ -46,7 +46,7 @@ into GUD. "--matrix" refers to:
 
 optional arguments:
   -h, --help          show this help message and exit
-  --source STR        source name (default = "FANTOM")
+  --source STR        source name (default = "FANTOM5")
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
@@ -91,7 +91,7 @@ def parse_args():
     )
     optional_group.add_argument(
         "--source",
-        default="FANTOM"
+        default="FANTOM5"
     )
 
     # MySQL args
@@ -181,19 +181,29 @@ def main():
     # Parse arguments
     args = parse_args()
 
-    # Insert FANTOM data to GUD database
-    insert_fantom_to_gud_db(args.user, args.pwd,
-        args.host, args.port, args.db, args.matrix,
-        args.samples, args.feat_type, args.source)
+    # Insert FANTOM data
+    fantom_to_gud_db(
+        args.user,
+        args.pwd,
+        args.host,
+        args.port,
+        args.db,
+        args.matrix
+        args.samples,
+        args.feat_type,
+        args.source
+    )
 
-def insert_fantom_to_gud_db(user, pwd, host, port, db,
-    matrix_file, samples_file, feat_type, source_name):
+def fantom_to_gud_db(user, pwd, host, port, db,
+    matrix_file, samples_file, feat_type,
+    source_name="FANTOM5"):
 
     # Initialize
     samples = {}
     sample_ids = []
     db_name = "mysql://{}:{}@{}:{}/{}".format(
-        user, pwd, host, port, db)
+        user, pwd, host, port, db
+    )
     if not database_exists(db_name):
         initialize_gud_db(
             user,
@@ -204,15 +214,21 @@ def insert_fantom_to_gud_db(user, pwd, host, port, db,
             genome
         )
     session = scoped_session(sessionmaker())
-    engine = create_engine(db_name, echo=False)
+    engine = create_engine(
+        db_name,
+        echo=False
+    )
     session.remove()
-    session.configure(bind=engine, autoflush=False,
-        expire_on_commit=False)
-    if matrix_file.endswith(".gz"): gz = True
-    else: gz = False
+    session.configure(
+        bind=engine,
+        autoflush=False,
+        expire_on_commit=False
+    )
 
     # Get samples
-    for line in GUDglobals.parse_tsv_file(samples_file):
+    for line in GUDglobals.parse_tsv_file(
+        samples_file
+    ):
         # Initialize 
         sample_id = line[0]
         sample_name = line[1]
@@ -226,14 +242,16 @@ def insert_fantom_to_gud_db(user, pwd, host, port, db,
         if line[6] == "Yes": cancer = True
         else: cancer = False
         # Get sample
-        samples.setdefault(sample_id, {
-            "sample_name": sample_name,
-            "cell_or_tissue": cell_or_tissue,
-            "add": add,
-            "treatment": treatment,
-            "cell_line": cell_line,
-            "cancer": cancer
-        })
+        samples.setdefault(sample_id,
+            {
+                "sample_name": sample_name,
+                "cell_or_tissue": cell_or_tissue,
+                "add": add,
+                "treatment": treatment,
+                "cell_line": cell_line,
+                "cancer": cancer
+            }
+        )
 
     # Get experiment
     experiment = Experiment()
@@ -241,7 +259,10 @@ def insert_fantom_to_gud_db(user, pwd, host, port, db,
         experiment.name = "CAGE"
         session.add(experiment)
         session.commit()
-    exp = experiment.select_by_name(session, "CAGE")
+    exp = experiment.select_by_name(
+        session,
+        "CAGE"
+    )
 
     # Get source
     source = Source()
@@ -249,24 +270,27 @@ def insert_fantom_to_gud_db(user, pwd, host, port, db,
         source.name = source_name
         session.add(source)
         session.commit()
-    sou = source.select_by_name(session, source_name)
+    sou = source.select_by_name(
+        session,
+        source_name
+    )
 
-    # Create tables
+    # Create table
     if feat_type == "enhancer":
         table = Enhancer()
-        lines = GUDglobals.parse_csv_file(matrix_file, gz)
-        counts_start_at = 1
-        if not engine.has_table(table.__tablename__):
-            table.__table__.create(bind=engine)
+        tpms_start_at = 1
+        lines = GUDglobals.parse_csv_file(
+            matrix_file
+        )
     if feat_type == "tss":
         table = TSS()
-        lines = GUDglobals.parse_tsv_file(matrix_file, gz)
-        counts_start_at = 7
-        if not engine.has_table(table.__tablename__):
-            table.__table__.create(bind=engine)
-        table = Expression()
-        if not engine.has_table(table.__tablename__):
-            table.__table__.create(bind=engine)
+        tpms_start_at = 7
+        lines = GUDglobals.parse_tsv_file(
+            matrix_file
+        )
+    if not engine.has_table(table.__tablename__):
+        # Create table
+        table.__table__.create(bind=engine)
 
     # For each line...
     for line in lines:
@@ -274,11 +298,15 @@ def insert_fantom_to_gud_db(user, pwd, host, port, db,
         if line[0].startswith("#"): continue
         # Get sample IDs
         if len(sample_ids) == 0:
-            for sample in line[counts_start_at:]:
-                m = re.search("(CNhs\d+)", unquote(sample))
+            for sample in line[tpms_start_at:]:
+                m = re.search(
+                    "(CNhs\d+)",
+                    unquote(sample)
+                )
                 sample_ids.append(m.group(1))
         # If enhancer/TSS...
-        elif line[0].startswith("chr") or line[0].startswith("\"chr"):
+        elif line[0].startswith("chr") or\
+             line[0].startswith("\"chr"):
             # Initialize
             data = {}
             features = []
@@ -286,30 +314,47 @@ def insert_fantom_to_gud_db(user, pwd, host, port, db,
             avg_expression_levels = []
             # Get coordinates
             if feat_type == "enhancer":
-                m = re.search("(chr\S+)\:(\d+)\-(\d+)", line[0])
+                m = re.search(
+                    "(chr\S+)\:(\d+)\-(\d+)",
+                    line[0]
+                )
                 chrom = m.group(1)
                 start = int(m.group(2))
                 end = int(m.group(3))
                 strand = None
             if feat_type == "tss":
-                m = re.search("(chr\S+)\:(\d+)\.\.(\d+),(\S)", line[0])
+                m = re.search(
+                    "(chr\S+)\:(\d+)\.\.(\d+),(\S)",
+                    line[0]
+                )
                 chrom = m.group(1)
                 start = int(m.group(2))
                 end = int(m.group(3))
                 strand = m.group(4)
-                m = re.search("p(\d+)@(\w+)", line[1])
+                m = re.search(
+                    "p(\d+)@(\w+)",
+                    line[1]
+                )
                 if m:
                     gene = m.group(2)
                     tss_id = m.group(1)
                 else:
                     gene = None
                     tss_id = 1
-            # Ignore non-standard chroms, scaffolds, etc.
+            # Ignore non-standard chroms,
+            # scaffolds, etc.
             m = re.search("^chr(\S+)$", chrom)
-            if not m.group(1) in GUDglobals.chroms: continue
+            if not m.group(1) in GUDglobals.chroms:
+                continue
             # Get region
             region = Region()
-            if region.is_unique(session, chrom, start, end, strand):
+            if region.is_unique(
+                session,
+                chrom,
+                start,
+                end,
+                strand
+            ):
                 # Insert region
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
@@ -318,56 +363,131 @@ def insert_fantom_to_gud_db(user, pwd, host, port, db,
                 region.strand = strand
                 session.add(region)
                 session.commit()
-            reg = region.select_unique(session, chrom, start, end, strand)
+            reg = region.select_unique(
+                session,
+                chrom,
+                start,
+                end,
+                strand
+            )
             # For each sample...
-            for i in range(counts_start_at, len(line)):
+            for i in range(tpms_start_at, len(line)):
                 # Skip sample
-                sample_id = sample_ids[i - counts_start_at]
-                if not samples[sample_id]["add"]: continue
+                sample_id = sample_ids[
+                    i - tpms_start_at
+                ]
+                if not samples[sample_id]["add"]:
+                    continue
                 # Get data
-                name = samples[sample_id]["cell_or_tissue"]
-                treatment = samples[sample_id]["treatment"]
-                cell_line = samples[sample_id]["cell_line"]
-                cancer = samples[sample_id]["cancer"]
-                data.setdefault((name, treatment, cell_line, cancer), [])
-                data[(name, treatment, cell_line, cancer)].append(float(line[i]))
+                name =\
+                    samples[sample_id]["cell_or_tissue"]
+                treatment =\
+                    samples[sample_id]["treatment"]
+                cell_line =\
+                    samples[sample_id]["cell_line"]
+                cancer =\
+                    samples[sample_id]["cancer"]
+                data.setdefault((
+                        name,
+                        treatment,
+                        cell_line,
+                        cancer
+                    ), []
+                )
+                data[(
+                        name,
+                        treatment,
+                        cell_line,
+                        cancer
+                    )
+                ].append(float(line[i]))
             # For each sample...
-            for name, treatment, cell_line, cancer in data:
+            for s in data:
+                # Initialize
+                name = s[0]
+                treatment = s[1]
+                cell_line = s[2]
+                cancer = s[3]
                 # Get sample
                 sample = Sample()
-                if sample.is_unique(session, name,treatment, cell_line, cancer):    
+                if sample.is_unique(
+                    session,
+                    name,
+                    treatment,
+                    cell_line,
+                    cancer
+                ):
                     sample.name = name
                     sample.treatment = treatment
                     sample.cell_line = cell_line
                     sample.cancer = cancer
                     session.add(sample)
                     session.commit()
-                sam = sample.select_unique(session, name, treatment, cell_line, cancer)
+                sam = sample.select_unique(
+                    session,
+                    name,
+                    treatment,
+                    cell_line,
+                    cancer
+                )
                 # Skip if feature not expressed in sample
-                avg_expression_level = float(sum(data[name, treatment, cell_line, cancer]) /
-                    len(data[name, treatment, cell_line, cancer]))
+                avg_expression_level = float(
+                    sum(data[
+                        name,
+                        treatment,
+                        cell_line,
+                        cancer
+                    ]) / len(data[
+                        name,
+                        treatment,
+                        cell_line,
+                        cancer
+                    ])
+                )
                 if avg_expression_level > 0:
                     sampleIDs.append(sam.uid)
-                    avg_expression_levels.append("%.3f" % avg_expression_level)
+                    avg_expression_levels.append(
+                        "%.3f" % avg_expression_level
+                    )
             # Get TSS
             if feat_type == "tss":
                 tss = TSS()
-                if tss.is_unique(session, reg.uid, sou.uid, exp.uid):
+                if tss.is_unique(
+                    session,
+                    reg.uid,
+                    sou.uid,
+                    exp.uid
+                ):
                     tss.regionID = reg.uid
                     tss.sourceID = sou.uid
                     tss.experimentID = exp.uid
                     tss.gene = gene
                     tss.tss = tss_id
-                    tss.sampleIDs = "{},".format(",".join(map(str, sampleIDs)))
-                    tss.avg_expression_levels = "{},".format(",".join(avg_expression_levels))
+                    tss.sampleIDs = "{},".format(
+                        ",".join(map(str, sampleIDs))
+                    )
+                    tss.avg_expression_levels = "{},".format(
+                        ",".join(avg_expression_levels)
+                    )
                     session.add(tss)
                     session.commit()
-                tss = tss.select_unique(session, reg.uid, sou.uid, exp.uid)
+                tss = tss.select_unique(
+                    session,
+                    reg.uid,
+                    sou.uid,
+                    exp.uid
+                )
             # For each sample...
             for i in range(len(sampleIDs)):
                 if feat_type == "enhancer":
                     enhancer = Enhancer()
-                    if enhancer.is_unique(session, reg.uid, sou.uid, sampleIDs[i], exp.uid):
+                    if enhancer.is_unique(
+                        session,
+                        reg.uid,
+                        sou.uid,
+                        sampleIDs[i],
+                        exp.uid
+                    ):
                         enhancer.regionID = reg.uid
                         enhancer.sourceID = sou.uid
                         enhancer.sampleID = sampleIDs[i]
@@ -375,10 +495,15 @@ def insert_fantom_to_gud_db(user, pwd, host, port, db,
                         features.append(enhancer)
                 if feat_type == "tss":
                     expression = Expression()
-                    if expression.is_unique(session, tss.uid, sampleIDs[i]):
+                    if expression.is_unique(
+                        session,
+                        tss.uid,
+                        sampleIDs[i]
+                    ):
                         expression.tssID = tss.uid
                         expression.sampleID = sampleIDs[i]
-                        expression.avg_expression_level = avg_expression_levels[i]
+                        expression.avg_expression_level =\
+                            avg_expression_levels[i]
                         features.append(expression)
             session.add_all(features)
             session.commit()
