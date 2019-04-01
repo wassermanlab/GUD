@@ -535,7 +535,7 @@ def encode_to_gud(user, pwd, host, port, db,
                     )
             # For each line...
             for line in GUDglobals.parse_tsv_file(
-                "%s.cluster" % cluster_file
+                "%s.bed" % cluster_file
             ):
                 # Get coordinates
                 chrom = line[1]
