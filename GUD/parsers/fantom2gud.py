@@ -277,20 +277,40 @@ def fantom_to_gud_db(user, pwd, host, port, db,
 
     # Create table
     if feat_type == "enhancer":
-        table = Enhancer()
         tpms_start_at = 1
+        table = Enhancer()
+        if not engine.has_table(
+            table.__tablename__
+        ):
+            # Create table
+            table.__table__.create(
+                bind=engine
+            )
         lines = GUDglobals.parse_csv_file(
             matrix_file
         )
+
     if feat_type == "tss":
-        table = TSS()
         tpms_start_at = 7
+        table = TSS()
+        if not engine.has_table(
+            table.__tablename__
+        ):
+            # Create table
+            table.__table__.create(
+                bind=engine
+            )
+        table = Expression()
+        if not engine.has_table(
+            table.__tablename__
+        ):
+            # Create table
+            table.__table__.create(
+                bind=engine
+            )
         lines = GUDglobals.parse_tsv_file(
             matrix_file
         )
-    if not engine.has_table(table.__tablename__):
-        # Create table
-        table.__table__.create(bind=engine)
 
     # For each line...
     for line in lines:
