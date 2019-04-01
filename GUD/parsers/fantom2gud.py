@@ -190,7 +190,7 @@ def main():
         args.db,
         args.matrix,
         args.samples,
-        args.feat_type,
+        args.feature,
         args.source
     )
 
