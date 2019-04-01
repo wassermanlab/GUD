@@ -24,13 +24,13 @@ from .initialize import (
 )
 
 usage_msg = """
-usage: genes2gud.py --genome STR [-h]
-                    [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+usage: refgene2gud.py --genome STR [-h]
+                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
 """
 
 help_msg = """%s
 
-inserts gene definitions from the UCSC's RefSeq table into GUD.
+inserts features from the UCSC's "refGene" table into GUD.
 
   --genome STR        genome assembly
 
@@ -120,7 +120,7 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\ngenes2gud.py" % usage_msg,
+                    "%s\nrefgene2gud.py" % usage_msg,
                     "error",
                     "argument \"--genome\" is required\n"
                 ]

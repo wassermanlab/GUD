@@ -25,53 +25,156 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tss import TSS
 
+usage_msg = """
+usage: fantom2gud.py  --matrix FILE --samples FILE --feature STR
+                      [-h] [--source STR]
+                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+"""
+
+help_msg = """%s
+
+inserts "enhancer" and "tss" features from the FANTOM5 consortium
+into GUD. "--matrix" refers to:
+
+    1) "hg19_permissive_enhancers_expression_rle_tpm.csv.gz"; and
+    2) "hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz"
+
+  --matrix FILE       expression matrix TPM/RLE normalized across
+                      all FANTOM libraries
+  --samples FILE      FANTOM samples (manually-curated)
+  --feature STR       type of genomic feature
+
+optional arguments:
+  -h, --help          show this help message and exit
+  --source STR        source name (default = "FANTOM")
+
+mysql arguments:
+  -d STR, --db STR    database name (default = "%s")
+  -H STR, --host STR  host name (default = "localhost")
+  -p STR, --pwd STR   password (default = ignore this option)
+  -P STR, --port STR  port number (default = %s)
+  -u STR, --user STR  user name (default = current user)
+""" % \
+(
+    usage_msg,
+    GUDglobals.db_name,
+    GUDglobals.db_port
+)
+
 #-------------#
 # Functions   #
 #-------------#
 
 def parse_args():
     """
-    This function parses arguments provided via the command
-    line using argparse.
+    This function parses arguments provided via
+    the command line and returns an {argparse}
+    object.
     """
 
-    parser = argparse.ArgumentParser(description="inserts \"enhancer\" or \"tss\" data from the FANTOM5 consortium into GUD. download \"hg19_permissive_enhancers_expression_rle_tpm.csv.gz\" and \"hg19.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz\" for enhancer and tss data, respectively.")
+    parser = argparse.ArgumentParser(
+        add_help=False,
+    )
 
-    parser.add_argument("matrix", help="expression (TPM/RLE normalized) matrix across all FANTOM libraries")
-    parser.add_argument("samples", help="FANTOM samples (manually-curated)")
-
-    feats = ["enhancer", "tss"]
-    parser.add_argument("feat_type", choices=feats,
-        help="type of genomic feature", metavar="feature_type")
+    # Mandatory arguments
+    parser.add_argument("--matrix")
+    parser.add_argument("--samples")
+    parser.add_argument("--feature")
 
     # Optional args
-    parser.add_argument("--source", default="FANTOM",
-        help="source name (default = \"FANTOM\")")
+    optional_group = parser.add_argument_group(
+        "optional arguments"
+    )
+    optional_group.add_argument(
+        "-h", "--help",
+        action="store_true"
+    )
+    optional_group.add_argument(
+        "--source",
+        default="FANTOM"
+    )
 
     # MySQL args
-    mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default="hg19",
-        help="database name (default = \"hg19\")")
-    mysql_group.add_argument("-H", "--host", default="localhost",
-        help="host name (default = localhost)")
-    mysql_group.add_argument("-p", "--pwd", metavar="PASS",
-        help="password (default = ignore this option)")
-    mysql_group.add_argument("-P", "--port", default=5506, type=int,
-        help="port number (default = 5506)")
-
-    user = getpass.getuser()
-    mysql_group.add_argument("-u", "--user", default=user,
-        help="user name (default = current user)")
+    mysql_group = parser.add_argument_group(
+        "mysql arguments"
+    )
+    mysql_group.add_argument(
+        "-d", "--db",
+        default=GUDglobals.db_name,
+    )
+    mysql_group.add_argument(
+        "-H", "--host",
+        default="localhost"
+    )
+    mysql_group.add_argument("-p", "--pwd")
+    mysql_group.add_argument(
+        "-P", "--port",
+        default=GUDglobals.db_port
+    )
+    mysql_group.add_argument(
+        "-u", "--user",
+        default=getpass.getuser()
+    )
 
     args = parser.parse_args()
 
-    # Set default
-    if not args.db:
-        args.db = args.genome
-    if not args.pwd:
-        args.pwd = ""
+    check_args(args)
 
     return args
+
+def check_args(args):
+    """
+    This function checks an {argparse} object.
+    """
+
+    # Initialize
+    feats = [
+        "enhancer",
+        "tss"
+    ]
+
+    # Print help
+    if args.help:
+        print(help_msg)
+        exit(0)
+
+    # Check mandatory arguments
+    if (
+        not args.matrix or \
+        not args.samples or \
+        not args.feature
+    ):
+        print(": "\
+            .join(
+                [
+                    "%s\nfantom2gud.py" % usage_msg,
+                    "error",
+                    "arguments \"--matrix\" \"--samples\" \"--feature\" are required\n"
+                ]
+            )
+        )
+        exit(0)
+
+    # Check for invalid feature
+    if args.feature not in feats:
+        print(": "\
+            .join(
+                [
+                    "%s\nfantom2gud.py" % usage_msg,
+                    "error",
+                    "argument \"feature\"",
+                    "invalid choice",
+                    "\"%s\" (choose from" % args.feature,
+                    " %s)\n" % " "\
+                    .join(["\"%s\"" % i for i in feats])
+                ]
+            )
+        )
+        exit(0)
+
+    # Check MySQL password
+    if not args.pwd:
+        args.pwd = ""
 
 def main():
 
