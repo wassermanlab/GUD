@@ -188,7 +188,7 @@ def main():
         args.host,
         args.port,
         args.db,
-        args.matrix
+        args.matrix,
         args.samples,
         args.feat_type,
         args.source
