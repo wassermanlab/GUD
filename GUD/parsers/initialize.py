@@ -67,7 +67,7 @@ def parse_args():
         add_help=False,
     )
 
-    # Mandatory arguments
+    # Mandatory args
     parser.add_argument("--genome")
 
     # Optional args

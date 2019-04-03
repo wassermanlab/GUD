@@ -85,7 +85,7 @@ def parse_args():
         add_help=False,
     )
 
-    # Mandatory arguments
+    # Mandatory args
     parser.add_argument("--file", nargs="*")
     parser.add_argument("--feature")
     parser.add_argument("--experiment")
@@ -179,7 +179,7 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\nsample2gene.py" % usage_msg,
+                    "%s\nbed2gud.py" % usage_msg,
                     "error",
                     "arguments \"--file\" \"--feature\" \"--experiment\" \"--sample\" \"--source\" are required\n"
                 ]
@@ -194,10 +194,10 @@ def check_args(args):
                 [
                     "%s\nbed2gud.py" % usage_msg,
                     "error",
-                    "argument \"feature\"",
+                    "argument \"--feature\"",
                     "invalid choice",
                     "\"%s\" (choose from" % args.feature,
-                    " %s)\n" % " "\
+                    "%s)\n" % " "\
                     .join(["\"%s\"" % i for i in feats])
                 ]
             )

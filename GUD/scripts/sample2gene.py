@@ -15,7 +15,7 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.tss import TSS
 
 usage_msg = """
-usage: sample2gene.py --sample [STR ...] | --sample-file FILE
+usage: sample2gene.py (--sample [STR ...] | --sample-file FILE)
                       [-h] [--dummy-dir DIR] [-o FILE]
                       [-a] [--percent FLT] [--tpm FLT] [--tss INT]
                       [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
@@ -75,12 +75,10 @@ def parse_args():
     )
 
     # Mandatory arguments
-    sample_group = parser\
-        .add_mutually_exclusive_group()
-    sample_group.add_argument(
+    parser.add_argument(
         "--sample", nargs="*"
     )
-    sample_group.add_argument("--sample-file")
+    parser.add_argument("--sample-file")
 
     # Optional args
     optional_group = parser.add_argument_group(
@@ -151,10 +149,7 @@ def check_args(args):
     """
 
     # Print help
-    if (
-        "-h" in sys.argv or \
-        "--help" in sys.argv
-    ):
+    if args.help:
         print(help_msg)
         exit(0)
     
@@ -169,6 +164,19 @@ def check_args(args):
                     "%s\nsample2gene.py" % usage_msg,
                     "error",
                     "one of the arguments \"--sample\" \"--sample-file\" is required\n"
+                ]
+            )
+        )
+        exit(0)
+
+    if args.sample and args.sample_file:
+        print(": "\
+            .join(
+                [
+                    "%s\nsample2gene.py" % usage_msg,
+                    "error",
+                    "arguments \"--sample\" \"--sample-file\"",
+                    "expected one argument\n"
                 ]
             )
         )

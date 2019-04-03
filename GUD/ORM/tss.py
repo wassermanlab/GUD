@@ -178,6 +178,79 @@ class TSS(Base):
             return feats
 
         return q.all()
+
+    @classmethod
+    def select_by_gene(cls, session, gene,
+        as_genomic_feature=False):
+        """
+        Query objects by uid.
+        """
+
+        q = session.query(
+                cls,
+                Experiment,
+                Region,
+                Source
+            )\
+            .join()\
+            .filter(
+                Experiment.uid == cls.experimentID,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID
+            ).filter(cls.gene == gene)
+
+        if as_genomic_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
+
+        return q.all()
+
+    @classmethod
+    def select_by_genes(cls, session, genes=[],
+        as_genomic_feature=False):
+        """
+        Query objects by multiple uids.
+        If no uids are provided, return all
+        objects.
+        """
+
+        q = session.query(
+                cls,
+                Experiment,
+                Region,
+                Source
+            )\
+            .join()\
+            .filter(
+                Experiment.uid == cls.experimentID,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID
+            )
+
+        if genes:
+            q = q.filter(cls.gene.in_(genes))
+
+        if as_genomic_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
+
+        return q.all()
 #
 #    @classmethod
 #    def select_by_multiple_tss(cls, session, tss=[]):

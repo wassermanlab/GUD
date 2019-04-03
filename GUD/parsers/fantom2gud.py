@@ -76,7 +76,7 @@ def parse_args():
         add_help=False,
     )
 
-    # Mandatory arguments
+    # Mandatory args
     parser.add_argument("--matrix")
     parser.add_argument("--samples")
     parser.add_argument("--feature")
@@ -162,10 +162,10 @@ def check_args(args):
                 [
                     "%s\nfantom2gud.py" % usage_msg,
                     "error",
-                    "argument \"feature\"",
+                    "argument \"--feature\"",
                     "invalid choice",
                     "\"%s\" (choose from" % args.feature,
-                    " %s)\n" % " "\
+                    "%s)\n" % " "\
                     .join(["\"%s\"" % i for i in feats])
                 ]
             )

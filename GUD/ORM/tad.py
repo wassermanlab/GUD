@@ -15,6 +15,7 @@ from sqlalchemy.dialects import mysql
 
 from .base import Base
 from .experiment import Experiment
+from .genomic_feature import GenomicFeature
 from .region import Region
 from .sample import Sample
 from .source import Source
@@ -111,6 +112,79 @@ class TAD(Base):
             )
 
         return q.first()
+
+    @classmethod
+    def select_by_location(cls, session,
+        chrom, start, end, samples=[],
+        as_genomic_feature=False):
+        """
+        Query objects by genomic location.
+        """
+
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(
+            cls,
+            Region,
+            Sample,
+            Experiment,
+            Source,
+            
+        )\
+            .join()\
+            .filter(
+                Region.uid == cls.regionID,
+                Sample.uid == cls.sampleID,
+                Experiment.uid == cls.experimentID,
+                Source.uid == cls.sourceID,
+            )\
+            .filter(
+                Region.chrom == chrom,
+                Region.start < end,
+                Region.end > start
+            )\
+            .filter(Region.bin.in_(bins))
+
+        if samples:
+            q = q.filter(Sample.name.in_(samples))
+
+        if as_genomic_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
+    
+        return q.all()
+
+    def __as_genomic_feature(feat):
+
+        # Define qualifiers
+        qualifiers = {
+            "experiment": feat.Experiment.name,
+            "restriction_enzyme": feat.TAD.restriction_enzyme,
+            "sample": feat.Sample.name,
+            "source" : feat.Source.name,            
+        }
+
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand = feat.Region.strand,
+            feat_type = "TAD",
+            feat_id = "%s|%s|%s" % (
+                qualifiers["source"],
+                qualifiers["restriction_enzyme"],
+                qualifiers["sample"].replace(" ", "_")
+            ),
+            qualifiers = qualifiers
+        )
 
     def __repr__(self):
 
