@@ -90,6 +90,16 @@ class GenomicFeature(SeqFeature):
         return 0
 
     @property
+    def strand_string(self):
+
+        if self.strand == 1:
+            return "+"
+        if self.strand == -1:
+            return "-"
+
+        return "."
+
+    @property
     def gud_strand(self):
 
         return self._strand
@@ -129,7 +139,7 @@ class GenomicFeature(SeqFeature):
                 self.end,
                 self.id,
                 self.score,
-                self.strand
+                self.strand_string
             )
 
     def __repr__(self):
