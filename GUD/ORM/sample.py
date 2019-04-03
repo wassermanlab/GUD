@@ -117,6 +117,33 @@ class Sample(Base):
         return q.all()
 
     @classmethod
+    def select_by_uid(cls, session, uid):
+        """
+        Query objects by uid.
+        """
+
+        q = session.query(cls).filter(
+            cls.uid == uid
+        )
+
+        return q.first()
+
+    @classmethod
+    def select_by_uids(cls, session, uids=[]):
+        """
+        Query objects by multiple uids.
+        If no uids are provided, return all
+        objects.
+        """
+
+        q = session.query(cls)
+
+        if uids:
+            q = q.filter(cls.uid.in_(uids))
+
+        return q.all()
+
+    @classmethod
     def select_by_names(cls, session, names=[],
         treatment=False, cell_line=False,
         cancer=False):

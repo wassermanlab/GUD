@@ -76,7 +76,7 @@ def parse_args():
         add_help=False,
     )
 
-    # Mandatory arguments
+    # Mandatory args
     parser.add_argument("--matrix")
     parser.add_argument("--samples")
     parser.add_argument("--feature")
@@ -162,10 +162,10 @@ def check_args(args):
                 [
                     "%s\nfantom2gud.py" % usage_msg,
                     "error",
-                    "argument \"feature\"",
+                    "argument \"--feature\"",
                     "invalid choice",
                     "\"%s\" (choose from" % args.feature,
-                    " %s)\n" % " "\
+                    "%s)\n" % " "\
                     .join(["\"%s\"" % i for i in feats])
                 ]
             )
@@ -190,7 +190,7 @@ def main():
         args.db,
         args.matrix,
         args.samples,
-        args.feat_type,
+        args.feature,
         args.source
     )
 
@@ -277,20 +277,40 @@ def fantom_to_gud_db(user, pwd, host, port, db,
 
     # Create table
     if feat_type == "enhancer":
-        table = Enhancer()
         tpms_start_at = 1
+        table = Enhancer()
+        if not engine.has_table(
+            table.__tablename__
+        ):
+            # Create table
+            table.__table__.create(
+                bind=engine
+            )
         lines = GUDglobals.parse_csv_file(
             matrix_file
         )
+
     if feat_type == "tss":
-        table = TSS()
         tpms_start_at = 7
+        table = TSS()
+        if not engine.has_table(
+            table.__tablename__
+        ):
+            # Create table
+            table.__table__.create(
+                bind=engine
+            )
+        table = Expression()
+        if not engine.has_table(
+            table.__tablename__
+        ):
+            # Create table
+            table.__table__.create(
+                bind=engine
+            )
         lines = GUDglobals.parse_tsv_file(
             matrix_file
         )
-    if not engine.has_table(table.__tablename__):
-        # Create table
-        table.__table__.create(bind=engine)
 
     # For each line...
     for line in lines:
