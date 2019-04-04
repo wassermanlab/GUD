@@ -48,10 +48,9 @@ class Globals(object):
     db_user = "ontarget_r"
 
     # Defaults for selecting differentially
-    # expressed genes
-    max_tss = 10
+    # expressed gene TSSs
     min_tpm_exp = 100.0
-    min_percent_exp = 25.0
+    max_num_tss = 50
 
     # Valid experiments
     experiments = [

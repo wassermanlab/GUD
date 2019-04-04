@@ -73,10 +73,14 @@ class TSS(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
+        # multiple TSSs might overlap:
+        # e.g. p16@IGF2,p1@INS-IGF2,p1@INS
         UniqueConstraint(
             regionID,
             experimentID,
-            sourceID
+            sourceID,
+            gene,
+            tss
         ),
         Index("ix_regionID", regionID), # query by bin range
         Index("ix_gene_tss", gene, tss),
@@ -88,13 +92,15 @@ class TSS(Base):
 
     @classmethod
     def is_unique(cls, session, regionID, sourceID,
-        experimentID):
+        experimentID, gene, tss):
 
         q = session.query(cls)\
             .filter(
                 cls.regionID == regionID,
                 cls.sourceID == sourceID,
-                cls.experimentID == experimentID
+                cls.experimentID == experimentID,
+                cls.gene == gene,
+                cls.tss == tss
             )
 
         return len(q.all()) == 0
@@ -102,13 +108,15 @@ class TSS(Base):
 
     @classmethod
     def select_unique(cls, session, regionID,
-        sourceID, experimentID):
+        sourceID, experimentID, gene, tss):
 
         q = session.query(cls)\
             .filter(
                 cls.regionID == regionID,
                 cls.sourceID == sourceID,
-                cls.experimentID == experimentID
+                cls.experimentID == experimentID,
+                cls.gene == gene,
+                cls.tss == tss
             )
 
         return q.first()
