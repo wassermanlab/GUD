@@ -474,6 +474,8 @@ def fantom_to_gud_db(user, pwd, host, port, db,
                     )
             # Get TSS
             if feat_type == "tss":
+                # Initialize
+                tss_ids = set()
                 for gene, tss_id in peak_ids:
                     tss = TSS()
                     if tss.is_unique(
@@ -505,6 +507,7 @@ def fantom_to_gud_db(user, pwd, host, port, db,
                         gene,
                         tss_id
                     )
+                    tss_ids.add(tss)
             # For each sample...
             for i in range(len(sampleIDs)):
                 if feat_type == "enhancer":
@@ -522,17 +525,18 @@ def fantom_to_gud_db(user, pwd, host, port, db,
                         enhancer.experimentID = exp.uid
                         features.append(enhancer)
                 if feat_type == "tss":
-                    expression = Expression()
-                    if expression.is_unique(
-                        session,
-                        tss.uid,
-                        sampleIDs[i]
-                    ):
-                        expression.tssID = tss.uid
-                        expression.sampleID = sampleIDs[i]
-                        expression.avg_expression_level =\
-                            avg_expression_levels[i]
-                        features.append(expression)
+                    for tss in tss_ids:
+                        expression = Expression()
+                        if expression.is_unique(
+                            session,
+                            tss.uid,
+                            sampleIDs[i]
+                        ):
+                            expression.tssID = tss.uid
+                            expression.sampleID = sampleIDs[i]
+                            expression.avg_expression_level =\
+                                avg_expression_levels[i]
+                            features.append(expression)
             session.add_all(features)
             session.commit()
 
