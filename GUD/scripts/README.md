@@ -1,7 +1,7 @@
 ### 1) Starting from a list of samples:
 
 ```
-GM12878"
+GM12878
 B cell (CD19-positive)
 ```
 
