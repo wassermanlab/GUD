@@ -35,11 +35,11 @@ optional arguments:
 
 expression arguments:
   -a, --all           expression in all samples (default = False)
-  --percent FLT       percentage of expression for TSS in input
-                      samples (default = %s)
-  --tpm FLT           expression levels (in TPM) for TSS in input
-                      samples (default = %s)
-  --tss INT           number of TSSs to return (default = %s)
+  --percent FLT       min. percentage of expression for TSS in
+                      input samples (default = ignore this option)
+  --tpm FLT           min. expression levels (in TPM) for TSS in
+                      input samples (default = %s)
+  --tss INT           max. number of TSSs to return (default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
@@ -50,9 +50,8 @@ mysql arguments:
 """ % \
 (
     usage_msg,
-    GUDglobals.min_percent_exp,
     GUDglobals.min_tpm_exp,
-    GUDglobals.max_tss,
+    GUDglobals.max_num_tss,
     GUDglobals.db_name,
     GUDglobals.db_host,
     GUDglobals.db_port,
@@ -104,7 +103,7 @@ def parse_args():
     )
     exp_group.add_argument(
         "--percent",
-        default=GUDglobals.min_percent_exp
+        default=0.0
     )
     exp_group.add_argument(
         "--tpm",
@@ -112,7 +111,7 @@ def parse_args():
     )
     exp_group.add_argument(
         "--tss",
-        default=GUDglobals.max_tss,
+        default=GUDglobals.max_num_tss
     )
 
     # MySQL args

@@ -48,10 +48,9 @@ class Globals(object):
     db_user = "ontarget_r"
 
     # Defaults for selecting differentially
-    # expressed genes
-    max_tss = 10
+    # expressed gene TSSs
     min_tpm_exp = 100.0
-    min_percent_exp = 25.0
+    max_num_tss = 50
 
     # Valid experiments
     experiments = [
@@ -134,17 +133,26 @@ class Globals(object):
     def _get_file_handle(self,
         file_name, gz=False, mode="r"):
 
+        # Initialize
+        raiseValueError = False
+        
         # Open file handle
         if gz or file_name.endswith(".gz"):
             try:
                 fh = gzip.open(file_name, mode)
             except:
-                raise ValueError("Could not open file handle: %s" % file_name)
+                raiseValueError = True
         else:
             try:
                 fh = open(file_name, mode)
             except:
-                raise ValueError("Could not open file handle: %s" % file_name)
+                raiseValueError = True
+        
+        if raiseValueError:
+            raise ValueError(
+                "Could not open file handle: %s" % \
+                file_name
+            )
 
         return fh
 
@@ -187,7 +195,9 @@ class Globals(object):
         fh = self._get_file_handle(file_name, gz)
 
         # For each line...
-        for line in csv.reader(fh, delimiter=delimiter):
+        for line in csv.reader(
+            fh, delimiter=delimiter
+        ):
             yield line
 
         fh.close()
@@ -205,7 +215,9 @@ class Globals(object):
         """
 
         # For each line...
-        for line in self.parse_csv_file(file_name, gz, delimiter="\t"):
+        for line in self.parse_csv_file(
+            file_name, gz, delimiter="\t"
+        ):
             yield line
 
     def parse_fasta_file(self, file_name, gz=False):
@@ -244,7 +256,9 @@ class Globals(object):
 
         if file_name:
             # Get file handle
-            fh = self._get_file_handle(file_name, mode="a")
+            fh = self._get_file_handle(
+                file_name, mode="a"
+            )
             # Write
             fh.write("%s\n" % content)
             fh.close()

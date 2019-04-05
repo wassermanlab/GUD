@@ -343,6 +343,8 @@ def fantom_to_gud_db(user, pwd, host, port, db,
                 end = int(m.group(3))
                 strand = None
             if feat_type == "tss":
+                # Initialize
+                peak_ids = set()
                 m = re.search(
                     "(chr\S+)\:(\d+)\.\.(\d+),(\S)",
                     line[0]
@@ -351,16 +353,17 @@ def fantom_to_gud_db(user, pwd, host, port, db,
                 start = int(m.group(2))
                 end = int(m.group(3))
                 strand = m.group(4)
-                m = re.search(
-                    "p(\d+)@(\w+)",
-                    line[1]
-                )
-                if m:
-                    gene = m.group(2)
-                    tss_id = m.group(1)
-                else:
-                    gene = None
-                    tss_id = 1
+                for peak in line[1].split(","):
+                    m = re.search(
+                        "p(\d+)@(\w+)",
+                        peak
+                    )
+                    if m:
+                        peak_ids.add((
+                            m.group(2), m.group(1)
+                        ))
+                    else:
+                        peak_ids.add((None, 1))
             # Ignore non-standard chroms,
             # scaffolds, etc.
             m = re.search("^chr(\S+)$", chrom)
@@ -471,32 +474,40 @@ def fantom_to_gud_db(user, pwd, host, port, db,
                     )
             # Get TSS
             if feat_type == "tss":
-                tss = TSS()
-                if tss.is_unique(
-                    session,
-                    reg.uid,
-                    sou.uid,
-                    exp.uid
-                ):
-                    tss.regionID = reg.uid
-                    tss.sourceID = sou.uid
-                    tss.experimentID = exp.uid
-                    tss.gene = gene
-                    tss.tss = tss_id
-                    tss.sampleIDs = "{},".format(
-                        ",".join(map(str, sampleIDs))
+                # Initialize
+                tss_ids = set()
+                for gene, tss_id in peak_ids:
+                    tss = TSS()
+                    if tss.is_unique(
+                        session,
+                        reg.uid,
+                        sou.uid,
+                        exp.uid,
+                        gene,
+                        tss_id
+                    ):
+                        tss.regionID = reg.uid
+                        tss.sourceID = sou.uid
+                        tss.experimentID = exp.uid
+                        tss.gene = gene
+                        tss.tss = tss_id
+                        tss.sampleIDs = "{},".format(
+                            ",".join(map(str, sampleIDs))
+                        )
+                        tss.avg_expression_levels = "{},".format(
+                            ",".join(avg_expression_levels)
+                        )
+                        session.add(tss)
+                        session.commit()
+                    tss = tss.select_unique(
+                        session,
+                        reg.uid,
+                        sou.uid,
+                        exp.uid,
+                        gene,
+                        tss_id
                     )
-                    tss.avg_expression_levels = "{},".format(
-                        ",".join(avg_expression_levels)
-                    )
-                    session.add(tss)
-                    session.commit()
-                tss = tss.select_unique(
-                    session,
-                    reg.uid,
-                    sou.uid,
-                    exp.uid
-                )
+                    tss_ids.add(tss)
             # For each sample...
             for i in range(len(sampleIDs)):
                 if feat_type == "enhancer":
@@ -514,17 +525,18 @@ def fantom_to_gud_db(user, pwd, host, port, db,
                         enhancer.experimentID = exp.uid
                         features.append(enhancer)
                 if feat_type == "tss":
-                    expression = Expression()
-                    if expression.is_unique(
-                        session,
-                        tss.uid,
-                        sampleIDs[i]
-                    ):
-                        expression.tssID = tss.uid
-                        expression.sampleID = sampleIDs[i]
-                        expression.avg_expression_level =\
-                            avg_expression_levels[i]
-                        features.append(expression)
+                    for tss in tss_ids:
+                        expression = Expression()
+                        if expression.is_unique(
+                            session,
+                            tss.uid,
+                            sampleIDs[i]
+                        ):
+                            expression.tssID = tss.uid
+                            expression.sampleID = sampleIDs[i]
+                            expression.avg_expression_level =\
+                                avg_expression_levels[i]
+                            features.append(expression)
             session.add_all(features)
             session.commit()
 
