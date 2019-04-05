@@ -34,7 +34,7 @@ session = GUDglobals.establish_GUD_session()
 # Get that gene's region
 region = get_gene_region(
     session,
-    gene,
+    gene="RELA",
     samples=["GM12878", "B cell (CD19-positive)"]
 )
 ```
