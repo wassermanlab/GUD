@@ -302,7 +302,7 @@ def main():
         )
 
 def get_differentially_expressed_tss(session,
-    samples=[], tpm_exp=100, percent_exp=25,
+    samples=[], tpm_exp=100, percent_exp=0.0,
     exp_in_all_samples=False):
     """
     Identifies TSSs from genes differentially
