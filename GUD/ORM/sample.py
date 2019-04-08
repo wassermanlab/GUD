@@ -7,6 +7,12 @@ from sqlalchemy import (
     UniqueConstraint
 )
 from sqlalchemy.dialects import mysql
+from sqlalchemy_fulltext import (
+    FullText,
+    FullTextSearch
+)
+import sqlalchemy_fulltext.modes \
+    as FullTextMode
 
 from .base import Base
 
@@ -99,24 +105,6 @@ class Sample(Base):
         return q.first()
 
     @classmethod
-    def select_by_name(cls, session, name,
-        treatment=False, cell_line=False,
-        cancer=False):
-        """
-        Query objects by sample name. 
-        """
-
-        q = session.query(cls)\
-            .filter(
-                cls.name == name,
-                cls.treatment <= int(treatment),
-                cls.cell_line <= int(cell_line),
-                cls.cancer <= int(cancer)
-            )
-
-        return q.all()
-
-    @classmethod
     def select_by_uid(cls, session, uid):
         """
         Query objects by uid.
@@ -144,6 +132,24 @@ class Sample(Base):
         return q.all()
 
     @classmethod
+    def select_by_name(cls, session, name,
+        treatment=False, cell_line=False,
+        cancer=False):
+        """
+        Query objects by sample name. 
+        """
+
+        q = session.query(cls)\
+            .filter(
+                cls.name == name,
+                cls.treatment <= int(treatment),
+                cls.cell_line <= int(cell_line),
+                cls.cancer <= int(cancer)
+            )
+
+        return q.all()
+
+    @classmethod
     def select_by_names(cls, session, names=[],
         treatment=False, cell_line=False,
         cancer=False):
@@ -162,6 +168,27 @@ class Sample(Base):
 
         if names:
             q = q.filter(cls.name.in_(names))
+
+        return q.all()
+
+    @classmethod
+    def select_by_fulltext(
+        cls, session, fulltext):
+        """
+        Query objects by fulltext. 
+        """
+
+        class SampleName(FullText, cls):        
+            __fulltext_columns__ = list(["name"])
+
+        q = session.query(cls)\
+            .filter(
+                FullTextSearch(
+                    fulltext,
+                    SampleName,
+                    FullTextMode.NATURAL
+                )
+            )
 
         return q.all()
 

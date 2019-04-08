@@ -15,6 +15,8 @@ pip install Biopython
 pip install mysqlclient
 pip install interval-binning
 pip install sqlalchemy
+pip install SQLAlchemy-FullText-Search
+pip install SQLAlchemy-Utils
 ```
 
 ## How to append GUD as submodule

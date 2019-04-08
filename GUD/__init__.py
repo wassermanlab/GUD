@@ -280,14 +280,22 @@ class Globals(object):
         if not db_pass: db_pass = ""
     
         gud_db = "mysql://{}:{}@{}:{}/{}".format(
-            db_user, db_pass, db_host, db_port, db_name)
+            db_user,
+            db_pass,
+            db_host,
+            db_port,
+            db_name
+        )
 
         # Establish a MySQL session
         try:
             engine = create_engine(gud_db, echo=False)
             session = Session(engine)
         except:
-            raise ValueError("Could not connect to GUD db: %s" % gud_db)
+            raise ValueError(
+                "Could not connect to GUD db: %s" \
+                % gud_db
+            )
 
         return session
 
