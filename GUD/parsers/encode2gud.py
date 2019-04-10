@@ -562,6 +562,7 @@ def encode_to_gud(user, pwd, host, port, db,
                     start,
                     end
                 )
+                print(reg)
                 print(dir(reg))
                 exit(0)
                 regions.append(reg.uid)
