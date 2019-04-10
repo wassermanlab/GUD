@@ -12,7 +12,7 @@
 ## Requirements
 GUD requires the following dependencies:
 * `MySQL`
-* `Python` (≥2.7 or 3) with the `Biopython`, `interval-binning`, `MySQL-python`, `sqlalchemy` and `sqlalchemy-utils` libraries
+* `Python` (≥2.7 or 3) with the `Biopython`, `interval-binning`, `MySQL-python`, `sqlalchemy`, `SQLAlchemy-FullText-Search` and `sqlalchemy-utils` libraries
 
 ## How to append GUD as submodule
 ```
