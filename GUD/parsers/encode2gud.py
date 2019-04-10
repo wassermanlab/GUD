@@ -631,7 +631,7 @@ def encode_to_gud(user, pwd, host, port, db,
                     if feat_type == "tf":
                         tf_name = experiment_target
                     # Insert BED file to GUD database
-                    insert_bed_to_gud_db(
+                    bed_to_gud_db(
                         user,
                         pwd,
                         host,
