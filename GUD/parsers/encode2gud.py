@@ -563,8 +563,6 @@ def encode_to_gud(user, pwd, host, port, db,
                     end
                 )
                 print(reg)
-                print(dir(reg))
-                exit(0)
                 regions.append(reg.uid)
             # For each line...
             for line in GUDglobals.parse_tsv_file(
