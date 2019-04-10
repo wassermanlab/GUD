@@ -538,6 +538,8 @@ def encode_to_gud(user, pwd, host, port, db,
                 "%s.bed" % cluster_file
             ):
                 # Get coordinates
+                print(line)
+                exit(0)
                 chrom = line[1]
                 start = int(line[2])
                 end = int(line[3])
