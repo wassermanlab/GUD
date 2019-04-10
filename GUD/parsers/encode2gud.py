@@ -23,7 +23,7 @@ from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-from .bed2gud import insert_bed_to_gud_db
+from .bed2gud import bed_to_gud_db
 from .initialize import initialize_gud_db
 
 usage_msg = """
