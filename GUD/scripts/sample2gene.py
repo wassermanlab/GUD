@@ -7,10 +7,8 @@ import sys
 
 # Import from GUD
 from GUD import GUDglobals
-from GUD.ORM.chrom import Chrom
 from GUD.ORM.expression import Expression
 from GUD.ORM.gene import Gene
-from GUD.ORM.genomic_feature import GenomicFeature
 from GUD.ORM.sample import Sample
 from GUD.ORM.tss import TSS
 
@@ -35,11 +33,12 @@ optional arguments:
 
 expression arguments:
   -a, --all           expression in all samples (default = False)
-  --percent FLT       min. percentage of expression for TSS in
-                      input samples (default = ignore this option)
+  --percent FLT       min. percentile of expression for TSS in
+                      input samples (default = %s)
   --tpm FLT           min. expression levels (in TPM) for TSS in
                       input samples (default = %s)
-  --tss INT           max. number of TSSs to return (default = %s)
+  --tss INT           max. number of TSSs to return (if 0, return
+                      all TSSs; default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
@@ -50,8 +49,9 @@ mysql arguments:
 """ % \
 (
     usage_msg,
-    GUDglobals.min_tpm_exp,
-    GUDglobals.max_num_tss,
+    GUDglobals.min_percent,
+    GUDglobals.min_tpm,
+    GUDglobals.max_tss,
     GUDglobals.db_name,
     GUDglobals.db_host,
     GUDglobals.db_port,
@@ -103,15 +103,15 @@ def parse_args():
     )
     exp_group.add_argument(
         "--percent",
-        default=0.0
+        default=GUDglobals.min_percent
     )
     exp_group.add_argument(
         "--tpm",
-        default=GUDglobals.min_tpm_exp
+        default=GUDglobals.min_tpm
     )
     exp_group.add_argument(
         "--tss",
-        default=GUDglobals.max_num_tss
+        default=GUDglobals.max_tss
     )
 
     # MySQL args
@@ -277,6 +277,10 @@ def main():
     # If differentially expressed TSSs...
     if diff_exp_tss:
 
+        # Initialize
+        if args.tss <= 0:
+            args.tss = len(diff_exp_tss)
+
         # For each TSS...
         for tss in diff_exp_tss[:args.tss]:
             # Write
@@ -396,7 +400,7 @@ def get_differentially_expressed_tss(session,
                         )
                         diff_exp_tss.append(tss)
 
-    # Sort TSSs by percent exp.
+    # Sort TSSs by percentile expression
     diff_exp_tss.sort(
         key=lambda x: x.qualifiers["percent_exp"],
         reverse=True
