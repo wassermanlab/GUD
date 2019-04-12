@@ -285,7 +285,8 @@ class TSS(Base):
 #
 #        return q.all()
 
-    def __as_genomic_feature(feat):
+    @classmethod
+    def __as_genomic_feature(self, feat):
 
         # Initialize
         isfloat = re.compile("\d+(\.\d+)?")

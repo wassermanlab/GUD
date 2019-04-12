@@ -271,7 +271,8 @@ class Gene(Base):
 
         return [g[0] for g in q]
 
-    def __as_genomic_feature(feat):
+    @classmethod
+    def __as_genomic_feature(self, feat):
 
         # Initialize
         exonStarts = []

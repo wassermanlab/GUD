@@ -15,7 +15,7 @@ from GUD.ORM.tss import TSS
 usage_msg = """
 usage: sample2gene.py (--sample [STR ...] | --sample-file FILE)
                       [-h] [--dummy-dir DIR] [-o FILE]
-                      [-a] [--percent FLT] [--tpm FLT] [--tss INT]
+                      [-a] [-g] [--percent FLT] [--tpm FLT] [--tss INT]
                       [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
 """
 
@@ -33,6 +33,7 @@ optional arguments:
 
 expression arguments:
   -a, --all           expression in all samples (default = False)
+  -g, --group         group by gene (default = False)
   --percent FLT       min. percentile of expression for TSS in
                       input samples (default = %s)
   --tpm FLT           min. expression levels (in TPM) for TSS in
@@ -99,6 +100,10 @@ def parse_args():
     )
     exp_group.add_argument(
         "-a", "--all",
+        action="store_true"
+    )
+    exp_group.add_argument(
+        "-g", "--group",
         action="store_true"
     )
     exp_group.add_argument(
@@ -265,8 +270,8 @@ def main():
         args.db
     )
 
-    # Get TSSs
-    diff_exp_tss = get_differentially_expressed_tss(
+    # Get differentially expressed TSSs
+    tss = get_differentially_expressed_tss(
         session,
         samples,
         args.tpm,
@@ -275,16 +280,32 @@ def main():
     )
 
     # If differentially expressed TSSs...
-    if diff_exp_tss:
+    if tss:
+
+        # Initialize
+        genes = set()
+        tss_count = 0
 
         # Initialize
         if args.tss <= 0:
             args.tss = len(diff_exp_tss)
 
         # For each TSS...
-        for tss in diff_exp_tss[:args.tss]:
+        for t in tss:
+            # Skip if enough TSSs
+            if tss_count == args.tss:
+                break
+            # If group by gene...
+            if args.group:
+                # Skip if there is a better
+                # TSS for this gene
+                if t.qualifiers["gene"] in \
+                    genes: continue
             # Write
-            GUDglobals.write(dummy_file, tss)
+            GUDglobals.write(dummy_file, t)
+            # Add gene and increase count
+            genes.add(t.qualifiers["gene"])
+            tss_count += 1
 
         # If output file...
         if args.o:
@@ -294,7 +315,9 @@ def main():
             )
         # ... Else, print on stdout...
         else:
-            for line in GUDglobals.parse_file(dummy_file):
+            for line in GUDglobals.parse_file(
+                dummy_file
+            ):
                 GUDglobals.write(None, line)
 
         # Delete dummy file
@@ -394,15 +417,15 @@ def get_differentially_expressed_tss(session,
                             "expression",
                             expression
                         )
-                        tss.qualifiers.setdefault(
-                            "percent_exp",
-                            (fg_exp * 100.0) / bg_exp
-                        )
+                        tss.score = "%.3f" % \
+                            round(
+                                (fg_exp * 100.0) / bg_exp, 3
+                            )
                         diff_exp_tss.append(tss)
 
     # Sort TSSs by percentile expression
     diff_exp_tss.sort(
-        key=lambda x: x.qualifiers["percent_exp"],
+        key=lambda x: float(x.score),
         reverse=True
     )
 

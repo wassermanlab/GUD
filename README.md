@@ -10,14 +10,9 @@
 + ADD onthology
 
 ## Requirements
-```
-pip install Biopython
-pip install mysqlclient
-pip install interval-binning
-pip install sqlalchemy
-pip install SQLAlchemy-FullText-Search
-pip install SQLAlchemy-Utils
-```
+GUD requires the following dependencies:
+* `MySQL`
+* `Python` (≥2.7 or 3) with the `Biopython`, `interval-binning`, `MySQL-python`, `sqlalchemy`, `SQLAlchemy-FullText-Search` and `sqlalchemy-utils` libraries
 
 ## How to append GUD as submodule
 ```

@@ -23,7 +23,7 @@ from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-from .bed2gud import insert_bed_to_gud_db
+from .bed2gud import bed_to_gud_db
 from .initialize import initialize_gud_db
 
 usage_msg = """
@@ -538,9 +538,9 @@ def encode_to_gud(user, pwd, host, port, db,
                 "%s.bed" % cluster_file
             ):
                 # Get coordinates
-                chrom = line[1]
-                start = int(line[2])
-                end = int(line[3])
+                chrom = line[0]
+                start = int(line[1])
+                end = int(line[2])
                 # Get region
                 region = Region()
                 if region.is_unique(
@@ -631,7 +631,7 @@ def encode_to_gud(user, pwd, host, port, db,
                     if feat_type == "tf":
                         tf_name = experiment_target
                     # Insert BED file to GUD database
-                    insert_bed_to_gud_db(
+                    bed_to_gud_db(
                         user,
                         pwd,
                         host,
