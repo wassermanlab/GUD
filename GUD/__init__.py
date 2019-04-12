@@ -6,8 +6,8 @@ __author__ = "Oriol Fornes"
 __credits__ = [
     "Oriol Fornes",
     "Tamar V. Av-Shalom",
-    "David J. Arenillas",
     "Rachelle A. Farkas",
+    "David J. Arenillas",
     "Michelle Kang",
     "Phillip A. Richmond",
     "Wyeth W. Wasserman"
@@ -47,10 +47,11 @@ class Globals(object):
     db_port = 5506
     db_user = "ontarget_r"
 
-    # Defaults for selecting differentially
-    # expressed gene TSSs
-    min_tpm_exp = 100.0
-    max_num_tss = 50
+    # Defaults for gene2sample & sample2gene 
+    max_samples = 0
+    max_tss = 50
+    min_percent = 0
+    min_tpm = 100.0
 
     # Valid experiments
     experiments = [
@@ -280,14 +281,22 @@ class Globals(object):
         if not db_pass: db_pass = ""
     
         gud_db = "mysql://{}:{}@{}:{}/{}".format(
-            db_user, db_pass, db_host, db_port, db_name)
+            db_user,
+            db_pass,
+            db_host,
+            db_port,
+            db_name
+        )
 
         # Establish a MySQL session
         try:
             engine = create_engine(gud_db, echo=False)
             session = Session(engine)
         except:
-            raise ValueError("Could not connect to GUD db: %s" % gud_db)
+            raise ValueError(
+                "Could not connect to GUD db: %s" \
+                % gud_db
+            )
 
         return session
 

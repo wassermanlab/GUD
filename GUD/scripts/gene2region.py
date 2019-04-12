@@ -3,7 +3,6 @@
 import argparse
 import os
 import shutil
-import sys
 
 # Import from GUD
 from GUD import GUDglobals
@@ -17,25 +16,24 @@ from GUD.ORM.tss import TSS
 
 usage_msg = """
 usage: gene2region.py (--gene [STR ...] | --gene-file FILE)
-                      [-h] [-l] [--dummy-dir DIR] [-o FILE]
+                      [-h] [--dummy-dir DIR] [-l] [-o FILE]
                       [--sample [STR ...] | --sample-file FILE]
                       [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
 """
 
 help_msg = """%s
 
-delimits a region for the given genes based on TADs, nearby genes,
-or distance (in kb).
+delimits a region for the given gene(s) based on TAD boundaries,
+UTRs of nearby genes, or genomic distance (in kb).
 
   --gene [STR ...]    gene(s) (e.g. "CD19")
   --gene-file FILE    file containing a list of genes
 
 optional arguments:
   -h, --help          show this help message and exit
-  -l --limit-by       limit the gene region based on TADs (i.e.
-                      "tad"; default), nearby genes (i.e. "gene"),
-                      or distance (i.e. +/- N kb)
   --dummy-dir DIR     dummy directory (default = "/tmp/")
+  -l --limit-by       limit region based on "tad" boundaries
+                      (default), nearby "gene" UTRs, or distance
   -o FILE             output file (default = stdout)
   --sample [STR ...]  sample(s) for GUD features (e.g. "B cell")
   --sample-file FILE  file containing a list of samples for GUD
@@ -86,12 +84,12 @@ def parse_args():
         action="store_true"
     )
     optional_group.add_argument(
-        "-l", "--limit-by",
-        default="tad"
-    )
-    optional_group.add_argument(
         "--dummy-dir",
         default="/tmp/"
+    )
+    optional_group.add_argument(
+        "-l", "--limit-by",
+        default="tad"
     )
     optional_group.add_argument("-o")
     optional_group.add_argument(
