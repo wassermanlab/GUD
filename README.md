@@ -1,4 +1,3 @@
-
 # Genomic Universal Database
 
 > This is a database which centralizes and unifies genomic data in a universal manner for specific reference datasets.
@@ -11,8 +10,14 @@
 
 ## Requirements
 GUD requires the following dependencies:
-* `MySQL`
-* `Python` (≥2.7 or 3) with the `Biopython`, `interval-binning`, `MySQL-python`, `sqlalchemy`, `SQLAlchemy-FullText-Search` and `sqlalchemy-utils` libraries
+* [`MySQL`](https://www.mysql.com)
+* [`Python`](https://www.python.org) `≥2.7` or `3.x` with the:
+    - [`Biopython`](https://biopython.org);
+    - [`interval-binning`](https://interval-binning.readthedocs.io/en/latest/);
+    - `MySQL-python`;
+    - [`sqlalchemy`](https://www.sqlalchemy.org);
+    - `SQLAlchemy-FullText-Search`; and
+    - `sqlalchemy-utils` libraries
 
 ## How to append GUD as submodule
 ```

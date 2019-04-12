@@ -34,7 +34,7 @@ optional arguments:
 expression arguments:
   --percent FLT       min. percentile of expression for TSS in
                       output samples (default = %s)
-  --sample INT        max. number of samples to return (if \"0\",
+  --sample INT        max. number of samples to return (if 0,
                       return all samples; default = %s)
   --tpm FLT           min. expression levels (in TPM) for TSS in
                       output samples (default = %s)
