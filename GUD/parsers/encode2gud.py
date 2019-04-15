@@ -381,6 +381,9 @@ def encode_to_gud(user, pwd, host, port, db,
             session,
             experiment_type
         )
+        # This accelerates the thingy...
+        skip_exps = set(["DNase-seq", "FAIRE-seq"])
+        if exp.name in skip_exps: continue
         # For each accession, biosample...
         for accession, biosample in metadata[k]:
             # Copy BED file
@@ -528,6 +531,7 @@ def encode_to_gud(user, pwd, host, port, db,
                     ),
                     line[0]
                 )
+                print(line[-1], m.group(1))
                 if m:
                     label2accession.setdefault(
                         line[-1],

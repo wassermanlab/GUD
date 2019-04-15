@@ -5,19 +5,19 @@
 
 ## Manifest
 + GUD/ORM - Object relational mapping classes
-+ GUD/scripts - Scripts for upserting data into GUD
-+ ADD onthology
++ GUD/parsers - Parsers for upserting data into GUD
++ GUD/scripts - General scripts
 
 ## Requirements
 GUD requires the following dependencies:
 * [`MySQL`](https://www.mysql.com)
-* [`Python`](https://www.python.org) `≥2.7` or `3.x` with the:
-    - [`Biopython`](https://biopython.org);
-    - [`interval-binning`](https://interval-binning.readthedocs.io/en/latest/);
-    - `MySQL-python`;
-    - [`sqlalchemy`](https://www.sqlalchemy.org);
-    - `SQLAlchemy-FullText-Search`; and
-    - `sqlalchemy-utils` libraries
+* [`Python`](https://www.python.org) `≥2.7` or `3.x` with:
+    - [`Biopython`](https://biopython.org)
+    - [`interval-binning`](https://interval-binning.readthedocs.io/en/latest/)
+    - `MySQL-python`
+    - [`sqlalchemy`](https://www.sqlalchemy.org)
+    - `SQLAlchemy-FullText-Search`
+    - `sqlalchemy-utils`
 
 ## How to append GUD as submodule
 ```

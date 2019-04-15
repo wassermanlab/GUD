@@ -13,15 +13,15 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.tss import TSS
 
 usage_msg = """
-usage: sample2gene.py (--gene [STR ...] | --gene-file FILE)
+usage: gene2sample.py (--gene [STR ...] | --gene-file FILE)
                       [-h] [--dummy-dir DIR] [-o FILE]
-                      [--percent FLT] [--sample INT] [--tpm INFLTT]
+                      [--percent FLT] [--sample INT] [--tpm FLT]
                       [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
 """
 
 help_msg = """%s
 
-identifies one or more genes differentially expressed in samples.
+I have to fix this...
 
   --gene [STR ...]    gene(s) (e.g. "CD19")
   --gene-file FILE    file containing a list of genes
@@ -74,9 +74,9 @@ def parse_args():
 
     # Mandatory arguments
     parser.add_argument(
-        "--sample", nargs="*"
+        "--gene", nargs="*"
     )
-    parser.add_argument("--sample-file")
+    parser.add_argument("--gene-file")
 
     # Optional args
     optional_group = parser.add_argument_group(
@@ -159,9 +159,9 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\nsample2gene.py" % usage_msg,
+                    "%s\ngene2sample.py" % usage_msg,
                     "error",
-                    "one of the arguments \"--sample\" \"--sample-file\" is required\n"
+                    "one of the arguments \"--gene\" \"--gene-file\" is required\n"
                 ]
             )
         )
@@ -171,9 +171,9 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\nsample2gene.py" % usage_msg,
+                    "%s\ngene2sample.py" % usage_msg,
                     "error",
-                    "arguments \"--sample\" \"--sample-file\"",
+                    "arguments \"--gene\" \"--gene-file\"",
                     "expected one argument\n"
                 ]
             )
@@ -187,7 +187,7 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\nsample2gene.py" % usage_msg,
+                    "%s\ngene2sample.py" % usage_msg,
                     "error",
                     "argument \"--percent\"",
                     "invalid float value",
@@ -196,7 +196,24 @@ def check_args(args):
             )
         )
         exit(0)
-        
+
+    # Check for invalid sample
+    try:
+        args.tss = int(args.tss)
+    except:
+        print(": "\
+            .join(
+                [
+                    "%s\ngene2sample.py" % usage_msg,
+                    "error",
+                    "argument \"--sample\"",
+                    "invalid int value",
+                    "\"%s\"\n" % args.tss
+                ]
+            )
+        )
+        exit(0)
+
     # Check for invalid TPM
     try:
         args.tpm = float(args.tpm)
@@ -214,23 +231,6 @@ def check_args(args):
         )
         exit(0)
 
-    # Check for invalid TSS
-    try:
-        args.tss = int(args.tss)
-    except:
-        print(": "\
-            .join(
-                [
-                    "%s\nsample2gene.py" % usage_msg,
-                    "error",
-                    "argument \"--tss\"",
-                    "invalid int value",
-                    "\"%s\"\n" % args.tss
-                ]
-            )
-        )
-        exit(0)
-
 def main():
 
     # Parse arguments
@@ -242,17 +242,17 @@ def main():
         "%s.%s.txt" % (os.path.basename(__file__),
         os.getpid()))
 
-    # Fetch samples
-    samples = []
-    if args.sample:
-        samples = args.sample
-    elif args.sample_file:
-        sample_file = os.path.abspath(args.sample_file)
-        for sample in GUDglobals.parse_file(sample_file):
-            samples.append(sample)
+    # Fetch genes
+    genes = []
+    if args.gene:
+        genes = args.gene
+    elif args.gene_file:
+        gene_file = os.path.abspath(args.gene_file)
+        for gene in GUDglobals.parse_file(gene_file):
+            genes.append(gene)
     else:
         raise ValueError(
-            "No samples were provided!!!"
+            "No genes were provided!!!"
         )
 
     # Establish SQLalchemy session with GUD
@@ -264,45 +264,38 @@ def main():
         args.db
     )
 
-    # Get TSSs
-    diff_exp_tss = get_differentially_expressed_tss(
-        session,
-        samples,
-        args.tpm,
-        args.percent,
-        args.all
-    )
-
-    # If differentially expressed TSSs...
-    if diff_exp_tss:
+    # For each gene...
+    for gene in genes:
 
         # For each TSS...
-        for tss in diff_exp_tss[:args.tss]:
-            # Write
-            GUDglobals.write(dummy_file, tss)
-
-        # If output file...
-        if args.o:
-            shutil.copy(
-                dummy_file,
-                os.path.abspath(args.o)
-            )
-        # ... Else, print on stdout...
-        else:
-            for line in GUDglobals.parse_file(dummy_file):
-                GUDglobals.write(None, line)
-
-        # Delete dummy file
-        os.remove(dummy_file)
-
-    else:
-        raise ValueError(
-            "No differentially expressed genes found!!!"
+        for tss in TSS.select_by_gene(
+            session,
+            gene,
+            as_genomic_feature=True
+        ):
+            sampleIDs +=\
+                tss.qualifiers["sampleIDs"]
+        # Get samples
+        samples = Sample.select_by_uids(
+            session,
+            list(set(sampleIDs))
         )
 
-def get_differentially_expressed_tss(session,
-    samples=[], tpm_exp=100, percent_exp=0.0,
-    exp_in_all_samples=False):
+    # If output file...
+    if args.o:
+        shutil.copy(
+            dummy_file,
+            os.path.abspath(args.o)
+        )
+    # ... Else, print on stdout...
+    else:
+        for line in GUDglobals.parse_file(dummy_file):
+            GUDglobals.write(None, line)
+
+    # Delete dummy file
+    os.remove(dummy_file)
+
+def get_gene_samples(session, gene):
     """
     Identifies TSSs from genes differentially
     expressed in samples.
