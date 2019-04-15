@@ -531,6 +531,7 @@ def encode_to_gud(user, pwd, host, port, db,
                     ),
                     line[0]
                 )
+                print(line)
                 print(line[-1], m.group(1))
                 if m:
                     label2accession.setdefault(
