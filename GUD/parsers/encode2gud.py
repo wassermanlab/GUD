@@ -411,7 +411,7 @@ def encode_to_gud(user, pwd, host, port, db,
                         };\
                         if($1 in dict){\
                             if($2<$3){\
-                                print $1"\t"$2"\t"$3;
+                                print $0;
                             }
                         }   
                     }' > %s""" % (
