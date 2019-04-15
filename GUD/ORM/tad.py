@@ -136,7 +136,7 @@ class TAD(Base):
                 Region.uid == cls.regionID,
                 Sample.uid == cls.sampleID,
                 Experiment.uid == cls.experimentID,
-                Source.uid == cls.sourceID,
+                Source.uid == cls.sourceID
             )\
             .filter(
                 Region.chrom == chrom,
@@ -147,6 +147,46 @@ class TAD(Base):
 
         if samples:
             q = q.filter(Sample.name.in_(samples))
+
+        if as_genomic_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
+    
+        return q.all()
+
+    @classmethod
+    def select_by_sample(cls, session,
+        sample, as_genomic_feature=False):
+        """
+        Query objects by sample.
+        """
+
+        q = session.query(
+            cls,
+            Region,
+            Sample,
+            Experiment,
+            Source,
+            
+        )\
+            .join()\
+            .filter(
+                Region.uid == cls.regionID,
+                Sample.uid == cls.sampleID,
+                Experiment.uid == cls.experimentID,
+                Source.uid == cls.sourceID
+            )\
+            .filter(
+                Sample.name == sample
+            )
 
         if as_genomic_feature:
 

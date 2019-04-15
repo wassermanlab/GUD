@@ -14,8 +14,8 @@ from GUD.ORM.tss import TSS
 
 usage_msg = """
 usage: sample2gene.py (--sample [STR ...] | --sample-file FILE)
-                      [-h] [--dummy-dir DIR] [-o FILE]
-                      [-a] [-g] [--percent FLT] [--tpm FLT] [--tss INT]
+                      [-h] [--dummy-dir DIR] [-g] [-o FILE]
+                      [-a] [--percent FLT] [--tpm FLT] [--tss INT]
                       [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
 """
 
@@ -29,11 +29,13 @@ identifies one or more genes differentially expressed in samples.
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
+  -g, --group         group by gene (if True, return the most
+                      differentially expressed TSS of each gene;
+                      default = False)
   -o FILE             output file (default = stdout)
 
 expression arguments:
   -a, --all           expression in all samples (default = False)
-  -g, --group         group by gene (default = False)
   --percent FLT       min. percentile of expression for TSS in
                       input samples (default = %s)
   --tpm FLT           min. expression levels (in TPM) for TSS in
@@ -92,6 +94,10 @@ def parse_args():
         "--dummy-dir",
         default="/tmp/"
     )
+    optional_group.add_argument(
+        "-g", "--group",
+        action="store_true"
+    )
     optional_group.add_argument("-o")
 
     # Expression args
@@ -100,10 +106,6 @@ def parse_args():
     )
     exp_group.add_argument(
         "-a", "--all",
-        action="store_true"
-    )
-    exp_group.add_argument(
-        "-g", "--group",
         action="store_true"
     )
     exp_group.add_argument(

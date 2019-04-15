@@ -14,6 +14,7 @@ from sqlalchemy.dialects import mysql
 
 from .base import Base
 from .experiment import Experiment
+from .genomic_feature import GenomicFeature
 from .region import Region
 from .sample import Sample
 from .source import Source
@@ -98,6 +99,69 @@ class Enhancer(Base):
             )
 
         return q.first()
+
+
+    @classmethod
+    def select_by_sample(cls, session,
+        sample, as_genomic_feature=False):
+        """
+        Query objects by sample.
+        """
+
+        q = session.query(
+            cls,
+            Region,
+            Sample,
+            Experiment,
+            Source,
+            
+        )\
+            .join()\
+            .filter(
+                Region.uid == cls.regionID,
+                Sample.uid == cls.sampleID,
+                Experiment.uid == cls.experimentID,
+                Source.uid == cls.sourceID
+            )\
+            .filter(
+                Sample.name == sample
+            )
+
+        if as_genomic_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
+    
+        return q.all()
+
+    def __as_genomic_feature(feat):
+
+        # Define qualifiers
+        qualifiers = {
+            "experiment": feat.Experiment.name,
+            "sample": feat.Sample.name,
+            "source" : feat.Source.name,            
+        }
+
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand = feat.Region.strand,
+            feat_type = "Enhancer",
+            feat_id = "%s|%s" % (
+                qualifiers["source"],
+                qualifiers["sample"].replace(" ", "_")
+            ),
+            qualifiers = qualifiers
+        )
 
     def __repr__(self):
 

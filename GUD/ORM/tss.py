@@ -259,6 +259,45 @@ class TSS(Base):
             return feats
 
         return q.all()
+
+    @classmethod
+    def select_by_gene_tss(cls, session, gene,
+        tss, as_genomic_feature=False):
+        """
+        Query objects by gene TSS.
+        """
+
+        q = session.query(
+                cls,
+                Experiment,
+                Region,
+                Source
+            )\
+            .join()\
+            .filter(
+                Experiment.uid == cls.experimentID,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID
+            ).filter(
+                cls.gene == gene,
+                cls.tss == tss
+            )
+
+        if as_genomic_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return cls.__as_genomic_feature(
+                q.first()
+            )
+
+        return q.first()
 #
 #    @classmethod
 #    def select_by_multiple_tss(cls, session, tss=[]):
