@@ -25,7 +25,17 @@ samples = Sample.select_by_names(
 # FANTOM5 enhancer-to-TSS associations
 fantom5_file = "/Users/ofornes/Work/mkang/human.associations.hdr.txt"
 
-## TSSs
+# TSSs
+tsss = TSS.select_all_genic_tss(
+    session,
+    as_genomic_feature=True
+)
+# TSS file
+tss_file = "tss.bed"
+# For each TSS...
+for tss in tsss:
+    GUDglobals.write(tss_file, tss)
+
 #tss_file = "tss.bed"
 ## For each line...
 #for line in GUDglobals.parse_tsv_file(fantom5_file):
