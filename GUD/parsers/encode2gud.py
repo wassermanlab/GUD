@@ -526,8 +526,8 @@ def encode_to_gud(user, pwd, host, port, db,
             ):
                 m = re.search("%s.%s/(\w+).bed" %\
                     (
-                        experiment_type,
-                        experiment_target
+                        experiment_type.replace(" ", "_"),
+                        str(experiment_target)
                     ),
                     line[0]
                 )
