@@ -381,8 +381,6 @@ def encode_to_gud(user, pwd, host, port, db,
             session,
             experiment_type
         )
-        # This accelerates the thingy...
-        if exp.name != "DNase-seq": continue
         # For each accession, biosample...
         for accession, biosample in metadata[k]:
             # Copy BED file
@@ -425,6 +423,8 @@ def encode_to_gud(user, pwd, host, port, db,
                         bed_file
                     )
                 )
+        # This is to create bed files only
+        continue
         # Cluster regions
         if cluster:
             # Initialize
