@@ -423,8 +423,6 @@ def encode_to_gud(user, pwd, host, port, db,
                         bed_file
                     )
                 )
-        # This is to create bed files only
-        continue
         # Cluster regions
         if cluster:
             # Initialize
