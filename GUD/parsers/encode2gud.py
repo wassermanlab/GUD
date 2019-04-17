@@ -381,8 +381,6 @@ def encode_to_gud(user, pwd, host, port, db,
             session,
             experiment_type
         )
-        # This accelerates the thingy...
-        if exp.name != "DNase-seq": continue
         # For each accession, biosample...
         for accession, biosample in metadata[k]:
             # Copy BED file
@@ -413,7 +411,7 @@ def encode_to_gud(user, pwd, host, port, db,
                         };\
                         if($1 in dict){\
                             if($2<$3){\
-                                print $1"\t"$2"\t"$3;
+                                print $0;
                             }
                         }   
                     }' > %s""" % (
