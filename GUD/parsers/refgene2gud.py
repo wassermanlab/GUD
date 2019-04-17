@@ -251,10 +251,12 @@ def refgene_to_gud(user, pwd, host, port, db,
             gene.sourceID = sou.uid
             gene.name = line[1]
             gene.name2 = line[12]
-            gene.cdsStart = line[6]
-            gene.cdsEnd = line[7]
-            gene.exonStarts = line[9]
-            gene.exonEnds = line[10]
+            gene.cdsStart = int(line[6])
+            gene.cdsEnd = int(line[7])
+            gene.exonStarts = \
+                line[9].encode("utf-8")
+            gene.exonEnds = \
+                line[10].encode("utf-8")
             session.add(gene)
             session.commit()
 
