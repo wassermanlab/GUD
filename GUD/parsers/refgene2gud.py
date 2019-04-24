@@ -24,9 +24,10 @@ from .initialize import (
 )
 
 usage_msg = """
-usage: refgene2gud.py --genome STR [-h]
+usage: %s --genome STR [-h]
                       [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
-"""
+""" % \
+os.path.basename(__file__)
 
 help_msg = """%s
 
@@ -120,7 +121,11 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\nrefgene2gud.py" % usage_msg,
+                    "%s\n%s" % \
+                        (
+                            usage_msg,
+                            os.path.basename(__file__)
+                        ),
                     "error",
                     "argument \"--genome\" is required\n"
                 ]
@@ -180,7 +185,7 @@ def refgene_to_gud(user, pwd, host, port, db,
         table.__tablename__
     ):
         # Initialize
-        rows = []
+        features = []
         # Create table
         table.__table__.create(bind=engine)
         # Get UCSC FTP file
@@ -245,7 +250,7 @@ def refgene_to_gud(user, pwd, host, port, db,
                 end,
                 strand
             )
-            # Insert gene
+            # Append to features
             gene = Gene()
             gene.regionID = reg.uid
             gene.sourceID = sou.uid
@@ -257,8 +262,10 @@ def refgene_to_gud(user, pwd, host, port, db,
                 line[9].encode("utf-8")
             gene.exonEnds = \
                 line[10].encode("utf-8")
-            session.add(gene)
-            session.commit()
+            features.append(gene)
+        # Insert features
+        session.add_all(features)
+        session.commit()
 
 #-------------#
 # Main        #

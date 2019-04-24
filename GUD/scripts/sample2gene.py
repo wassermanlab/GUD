@@ -21,7 +21,7 @@ usage: sample2gene.py (--sample [STR ...] | --sample-file FILE)
 
 help_msg = """%s
 
-identifies one or more genes differentially expressed in samples.
+identifies one or more genes selectively expressed in samples.
 
   --sample [STR ...]  sample(s) (e.g. "B cell")
   --sample-file FILE  file containing a list of samples
@@ -30,7 +30,7 @@ optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
   -g, --group         group by gene (if True, return the most
-                      differentially expressed TSS of each gene;
+                      selectively expressed TSS of each gene;
                       default = False)
   -o FILE             output file (default = stdout)
 
@@ -272,8 +272,8 @@ def main():
         args.db
     )
 
-    # Get differentially expressed TSSs
-    tss = get_differentially_expressed_tss(
+    # Get selectively expressed TSSs
+    tss = get_selectively_expressed_tss(
         session,
         samples,
         args.tpm,
@@ -281,7 +281,7 @@ def main():
         args.all
     )
 
-    # If differentially expressed TSSs...
+    # If selectively expressed TSSs...
     if tss:
 
         # Initialize
@@ -290,7 +290,7 @@ def main():
 
         # Initialize
         if args.tss <= 0:
-            args.tss = len(diff_exp_tss)
+            args.tss = len(tss)
 
         # For each TSS...
         for t in tss:
@@ -327,14 +327,14 @@ def main():
 
     else:
         raise ValueError(
-            "No differentially expressed genes found!!!"
+            "No selectively expressed genes found!!!"
         )
 
-def get_differentially_expressed_tss(session,
+def get_selectively_expressed_tss(session,
     samples=[], tpm_exp=100, percent_exp=0.0,
     exp_in_all_samples=False):
     """
-    Identifies TSSs from genes differentially
+    Identifies TSSs from genes selectively
     expressed in samples.
     """
 
@@ -343,7 +343,7 @@ def get_differentially_expressed_tss(session,
     uid2name = {}
     tssIDs = set()
     sample2tss = []
-    diff_exp_tss = []
+    sel_exp_tss = []
 
     # For each sample...
     for feat in Sample.select_by_names(session):
@@ -413,7 +413,7 @@ def get_differentially_expressed_tss(session,
                     for sample in expression:
                         expression[sample][1] = \
                             expression[sample][0] * 100.0 / bg_exp
-                    # If differentially expressed...
+                    # If selectively expressed...
                     if (fg_exp * 100.0) / bg_exp >= percent_exp:
                         tss.qualifiers.setdefault(
                             "expression",
@@ -423,15 +423,15 @@ def get_differentially_expressed_tss(session,
                             round(
                                 (fg_exp * 100.0) / bg_exp, 3
                             )
-                        diff_exp_tss.append(tss)
+                        sel_exp_tss.append(tss)
 
     # Sort TSSs by percentile expression
-    diff_exp_tss.sort(
+    sel_exp_tss.sort(
         key=lambda x: float(x.score),
         reverse=True
     )
 
-    return diff_exp_tss
+    return sel_exp_tss
 
 #-------------#
 # Main        #

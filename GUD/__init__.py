@@ -132,7 +132,7 @@ class Globals(object):
     #--------------#
 
     def _get_file_handle(self,
-        file_name, gz=False, mode="r"):
+        file_name, gz=False, mode="rt"):
 
         # Initialize
         raiseValueError = False
@@ -250,9 +250,8 @@ class Globals(object):
     def write(self, file_name=None, content=None):
         """
         This function writes content to a file or,
-        if no file file is provided, to STDOUT. Note
-        that content will be appended at the end of
-        the file.
+        if no file is provided, to STDOUT. Content
+        will be appended at the end of the file.
         """
 
         if file_name:

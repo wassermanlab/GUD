@@ -26,9 +26,10 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 
 usage_msg = """
-usage: initialize.py --genome STR [-h] 
+usage: %s --genome STR [-h]
                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]                            
-"""
+""" % \
+os.path.basename(__file__)
 
 help_msg = """%s
 
@@ -122,7 +123,11 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\ninitialize.py" % usage_msg,
+                    "%s\n%s" % \
+                        (
+                            usage_msg,
+                            os.path.basename(__file__)
+                        ),
                     "error",
                     "argument \"--genome\" is required\n"
                 ]
@@ -175,7 +180,7 @@ def initialize_gud_db(user, pwd, host, port,
         table.__tablename__
     ):
         # Intialize
-        rows = []
+        features = []
         # Create table
         table.__table__.create(bind=engine)
         # Get UCSC FTP file
@@ -197,17 +202,17 @@ def initialize_gud_db(user, pwd, host, port,
             m = re.search("^chr(\S+)$", line[0])
             if not m.group(1) in GUDglobals.chroms:
                 continue
-            # Add row
-            rows.append(
+            # Append to features
+            features.append(
                 {
                     "chrom": line[0],
                     "size": line[1]
                 }
             )
-        # Insert rows to table
+        # Insert features
         engine.execute(
             table.__table__.insert(),
-            rows
+            features
         )
 
     table = Experiment()
@@ -264,7 +269,8 @@ def get_ftp_dir_and_file(genome, data_type):
         print(": "\
             .join(
                 [
-                    "\ninitialize.py",
+                    "\n%s" % \
+                        os.path.basename(__file__),
                     "error",
                     "cannot connect to UCSC's FTP goldenPath folder",
                     "\"%s\"\n" % genome
@@ -276,6 +282,16 @@ def get_ftp_dir_and_file(genome, data_type):
     # Fetch bigZips and database files
     if data_type == "chrom_size":
         return "bigZips", "%s.chrom.sizes" % genome
+    if data_type == "conservation":
+        regexp = re.compile("(multiz\d+way.txt.gz)")
+        for file_name in sorted(
+            filter(
+                regexp.search,
+                ftp.nlst("database")
+            )
+        ):
+            m = re.search(regexp, file_name)
+            return "database", m.group(1)
     if data_type == "gene":
         return "database", "refGene.txt.gz"
 
@@ -300,7 +316,8 @@ def fetch_lines_from_ftp_file(genome, directory, file_name):
         print(": "\
             .join(
                 [
-                    "\ninitialize.py",
+                    "\n%s" % \
+                        os.path.basename(__file__),
                     "error",
                     "cannot connect to UCSC's FTP goldenPath folder",
                     "\"%s/%s\"\n" % (genome, directory)

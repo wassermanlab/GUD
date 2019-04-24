@@ -27,11 +27,12 @@ from .bed2gud import bed_to_gud_db
 from .initialize import initialize_gud_db
 
 usage_msg = """
-usage: encode2gud.py --genome STR --metadata FILE
+usage: %s --genome STR --metadata FILE
                      --data-dir DIR --samples FILE --feature STR
                      [-h] [-c] [--dummy-dir DIR] [--source STR]
                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
-"""
+""" % \
+os.path.basename(__file__)
 
 help_msg = """%s
 
@@ -165,7 +166,11 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\nencode2gud.py" % usage_msg,
+                    "%s\n%s" % \
+                        (
+                            usage_msg,
+                            os.path.basename(__file__)
+                        ),
                     "error",
                     "arguments \"--genome\" \"--metadata\" \"--data-dir\" \"--samples\" \"--feature\" are required\n"
                 ]
@@ -178,7 +183,11 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\nencode2gud.py" % usage_msg,
+                    "%s\n%s" % \
+                        (
+                            usage_msg,
+                            os.path.basename(__file__)
+                        ),
                     "error",
                     "argument \"--feature\"",
                     "invalid choice",
@@ -322,7 +331,7 @@ def encode_to_gud(user, pwd, host, port, db,
             print(": "\
                 .join(
                     [
-                        "bed2gud.py",
+                        os.path.basename(__file__),
                         "warning",
                         "treated sample",
                         "\"%s\" (\"%s\")" % (

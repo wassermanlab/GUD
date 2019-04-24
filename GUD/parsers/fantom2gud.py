@@ -26,10 +26,11 @@ from GUD.ORM.source import Source
 from GUD.ORM.tss import TSS
 
 usage_msg = """
-usage: fantom2gud.py  --matrix FILE --samples FILE --feature STR
+usage: %s  --matrix FILE --samples FILE --feature STR
                       [-h] [--source STR]
                       [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
-"""
+""" % \
+os.path.basename(__file__)
 
 help_msg = """%s
 
@@ -147,7 +148,11 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\nfantom2gud.py" % usage_msg,
+                    "%s\n%s" % \
+                        (
+                            usage_msg,
+                            os.path.basename(__file__)
+                        ),
                     "error",
                     "arguments \"--matrix\" \"--samples\" \"--feature\" are required\n"
                 ]
@@ -160,7 +165,11 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\nfantom2gud.py" % usage_msg,
+                    "%s\n%s" % \
+                        (
+                            usage_msg,
+                            os.path.basename(__file__)
+                        ),
                     "error",
                     "argument \"--feature\"",
                     "invalid choice",
@@ -523,6 +532,7 @@ def fantom_to_gud_db(user, pwd, host, port, db,
                         enhancer.sourceID = sou.uid
                         enhancer.sampleID = sampleIDs[i]
                         enhancer.experimentID = exp.uid
+                        # Append to features
                         features.append(enhancer)
                 if feat_type == "tss":
                     for tss in tss_ids:
@@ -536,7 +546,9 @@ def fantom_to_gud_db(user, pwd, host, port, db,
                             expression.sampleID = sampleIDs[i]
                             expression.avg_expression_level =\
                                 avg_expression_levels[i]
+                            # Append to features
                             features.append(expression)
+            # Insert features
             session.add_all(features)
             session.commit()
 
