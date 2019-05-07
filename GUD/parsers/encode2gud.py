@@ -309,6 +309,8 @@ def encode_to_gud(user, pwd, host, port, db,
     for line in GUDglobals.parse_tsv_file(
         metadata_file
     ):
+        print(line)
+        exit(0)
         # Skip first line
         if line[0] == "File accession":
             continue
