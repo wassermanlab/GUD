@@ -317,7 +317,7 @@ def encode_to_gud(user, pwd, host, port, db,
         metadata_file
     ):
         # If first line...
-        if accession_idx is None:
+        if not accession_idx:
             accession_idx = line.index(
                 "File accession"
             )
