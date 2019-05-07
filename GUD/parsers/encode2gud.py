@@ -339,6 +339,7 @@ def encode_to_gud(user, pwd, host, port, db,
             status_idx = line.index(
                 "File Status"
             )
+            continue
         # Initialize
         accession = \
             line[accession_idx]
