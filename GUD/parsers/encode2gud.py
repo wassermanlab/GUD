@@ -316,8 +316,8 @@ def encode_to_gud(user, pwd, host, port, db,
     for line in GUDglobals.parse_tsv_file(
         metadata_file
     ):
-        # If first line
-        if not accession_idx:
+        # If first line...
+        if accession_idx is None:
             accession_idx = line.index(
                 "File accession"
             )
