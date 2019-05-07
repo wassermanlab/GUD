@@ -318,6 +318,7 @@ def encode_to_gud(user, pwd, host, port, db,
     ):
         # If first line...
         if not accession_idx:
+            print(line)
             accession_idx = line.index(
                 "File accession"
             )
