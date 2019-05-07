@@ -231,6 +231,13 @@ def encode_to_gud(user, pwd, host, port, db,
     dummy_dir="/tmp/", source_name="ENCODE"):
 
     # Initialize
+    accession_idx = None
+    assembly_idx = None
+    biosample_idx = None
+    experiment_type_idx = None
+    experiment_target_idx = None
+    treatment_idx = None
+    status_idx = None
     samples = {}
     metadata = {}
     db_name = "mysql://{}:{}@{}:{}/{}".format(
@@ -309,25 +316,46 @@ def encode_to_gud(user, pwd, host, port, db,
     for line in GUDglobals.parse_tsv_file(
         metadata_file
     ):
-        print(line)
-        exit(0)
-        # Skip first line
-        if line[0] == "File accession":
-            continue
-        # Initialize
-        accession = line[0]
-        experiment_type = line[4]
-        biosample = line[6]
-        experiment_target = None
-        m = re.search("^(.+)-(human|mouse)$", line[12])
-        if m: experiment_target = m.group(1)
-        treatment = None
-        if line[9] or line[10] or line[11]:
-            treatment = "%s %s %s" % (
-                line[9], line[10], line[11]
+        # If first line
+        if not accession_idx:
+            accession_idx = line.index(
+                "File accession"
             )
-        assembly = line[37]
-        status = line[40]
+            assembly_idx = line.index(
+                "Assembly"
+            )
+            biosample_idx = line.index(
+                "Biosample term name"
+            )
+            experiment_type_idx = line.index(
+                "Assay"
+            )
+            experiment_target_idx = line.index(
+                "Experiment target"
+            )
+            treatment_idx = line.index(
+                "Biosample treatments"
+            )
+            status_idx = line.index(
+                "File Status"
+            )
+        # Initialize
+        accession = \
+            line[accession_idx]
+        experiment_type = \
+            line[experiment_type_idx]
+        biosample = \
+            line[biosample_idx]
+        experiment_target = None
+        m = re.search(
+            "^(.+)-(human|mouse)$",
+            line[experiment_target_idx]
+        )
+        if m: experiment_target = m.group(1)
+        treatment = \
+            line[treatment_idx]
+        assembly = line[assembly_idx]
+        status = line[status_idx]
         # Skip treated samples
         if treatment:
             print(": "\
