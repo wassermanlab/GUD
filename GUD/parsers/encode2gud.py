@@ -373,7 +373,6 @@ def encode_to_gud(user, pwd, host, port, db,
                 )
             )
             continue
-        print(accession, experiment_type, biosample, experiment_target, status)
         # This is a released sample!
         if assembly == genome and status == "released":
             # Skip sample
@@ -391,9 +390,6 @@ def encode_to_gud(user, pwd, host, port, db,
                 )
                 metadata.setdefault(k, [])
                 metadata[k].append((accession, biosample))
-
-    print(metadata)
-    exit(0)
 
     # For each experiment, target...
     for k in sorted(metadata):
