@@ -339,6 +339,8 @@ def encode_to_gud(user, pwd, host, port, db,
             status_idx = line.index(
                 "File Status"
             )
+            print(accession_idx, assembly_idx, biosample_idx, experiment_type_idx, experiment_target_idx, treatment_idx, status_idx)
+            exit(0)
             continue
         # Initialize
         accession = \
