@@ -409,9 +409,6 @@ def encode_to_gud(user, pwd, host, port, db,
                 metadata.setdefault(k, [])
                 metadata[k].append((accession, biosample))
 
-    print(metadata.keys())
-    exit(0)
-
     # For each experiment, target...
     for k in sorted(metadata):
         # Initialize
