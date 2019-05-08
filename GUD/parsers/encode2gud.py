@@ -347,16 +347,34 @@ def encode_to_gud(user, pwd, host, port, db,
             line[experiment_type_idx]
         biosample = \
             line[biosample_idx]
+        tag = None
         experiment_target = None
         m = re.search(
-            "^(3xFLAG-|eGFP-)(.+)-(human|mouse)$",
+            "^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$",
             line[experiment_target_idx]
         )
-        if m: experiment_target = m.group(2)
+        if m:
+            tag = m.group(1)
+            experiment_target = m.group(2)
         treatment = \
             line[treatment_idx]
         assembly = line[assembly_idx]
         status = line[status_idx]
+        # Skip tagged samples
+        if tag:
+            print(": "\
+                .join(
+                    [
+                        os.path.basename(__file__),
+                        "warning",
+                        "use of protein tag",
+                        "\"%s\" (\"%s\")" % (
+                            accession,
+                            tag
+                        )
+                    ]
+                )
+            )
         # Skip treated samples
         if treatment:
             print(": "\
@@ -390,8 +408,10 @@ def encode_to_gud(user, pwd, host, port, db,
                 )
                 metadata.setdefault(k, [])
                 metadata[k].append((accession, biosample))
+
     print(metadata.keys())
     exit(0)
+
     # For each experiment, target...
     for k in sorted(metadata):
         # Initialize
