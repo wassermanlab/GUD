@@ -349,10 +349,10 @@ def encode_to_gud(user, pwd, host, port, db,
             line[biosample_idx]
         experiment_target = None
         m = re.search(
-            "^(.+)-(human|mouse)$",
+            "^(3xFLAG-|eGFP-)(.+)-(human|mouse)$",
             line[experiment_target_idx]
         )
-        if m: experiment_target = m.group(1)
+        if m: experiment_target = m.group(2)
         treatment = \
             line[treatment_idx]
         assembly = line[assembly_idx]
@@ -390,7 +390,8 @@ def encode_to_gud(user, pwd, host, port, db,
                 )
                 metadata.setdefault(k, [])
                 metadata[k].append((accession, biosample))
-
+    print(metadata)
+    exit(0)
     # For each experiment, target...
     for k in sorted(metadata):
         # Initialize
