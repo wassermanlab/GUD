@@ -95,7 +95,7 @@ class Expression(Base):
             .filter(Sample.name == sample)\
             .filter(cls.avg_expression_level >= min_tpm)
 
-        return q.first()
+        return q.all()
 
     @classmethod
     def select_by_samples(cls, session,

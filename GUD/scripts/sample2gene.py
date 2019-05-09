@@ -358,7 +358,8 @@ def get_selectively_expressed_tss(session,
         sample2tss.append(set())
     # For each TSS...
     for tss in Expression.select_by_samples(
-        session, samples, tpm_exp):
+        session, samples, tpm_exp
+    ):
         # Get index
         i = samples.index(tss.Sample.name)
         sample2tss[i].add(tss.Expression.tssID)
