@@ -106,7 +106,7 @@ def parse_args():
     )
     exp_group.add_argument(
         "--tpm",
-        default=GUDglobals.min_tpm_exp
+        default=GUDglobals.min_tpm
     )
     exp_group.add_argument(
         "--tss",

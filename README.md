@@ -2,7 +2,6 @@
 
 > This is a database which centralizes and unifies genomic data in a universal manner for specific reference datasets.
 
-
 ## Manifest
 + GUD/ORM - Object relational mapping classes
 + GUD/parsers - Parsers for upserting data into GUD
