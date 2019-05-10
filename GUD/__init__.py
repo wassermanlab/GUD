@@ -289,7 +289,11 @@ class Globals(object):
 
         # Establish a MySQL session
         try:
-            engine = create_engine(gud_db, echo=False)
+            engine = create_engine(
+                gud_db,
+                echo=False,
+                pool_pre_ping=True
+            )
             session = Session(engine)
         except:
             raise ValueError(
