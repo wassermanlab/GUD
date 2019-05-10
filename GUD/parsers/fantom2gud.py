@@ -2,9 +2,7 @@
 
 import argparse
 from binning import assign_bin
-from datetime import date
 import getpass
-import pybedtools
 import re
 from sqlalchemy import create_engine
 from sqlalchemy.orm import (
@@ -225,7 +223,8 @@ def fantom_to_gud_db(user, pwd, host, port, db,
     session = scoped_session(sessionmaker())
     engine = create_engine(
         db_name,
-        echo=False
+        echo=False,
+        pool_pre_ping=True
     )
     session.remove()
     session.configure(
