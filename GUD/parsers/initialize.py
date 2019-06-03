@@ -166,7 +166,8 @@ def initialize_gud_db(user, pwd, host, port,
     session = scoped_session(sessionmaker())
     engine = create_engine(
         db_name,
-        echo=False
+        echo=False,
+        pool_pre_ping=True
     )
     session.remove()
     session.configure(
