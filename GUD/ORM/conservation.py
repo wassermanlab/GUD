@@ -12,6 +12,7 @@ from sqlalchemy.dialects import mysql
 from .base import Base
 from .region import Region
 from .source import Source
+from .genomic_feature import GenomicFeature
 
 class Conservation(Base):
 
