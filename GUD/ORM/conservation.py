@@ -1,87 +1,132 @@
-from binning import containing_bins, contained_bins 
-
 from sqlalchemy import (
-    Column, Date, Index, PrimaryKeyConstraint, String
+    Column,
+    Index,
+    Float,
+    ForeignKey,
+    Integer,
+    PrimaryKeyConstraint,
+    UniqueConstraint
 )
-
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.hybrid import hybrid_property
 
-Base = declarative_base()
+from .base import Base
+from .region import Region
+from .source import Source
 
 class Conservation(Base):
-        
+
     __tablename__ = "conservation"
 
-    bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    chrom = Column("chrom", String(5), nullable=False)
-    chromStart = Column("chromStart", mysql.INTEGER(unsigned=True), nullable=False)
-    chromEnd = Column("chromEnd", mysql.INTEGER(unsigned=True), nullable=False)
-#    extFile = Column("extFile", mysql.INTEGER(), nullable=False, default=0)
-#    offset = Column("offset", mysql.INTEGER(), nullable=False, default=0)
-    score = Column("score", mysql.FLOAT(unsigned=True), nullable=False)
-    source_name = Column("source_name", String(25), nullable=False)
-    date = Column("date", Date(), nullable=True) 
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    regionID = Column(
+        "regionID",
+        Integer,
+        ForeignKey("regions.uid"),
+        nullable=False
+    )
+
+    score = Column("score", Float)
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
 
     __table_args__ = (
-
-        PrimaryKeyConstraint(
-            chrom, chromStart, chromEnd, source_name
+        PrimaryKeyConstraint(uid),
+        UniqueConstraint(
+            regionID,
+            sourceID
         ),
-
-        Index("ix_conservation", bin, chrom),
-        
+        Index("ix_regionID", regionID), # query by bin range
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
         }
     )
 
-    # Create these properties to map columns to
-    # standard attributes
-    @hybrid_property
-    def start(self):
-        return self.chromStart
+    @classmethod
+    def is_unique(cls, session, regionID,
+        sourceID):
 
-    @start.setter
-    def start(self, val):
-        self.chromStart = val
+        q = session.query(cls)\
+            .filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID
+            )
 
-    @hybrid_property
-    def end(self):
-        return self.chromEnd
-
-    @end.setter
-    def end(self, val):
-        self.chromEnd = val
+        return len(q.all()) == 0
 
     @classmethod
-    def select_by_bin_range(cls, session, chrom, start, end, bins=[],
-        compute_bins=False): 
+    def select_unique(cls, session, regionID,
+        sourceID):
+
+        q = session.query(cls)\
+            .filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID
+            )
+
+        return q.first()
+
+    @classmethod
+    def select_by_location(cls, session, chrom,
+        start, end, as_genomic_feature=False):
         """
-        Query objects by chromosomal range using the binning system to
-        speed up range searches. If bins are provided, use the given bins.
-        If bins are NOT provided AND compute_bins is set to True, then
-        compute the bins. Otherwise, perform the range query without the use
-        of bins.
+        Query objects by genomic location.
         """
 
-        if not bins and compute_bins:
-            bins = set(containing_bins(start, end) + contained_bins(start, end))
+        bins = Region._compute_bins(start, end)
 
-        q = session.query(cls).filter(
-                cls.chrom == chrom, cls.end > start, cls.start < end)
+        q = session.query(cls, Region, Source)\
+            .join()\
+            .filter(
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID,
+            )\
+            .filter(
+                Region.chrom == chrom,
+                Region.start < end,
+                Region.end > start
+            )\
+            .filter(Region.bin.in_(bins))
 
-        if bins:
-            q = q.filter(cls.bin.in_(list(bins)))
+        if as_genomic_feature:
 
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
+    
         return q.all()
 
-    def __str__(self):
-        return "{}\t{}\t{}\t.\t{}".format(self.chrom, self.start,
-            self.end, self.score)
+    @classmethod
+    def __as_genomic_feature(self, feat):
+
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            feat_type = "Conservation"
+        )
 
     def __repr__(self):
-        return "<Conservation(chrom={}, start={}, end={}, score={}, source={})>".format(
-            self.chrom, self.start, self.end, self.score, self.source_name)
+
+        return "<Conservation(%s, %s, %s, %s)>" % \
+            (
+                "uid={}".format(self.uid),
+                "regionID={}".format(self.regionID),
+                "score={}".format(self.score),
+                "sourceID={}".format(self.sourceID)
+            )

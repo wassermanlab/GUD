@@ -1,36 +1,70 @@
-from binning import containing_bins, contained_bins 
-
-from sqlalchemy import (
-    Column, Date, Index, PrimaryKeyConstraint, String
+from binning import (
+    containing_bins,
+    contained_bins
 )
-
+from sqlalchemy import (
+    Column,
+    Index,
+    Integer,
+    PrimaryKeyConstraint,
+    ForeignKey,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+from .base import Base
+from .experiment import Experiment
+from .region import Region
+from .sample import Sample
+from .source import Source
 
-class DnaAccessibility(Base):
+class DNAAccessibility(Base):
 
     __tablename__ = "dna_accessibility"
 
-    bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    chrom = Column("chrom", String(5), nullable=False)
-    start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
-    end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
-    cell_or_tissue = Column("cell_or_tissue", String(225), nullable=False)
-    experiment_type = Column("experiment_type", String(25), nullable=False)
-    source_name = Column("source_name", String(25), nullable=False)
-    date = Column("date", Date(), nullable=True)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    regionID = Column(
+        "regionID",
+        Integer,
+        ForeignKey("regions.uid"),
+        nullable=False
+    )
+
+    sampleID = Column(
+        "sampleID",
+        Integer,
+        ForeignKey("samples.uid"),
+        nullable=False
+    )
+
+    experimentID = Column(
+        "experimentID",
+        Integer,
+        ForeignKey("experiments.uid"),
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
 
     __table_args__ = (
-
-        PrimaryKeyConstraint(
-            chrom, start, end, cell_or_tissue,
-            experiment_type, source_name
+        PrimaryKeyConstraint(uid),
+        UniqueConstraint(
+            regionID,
+            sampleID,
+            experimentID,
+            sourceID
         ),
-
-        Index("ix_dna_accessibility", bin, chrom),
-
+        Index("ix_regionID", regionID), # query by bin range
+        Index("ix_sampleID", sampleID),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -38,54 +72,40 @@ class DnaAccessibility(Base):
     )
 
     @classmethod
-    def select_by_bin_range(cls, session, chrom, start, end,
-        sample=[], bins=[], compute_bins=False): 
-        """
-        Query objects by chromosomal range using the binning system to
-        speed up range searches. If bins are provided, use the given bins.
-        If bins are NOT provided AND compute_bins is set to True, then
-        compute the bins. Otherwise, perform the range query without the use
-        of bins.
-        """
+    def is_unique(cls, session, regionID,
+        sampleID, experimentID, sourceID):
 
-        if not bins and compute_bins:
-            bins = set(containing_bins(start, end) + contained_bins(start, end))
-
-        q = session.query(cls).filter(
-                cls.chrom == chrom, cls.end > start, cls.start < end)
-
-        if bins:
-            q = q.filter(cls.bin.in_(list(bins)))
-
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def feature_exists(cls, session, chrom, start, end,
-        cell_or_tissue, experiment_type, source_name): 
-        """
-        Returns whether a feature exists in the database.
-        """
-
-        q = session.query(cls).filter(
-                cls.chrom == chrom,
-                cls.start == start,
-                cls.end == end,
-                cls.cell_or_tissue == cell_or_tissue,
-                cls.experiment_type == experiment_type,
-                cls.source_name == source_name
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sampleID == sampleID,
+                cls.experimentID == experimentID,
+                cls.sourceID == sourceID
             )
 
-        return session.query(q.exists()).scalar()
+        return len(q.all()) == 0
 
-    def __str__(self):
-        return "{}\t{}\t{}\t{}|{}|{}".format(self.chrom, self.start,
-            self.end, self.cell_or_tissue, self.experiment_type,
-            self.source_name)
+    @classmethod
+    def select_unique(cls, session, regionID,
+        sampleID, experimentID, sourceID):
+
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sampleID == sampleID,
+                cls.experimentID == experimentID,
+                cls.sourceID == sourceID
+            )
+
+        return q.first()
 
     def __repr__(self):
-        return "<DnaAccessibility(chrom={}, start={}, end={}, sample={}, experiment={}, source={})>".format(
-            self.chrom, self.start, self.end, self.cell_or_tissue,
-            self.experiment_type, self.source_name, self.date)
+
+        return "<DNAAccessibility(%s, %s, %s, %s, %s)>" % \
+            (
+                "uid={}".format(self.uid),
+                "regionID={}".format(self.regionID),
+                "sampleID={}".format(self.sampleID),
+                "experimentID={}".format(self.experimentID),
+                "sourceID={}".format(self.sourceID)
+            )

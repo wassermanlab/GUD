@@ -1,37 +1,80 @@
-from binning import containing_bins, contained_bins 
-
-from sqlalchemy import (
-    Column, Date, Index, PrimaryKeyConstraint, String
+from binning import (
+    containing_bins,
+    contained_bins
 )
-
+from sqlalchemy import (
+    Column,
+    ForeignKey,
+    Index,
+    Integer,
+    PrimaryKeyConstraint,
+    String,
+    UniqueConstraint
+)
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+from .base import Base
+from .experiment import Experiment
+from .genomic_feature import GenomicFeature
+from .region import Region
+from .sample import Sample
+from .source import Source
 
-class Tad(Base):
+class TAD(Base):
 
-    __tablename__ = "tad"
+    __tablename__ = "tads"
 
-    bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    chrom = Column("chrom", String(5), nullable=False)
-    start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
-    end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
-    cell_or_tissue = Column("cell_or_tissue", String(225), nullable=False)
-    experiment_type = Column("experiment_type", String(25), nullable=False)
-    restriction_enzyme = Column("restriction_enzyme", String(25), nullable=False)
-    source_name = Column("source_name", String(25), nullable=False)
-    date = Column("date", Date(), nullable=True)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    regionID = Column(
+        "regionID",
+        Integer,
+        ForeignKey("regions.uid"),
+        nullable=False
+    )
+
+    sampleID = Column(
+        "sampleID",
+        Integer,
+        ForeignKey("samples.uid"),
+        nullable=False
+    )
+
+    experimentID = Column(
+        "experimentID",
+        Integer,
+        ForeignKey("experiments.uid"),
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
+    restriction_enzyme = Column(
+        "restriction_enzyme",
+        String(25),
+        nullable=False
+    )
 
     __table_args__ = (
+        PrimaryKeyConstraint(uid),
+        UniqueConstraint(
+            regionID,
+            sampleID,
+            experimentID,
+            sourceID,
+            restriction_enzyme
 
-        PrimaryKeyConstraint(
-            chrom, start, end, cell_or_tissue, experiment_type,
-            restriction_enzyme, source_name
         ),
-
-        Index("ix_tad", bin, chrom),
-
+        Index("ix_regionID", regionID), # query by bin range
+        Index("ix_sampleID", sampleID),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -39,100 +82,158 @@ class Tad(Base):
     )
 
     @classmethod
-    def select_by_bin_range(cls, session, chrom, start, end,
-        sample=[], bins=[], compute_bins=False):
-        """
-        Query objects by chromosomal range using the binning system to
-        speed up range searches. If bins are provided, use the given bins.
-        If bins are NOT provided AND compute_bins is set to True, then
-        compute the bins. Otherwise, perform the range query without the use
-        of bins.
-        """
+    def is_unique(cls, session, regionID,
+        sampleID, experimentID, sourceID,
+        restriction_enzyme):
 
-        if not bins and compute_bins:
-            bins = set(containing_bins(start, end) + contained_bins(start, end))
-
-        q = session.query(cls).filter(
-                cls.chrom == chrom, cls.end > start, cls.start < end)
-
-        if bins:
-            q = q.filter(cls.bin.in_(list(bins)))
-
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def select_encompasing_range(cls, session, chrom, start, end,
-        sample=[], bins=[], compute_bins=False):
-        """
-        Query objects which encompass the given range, e.g. an object
-        which fully contains the given feature.
-        """
-
-        if not bins and compute_bins:
-            bins = set(containing_bins(start, end) + contained_bins(start, end))
-
-        q = session.query(cls).filter(
-                cls.chrom == chrom, cls.start <= start, cls.end >= end)
-
-        if bins:
-            q = q.filter(cls.bin.in_(list(bins)))
-
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def select_overlapping_range(cls, session, chrom, start, end,
-        sample=[], bins=[], compute_bins=False):
-        """
-        Query objects which overlap the given range, e.g. an object
-        which partially overlaps the given feature.
-        """
-
-        if not bins and compute_bins:
-            bins = set(containing_bins(start, end) + contained_bins(start, end))
-
-        q = session.query(cls).filter(
-                cls.chrom == chrom, cls.start < end, cls.end > start)
-
-        if bins:
-            q = q.filter(cls.bin.in_(list(bins)))
-
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def feature_exists(cls, session, chrom, start, end,
-        cell_or_tissue, experiment_type, restriction_enzyme,
-        source_name): 
-        """
-        Returns whether a feature exists in the database.
-        """
-
-        q = session.query(cls).filter(
-                cls.chrom == chrom,
-                cls.start == start,
-                cls.end == end,
-                cls.cell_or_tissue == cell_or_tissue,
-                cls.experiment_type == experiment_type,
-                cls.restriction_enzyme == restriction_enzyme,
-                cls.source_name == source_name
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sampleID == sampleID,
+                cls.experimentID == experimentID,
+                cls.sourceID == sourceID,
+                cls.restriction_enzyme == restriction_enzyme
             )
 
-        return session.query(q.exists()).scalar()
+        return len(q.all()) == 0
 
-    def __str__(self):
-        return "{}\t{}\t{}\t{}|{}|{}|{}".format(self.chrom, self.start,
-            self.end, self.cell_or_tissue, self.experiment_type,
-            self.restriction_enzyme, self.source_name)
+    @classmethod
+    def select_unique(cls, session, regionID,
+        sampleID, experimentID, sourceID,
+        restriction_enzyme):
+
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sampleID == sampleID,
+                cls.experimentID == experimentID,
+                cls.sourceID == sourceID,
+                cls.restriction_enzyme == restriction_enzyme
+            )
+
+        return q.first()
+
+    @classmethod
+    def select_by_location(cls, session,
+        chrom, start, end, samples=[],
+        as_genomic_feature=False):
+        """
+        Query objects by genomic location.
+        """
+
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(
+            cls,
+            Region,
+            Sample,
+            Experiment,
+            Source,
+            
+        )\
+            .join()\
+            .filter(
+                Region.uid == cls.regionID,
+                Sample.uid == cls.sampleID,
+                Experiment.uid == cls.experimentID,
+                Source.uid == cls.sourceID
+            )\
+            .filter(
+                Region.chrom == chrom,
+                Region.start < end,
+                Region.end > start
+            )\
+            .filter(Region.bin.in_(bins))
+
+        if samples:
+            q = q.filter(Sample.name.in_(samples))
+
+        if as_genomic_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
+    
+        return q.all()
+
+    @classmethod
+    def select_by_sample(cls, session,
+        sample, as_genomic_feature=False):
+        """
+        Query objects by sample.
+        """
+
+        q = session.query(
+            cls,
+            Region,
+            Sample,
+            Experiment,
+            Source,
+            
+        )\
+            .join()\
+            .filter(
+                Region.uid == cls.regionID,
+                Sample.uid == cls.sampleID,
+                Experiment.uid == cls.experimentID,
+                Source.uid == cls.sourceID
+            )\
+            .filter(
+                Sample.name == sample
+            )
+
+        if as_genomic_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
+    
+        return q.all()
+
+    def __as_genomic_feature(feat):
+
+        # Define qualifiers
+        qualifiers = {
+            "experiment": feat.Experiment.name,
+            "restriction_enzyme": feat.TAD.restriction_enzyme,
+            "sample": feat.Sample.name,
+            "source" : feat.Source.name,            
+        }
+
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand = feat.Region.strand,
+            feat_type = "TAD",
+            feat_id = "%s|%s|%s" % (
+                qualifiers["source"],
+                qualifiers["restriction_enzyme"],
+                qualifiers["sample"].replace(" ", "_")
+            ),
+            qualifiers = qualifiers
+        )
 
     def __repr__(self):
-        return "<Tad(chrom={}, start={}, end={}, sample={}, experiment={}, enzyme={}, source={})>".format(
-            self.chrom, self.start, self.end, self.cell_or_tissue,
-            self.experiment_type, self.restriction_enzyme, self.source_name)
+
+        return "<TAD(%s, %s, %s, %s, %s, %s)>" % \
+            (
+                "uid={}".format(self.uid),
+                "regionID={}".format(self.regionID),
+                "sampleID={}".format(self.sampleID),
+                "experimentID={}".format(self.experimentID),
+                "sourceID={}".format(self.sourceID),
+                "restriction_enzyme={}".format(self.restriction_enzyme)
+            )

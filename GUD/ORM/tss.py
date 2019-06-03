@@ -1,51 +1,89 @@
 import re
-
-from binning import containing_bins, contained_bins 
-from Bio.SeqFeature import FeatureLocation
-
 from sqlalchemy import (
-    and_, or_, Column, Date, Enum, Float, Index,
-    Integer, PrimaryKeyConstraint, String, types
+    and_,
+    or_,
+    Column,
+    Index,
+    Integer,
+    PrimaryKeyConstraint,
+    String,
+    ForeignKey,
+    UniqueConstraint
 )
-
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import func
 
-from GUD.ORM.gene import Gene
-
-Base = declarative_base()
+from .base import Base
+from .experiment import Experiment
+from .gene import Gene
+from .genomic_feature import GenomicFeature
+from .region import Region
+from .source import Source
 
 class TSS(Base):
 
-    __tablename__ = "tss"
+    __tablename__ = "transcription_start_sites"
 
-    bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    gene = Column("gene", String(75))
-    tss = Column("tss", Integer)
-    chrom = Column("chrom", String(5), nullable=False)
-    start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
-    end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
-    cell_or_tissue = Column("cell_or_tissue", String(225), nullable=False)
-    avg_tpm = Column("avg_tpm", Float, nullable=False)
-#    percent_tpm = Column("percent_tpm", Float, nullable=False)
-    experiment_type = Column("experiment_type", String(25), nullable=False)
-    source_name = Column("source_name", String(25), nullable=False)
-    date = Column("date", Date(), nullable=True)
+    uid = Column(
+        "uid",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    regionID = Column(
+        "regionID",
+        Integer,
+        ForeignKey("regions.uid"),
+        nullable=False
+    )
+
+    gene = Column(
+        "gene",
+        String(75),
+        ForeignKey("genes.name2")
+    )
+
+    tss = Column(
+        "tss",
+        mysql.INTEGER(unsigned=True)
+    )
+
+    sampleIDs = Column(
+        "sampleIDs",
+        mysql.LONGBLOB,
+        nullable=False
+    )
+
+    avg_expression_levels = Column(
+        "avg_expression_levels",
+        mysql.LONGBLOB, nullable=False
+    )
+
+    experimentID = Column(
+        "experimentID",
+        Integer,
+        ForeignKey("experiments.uid"),
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
 
     __table_args__ = (
-
-        PrimaryKeyConstraint(
-            chrom, start, end, strand, cell_or_tissue,
-            experiment_type, source_name
+        PrimaryKeyConstraint(uid),
+        # multiple TSSs might overlap:
+        # e.g. p16@IGF2,p1@INS-IGF2,p1@INS
+        UniqueConstraint(
+            regionID,
+            experimentID,
+            sourceID,
+            gene,
+            tss
         ),
-
-        Index("ix_tss", bin, chrom),
-        Index("ix_tss_gene", gene),
-        Index("ix_tss_gene_tss", gene, tss),
-        Index("ix_tss_cell_or_tissue", cell_or_tissue),
-
+        Index("ix_regionID", regionID), # query by bin range
+        Index("ix_gene_tss", gene, tss),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -53,256 +91,339 @@ class TSS(Base):
     )
 
     @classmethod
-    def select_by_bin_range(cls, session, chrom, start, end,
-        sample=[], bins=[], compute_bins=False):
+    def is_unique(cls, session, regionID, sourceID,
+        experimentID, gene, tss):
+
+        q = session.query(cls)\
+            .filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID,
+                cls.experimentID == experimentID,
+                cls.gene == gene,
+                cls.tss == tss
+            )
+
+        return len(q.all()) == 0
+
+
+    @classmethod
+    def select_unique(cls, session, regionID,
+        sourceID, experimentID, gene, tss):
+
+        q = session.query(cls)\
+            .filter(
+                cls.regionID == regionID,
+                cls.sourceID == sourceID,
+                cls.experimentID == experimentID,
+                cls.gene == gene,
+                cls.tss == tss
+            )
+
+        return q.first()
+
+    @classmethod
+    def select_by_uid(cls, session, uid,
+        as_genomic_feature=False):
         """
-        Query objects by chromosomal range using the binning system to
-        speed up range searches. If bins are provided, use the given bins.
-        If bins are NOT provided AND compute_bins is set to True, then
-        compute the bins. Otherwise, perform the range query without the use
-        of bins.
+        Query objects by uid.
         """
 
-        if not bins and compute_bins:
-            bins = set(containing_bins(start, end) + contained_bins(start, end))
+        q = session.query(
+                cls,
+                Experiment,
+                Region,
+                Source
+            )\
+            .join()\
+            .filter(
+                Experiment.uid == cls.experimentID,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID
+            ).filter(cls.uid == uid)
 
-        q = session.query(cls).filter(cls.chrom == chrom, cls.end > start,
-            cls.start < end)
+        if as_genomic_feature:
+            return cls.__as_genomic_feature(
+                q.first()
+            )
 
-        if bins:
-            q = q.filter(cls.bin.in_((list(bins))))
+        return q.first()
 
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
+    @classmethod
+    def select_by_uids(cls, session, uids=[],
+        as_genomic_feature=False):
+        """
+        Query objects by multiple uids.
+        If no uids are provided, return all
+        objects.
+        """
+
+        q = session.query(
+                cls,
+                Experiment,
+                Region,
+                Source
+            )\
+            .join()\
+            .filter(
+                Experiment.uid == cls.experimentID,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID
+            )
+
+        if uids:
+            q = q.filter(cls.uid.in_(uids))
+
+        if as_genomic_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
 
         return q.all()
 
     @classmethod
-    def select_by_gene(cls, session, gene, sample=[]):
+    def select_by_gene(cls, session, gene,
+        as_genomic_feature=False):
         """
-        Query objects by gene. If no gene is provided, query all TSSs.
+        Query objects by uid.
         """
 
-        q = session.query(cls)
+        q = session.query(
+                cls,
+                Experiment,
+                Region,
+                Source
+            )\
+            .join()\
+            .filter(
+                Experiment.uid == cls.experimentID,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID
+            ).filter(cls.gene == gene)
 
-        if gene:
-            q = q.filter(cls.gene == gene)
+        if as_genomic_feature:
 
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
 
         return q.all()
 
     @classmethod
-    def select_by_genes(cls, session, genes=[], sample=[]):
+    def select_by_genes(cls, session, genes=[],
+        as_genomic_feature=False):
         """
-        Query objects by list of genes. If no genes are provided, query
-        all TSSs.
+        Query objects by multiple uids.
+        If no uids are provided, return all
+        objects.
         """
 
-        q = session.query(cls)
+        q = session.query(
+                cls,
+                Experiment,
+                Region,
+                Source
+            )\
+            .join()\
+            .filter(
+                Experiment.uid == cls.experimentID,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID
+            )
 
         if genes:
             q = q.filter(cls.gene.in_(genes))
 
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
+        if as_genomic_feature:
+
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
 
         return q.all()
 
     @classmethod
-    def select_by_tss(cls, session, gene, tss, sample=[]):
+    def select_all_genic_tss(cls, session,
+        as_genomic_feature=False):
         """
-        Query objects by TSS (i.e. gene + tss). If no TSS is provided,
-        query all TSSs.
-        """
-
-        q = session.query(cls)
-
-        if gene and tss:
-            q = q.filter(cls.gene == gene, cls.tss == tss)
-
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def select_by_multiple_tss(cls, session, tss=[], sample=[]):
-        """
-        Query objects by list of TSSs. If no TSS are provided, query
-        all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
-        length 2 in the form gene, tss.
+        Query all objects associated with a gene.
         """
 
-        q = session.query(cls)
-
-        if tss:
-            # Initialize
-            ands = []
-            # For each gene, TSS pair...
-            for i, j in tss:
-                ands.append(and_(cls.gene == i,
-                    cls.tss == j))
-            q = q.filter(or_(*ands))
-
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-
-        return q.all()
-
-#    @classmethod
-#    def select_gene_total_tpm(cls, session, gene):
-#        """
-#        Query objects by list of TSSs. If no TSS are provided, query
-#        all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
-#        length 2 in the form gene, tss.
-#        """
-#
-#        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
-#
-#        if tss:
-#            # Initialize
-#            ands = []
-#            # For each gene, TSS pair...
-#            for i, j in tss:
-#                ands.append(and_(cls.gene == i,
-#                    cls.tss == j))
-#            q = q.filter(or_(*ands))
-#
-#        if sample:
-#            q = q.filter(cls.cell_or_tissue.in_(sample))
-#
-#        return q.all()
-#
-#    @classmethod
-#    def select_genes_total_tpm(cls, session, genes=[]):
-#        """
-#        Query objects by list of TSSs. If no TSS are provided, query
-#        all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
-#        length 2 in the form gene, tss.
-#        """
-#
-#        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
-#
-#        if tss:
-#            # Initialize
-#            ands = []
-#            # For each gene, TSS pair...
-#            for i, j in tss:
-#                ands.append(and_(cls.gene == i,
-#                    cls.tss == j))
-#            q = q.filter(or_(*ands))
-#
-#        if sample:
-#            q = q.filter(cls.cell_or_tissue.in_(sample))
-#
-#        return q.all()
-#
-#    @classmethod
-#    def select_tss_total_tpm(cls, session, gene, tss):
-#        """
-#        Query objects by list of TSSs. If no TSS are provided, query
-#        all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
-#        length 2 in the form gene, tss.
-#        """
-#
-#        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
-#
-#        if tss:
-#            # Initialize
-#            ands = []
-#            # For each gene, TSS pair...
-#            for i, j in tss:
-#                ands.append(and_(cls.gene == i,
-#                    cls.tss == j))
-#            q = q.filter(or_(*ands))
-#
-#        if sample:
-#            q = q.filter(cls.cell_or_tissue.in_(sample))
-#
-#        return q.all()
-#
-#    @classmethod
-#    def select_multiple_tss_total_tpm(cls, session, tss=[]):
-#        """
-#        Query objects by list of TSSs. If no TSS are provided, query
-#        all TSSs. Provide TSSs as a {list} of {lists}/{tuples} of 
-#        length 2 in the form gene, tss.
-#        """
-#
-#        q = session.query(cls).filter(cls.avg_tpm >= avg_tpm)
-#
-#        if tss:
-#            # Initialize
-#            ands = []
-#            # For each gene, TSS pair...
-#            for i, j in tss:
-#                ands.append(and_(cls.gene == i,
-#                    cls.tss == j))
-#            q = q.filter(or_(*ands))
-#
-#        if sample:
-#            q = q.filter(cls.cell_or_tissue.in_(sample))
-#
-#        return q.all()
-
-    @classmethod
-    def select_by_sample(cls, session, sample=[]):
-        """
-        Query objects by list of samples. If no samples are provided,
-        query all TSSs.
-        """
-
-        q = session.query(cls)
-
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-
-        return q.all()
-
-    @classmethod
-    def select_by_sample_and_relative_exp(cls, session, sample=[],
-        relative_exp=0.25):
-        """
-        Query objects by list of samples. If no samples are provided,
-        query all TSSs.
-        """
-
-        q = session.query(cls)
-
-        if sample:
-            q = q.filter(cls.cell_or_tissue.in_(sample))
-
-        return q.all()
-
-
-    @classmethod
-    def feature_exists(cls, session, chrom, start, end, strand,
-        cell_or_tissue, experiment_type, source_name): 
-        """
-        Returns whether a feature exists in the database.
-        """
-
-        q = session.query(cls).filter(
-                cls.chrom == chrom,
-                cls.start == start,
-                cls.end == end,
-                cls.strand == strand,
-                cls.cell_or_tissue == cell_or_tissue,
-                cls.experiment_type == experiment_type,
-                cls.source_name == source_name
+        q = session.query(
+                cls,
+                Experiment,
+                Region,
+                Source
+            )\
+            .join()\
+            .filter(
+                Experiment.uid == cls.experimentID,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID
+            ).filter(
+                cls.gene != None
             )
 
-        return session.query(q.exists()).scalar()
+        if as_genomic_feature:
 
-    def __str__(self):
-        return "{}\t{}\t{}\t{} ({})\t{}\t{}\t{}".format(self.chrom,
-            self.start, self.end, self.gene, self.tss, self.strand,
-            self.avg_tpm, self.cell_or_tissue)
+            feats = []
+
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+
+            return feats
+
+        return q.all()
+
+
+#    @classmethod
+#    def select_by_gene_tss(cls, session, gene,
+#        tss, as_genomic_feature=False):
+#        """
+#        Query objects by gene TSS.
+#        """
+#
+#        q = session.query(
+#                cls,
+#                Experiment,
+#                Region,
+#                Source
+#            )\
+#            .join()\
+#            .filter(
+#                Experiment.uid == cls.experimentID,
+#                Region.uid == cls.regionID,
+#                Source.uid == cls.sourceID
+#            ).filter(
+#                cls.gene == gene,
+#                cls.tss == tss
+#            )
+#
+#        if as_genomic_feature:
+#
+#            feats = []
+#
+#            # For each feature...
+#            for feat in q.all():
+#                feats.append(
+#                    cls.__as_genomic_feature(feat)
+#                )
+#
+#            return cls.__as_genomic_feature(
+#                q.first()
+#            )
+#
+#        return q.first()
+#
+#    @classmethod
+#    def select_by_multiple_tss(cls, session, tss=[]):
+#        """
+#        Query objects by multiple TSSs. If no TSSs
+#        are provided, return all objects. TSSs are
+#        to be provided as a two-dimensional list in
+#        the form: [[geneA, tss1], [geneA, tss2], ...]
+#        """
+#
+#        # Initialize
+#        ands = []
+#
+#        # For each gene, TSS pair...
+#        for i, j in tss:
+#            ands.append(
+#                and_(
+#                    cls.gene == i,
+#                    cls.tss == j
+#                )
+#            )
+#
+#        q = session.query(cls).filter(or_(*ands))
+#
+#        return q.all()
+
+    @classmethod
+    def __as_genomic_feature(self, feat):
+
+        # Initialize
+        isfloat = re.compile("\d+(\.\d+)?")
+        sampleIDs = []
+        avg_expression_levels = []
+
+        # For each exon start...
+        for i in str(feat.TSS.sampleIDs).split(","):
+            if i.isdigit():
+                sampleIDs.append(int(i))
+        
+        # For each exon end...
+        for i in str(feat.TSS.avg_expression_levels).split(","):
+            if isfloat.match(i):
+                avg_expression_levels.append(float(i))
+
+        # Define qualifiers
+        qualifiers = {
+            "gene": feat.TSS.gene,
+            "tss": feat.TSS.tss,
+            "sampleIDs": sampleIDs,
+            "avg_expression_levels": avg_expression_levels,
+            "experiment": feat.Experiment.name,
+            "source" : feat.Source.name,            
+        }
+
+        if feat.TSS.gene:
+            feat_id = "p%s@%s" % (
+                feat.TSS.tss,
+                feat.TSS.gene
+            )
+        else:
+            feat_id = "p@%s:%s..%s,%s" % (
+                feat.Region.chrom,
+                int(feat.Region.start),
+                int(feat.Region.end),
+                feat.Region.strand
+            )
+
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand = feat.Region.strand,
+            feat_type = "TSS",
+            feat_id = feat_id,
+            qualifiers = qualifiers
+        )
 
     def __repr__(self):
-        return "<TSS(gene={}, tss={}, chrom={}, start={}, end={}, strand={}, sample={}, tpm={}, experiment={}, source={})>".format(
-            self.gene, self.tss, self.chrom, self.start, self.end,
-            self.strand, self.cell_or_tissue, self.avg_tpm,
-            self.experiment_type, self.source_name)
+
+        return "<TSS(%s, %s, %s, %s, %s, %s, %s, %s)>" % \
+            (
+                "uid={}".format(self.uid),
+                "regionID={}".format(self.regionID),
+                "gene={}".format(self.gene),
+                "tss={}".format(self.tss),
+                "sampleIDs={}".format(self.sampleIDs),
+                "avg_expression_levels={}".format(
+                    self.avg_expression_levels
+                ),
+                "experimentID={}".format(self.experimentID),
+                "sourceID={}".format(self.sourceID)
+            )

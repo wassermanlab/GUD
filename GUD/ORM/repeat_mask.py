@@ -1,47 +1,35 @@
-from binning import containing_bins, contained_bins 
-
-from sqlalchemy import (
-    Column, Date, Index, PrimaryKeyConstraint, String
+from binning import (
+    containing_bins,
+    contained_bins
 )
-
+from sqlalchemy import (
+    Column, Index, PrimaryKeyConstraint, String, ForeignKey,
+    UniqueConstraint, CheckConstraint, Integer, Float
+)
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.hybrid import hybrid_property
 
-Base = declarative_base()
+from .base import Base
+from .region import Region
+from .source import Source
 
 class RepeatMask(Base):
 
     __tablename__ = "rmsk"
 
-    bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
-    swScore = Column("swScore", mysql.INTEGER(unsigned=True), nullable=False)
-#    milliDiv = Column("milliDiv", mysql.INTEGER(unsigned=True), nullable=False)
-#    milliDel = Column("milliDel", mysql.INTEGER(unsigned=True), nullable=False)
-#    milliIns = Column("milliIns", mysql.INTEGER(unsigned=True), nullable=False)
-    genoName = Column("genoName", String(5), nullable=False)
-    genoStart = Column("genoStart", mysql.INTEGER(unsigned=True), nullable=False)
-    genoEnd = Column("genoEnd", mysql.INTEGER(unsigned=True), nullable=False)
-#    genoLeft = Column("genoLeft", mysql.INTEGER(), nullable=False, default=0)
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
+    uid = Column("uid", mysql.INTEGER(unsigned=True))
+    regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
+    sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
+    swScore = Column("swScore", Float, nullable=False)
     repName = Column("repName", String(75), nullable=False)
     repClass = Column("repClass", String(75), nullable=False)
     repFamily = Column("repFamily", String(75), nullable=False)
-#    repStart = Column("repStart", mysql.INTEGER(), nullable=False, default=0)
-#    repEnd = Column("repEnd", mysql.INTEGER(), nullable=False, default=0)
-#    repLeft = Column("repLeft", mysql.INTEGER(), nullable=False, default=0)
-#    id = Column("id", mysql.CHAR(1), nullable=False)
-    source_name = Column("source_name", String(25), nullable=False)
-    date = Column("date", Date(), nullable=True)
+    strand = Column("strand", mysql.CHAR(1), nullable=False)
 
     __table_args__ = (
+        PrimaryKeyConstraint(uid),
+        UniqueConstraint(regionID, sourceID),
 
-        PrimaryKeyConstraint(
-            genoName, genoStart, genoEnd, strand, repName,
-            repClass, repFamily, source_name
-        ),
-
-        Index("ix_rmsk", bin, genoName),
+        Index("ix_rmsk", regionID),
 
         {
             "mysql_engine": "MyISAM",
@@ -49,63 +37,34 @@ class RepeatMask(Base):
         }
     )
 
-    # Create these properties to map columns to
-    # standard attributes
-    @hybrid_property
-    def chrom(self):
-        return self.genoName
+    @classmethod
+    def select_by_location(cls, session, chrom, start, end):
+        """
+        Query objects based off of their location being within the start only
+        motifs through that  
+         """
 
-    @chrom.setter
-    def chrom(self, val):
-        self.genoName = val
-
-    @hybrid_property
-    def start(self):
-        return self.genoStart
-
-    @start.setter
-    def start(self, val):
-        self.genoStart = val
-
-    @hybrid_property
-    def end(self):
-        return self.genoEnd
-
-    @end.setter
-    def end(self, val):
-        self.genoEnd = val
+        bins = set(containing_bins(start, end) + contained_bins(start, end))
+        
+        q = session.query(cls, Region).\
+        join().\
+        filter(Region.uid == cls.regionID).\
+        filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
+        filter(Region.bin.in_(bins))
+        return q.all()   
 
     @classmethod
-    def select_by_bin_range(cls, session, chrom, start, end,
-        repeat_classes=[], bins=[], compute_bins=False):
-        """
-        Query objects by chromosomal range using the binning system to
-        speed up range searches. If bins are provided, use the given bins.
-        If bins are NOT provided AND compute_bins is set to True, then
-        compute the bins. Otherwise, perform the range query without the use
-        of bins.
-        """
-
-        if not bins and compute_bins:
-            bins = set(containing_bins(start, end) + contained_bins(start, end))
-
-        q = session.query(cls).filter(
-                cls.chrom == chrom, cls.end > start, cls.start < end)
-
-        if bins:
-            q = q.filter(cls.bin.in_(list(bins)))
-
-        if repeat_classes:
-            q = q.filter(cls.repClass.in_(repeat_classes))
-
-        return q.all()
+    def is_unique(cls, session, regionID, sourceID):
+        q = session.query(cls).filter(cls.regionID == regionID, cls.sourceID == sourceID)
+        q = q.all()
+        if len(q) == 0:
+            return True
+        else: 
+            return False 
 
     def __str__(self):
-        return "{}\t{}\t{}\t{}|{}|{}\t{}\t{}".format(self.chrom,
-            self.start, self.end, self.repName, self.repClass,
-            self.repFamily, self.swScore, self.strand)
+        return "{}\t{}\t{}\t{}".format(self.swScore, self.repName, self.repClass, self.strand)
 
     def __repr__(self):
-        return "<RepeatRegion(chrom={}, start={}, end={}, repName={}, strand={}, repClass={}, repFamily={}, score={})>".format(
-            self.chrom, self.start, self.end, self.repName, self.strand,
-            self.repClass, self.repFamily, self.swScore)
+        return "<RMSK(uid={}, regionID={}, sourceID={}, swScore={}, repName={}, repClass={}, strand={})>".format(
+            self.uid, self.regionID, self.sourceID, self.swScore, self.repName, self.repClass, self.strand)
