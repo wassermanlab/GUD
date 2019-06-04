@@ -213,23 +213,23 @@ class Gene(Base):
 
         return q.all()
 
-#    @classmethod
-#    def select_by_uid(cls, session, uid,
-#        as_genomic_feature=False):
-#        """
-#        Query objects by uid.
-#        """
-#
-#        q = session.query(cls, Region, Source).\
-#            join().\
-#            filter(cls.uid == uid)
-#
-#        if as_genomic_feature:
-#            return cls.__as_genomic_feature(
-#                q.first()
-#            )
-#
-#        return q.first()
+    @classmethod
+    def select_by_uid(cls, session, uid,
+        as_genomic_feature=False):
+        """
+        Query objects by uid.
+        """
+
+        q = session.query(cls, Region, Source).\
+            join().\
+            filter(cls.uid == uid)
+
+        if as_genomic_feature:
+            return cls.__as_genomic_feature(
+                q.first()
+            )
+
+        return q.first()
 #
 #    @classmethod
 #    def select_by_uids(cls, session, uids=[],
