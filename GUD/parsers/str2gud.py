@@ -10,10 +10,10 @@ from sqlalchemy_utils import create_database, database_exists
 import warnings
 
 # Import from GUD module
-from GUD2 import GUDglobals
-from GUD2.ORM.short_tandem_repeat import ShortTandemRepeat
-from GUD2.ORM.region import Region
-from GUD2.ORM.source import Source
+from GUD import GUDglobals
+from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
+from GUD.ORM.region import Region
+from GUD.ORM.source import Source
 
 #-------------#
 # Functions   #

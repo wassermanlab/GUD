@@ -15,10 +15,10 @@ import warnings
 from datetime import date
 
 # Import from GUD module
-from GUD2 import GUDglobals
-from GUD2.ORM.clinvar import ClinVar
-from GUD2.ORM.region import Region
-from GUD2.ORM.source import Source
+from GUD import GUDglobals
+from GUD.ORM.clinvar import ClinVar
+from GUD.ORM.region import Region
+from GUD.ORM.source import Source
 
 #-------------#
 # Functions   #
@@ -118,6 +118,7 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
               region.chrom = chrom
               region.start = start
               region.end = end 
+              region.strand = "+"
               session.merge(region)
               session.commit()
               reg = region.select_by_exact_location(session, chrom, start, end)
