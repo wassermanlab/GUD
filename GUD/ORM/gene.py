@@ -146,7 +146,7 @@ class Gene(Base):
                 feats.append(
                     cls.__as_genomic_feature(feat)
                 )
-
+            
             return feats
     
         return q.all()

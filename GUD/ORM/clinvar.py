@@ -84,9 +84,7 @@ class ClinVar(Base):
                 feats.append(
                     cls.__as_genomic_feature(feat)
                 )
-
             return feats
-    
         return q.all()
    
     @classmethod
@@ -110,14 +108,8 @@ class ClinVar(Base):
         q = session.query(cls).filter(cls.clinvarID == clinvarID)
         return len(q.all()) == 0
 
-    def __str__(self):
-        return "REF\tALT\tclinvarID\tannotation\tannotation_impact\tfeature_type\tCLNDISDB\tCLINSIG\n{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".\
-        format(self.ref, self.alt, self.clinvarID, 
-        self.ANN_Annotation, self.ANN_Annotation_Impact, self.ANN_Feature_Type,
-        self.CLNDISDB, self.CLNSIG)
-
     @classmethod
-    def __as_genomic_feature(feat):
+    def __as_genomic_feature(self, feat):
         # Define qualifiers
         qualifiers = {
             "ref": feat.ClinVar.ref,
@@ -148,7 +140,7 @@ class ClinVar(Base):
             qualifiers = qualifiers)
 
     def __repr__(self):
-        return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={},\
+        return "<ClinVar(uid={}, regionID={}, sourceID={},\
         ref={}, alt={}, clinvarID={},\
         ANN_Annotation={}, ANN_Annotation_Impact={}, ANN_Gene_Name={},\
         ANN_Gene_ID={}, ANN_Feature_Type={}, ANN_Feature_ID={},\

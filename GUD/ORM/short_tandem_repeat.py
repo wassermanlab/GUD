@@ -135,7 +135,7 @@ class ShortTandemRepeat(Base):
         return len(q) == 0
 
     @classmethod
-    def __as_genomic_feature(feat):
+    def __as_genomic_feature(self, feat):
         # Define qualifiers
         qualifiers = {
             "uid": feat.ShortTandemRepeat.uid, 
@@ -152,9 +152,6 @@ class ShortTandemRepeat(Base):
             feat_type = "ShortTandemRepeat",
             feat_id = feat.ShortTandemRepeat.uid, 
             qualifiers = qualifiers)
-
-    def __str__(self):
-        return "{}\t{}".format(self.motif, self.pathogenicity)
 
     def __repr__(self):
         return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={}, motif={}, pathogencity={})>".format(

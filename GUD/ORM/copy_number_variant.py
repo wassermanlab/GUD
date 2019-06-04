@@ -91,8 +91,25 @@ class CNV(Base):
         q = q.all()
         return len(q) == 0
 
-    def __str__(self):
-        return "{}\t{}".format(self.copy_number, self.clinical_significance)
+    @classmethod
+    def __as_genomic_feature(self, feat):
+        # Define qualifiers
+        qualifiers = {   
+            "uid": feat.CNV.uid, 
+            "regionID": feat.CNV.regionID, 
+            "sourceID": feat.CNV.sourceID, 
+            "copy_number": feat.CNV.copy_number, 
+            "clinical_interpretation": feat.CNV.clinical_interpretation, 
+            "variant_type": feat.CNV.variant_type    
+        }
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand = feat.Region.strand,
+            feat_type = "CopyNumberVariant",
+            feat_id = feat.CNV.uid, 
+            qualifiers = qualifiers)
 
     def __repr__(self):
         return "<CNV(uid={}, regionID={}, sourceID={}, copy_number={}, clinical_significance={}, variant_type={}yes)>".format(
