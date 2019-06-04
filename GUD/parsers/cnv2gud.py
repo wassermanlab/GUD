@@ -86,7 +86,7 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
     # get source
     source = Source()
     sou = source.select_by_name(session, source_name)
-    if not sou: 
+    if not sou:
         source.name = source_name
         session.merge(source)
         session.commit()
@@ -99,34 +99,36 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
             if not line.startswith("#"):
                 split_line = line.split("\t")
                 split_line[-1] = split_line[-1].rstrip()
-		        chrom = str(split_line[0]) 
+                chrom = str(split_line[0])
                 start = int(split_line[1])
                 end = int(split_line[2])
                 name = str(split_line[3])
                 clinical_interpretation = str(split_line[4])
                 variant_type = str(split_line[5])
                 copy_number = int(split_line[6])
-                 
+
                 if chrom in chroms:
-                    # region entry 
+                    # region entry
                     region = Region()
-                    reg = region.select_by_exact_location(session, chrom, start, end)
-                    if not reg: 
+                    reg = region.select_by_exact_location(
+                        session, chrom, start, end)
+                    if not reg:
                         region.bin = assign_bin(start, end)
                         region.chrom = chrom
                         region.start = start
-                        region.end = end 
+                        region.end = end
                         session.merge(region)
                         session.commit()
-                        reg = region.select_by_exact_location(session, chrom, start, end)
-    
-                    # str entry 
+                        reg = region.select_by_exact_location(
+                            session, chrom, start, end)
+
+                    # str entry
                     cnv = CNV()
                     if cnv.is_unique(session, name):
-                        cnv.uid = name 
+                        cnv.uid = name
                         cnv.copy_number = copy_number
                         cnv.variant_type = variant_type
-			            cnv.clinical_interpretation = clinical_interpretation
+                        cnv.clinical_interpretation = clinical_interpretation
                         cnv.regionID = reg.uid
                         cnv.sourceID = sou.uid
                         session.merge(cnv)
