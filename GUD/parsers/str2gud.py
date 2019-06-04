@@ -82,8 +82,8 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
     table = ShortTandemRepeat()
     table.metadata.bind = engine
     try:
-        # table.metadata.create_all(engine)
-        table.__table__.create(bind=engine)
+        table.metadata.create_all(engine)
+        # table.__table__.create(bind=engine)
     except:
         raise ValueError("Cannot create \"short_tandem_repeats\" table!")
     if not engine.has_table("regions"):

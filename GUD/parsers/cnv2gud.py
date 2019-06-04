@@ -74,8 +74,7 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
     table = CNV()
     table.metadata.bind = engine
     try:
-        # table.metadata.create_all(engine)
-        table.__table__.create(bind=engine)
+        table.metadata.create_all(engine)
     except:
         raise ValueError("Cannot create \"copy_number_variants\" table!")
     if not engine.has_table("regions"):
@@ -110,7 +109,7 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
                 if chrom in chroms:
                     # region entry
                     region = Region()
-                    reg = region.select_by_exact_location(
+                    reg = region.select_unique(
                         session, chrom, start, end)
                     if not reg:
                         region.bin = assign_bin(start, end)
@@ -119,7 +118,7 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
                         region.end = end
                         session.merge(region)
                         session.commit()
-                        reg = region.select_by_exact_location(
+                        reg = region.select_unique(
                             session, chrom, start, end)
 
                     # str entry

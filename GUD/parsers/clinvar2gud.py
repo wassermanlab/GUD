@@ -71,8 +71,8 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
     table = ClinVar()
     table.metadata.bind = engine
     try:
-        # table.metadata.create_all(engine)
-        table.__table__.create(bind=engine)
+        table.metadata.create_all(engine)
+        # table.__table__.create(bind=engine)
     except:
         raise ValueError("Cannot create \"ClinVar\" table!")
     
@@ -113,7 +113,7 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
           start = int(fields[1]) - 1
           end = start + len(fields[3]) ##finish this 
           region = Region()
-          reg = region.select_by_exact_location(session, chrom, start, end)
+          reg = region.select_unique(session, chrom, start, end)
           if not reg: 
               region.bin = assign_bin(start, end)
               region.chrom = chrom
@@ -122,7 +122,7 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
               region.strand = "+"
               session.merge(region)
               session.commit()
-              reg = region.select_by_exact_location(session, chrom, start, end)
+              reg = region.select_unique(session, chrom, start, end)
           ## add info fields
           for i in info:
             i_split = i.split("=")
