@@ -381,10 +381,14 @@ class TSS(Base):
 
         # Define qualifiers
         qualifiers = {
+            "uid": feat.TSS.uid,
+            "regionID": feat.TSS.regionID,
             "gene": feat.TSS.gene,
             "tss": feat.TSS.tss,
-            "sampleIDs": sampleIDs,
-            "avg_expression_levels": avg_expression_levels,
+            "sampleIDs": feat.TSS.sampleIDs,
+            "avg_expression_levels": feat.TSS.avg_expression_levels,
+            "experimentID": feat.TSS.experimentID,
+            "sourceID": feat.TSS.sourceID,
             "experiment": feat.Experiment.name,
             "source" : feat.Source.name,            
         }

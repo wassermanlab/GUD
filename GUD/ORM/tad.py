@@ -20,6 +20,7 @@ from .region import Region
 from .sample import Sample
 from .source import Source
 
+
 class TAD(Base):
 
     __tablename__ = "tads"
@@ -73,7 +74,7 @@ class TAD(Base):
             restriction_enzyme
 
         ),
-        Index("ix_regionID", regionID), # query by bin range
+        Index("ix_regionID", regionID),  # query by bin range
         Index("ix_sampleID", sampleID),
         {
             "mysql_engine": "MyISAM",
@@ -83,8 +84,8 @@ class TAD(Base):
 
     @classmethod
     def is_unique(cls, session, regionID,
-        sampleID, experimentID, sourceID,
-        restriction_enzyme):
+                  sampleID, experimentID, sourceID,
+                  restriction_enzyme):
 
         q = session.query(cls).\
             filter(
@@ -93,14 +94,14 @@ class TAD(Base):
                 cls.experimentID == experimentID,
                 cls.sourceID == sourceID,
                 cls.restriction_enzyme == restriction_enzyme
-            )
+        )
 
         return len(q.all()) == 0
 
     @classmethod
     def select_unique(cls, session, regionID,
-        sampleID, experimentID, sourceID,
-        restriction_enzyme):
+                      sampleID, experimentID, sourceID,
+                      restriction_enzyme):
 
         q = session.query(cls).\
             filter(
@@ -109,14 +110,14 @@ class TAD(Base):
                 cls.experimentID == experimentID,
                 cls.sourceID == sourceID,
                 cls.restriction_enzyme == restriction_enzyme
-            )
+        )
 
         return q.first()
 
     @classmethod
     def select_by_location(cls, session,
-        chrom, start, end, samples=[],
-        as_genomic_feature=False):
+                           chrom, start, end, samples=[],
+                           as_genomic_feature=False):
         """
         Query objects by genomic location.
         """
@@ -129,7 +130,7 @@ class TAD(Base):
             Sample,
             Experiment,
             Source,
-            
+
         )\
             .join()\
             .filter(
@@ -137,12 +138,12 @@ class TAD(Base):
                 Sample.uid == cls.sampleID,
                 Experiment.uid == cls.experimentID,
                 Source.uid == cls.sourceID
-            )\
+        )\
             .filter(
                 Region.chrom == chrom,
                 Region.start < end,
                 Region.end > start
-            )\
+        )\
             .filter(Region.bin.in_(bins))
 
         if samples:
@@ -159,12 +160,12 @@ class TAD(Base):
                 )
 
             return feats
-    
+
         return q.all()
 
     @classmethod
     def select_by_sample(cls, session,
-        sample, as_genomic_feature=False):
+                         sample, as_genomic_feature=False):
         """
         Query objects by sample.
         """
@@ -175,7 +176,7 @@ class TAD(Base):
             Sample,
             Experiment,
             Source,
-            
+
         )\
             .join()\
             .filter(
@@ -183,10 +184,10 @@ class TAD(Base):
                 Sample.uid == cls.sampleID,
                 Experiment.uid == cls.experimentID,
                 Source.uid == cls.sourceID
-            )\
+        )\
             .filter(
                 Sample.name == sample
-            )
+        )
 
         if as_genomic_feature:
 
@@ -199,31 +200,36 @@ class TAD(Base):
                 )
 
             return feats
-    
+
         return q.all()
 
-    def __as_genomic_feature(feat):
+    def __as_genomic_feature(self, feat):
 
         # Define qualifiers
         qualifiers = {
-            "experiment": feat.Experiment.name,
+            "uid": feat.TAD.uid,
+            "regionID": feat.TAD.regionID,
+            "sampleID": feat.TAD.sampleID,
+            "experimentID": feat.TAD.experimentID,
+            "sourceID": feat.TAD.sourceID,
             "restriction_enzyme": feat.TAD.restriction_enzyme,
+            "experiment": feat.Experiment.name,
             "sample": feat.Sample.name,
-            "source" : feat.Source.name,            
+            "source": feat.Source.name,
         }
 
         return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),
             int(feat.Region.end),
-            strand = feat.Region.strand,
-            feat_type = "TAD",
-            feat_id = "%s|%s|%s" % (
+            strand=feat.Region.strand,
+            feat_type="TAD",
+            feat_id="%s|%s|%s" % (
                 qualifiers["source"],
                 qualifiers["restriction_enzyme"],
                 qualifiers["sample"].replace(" ", "_")
             ),
-            qualifiers = qualifiers
+            qualifiers=qualifiers
         )
 
     def __repr__(self):

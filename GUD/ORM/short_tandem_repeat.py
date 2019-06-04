@@ -150,7 +150,6 @@ class ShortTandemRepeat(Base):
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_type = "ShortTandemRepeat",
-            feat_id = feat.ShortTandemRepeat.uid, 
             qualifiers = qualifiers)
 
     def __repr__(self):

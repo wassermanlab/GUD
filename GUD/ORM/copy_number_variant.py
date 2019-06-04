@@ -94,6 +94,12 @@ class CNV(Base):
     @classmethod
     def __as_genomic_feature(self, feat):
         # Define qualifiers
+        # qualifiers = {
+        #     "uid": feat.ClinVar.uid}
+
+        # qualifiers = qualifiers
+
+
         qualifiers = {   
             "uid": feat.CNV.uid, 
             "regionID": feat.CNV.regionID, 
@@ -108,7 +114,6 @@ class CNV(Base):
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_type = "CopyNumberVariant",
-            feat_id = feat.CNV.uid, 
             qualifiers = qualifiers)
 
     def __repr__(self):

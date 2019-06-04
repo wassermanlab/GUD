@@ -114,12 +114,20 @@ class Conservation(Base):
 
     @classmethod
     def __as_genomic_feature(self, feat):
+        
+        qualifiers = {
+            "uid": feat.Conservation.uid,
+            "regionID": feat.Conservation.regionID, 
+            "score": feat.Conservation.score,
+            "sourceID": feat.Conservation.sourceID, 
+            }
 
         return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),
             int(feat.Region.end),
-            feat_type = "Conservation"
+            feat_type = "Conservation",
+            qualifiers = qualifiers
         )
 
     def __repr__(self):

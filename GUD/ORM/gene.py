@@ -290,12 +290,16 @@ class Gene(Base):
 
         # Define qualifiers
         qualifiers = {
-            "name": feat.Gene.name,
+            "uid": uid,
+            "regionID": regionID,
+            "name": name,
+            "name2": name2,
             "cdsStart": int(feat.Gene.cdsStart),
             "cdsEnd": int(feat.Gene.cdsEnd),
             "exonStarts": exonStarts,
             "exonEnds": exonEnds,
-            "source" : feat.Source.name,            
+            "sourceID": sourceID,
+            "source" : feat.Source.name,           
         }
 
         return GenomicFeature(

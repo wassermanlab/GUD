@@ -112,6 +112,9 @@ class ClinVar(Base):
     def __as_genomic_feature(self, feat):
         # Define qualifiers
         qualifiers = {
+            "uid": feat.ClinVar.uid,
+            "regionID": feat.ClinVar.regionID,
+            "sourceID": feat.ClinVar.sourceID,
             "ref": feat.ClinVar.ref,
             "alt": feat.ClinVar.alt,
             "clinvarID": feat.ClinVar.clinvarID,
@@ -136,7 +139,6 @@ class ClinVar(Base):
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_type = "ClinVar",
-            feat_id = feat.ClinVar.clinvarID, 
             qualifiers = qualifiers)
 
     def __repr__(self):

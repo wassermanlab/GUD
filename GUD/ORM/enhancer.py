@@ -145,10 +145,19 @@ class Enhancer(Base):
 
         # Define qualifiers
         qualifiers = {
-            "experiment": feat.Experiment.name,
+            "uid": feat.Enhancer.uid,  
+            "regionID": feat.Enhancer.regionID,  
+            "sampleID": feat.Enhancer.sampleID,  
+            "experimentID": feat.Enhancer.experimentID,  
+            "sourceID": feat.Enhancer.sourceID,  
+            "experiment": feat.Enhancer.name,
             "sample": feat.Sample.name,
             "source" : feat.Source.name,            
         }
+        # qualifiers = {
+        #     "uid": feat.ClinVar.uid}
+
+        # qualifiers = qualifiers
 
         return GenomicFeature(
             feat.Region.chrom,
