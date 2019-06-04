@@ -71,7 +71,8 @@ def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
     table = ClinVar()
     table.metadata.bind = engine
     try:
-        table.metadata.create_all(engine)
+        # table.metadata.create_all(engine)
+        table.__table__.create(bind=engine)
     except:
         raise ValueError("Cannot create \"ClinVar\" table!")
     

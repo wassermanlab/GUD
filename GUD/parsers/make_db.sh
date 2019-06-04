@@ -1,7 +1,7 @@
 ##DB initialization (chrom, region, sample, source, experiment tables)
 /usr/local/python2.7.14/bin/python -m GUD.parsers.initialize --genome hg19 -u ontarget_w -d tamar_test
 
-#str insertion 
+##str insertion 
 nohup /usr/local/python2.7.14/bin/python -m GUD.parsers.str2gud /space/data/gangSTR/hg19_ver10.sorted.0based.bed -u ontarget_w -d tamar_test &
 
 #pathogenic str insertion 

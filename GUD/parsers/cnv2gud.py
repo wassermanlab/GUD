@@ -74,7 +74,8 @@ def insert_cnv_to_gud_db(user, host, port, db, tsv_file, source_name):
     table = CNV()
     table.metadata.bind = engine
     try:
-        table.metadata.create_all(engine)
+        # table.metadata.create_all(engine)
+        table.__table__.create(bind=engine)
     except:
         raise ValueError("Cannot create \"copy_number_variants\" table!")
     if not engine.has_table("regions"):
