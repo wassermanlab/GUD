@@ -1,6 +1,7 @@
 from binning import (
     containing_bins,
-    contained_bins
+    contained_bins,
+    assign_bin
 )
 from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
@@ -65,11 +66,11 @@ class ShortTandemRepeat(Base):
         Query objects based off of their location being within the start only
         motifs through that  
          """
-        # print(chrom, start, end)
         # q = Region.select_by_bin_range(session, chrom, start, end, [], True, False)
 
-        bin = assign_bin(start, end)
-        
+        # bin = assign_bin(start, end)
+        bin = assign_bin(start,end)
+
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\
@@ -82,7 +83,11 @@ class ShortTandemRepeat(Base):
     @classmethod 
     def select_by_pathogenicity(cls, session, as_genomic_feature=False):
         """returns all strs that are pathogenic"""
-        q = session.query(cls).filter(cls.pathogenicity != 0)
+        q = session.query(cls, Region).\
+        join().\
+        filter(cls.pathogenicity != 0).\
+        filter(Region.uid == cls.regionID)
+        
         if as_genomic_feature:
             feats = []
             # For each feature...
@@ -91,7 +96,7 @@ class ShortTandemRepeat(Base):
                     cls.__as_genomic_feature(feat)
                 )
             return feats
-        return q.all() 
+        return q.all()
 
     @classmethod
     def select_by_motif(cls, session, motif, compute_rotations=False, as_genomic_feature=False):
@@ -150,8 +155,9 @@ class ShortTandemRepeat(Base):
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_type = "ShortTandemRepeat",
+            feat_id = "%s_%s"%(self.__tablename__, feat.ShortTandemRepeat.uid),
             qualifiers = qualifiers)
 
     def __repr__(self):
-        return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={}, motif={}, pathogencity={})>".format(
-            self.uid, self.regionID, self.sourceID, self.motif, self.pathogenicity)
+        return "<%s(uid={}, regionID={}, sourceID={}, motif={}, pathogencity={})>".format(
+            self.__tablename__,self.uid, self.regionID, self.sourceID, self.motif, self.pathogenicity)

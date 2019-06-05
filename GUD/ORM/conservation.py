@@ -127,13 +127,15 @@ class Conservation(Base):
             int(feat.Region.start),
             int(feat.Region.end),
             feat_type = "Conservation",
+            feat_id = "%s_%s"%(self.__tablename__, feat.Conservation.uid),
             qualifiers = qualifiers
         )
 
     def __repr__(self):
 
-        return "<Conservation(%s, %s, %s, %s)>" % \
+        return "<%s(%s, %s, %s, %s)>" % \
             (
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
                 "score={}".format(self.score),
