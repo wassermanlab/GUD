@@ -222,7 +222,9 @@ class Gene(Base):
 
         q = session.query(cls, Region, Source).\
             join().\
-            filter(cls.uid == uid)
+            filter(cls.uid == uid,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID,)
 
         if as_genomic_feature:
             return cls.__as_genomic_feature(
