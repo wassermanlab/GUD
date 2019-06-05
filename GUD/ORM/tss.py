@@ -381,26 +381,17 @@ class TSS(Base):
 
         # Define qualifiers
         qualifiers = {
+            "uid": feat.TSS.uid,
+            "regionID": feat.TSS.regionID,
             "gene": feat.TSS.gene,
             "tss": feat.TSS.tss,
-            "sampleIDs": sampleIDs,
-            "avg_expression_levels": avg_expression_levels,
+            "sampleIDs": feat.TSS.sampleIDs,
+            "avg_expression_levels": feat.TSS.avg_expression_levels,
+            "experimentID": feat.TSS.experimentID,
+            "sourceID": feat.TSS.sourceID,
             "experiment": feat.Experiment.name,
             "source" : feat.Source.name,            
         }
-
-        if feat.TSS.gene:
-            feat_id = "p%s@%s" % (
-                feat.TSS.tss,
-                feat.TSS.gene
-            )
-        else:
-            feat_id = "p@%s:%s..%s,%s" % (
-                feat.Region.chrom,
-                int(feat.Region.start),
-                int(feat.Region.end),
-                feat.Region.strand
-            )
 
         return GenomicFeature(
             feat.Region.chrom,
@@ -408,14 +399,15 @@ class TSS(Base):
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_type = "TSS",
-            feat_id = feat_id,
+            feat_id = "%s_%s"%(self.__tablename__, feat.TSS.uid),
             qualifiers = qualifiers
         )
 
     def __repr__(self):
 
-        return "<TSS(%s, %s, %s, %s, %s, %s, %s, %s)>" % \
-            (
+        return "<%s(%s, %s, %s, %s, %s, %s, %s, %s)>" % \
+            (   
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
                 "gene={}".format(self.gene),

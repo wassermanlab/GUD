@@ -12,10 +12,10 @@ from sqlalchemy_utils import database_exists
 import warnings
 
 # Import from GUD module
-from GUD2 import GUDglobals
-from GUD2.ORM.short_tandem_repeat import ShortTandemRepeat
-from GUD2.ORM.region import Region
-from GUD2.ORM.source import Source
+from GUD import GUDglobals
+from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
+from GUD.ORM.region import Region
+from GUD.ORM.source import Source
 
 #-------------#
 # Functions   #
@@ -78,14 +78,14 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
     if not engine.has_table("sources"):
         raise ValueError("No sources table!")
 
-                #source entry 
-                source = Source()
-                sou = source.select_by_name(session, source_name)
-                if not sou: 
-                    source.name = source_name
-                    session.merge(source)
-                    session.commit()
-                    sou = source.select_by_name(session, source_name)
+    # source entry
+    source = Source()
+    sou = source.select_by_name(session, source_name)
+    if not sou:
+            source.name = source_name
+            session.merge(source)
+            session.commit()
+            sou = source.select_by_name(session, source_name)
 
     # parse table
     with open(bed_file) as f:
@@ -98,22 +98,24 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
                 motif = str(split_line[3])
                 pathogenicity = int(split_line[4].rstrip())
 
-                #region entry 
+                # region entry
                 region = Region()
-                reg = region.select_by_exact_location(session, chrom, start, end)
-                if not reg: 
+                reg = region.select_unique(
+                    session, chrom, start, end)
+                if not reg:
                     region.bin = assign_bin(start, end)
                     region.chrom = chrom
                     region.start = start
-                    region.end = end 
+                    region.end = end
                     session.merge(region)
                     session.commit()
-                    reg = region.select_by_exact_location(session, chrom, start, end)
+                    reg = region.select_unique(
+                        session, chrom, start, end)
 
-                #str entry 
+                # str entry
                 STR = ShortTandemRepeat()
                 if STR.is_unique(session, reg.uid, sou.uid, pathogenicity):
-                    STR.motif = motif 
+                    STR.motif = motif
                     STR.pathogenicity = pathogenicity
                     STR.regionID = reg.uid
                     STR.sourceID = sou.uid

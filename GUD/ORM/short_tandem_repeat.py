@@ -1,6 +1,7 @@
 from binning import (
     containing_bins,
-    contained_bins
+    contained_bins,
+    assign_bin
 )
 from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
@@ -11,6 +12,7 @@ from sqlalchemy.dialects import mysql
 from .base import Base
 from .region import Region
 from .source import Source
+from .genomic_feature import GenomicFeature
 
 class ShortTandemRepeat(Base):
 
@@ -37,7 +39,7 @@ class ShortTandemRepeat(Base):
     )
 
     @classmethod
-    def select_by_location(cls, session, chrom, start, end):
+    def select_by_location(cls, session, chrom, start, end, as_genomic_feature=False):
         """
         Query objects based off of their location being within the start only
         motifs through that  
@@ -48,35 +50,56 @@ class ShortTandemRepeat(Base):
         filter(Region.uid == cls.regionID).\
         filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
         filter(Region.bin.in_(bins))
+        if as_genomic_feature:
+            feats = []
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+            return feats
         return q.all()
 
     @classmethod
-    def select_by_exact_location(cls, session, chrom, start, end):
+    def select_by_exact_location(cls, session, chrom, start, end, as_genomic_feature=False):
         """
         Query objects based off of their location being within the start only
         motifs through that  
          """
-        # print(chrom, start, end)
         # q = Region.select_by_bin_range(session, chrom, start, end, [], True, False)
 
-        bin = assign_bin(start, end)
-        
+        # bin = assign_bin(start, end)
+        bin = assign_bin(start,end)
+
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\
         filter(Region.chrom == chrom, Region.start == start, Region.end == end).\
         filter(Region.bin == bin)
+        if as_genomic_feature:
+            return cls.__as_genomic_feature(q.first())
         return q.first()
     
     @classmethod 
-    def select_by_pathogenicity(cls, session):
+    def select_by_pathogenicity(cls, session, as_genomic_feature=False):
         """returns all strs that are pathogenic"""
-        q = session.query(cls).filter(cls.pathogenicity != 0)
-
-        return q.all() 
+        q = session.query(cls, Region).\
+        join().\
+        filter(cls.pathogenicity != 0).\
+        filter(Region.uid == cls.regionID)
+        
+        if as_genomic_feature:
+            feats = []
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+            return feats
+        return q.all()
 
     @classmethod
-    def select_by_motif(cls, session, motif, compute_rotations=False):
+    def select_by_motif(cls, session, motif, compute_rotations=False, as_genomic_feature=False):
         """returns all occurences of a certain motif computing 
         rotations if requested"""
         if compute_rotations is True: #compute the rotations
@@ -90,15 +113,24 @@ class ShortTandemRepeat(Base):
             motifs = [motif]
 
         q = session.query(cls).filter(cls.motif.in_(motifs))
-
+        if as_genomic_feature:
+            feats = []
+            # For each feature...
+            for feat in q.all():
+                feats.append(
+                    cls.__as_genomic_feature(feat)
+                )
+            return feats
         return q.all()  
 
     @classmethod
-    def select_by_uid(cls, session, uid):
+    def select_by_uid(cls, session, uid, as_genomic_feature=False):
         q = session.query(cls, Region).\
         join().\
         filter(Region.uid == cls.regionID).\
         filter(cls.uid == uid)
+        if as_genomic_feature:
+            return cls.__as_genomic_feature(q.first())
         return q.first()
 
     @classmethod
@@ -107,9 +139,25 @@ class ShortTandemRepeat(Base):
         q = q.all()
         return len(q) == 0
 
-    def __str__(self):
-        return "{}\t{}".format(self.motif, self.pathogenicity)
+    @classmethod
+    def __as_genomic_feature(self, feat):
+        # Define qualifiers
+        qualifiers = {
+            "uid": feat.ShortTandemRepeat.uid, 
+            "regionID": feat.ShortTandemRepeat.regionID, 
+            "sourceID": feat.ShortTandemRepeat.sourceID, 
+            "motif": feat.ShortTandemRepeat.motif, 
+            "pathogenicity": feat.ShortTandemRepeat.pathogenicity         
+        }
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand = feat.Region.strand,
+            feat_type = "ShortTandemRepeat",
+            feat_id = "%s_%s"%(self.__tablename__, feat.ShortTandemRepeat.uid),
+            qualifiers = qualifiers)
 
     def __repr__(self):
-        return "<ShortTandemRepeat(uid={}, regionID={}, sourceID={}, motif={}, pathogencity={})>".format(
-            self.uid, self.regionID, self.sourceID, self.motif, self.pathogenicity)
+        return "<%s(uid={}, regionID={}, sourceID={}, motif={}, pathogencity={})>".format(
+            self.__tablename__,self.uid, self.regionID, self.sourceID, self.motif, self.pathogenicity)

@@ -10,10 +10,10 @@ from sqlalchemy_utils import create_database, database_exists
 import warnings
 
 # Import from GUD module
-from GUD2 import GUDglobals
-from GUD2.ORM.short_tandem_repeat import ShortTandemRepeat
-from GUD2.ORM.region import Region
-from GUD2.ORM.source import Source
+from GUD import GUDglobals
+from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
+from GUD.ORM.region import Region
+from GUD.ORM.source import Source
 
 #-------------#
 # Functions   #
@@ -28,7 +28,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="this script inserts short tandem repeat location information")
 
-    parser.add_argument("bedfile", help="BED file from gangSTR")
+    parser.add_argument("bed_file", help="BED file from gangSTR")
 
     # Optional args
     parser.add_argument("--source", default="gangSTR",
@@ -83,6 +83,7 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
     table.metadata.bind = engine
     try:
         table.metadata.create_all(engine)
+        # table.__table__.create(bind=engine)
     except:
         raise ValueError("Cannot create \"short_tandem_repeats\" table!")
     if not engine.has_table("regions"):
@@ -102,7 +103,7 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
             
             #region entry 
             region = Region()
-            reg = region.select_by_exact_location(session, chrom, start, end)
+            reg = region.select_unique(session, chrom, start, end)
             if not reg: 
                 region.bin = assign_bin(start, end)
                 region.chrom = chrom
@@ -110,7 +111,7 @@ def insert_str_to_gud_db(user, host, port, db, bed_file, source_name):
                 region.end = end 
                 session.merge(region)
                 session.commit()
-                reg = region.select_by_exact_location(session, chrom, start, end)
+                reg = region.select_unique(session, chrom, start, end)
 
             #source entry 
             source = Source()

@@ -141,14 +141,23 @@ class Enhancer(Base):
     
         return q.all()
 
-    def __as_genomic_feature(feat):
+    def __as_genomic_feature(self, feat):
 
         # Define qualifiers
         qualifiers = {
-            "experiment": feat.Experiment.name,
+            "uid": feat.Enhancer.uid,  
+            "regionID": feat.Enhancer.regionID,  
+            "sampleID": feat.Enhancer.sampleID,  
+            "experimentID": feat.Enhancer.experimentID,  
+            "sourceID": feat.Enhancer.sourceID,  
+            "experiment": feat.Enhancer.name,
             "sample": feat.Sample.name,
             "source" : feat.Source.name,            
         }
+        # qualifiers = {
+        #     "uid": feat.ClinVar.uid}
+
+        # qualifiers = qualifiers
 
         return GenomicFeature(
             feat.Region.chrom,
@@ -156,17 +165,15 @@ class Enhancer(Base):
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_type = "Enhancer",
-            feat_id = "%s|%s" % (
-                qualifiers["source"],
-                qualifiers["sample"].replace(" ", "_")
-            ),
+            feat_id = "%s_%s"%(self.__tablename__, feat.Enhancer.uid),
             qualifiers = qualifiers
         )
 
     def __repr__(self):
 
-        return "<Enhancer(%s, %s, %s, %s, %s)>" % \
+        return "<%s(%s, %s, %s, %s, %s)>" % \
             (
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
                 "sampleID={}".format(self.sampleID),

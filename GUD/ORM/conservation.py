@@ -12,6 +12,7 @@ from sqlalchemy.dialects import mysql
 from .base import Base
 from .region import Region
 from .source import Source
+from .genomic_feature import GenomicFeature
 
 class Conservation(Base):
 
@@ -113,18 +114,28 @@ class Conservation(Base):
 
     @classmethod
     def __as_genomic_feature(self, feat):
+        
+        qualifiers = {
+            "uid": feat.Conservation.uid,
+            "regionID": feat.Conservation.regionID, 
+            "score": feat.Conservation.score,
+            "sourceID": feat.Conservation.sourceID, 
+            }
 
         return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),
             int(feat.Region.end),
-            feat_type = "Conservation"
+            feat_type = "Conservation",
+            feat_id = "%s_%s"%(self.__tablename__, feat.Conservation.uid),
+            qualifiers = qualifiers
         )
 
     def __repr__(self):
 
-        return "<Conservation(%s, %s, %s, %s)>" % \
+        return "<%s(%s, %s, %s, %s)>" % \
             (
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
                 "score={}".format(self.score),
