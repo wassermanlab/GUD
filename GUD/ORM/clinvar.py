@@ -88,10 +88,10 @@ class ClinVar(Base):
         return q.all()
    
     @classmethod
-    def select_by_name(cls, session, clinvarID, as_genomic_feature=False):
+    def select_by_clinvarID(cls, session, clinvarID, as_genomic_feature=False):
         """
-        Query refGene objects by common name. If no name is provided,
-        query all genes.
+        Query clinvar objects by clinvarID. If no name is provided,
+        query all ids.
         """
         q = session.query(cls)
         q = session.query(cls, Region).\
