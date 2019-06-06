@@ -14,7 +14,6 @@ usage: name2sample.py --name STR [-h] [--dummy-dir DIR] [-o FILE]
 """
 
 help_msg = """%s
-
 identifies one or more samples in GUD that match the given name.
 
   --name STR          name to match (e.g. "B cell")

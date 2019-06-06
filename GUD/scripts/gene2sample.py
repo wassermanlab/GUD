@@ -20,8 +20,7 @@ usage: gene2sample.py (--gene [STR ...] | --gene-file FILE)
 """
 
 help_msg = """%s
-
-I have to fix this...
+returns one or more samples in which genes are expressed.
 
   --gene [STR ...]    gene(s) (e.g. "CD19")
   --gene-file FILE    file containing a list of genes
@@ -32,8 +31,6 @@ optional arguments:
   -o FILE             output file (default = stdout)
 
 expression arguments:
-  --percent FLT       min. percentile of expression for TSS in
-                      output samples (default = %s)
   --sample INT        max. number of samples to return (if 0,
                       return all samples; default = %s)
   --tpm FLT           min. expression levels (in TPM) for TSS in
@@ -48,7 +45,6 @@ mysql arguments:
 """ % \
 (
     usage_msg,
-    GUDglobals.min_percent,
     GUDglobals.max_samples,
     GUDglobals.min_tpm,
     GUDglobals.db_name,
@@ -97,20 +93,12 @@ def parse_args():
         "expression arguments"
     )
     exp_group.add_argument(
-        "-a", "--all",
-        action="store_true"
-    )
-    exp_group.add_argument(
-        "--percent",
-        default=0.0
+        "--sample",
+        default=GUDglobals.max_samples
     )
     exp_group.add_argument(
         "--tpm",
         default=GUDglobals.min_tpm
-    )
-    exp_group.add_argument(
-        "--tss",
-        default=GUDglobals.max_tss
     )
 
     # MySQL args
@@ -153,8 +141,8 @@ def check_args(args):
     
     # Check mandatory arguments
     if (
-        not args.sample and \
-        not args.sample_file
+        not args.gene and \
+        not args.gene_file
     ):
         print(": "\
             .join(
@@ -167,7 +155,7 @@ def check_args(args):
         )
         exit(0)
 
-    if args.sample and args.sample_file:
+    if args.gene and args.gene_file:
         print(": "\
             .join(
                 [
@@ -180,26 +168,9 @@ def check_args(args):
         )
         exit(0)
 
-    # Check for invalid percent
-    try:
-        args.percent = float(args.percent)
-    except:
-        print(": "\
-            .join(
-                [
-                    "%s\ngene2sample.py" % usage_msg,
-                    "error",
-                    "argument \"--percent\"",
-                    "invalid float value",
-                    "\"%s\"\n" % args.percent
-                ]
-            )
-        )
-        exit(0)
-
     # Check for invalid sample
     try:
-        args.tss = int(args.tss)
+        args.sample = int(args.sample)
     except:
         print(": "\
             .join(
@@ -208,7 +179,7 @@ def check_args(args):
                     "error",
                     "argument \"--sample\"",
                     "invalid int value",
-                    "\"%s\"\n" % args.tss
+                    "\"%s\"\n" % args.sample
                 ]
             )
         )
@@ -221,7 +192,7 @@ def check_args(args):
         print(": "\
             .join(
                 [
-                    "%s\nsample2gene.py" % usage_msg,
+                    "%s\ngene2sample.py" % usage_msg,
                     "error",
                     "argument \"--tpm\"",
                     "invalid float value",
@@ -273,13 +244,41 @@ def main():
             gene,
             as_genomic_feature=True
         ):
-            sampleIDs +=\
-                tss.qualifiers["sampleIDs"]
-        # Get samples
-        samples = Sample.select_by_uids(
-            session,
-            list(set(sampleIDs))
-        )
+            # Initialize
+            avg_expression_levels = {}
+#            GUDglobals.write(
+#                None, ">Gene:%s;TSS:%s" % \
+#                (
+#                    tss.qualifiers["gene"],
+#                    tss.qualifiers["tss"]
+#                )
+#            )
+            print(len(tss.qualifiers["sampleIDs"]), len(tss.qualifiers["avg_expression_levels"]))
+            exit(0)
+            # For each sample...
+            for i in range(
+                len(tss.qualifiers["sampleIDs"])
+            ):
+                avg_expression_levels.setdefault(
+                    tss.qualifiers["sampleIDs"][i],
+                    tss.qualifiers["avg_expression_levels"][i]
+                )
+            print(avg_expression_levels)
+            exit(0)
+            print(tss.qualifiers["avg_expression_levels"])
+            exit(0)
+#            sampleIDs +=\
+#                tss.qualifiers["sampleIDs"]
+            # Get samples
+            samples = Sample.select_by_uids(
+                session,
+                list(set(tss.qualifiers["sampleIDs"]))
+            )
+            print(samples)
+            exit(0)
+
+    exit(0)
+        
 
     # If output file...
     if args.o:

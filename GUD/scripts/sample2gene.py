@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import re
 import shutil
 import sys
 
@@ -20,7 +21,6 @@ usage: sample2gene.py (--sample [STR ...] | --sample-file FILE)
 """
 
 help_msg = """%s
-
 identifies one or more genes selectively expressed in samples.
 
   --sample [STR ...]  sample(s) (e.g. "B cell")
@@ -344,6 +344,7 @@ def get_selectively_expressed_tss(session,
     tssIDs = set()
     sample2tss = []
     sel_exp_tss = []
+    isfloat = re.compile("\d+(\.\d+)?")
 
     # For each sample...
     for feat in Sample.select_by_names(session):
@@ -390,15 +391,32 @@ def get_selectively_expressed_tss(session,
                 expression = {}
                 bg_exp = 0.0 # background exp.
                 fg_exp = 0.0 # foreground exp.
+                # Get sample IDs,
+                # avg. expression levels
+                # and indices
+                sampleIDs = str(
+                    tss.qualifiers["sampleIDs"]
+                ).split(",")
+                avg_exps = str(
+                    tss.qualifiers["avg_expression_levels"]
+                ).split(",")
+                idxs = list(reversed(range(len(sampleIDs))))
+                # For each sample ID...
+                for i in idxs:
+                    if (
+                        sampleIDs[i].isdigit() and \
+                        isfloat.match(avg_exps[i])
+                    ):
+                        sampleIDs[i] = int(sampleIDs[i])
+                        avg_exps[i] = float(avg_exps[i])
+                    else:
+                        sampleIDs.pop(i)
+                        avg_exps.pop(i)
                 # For each sampleID
-                for i in range(
-                    len(tss.qualifiers["sampleIDs"])
-                ):
+                for i in range(len(sampleIDs)):
                     # Initialize
-                    sampleID = tss\
-                        .qualifiers["sampleIDs"][i]
-                    avg_exp = tss\
-                        .qualifiers["avg_expression_levels"][i]
+                    sampleID = sampleIDs[i]
+                    avg_exp = avg_exps[i]
                     # If sample...
                     if sampleID in uid2name:
                         expression.setdefault(

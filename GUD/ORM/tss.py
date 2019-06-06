@@ -364,21 +364,6 @@ class TSS(Base):
     @classmethod
     def __as_genomic_feature(self, feat):
 
-        # Initialize
-        isfloat = re.compile("\d+(\.\d+)?")
-        sampleIDs = []
-        avg_expression_levels = []
-
-        # For each exon start...
-        for i in str(feat.TSS.sampleIDs).split(","):
-            if i.isdigit():
-                sampleIDs.append(int(i))
-        
-        # For each exon end...
-        for i in str(feat.TSS.avg_expression_levels).split(","):
-            if isfloat.match(i):
-                avg_expression_levels.append(float(i))
-
         # Define qualifiers
         qualifiers = {
             "uid": feat.TSS.uid,
