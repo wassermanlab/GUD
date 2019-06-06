@@ -222,7 +222,9 @@ class Gene(Base):
 
         q = session.query(cls, Region, Source).\
             join().\
-            filter(cls.uid == uid)
+            filter(cls.uid == uid,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID,)
 
         if as_genomic_feature:
             return cls.__as_genomic_feature(
@@ -230,6 +232,7 @@ class Gene(Base):
             )
 
         return q.first()
+
 #
 #    @classmethod
 #    def select_by_uids(cls, session, uids=[],
@@ -290,16 +293,16 @@ class Gene(Base):
 
         # Define qualifiers
         qualifiers = {
-            "uid": uid,
-            "regionID": regionID,
-            "name": name,
-            "name2": name2,
+            "uid": feat.Gene.uid,
+            "regionID": feat.Gene.regionID,
+            "name": feat.Gene.name,
+            "name2": feat.Gene.name2,
             "cdsStart": int(feat.Gene.cdsStart),
             "cdsEnd": int(feat.Gene.cdsEnd),
-            "exonStarts": exonStarts,
-            "exonEnds": exonEnds,
-            "sourceID": sourceID,
-            "source" : feat.Source.name,           
+            "exonStarts": feat.Gene.exonStarts,
+            "exonEnds": feat.Gene.exonEnds,
+            "sourceID": feat.Gene.sourceID,
+            "source": feat.Source.name,           
         }
 
         return GenomicFeature(
@@ -308,14 +311,15 @@ class Gene(Base):
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_type = "Gene",
-            feat_id = feat.Gene.name2,
+            feat_id = "%s_%s"%(self.__tablename__, feat.Gene.uid),
             qualifiers = qualifiers
         )
 
     def __repr__(self):
 
-        return "<Gene(%s, %s, %s, %s, %s)>" % \
-            (
+        return "<%s(%s, %s, %s, %s, %s)>" % \
+            (   
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
                 "name={}".format(self.name),

@@ -1,6 +1,7 @@
 from binning import (
     containing_bins,
-    contained_bins
+    contained_bins,
+    assign_bin
 )
 from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
@@ -114,8 +115,10 @@ class CNV(Base):
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_type = "CopyNumberVariant",
+            feat_id = "%s_%s"%(self.__tablename__, feat.CNV.uid),
             qualifiers = qualifiers)
 
     def __repr__(self):
-        return "<CNV(uid={}, regionID={}, sourceID={}, copy_number={}, clinical_significance={}, variant_type={}yes)>".format(
+        return "<%s(uid={}, regionID={}, sourceID={}, copy_number={}, clinical_significance={}, variant_type={}yes)>".format(
+            self.__tablename__,
             self.uid, self.regionID, self.sourceID, self.copy_number, self.clinical_interpretation, self.variant_type)

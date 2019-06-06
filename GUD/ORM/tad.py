@@ -224,18 +224,15 @@ class TAD(Base):
             int(feat.Region.end),
             strand=feat.Region.strand,
             feat_type="TAD",
-            feat_id="%s|%s|%s" % (
-                qualifiers["source"],
-                qualifiers["restriction_enzyme"],
-                qualifiers["sample"].replace(" ", "_")
-            ),
+            feat_id = "%s_%s"%(self.__tablename__, feat.TAD.uid),
             qualifiers=qualifiers
         )
 
     def __repr__(self):
 
-        return "<TAD(%s, %s, %s, %s, %s, %s)>" % \
+        return "<%s(%s, %s, %s, %s, %s, %s)>" % \
             (
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
                 "sampleID={}".format(self.sampleID),

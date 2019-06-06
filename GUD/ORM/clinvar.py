@@ -138,16 +138,17 @@ class ClinVar(Base):
             int(feat.Region.start),
             int(feat.Region.end),
             strand = feat.Region.strand,
-            feat_type = "ClinVar",
+            feat_id = "%s_%s"%(self.__tablename__, feat.ClinVar.uid),
             qualifiers = qualifiers)
 
     def __repr__(self):
-        return "<ClinVar(uid={}, regionID={}, sourceID={},\
+        return "<%s(uid={}, regionID={}, sourceID={},\
         ref={}, alt={}, clinvarID={},\
         ANN_Annotation={}, ANN_Annotation_Impact={}, ANN_Gene_Name={},\
         ANN_Gene_ID={}, ANN_Feature_Type={}, ANN_Feature_ID={},\
         CADD={}, CLNDISDB={}, CLNDN={}, CLNSIG={},\
         gnomad_exome_af_global={}, gnomad_exome_hom_global={}, gnomad_genome_af_global={}, gnomad_genome_hom_global={})>".format(
+            self.__tablename__,
             self.uid, self.regionID, self.sourceID, self.ref, self.alt, self.clinvarID,
             self.ANN_Annotation, self.ANN_Annotation_Impact, self.ANN_Gene_Name,
             self.ANN_Gene_ID, self.ANN_Feature_Type, self.ANN_Feature_ID,

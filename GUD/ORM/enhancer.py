@@ -141,7 +141,7 @@ class Enhancer(Base):
     
         return q.all()
 
-    def __as_genomic_feature(feat):
+    def __as_genomic_feature(self, feat):
 
         # Define qualifiers
         qualifiers = {
@@ -165,17 +165,15 @@ class Enhancer(Base):
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_type = "Enhancer",
-            feat_id = "%s|%s" % (
-                qualifiers["source"],
-                qualifiers["sample"].replace(" ", "_")
-            ),
+            feat_id = "%s_%s"%(self.__tablename__, feat.Enhancer.uid),
             qualifiers = qualifiers
         )
 
     def __repr__(self):
 
-        return "<Enhancer(%s, %s, %s, %s, %s)>" % \
+        return "<%s(%s, %s, %s, %s, %s)>" % \
             (
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
                 "sampleID={}".format(self.sampleID),
