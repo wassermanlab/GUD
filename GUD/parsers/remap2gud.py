@@ -4,7 +4,7 @@ import argparse
 from binning import assign_bin
 import getpass
 import os
-from pybedtools import BedTool, cleanup
+from pybedtools import BedTool, cleanup, set_tempdir
 import re
 import shutil
 from sqlalchemy import create_engine
@@ -186,6 +186,7 @@ def remap_to_gud(user, pwd, host, port, db,
     samples = {}
     table = TFBinding()
     experiment_type = "ChIP-seq"
+    set_tempdir(dummy_dir)
     db_name = "mysql://{}:{}@{}:{}/{}".format(
         user, pwd, host, port, db
     )
@@ -348,10 +349,8 @@ def remap_to_gud(user, pwd, host, port, db,
             )
             # Remove dummy BED
             os.remove(dummy_file)
-
-    # Clean PyBedTools files
-    cleanup(remove_all=True)
-    exit(0)
+        # Clean PyBedTools files
+        cleanup(remove_all=True)
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(
