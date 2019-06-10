@@ -259,7 +259,7 @@ def remap_to_gud(user, pwd, host, port, db,
         and not bed_file.endswith(".bed.gz"):
             continue
         # Get TF name
-        m = re.search("^remap\d{4}_(\w+)_all_macs2_hg\d{2}_.+.bed", bed_file)
+        m = re.search("^remap\d{4}_(.+)_all_macs2_hg\d{2}_.+.bed", bed_file)
         print(bed_file)
         if m:
             print(m.group(1))
