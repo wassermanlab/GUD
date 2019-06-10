@@ -288,11 +288,11 @@ def remap_to_gud(user, pwd, host, port, db,
             ):
                 d, tf, s = line[3].split(".")
                 # If sample exists...
-                if s in samples:
+                if s in samples and tf == m.group(1):
                     # Initialize
                     dummy_file = os.path.join(
                         exp_dummy_dir,
-                        "%s.bed" % bed
+                        "%s.bed" % s
                     )
                     # Write
                     GUDglobals.write(
