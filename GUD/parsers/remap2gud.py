@@ -288,11 +288,10 @@ def remap_to_gud(user, pwd, host, port, db,
             ):
                 # Initialize
                 d, tf, s = line[3].split(".")
+                tf = tf.split("_")
                 s = s.split("_")
                 # If sample exists...
-                if s[0] in samples:
-                    if tf != m.group(1):
-                        print("tf", tf)
+                if s[0] in samples and tf[0] != m.group(1):
 #                    # Initialize
 #                    dummy_file = os.path.join(
 #                        exp_dummy_dir,
@@ -305,7 +304,7 @@ def remap_to_gud(user, pwd, host, port, db,
 #                    )
                     continue
                 else:
-                    print("sample", s)
+                    print(line)
     exit(0)
 
     # For each line...
