@@ -326,7 +326,7 @@ def remap_to_gud(user, pwd, host, port, db,
         # For each BED file...
         for bed_file in os.listdir(
             exp_dummy_dir
-        )
+        ):
             print(bed_file)
         exit(0)
 
