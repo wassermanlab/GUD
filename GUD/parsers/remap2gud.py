@@ -291,7 +291,7 @@ def remap_to_gud(user, pwd, host, port, db,
                 tf = tf.split("_")
                 s = s.split("_")
                 # If sample exists...
-                if s[0] in samples and tf[0] != m.group(1):
+                if s[0] in samples and tf[0] == m.group(1):
 #                    # Initialize
 #                    dummy_file = os.path.join(
 #                        exp_dummy_dir,
