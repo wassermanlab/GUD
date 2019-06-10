@@ -89,8 +89,9 @@ class Chrom(Base):
 
     def __repr__(self):
 
-        return "<Chrom(%s, %s)>" % \
+        return "<%s(%s, %s)>" % \
             (
+                self.__tablename__,
                 "chrom={}".format(self.chrom),
                 "size={}".format(self.size)
             )

@@ -211,8 +211,9 @@ class Sample(Base):
 
     def __repr__(self):
 
-        return "<Sample(%s, %s, %s, %s, %s)>" % \
+        return "<%s(%s, %s, %s, %s, %s)>" % \
             (
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "name={}".format(self.name),
                 "treatment={}".format(self.treatment),

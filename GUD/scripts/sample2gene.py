@@ -287,8 +287,6 @@ def main():
         # Initialize
         genes = set()
         tss_count = 0
-
-        # Initialize
         if args.tss <= 0:
             args.tss = len(tss)
 

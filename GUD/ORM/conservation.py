@@ -126,8 +126,12 @@ class Conservation(Base):
             feat.Region.chrom,
             int(feat.Region.start),
             int(feat.Region.end),
-            feat_type = "Conservation",
-            feat_id = "%s_%s"%(self.__tablename__, feat.Conservation.uid),
+            feat_type = self.__tablename__,
+            feat_id = "%s_%s" % \
+                (
+                    self.__tablename__,
+                    feat.Conservation.uid
+                ),
             qualifiers = qualifiers
         )
 

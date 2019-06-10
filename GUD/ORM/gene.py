@@ -277,19 +277,22 @@ class Gene(Base):
     @classmethod
     def __as_genomic_feature(self, feat):
 
-        # Initialize
-        exonStarts = []
-        exonEnds = []
+        # Note for Oriol:
+        # Move this within your code!!!
 
-        # For each exon start...
-        for i in str(feat.Gene.exonStarts).split(","):
-            if i.isdigit():
-                exonStarts.append(int(i))
-        
-        # For each exon end...
-        for i in str(feat.Gene.exonEnds).split(","):
-            if i.isdigit():
-                exonStarts.append(int(i))
+#        # Initialize
+#        exonStarts = []
+#        exonEnds = []
+#
+#        # For each exon start...
+#        for i in str(feat.Gene.exonStarts).split(","):
+#            if i.isdigit():
+#                exonStarts.append(int(i))
+#        
+#        # For each exon end...
+#        for i in str(feat.Gene.exonEnds).split(","):
+#            if i.isdigit():
+#                exonStarts.append(int(i))
 
         # Define qualifiers
         qualifiers = {
@@ -310,8 +313,12 @@ class Gene(Base):
             int(feat.Region.start),
             int(feat.Region.end),
             strand = feat.Region.strand,
-            feat_type = "Gene",
-            feat_id = "%s_%s"%(self.__tablename__, feat.Gene.uid),
+            feat_type = self.__tablename__,
+            feat_id = "%s_%s" % \
+                (
+                    self.__tablename__,
+                    feat.Gene.uid
+                ),
             qualifiers = qualifiers
         )
 

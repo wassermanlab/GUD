@@ -164,8 +164,12 @@ class Enhancer(Base):
             int(feat.Region.start),
             int(feat.Region.end),
             strand = feat.Region.strand,
-            feat_type = "Enhancer",
-            feat_id = "%s_%s"%(self.__tablename__, feat.Enhancer.uid),
+            feat_type = self.__tablename__,
+            feat_id = "%s_%s" % \
+                (
+                    self.__tablename__,
+                    feat.Enhancer.uid
+                ),
             qualifiers = qualifiers
         )
 

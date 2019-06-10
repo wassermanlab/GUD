@@ -152,8 +152,9 @@ class Region(Base):
 
     def __repr__(self):
 
-        return "<Region(%s, %s, %s, %s, %s, %s)>" % \
+        return "<%s(%s, %s, %s, %s, %s, %s)>" % \
             (
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "bin={}".format(self.bin),
                 "chrom={}".format(self.chrom),

@@ -114,8 +114,9 @@ class HistoneModification(Base):
 
     def __repr__(self):
 
-        return "<HistoneModification(%s, %s, %s, %s, %s, %s)>" % \
+        return "<%s(%s, %s, %s, %s, %s, %s)>" % \
             (
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
                 "sampleID={}".format(self.sampleID),

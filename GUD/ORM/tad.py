@@ -223,8 +223,12 @@ class TAD(Base):
             int(feat.Region.start),
             int(feat.Region.end),
             strand=feat.Region.strand,
-            feat_type="TAD",
-            feat_id = "%s_%s"%(self.__tablename__, feat.TAD.uid),
+            feat_type = self.__tablename__,
+            feat_id = "%s_%s" % \
+                (
+                    self.__tablename__,
+                    feat.TAD.uid
+                ),
             qualifiers=qualifiers
         )
 
