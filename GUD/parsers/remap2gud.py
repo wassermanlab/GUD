@@ -4,6 +4,7 @@ import argparse
 from binning import assign_bin
 import getpass
 import os
+from pybedtools import BedTool
 import re
 import shutil
 from sqlalchemy import create_engine
@@ -308,6 +309,12 @@ def remap_to_gud(user, pwd, host, port, db,
                         dummy_file,
                         "\t".join(line)
                     )
+
+    # For each directory...
+    for directory in os.listdir(
+        dummy_dir
+    ):
+        print(directory)
     exit(0)
 
     # For each line...
