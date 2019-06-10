@@ -35,7 +35,6 @@ usage: %s --genome STR --metadata FILE
 os.path.basename(__file__)
 
 help_msg = """%s
-
 inserts ENCODE features into GUD. "--metadata" and "--data-dir"
 refer to executing "xargs -n 1 curl -O -L < file.txt". types of
 genomic features include "accessibility", "histone", or "tf".

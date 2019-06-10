@@ -32,7 +32,6 @@ usage: %s --data-dir DIR --samples FILE
 os.path.basename(__file__)
 
 help_msg = """%s
-
 inserts ReMap transcription factor ChIP-seq data into GUD.
 
   --data-dir DIR      directory where data was downloaded
@@ -259,7 +258,9 @@ def remap_to_gud(user, pwd, host, port, db,
         if not bed_file.endswith(".bed") \
         and not bed_file.endswith(".bed.gz"):
             continue
-        print(bed_file)
+        # Get TF name
+        m = re.search("^remap\d{4}_(\w+)_.+.bed", bed_file)
+        print(m.group(1))
     exit(0)
 
     # For each line...

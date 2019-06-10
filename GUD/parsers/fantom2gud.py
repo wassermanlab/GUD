@@ -31,7 +31,6 @@ usage: %s  --matrix FILE --samples FILE --feature STR
 os.path.basename(__file__)
 
 help_msg = """%s
-
 inserts "enhancer" and "tss" features from the FANTOM5 consortium
 into GUD. "--matrix" refers to:
 

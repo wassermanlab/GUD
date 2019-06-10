@@ -30,7 +30,6 @@ usage: %s --genome STR [-h]
 os.path.basename(__file__)
 
 help_msg = """%s
-
 inserts features from the UCSC's "refGene" table into GUD.
 
   --genome STR        genome assembly
