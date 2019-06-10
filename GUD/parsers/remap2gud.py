@@ -290,21 +290,21 @@ def remap_to_gud(user, pwd, host, port, db,
                 d, tf, s = line[3].split(".")
                 tf = tf.split("_")
                 s = s.split("_")
+                # Fix sample
+                if s[0] == "LNCAPABL":
+                    s[0] == "LNCAP"
                 # If sample exists...
                 if s[0] in samples and tf[0] == m.group(1):
-#                    # Initialize
-#                    dummy_file = os.path.join(
-#                        exp_dummy_dir,
-#                        "%s.bed" % s
-#                    )
-#                    # Write
-#                    GUDglobals.write(
-#                        dummy_file,
-#                        "\t".join(line)
-#                    )
-                    continue
-                else:
-                    print(line)
+                    # Initialize
+                    dummy_file = os.path.join(
+                        exp_dummy_dir,
+                        "%s.bed" % s[0]
+                    )
+                    # Write
+                    GUDglobals.write(
+                        dummy_file,
+                        "\t".join(line)
+                    )
     exit(0)
 
     # For each line...
