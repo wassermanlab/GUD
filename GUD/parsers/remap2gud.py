@@ -286,8 +286,20 @@ def remap_to_gud(user, pwd, host, port, db,
                     data_dir, bed_file
                 )
             ):
-                print(line)
-            exit(0)
+                d, tf, s = line[3].split(".")
+                # If sample exists...
+                if s in samples:
+                    # Initialize
+                    dummy_file = os.path.join(
+                        exp_dummy_dir,
+                        "%s.bed" % bed
+                    )
+                    # Write
+                    GUDglobals.write(
+                        dummy_file,
+                        "\t".join(line)
+                    )
+    exit(0)
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(
