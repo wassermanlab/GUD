@@ -314,8 +314,21 @@ def remap_to_gud(user, pwd, host, port, db,
     for directory in os.listdir(
         dummy_dir
     ):
-        print(directory)
-    exit(0)
+        # Initialize
+        exp_dummy_dir = os.path.join(
+            dummy_dir, directory
+        )
+        # Skip if directory does not
+        # exist...
+        if not os.path.isdir(
+            exp_dummy_dir
+        ): continue
+        # For each BED file...
+        for bed_file in os.listdir(
+            exp_dummy_dir
+        )
+            print(bed_file)
+        exit(0)
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(
