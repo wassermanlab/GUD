@@ -277,6 +277,9 @@ def remap_to_gud(user, pwd, host, port, db,
                 dummy_dir,
                 "ChIP-seq.%s" % m.group(1)
             )
+            # Skip if already exists
+            if os.path.isdir(exp_dummy_dir):
+                continue
             # Create dummy dir
             if not os.path.isdir(exp_dummy_dir):
                 os.mkdir(exp_dummy_dir)
