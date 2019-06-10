@@ -4,7 +4,7 @@ import argparse
 from binning import assign_bin
 import getpass
 import os
-from pybedtools import BedTool
+from pybedtools import BedTool, cleanup
 import re
 import shutil
 from sqlalchemy import create_engine
@@ -315,6 +315,10 @@ def remap_to_gud(user, pwd, host, port, db,
         dummy_dir
     ):
         # Initialize
+        dummy_file = os.path.join(
+            dummy_dir,
+            "%s.bed" % directory
+        )
         exp_dummy_dir = os.path.join(
             dummy_dir, directory
         )
@@ -327,8 +331,27 @@ def remap_to_gud(user, pwd, host, port, db,
         for bed_file in os.listdir(
             exp_dummy_dir
         ):
-            print(bed_file)
-        exit(0)
+            # Initialize
+            file_name = os.path.join(
+                exp_dummy_dir, bed_file
+            )
+            # Load BED
+            b = BedTool(file_name)
+            # Sort BED
+            b = b.sort()
+            # Save BED
+            b.saveas(dummy_file)
+            # Copy dummy BED to original
+            shutil.copy(
+                dummy_file,
+                file_name
+            )
+            # Remove dummy BED
+            os.remove(dummy_file)
+
+    # Clean PyBedTools files
+    cleanup(remove_all=True)
+    exit(0)
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(
