@@ -178,9 +178,8 @@ def main():
     )
 
 def remap_to_gud(user, pwd, host, port, db,
-    data_dir, samples_file, feat_type,
-    cluster=False, dummy_dir="/tmp/",
-    source_name="ReMap"):
+    data_dir, samples_file, cluster=False,
+    dummy_dir="/tmp/", source_name="ReMap"):
 
     # Initialize
     samples = {}
