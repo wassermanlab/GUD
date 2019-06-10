@@ -299,6 +299,8 @@ def remap_to_gud(user, pwd, host, port, db,
                         dummy_file,
                         "\t".join(line)
                     )
+                else:
+                    print(line[3])
     exit(0)
 
     # For each line...
