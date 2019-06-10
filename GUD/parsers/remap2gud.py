@@ -21,7 +21,7 @@ from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-from .bed2gud import bed_to_gud_db
+#from .bed2gud import bed_to_gud_db
 from .initialize import initialize_gud_db
 
 usage_msg = """
@@ -40,8 +40,6 @@ inserts ReMap transcription factor ChIP-seq data into GUD.
 
 optional arguments:
   -h, --help          show this help message and exit
-  -c, --cluster       cluster genome regions by UCSC's regCluster
-                      (default = False)
   --dummy-dir DIR     dummy directory (default = "/tmp/")
   --source STR        source name (default = "ReMap")
 
@@ -253,7 +251,15 @@ def remap_to_gud(user, pwd, host, port, db,
         # Create table
         table.__table__.create(bind=engine)
 
-    print(samples)
+    # For each file...
+    for bed_file in os.listdir(
+        data_dir
+    ):
+        # Skip non-BED files
+        if not bed_file.endswith(".bed") \
+        and not bed_file.endswith(".bed.gz"):
+            continue
+        print(bed_file)
     exit(0)
 
     # For each line...
