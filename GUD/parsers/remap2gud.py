@@ -26,8 +26,8 @@ from .initialize import initialize_gud_db
 
 usage_msg = """
 usage: %s --data-dir DIR --samples FILE
-                     [-h] [-c] [--dummy-dir DIR] [--source STR]
-                     [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
+                    [-h] [-c] [--dummy-dir DIR] [--source STR]
+                    [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
 """ % \
 os.path.basename(__file__)
 
@@ -241,7 +241,6 @@ def remap_to_gud(user, pwd, host, port, db,
         else: cancer = False
         # Get sample
         samples.setdefault(cell_type, {
-            "sample_type": sample_type,
             "cell_or_tissue": cell_or_tissue,
             "add": add,
             "treatment": treatment,
@@ -254,8 +253,8 @@ def remap_to_gud(user, pwd, host, port, db,
         # Create table
         table.__table__.create(bind=engine)
 
-
     print(samples)
+    exit(0)
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(
