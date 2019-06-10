@@ -261,7 +261,8 @@ def remap_to_gud(user, pwd, host, port, db,
         # Get TF name
         m = re.search("^remap\d{4}_(\w+)_all_macs2_hg\d{2}_.+.bed", bed_file)
         print(bed_file)
-        print(m.group(1))
+        if m:
+            print(m.group(1))
     exit(0)
 
     # For each line...
