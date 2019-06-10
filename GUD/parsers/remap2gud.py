@@ -185,6 +185,7 @@ def remap_to_gud(user, pwd, host, port, db,
     # Initialize
     samples = {}
     table = TFBinding()
+    experiment_type = "ChIP-seq"
     db_name = "mysql://{}:{}@{}:{}/{}".format(
         user, pwd, host, port, db
     )
@@ -220,6 +221,16 @@ def remap_to_gud(user, pwd, host, port, db,
         session,
         source_name
     )
+
+    # Get experiment
+    experiment = Experiment()
+    if experiment.is_unique(
+        session,
+        experiment_type
+    ):
+        experiment.name = experiment_type
+        session.add(experiment)
+        session.commit()
 
     # Get samples
     for line in GUDglobals.parse_tsv_file(
@@ -259,11 +270,25 @@ def remap_to_gud(user, pwd, host, port, db,
         and not bed_file.endswith(".bed.gz"):
             continue
         # Get TF name
-        m = re.search("^remap\d{4}_(.+)_all_macs2_hg\d{2}_.+.bed", bed_file)
-        print(bed_file)
+        m = re.search(
+            "^remap\d{4}_(.+)_all_.+.bed", bed_file)
         if m:
-            print(m.group(1))
-    exit(0)
+            # Initialize
+            exp_dummy_dir = os.path.join(
+                dummy_dir,
+                "ChIP-seq.%s" % m.group(1)
+            )
+            # Create dummy dir
+            if not os.path.isdir(exp_dummy_dir):
+                os.mkdir(exp_dummy_dir)
+            # For each line...
+            for line in GUDglobals.parse_tsv_file(
+                os.path.join(
+                    data_dir, bed_file
+                )
+            ):
+                print(line)
+            exit(0)
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(
