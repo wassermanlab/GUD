@@ -310,7 +310,6 @@ def remap_to_gud(user, pwd, host, port, db,
                         dummy_file,
                         "\t".join(line)
                     )
-        break
 
     # For each directory...
     for directory in os.listdir(
@@ -354,7 +353,9 @@ def remap_to_gud(user, pwd, host, port, db,
                         )
                     )
             # Load BED from string
-            a = BedTool("\n".join(lines), from_string=True)
+            a = BedTool(
+                "\n".join(lines), from_string=True
+            )
             # Sort BED
             a = a.sort()
             # Save BED
