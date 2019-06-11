@@ -346,7 +346,11 @@ def remap_to_gud(user, pwd, host, port, db,
                 if len(l) >= 7:
                     lines.append(
                         "\t".join(
-                            l[:7] + [l[6], "0,0,0"]
+                            l[:7] + \
+                            [
+                                str(int(l[6])+1),
+                                "0,0,0"
+                            ]
                         )
                     )
             # Load BED from string
