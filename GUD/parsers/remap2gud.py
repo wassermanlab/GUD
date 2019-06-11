@@ -341,7 +341,9 @@ def remap_to_gud(user, pwd, host, port, db,
             a = BedTool(file_name)
             # For line in BED...
             for l in a:
-                lines.append("\t".join(l[:6]))
+                # If BED12...
+                if len(l) == 12:
+                    lines.append("\t".join(l))
             # Load BED from string
             a = BedTool("\n".join(lines), from_string=True)
             # Sort BED
