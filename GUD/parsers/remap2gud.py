@@ -333,15 +333,21 @@ def remap_to_gud(user, pwd, host, port, db,
             exp_dummy_dir
         ):
             # Initialize
+            lines = []
             file_name = os.path.join(
                 exp_dummy_dir, bed_file
             )
             # Load BED
-            b = BedTool(file_name)
+            a = BedTool(file_name)
+            # For line in BED...
+            for l in a:
+                lines.append("\t".join(l[:6]))
+            # Load BED from string
+            a = BedTool("\n".join(lines), from_string=True)
             # Sort BED
-            b = b.sort()
+            a = a.sort()
             # Save BED
-            b.saveas(dummy_file)
+            a.saveas(dummy_file)
             # Copy dummy BED to original
             shutil.copy(
                 dummy_file,
@@ -351,6 +357,7 @@ def remap_to_gud(user, pwd, host, port, db,
             os.remove(dummy_file)
         # Clean PyBedTools files
         cleanup(remove_all=True)
+    exit(0)
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(
