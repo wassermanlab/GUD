@@ -537,11 +537,7 @@ def remap_to_gud(user, pwd, host, port, db,
                         feat.experimentID =\
                             experiment.uid
                         feat.sourceID = sou.uid
-                        if feat_type == "histone":
-                            feat.histone_type =\
-                                experiment_target
-                        if feat_type == "tf":
-                            feat.tf = experiment_target
+                        feat.tf = experiment_target
                         session.add(feat)
                         session.commit()
             except:
@@ -611,11 +607,7 @@ def remap_to_gud(user, pwd, host, port, db,
                             feat.experimentID =\
                                 experiment.uid
                             feat.sourceID = sou.uid
-                            if feat_type == "histone":
-                                feat.histone_type =\
-                                    experiment_target
-                            if feat_type == "tf":
-                                feat.tf = experiment_target
+                            feat.tf = experiment_target
                             session.add(feat)
                             session.commit()
 
