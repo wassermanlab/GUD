@@ -351,6 +351,8 @@ def remap_to_gud(user, pwd, host, port, db,
     for directory in os.listdir(
         dummy_dir
     ):
+        print(directory)
+        exit(0)
         # Initialize
         dummy_file = os.path.join(
             dummy_dir,
@@ -419,7 +421,6 @@ def remap_to_gud(user, pwd, host, port, db,
         # Cluster regions
         if cluster:
             # Initialize
-            label2accession = {}
             regions = []
             bed_files = os.path.join(
                 exp_dummy_dir,
@@ -479,23 +480,6 @@ def remap_to_gud(user, pwd, host, port, db,
                         ],
                         stderr=subprocess.STDOUT
                     )
-
-                # For each line...
-                for line in GUDglobals.parse_tsv_file(
-                    table_file
-                ):
-                    m = re.search("%s.%s/(\w+).bed" %\
-                        (
-                            experiment_type.replace(" ", "_"),
-                            str(experiment_target)
-                        ),
-                        line[0]
-                    )
-                    if m:
-                        label2accession.setdefault(
-                            line[-1],
-                            m.group(1)
-                        )
                 # For each line...
                 for line in GUDglobals.parse_tsv_file(
                     "%s.bed" % cluster_file
@@ -567,8 +551,67 @@ def remap_to_gud(user, pwd, host, port, db,
                     # Skip regCluster BED file
                     if bed_file == "regCluster.bed":
                         continue
-                    print(bed_file)
-                    exit(0)
+                    # Get sample
+                    m = re.search("^(.+).bed$", bed_file)
+                    sam_uid = accession2sample[m.group(1)]
+                    # Load BED
+                    file_name = os.path.join(
+                        exp_dummy_dir, bed_file
+                    )
+                    a = BedTool(file_name)
+                    # For line in BED...
+                    for l in a.merge():
+                        # Get coordinates
+                        chrom = l[0]
+                        start = int(l[1])
+                        end = int(l[2])
+                        # Get region
+                        region = Region()
+                        if region.is_unique(
+                            session,
+                            chrom,
+                            start,
+                            end
+                        ):
+                            # Insert region
+                            region.bin = assign_bin(start, end)
+                            region.chrom = chrom
+                            region.start = start
+                            region.end = end
+                            session.add(region)
+                            session.commit()
+                        reg = region.select_unique(
+                            session,
+                            chrom,
+                            start,
+                            end
+                        )
+                        regions.append(reg.uid)
+                    # For each region...
+                    for reg_uid in regions:
+                        # Get TF feature
+                        feat = TFBinding()
+                        is_unique = feat.is_unique(
+                            session,
+                            reg_uid,
+                            sam_uid,
+                            exp.uid,
+                            sou.uid,
+                            experiment_target
+                        )
+                        # Insert feature to GUD
+                        if is_unique:
+                            feat.regionID = reg_uid
+                            feat.sampleID = sam_uid
+                            feat.experimentID = exp.uid
+                            feat.sourceID = sou.uid
+                            if feat_type == "histone":
+                                feat.histone_type = experiment_target
+                            if feat_type == "tf":
+                                feat.tf = experiment_target
+                            session.add(feat)
+                            session.commit()
+
             exit(0)
 #        # Do not cluster
 #        else:
