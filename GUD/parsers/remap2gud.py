@@ -186,7 +186,7 @@ def remap_to_gud(user, pwd, host, port, db,
 
     # Initialize
     samples = {}
-    accessions2samples = {}
+    accession2sample = {}
     table = TFBinding()
     experiment_type = "ChIP-seq"
     set_tempdir(dummy_dir)
@@ -422,7 +422,6 @@ def remap_to_gud(user, pwd, host, port, db,
         # Cluster regions
         if cluster:
             # Initialize
-            accession2sample = {}
             label2accession = {}
             regions = []
             bed_files = os.path.join(
