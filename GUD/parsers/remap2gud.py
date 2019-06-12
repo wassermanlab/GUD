@@ -572,6 +572,7 @@ def remap_to_gud(user, pwd, host, port, db,
                     if bed_file == "regCluster.bed":
                         continue
                     # Get sample
+                    print(bed_file)
                     m = re.search("^(.+).bed$", bed_file)
                     sam_uid = accession2sample[m.group(1)]
                     # Load BED
