@@ -557,7 +557,18 @@ def remap_to_gud(user, pwd, host, port, db,
                         session.add(feat)
                         session.commit()
             except:
-                print("here")
+                # For each BED file...
+                for bed_file in os.listdir(
+                    exp_dummy_dir
+                ):
+                    # Skip non-BED files
+                    if not bed_file.endswith(".bed"):
+                        continue
+                    # Skip regCluster BED file
+                    if bed_file == "regCluster.bed":
+                        continue
+                    print(bed_file)
+                    exit(0)
             exit(0)
 #        # Do not cluster
 #        else:
