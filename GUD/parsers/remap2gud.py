@@ -303,7 +303,6 @@ def remap_to_gud(user, pwd, host, port, db,
         # Create table
         table.__table__.create(bind=engine)
 
-
     # Get valid chromosomes
     chroms = Chrom.chrom_sizes(session)
 
@@ -379,7 +378,7 @@ def remap_to_gud(user, pwd, host, port, db,
             directory
         )
         experiment_target = m.group(1)
-        if experiment_target != "GATA2":
+        if experiment_target != "ZZZ3":
             continue
 
         # Skip if completed
@@ -504,7 +503,8 @@ def remap_to_gud(user, pwd, host, port, db,
                     chrom = line[0]
                     start = int(line[1])
                     end = int(line[2])
-                    # If valid chromosome...
+                    # Ignore non-standard chroms,
+                    # scaffolds, etc.
                     if chrom in chroms:
                         # Get region
                         region = Region()
@@ -537,7 +537,7 @@ def remap_to_gud(user, pwd, host, port, db,
                 ):
                     # Get region
                     reg_uid = regions[int(line[0]) - 1]
-                    # Skip invalid regions
+                    # Skip invalid region
                     if not reg_uid: continue
                     # Get sample
                     sam_uid =\

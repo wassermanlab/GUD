@@ -15,6 +15,7 @@ from sqlalchemy_utils import database_exists
 
 # Import from GUD module
 from GUD import GUDglobals
+from GUD.ORM.chrom import Chrom
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.enhancer import Enhancer
 from GUD.ORM.experiment import Experiment
@@ -380,14 +381,16 @@ def bed_to_gud_db(user, pwd, host, port, db,
         # Create table
         table.__table__.create(bind=engine)
 
+    # Get valid chromosomes
+    chroms = Chrom.chrom_sizes(session)
+
     # For each line...
     for line in GUDglobals.parse_tsv_file(bed_file):
         # Skip if not enough elements
         if len(line) < 3: continue
         # Ignore non-standard chroms,
         # scaffolds, etc.
-        m = re.search("^chr(\S+)$", line[0])
-        if not m.group(1) in GUDglobals.chroms:
+        if line[0] not in chroms:
             continue
         # Skip if not start or end
         if not line[1].isdigit(): continue

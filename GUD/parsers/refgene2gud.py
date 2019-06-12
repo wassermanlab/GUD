@@ -14,6 +14,7 @@ from sqlalchemy_utils import database_exists
 
 # Import from GUD module
 from GUD import GUDglobals
+from GUD.ORM.chrom import Chrom
 from GUD.ORM.gene import Gene
 from GUD.ORM.region import Region
 from GUD.ORM.source import Source
@@ -180,6 +181,9 @@ def refgene_to_gud(user, pwd, host, port, db,
         expire_on_commit=False
     )
 
+    # Get valid chromosomes
+    chroms = Chrom.chrom_sizes(session)
+
     table = Gene()
     if not engine.has_table(
         table.__tablename__
@@ -216,16 +220,15 @@ def refgene_to_gud(user, pwd, host, port, db,
         ):
             # Split line
             line = line.split("\t")
-            # Ignore non-standard chroms,
-            # scaffolds, etc.
-            m = re.search("^chr(\S+)$", line[2])
-            if not m.group(1) in GUDglobals.chroms:
-                continue
             # Get coordinates
             chrom = line[2]
             start = int(line[4])
             end = int(line[5])
             strand = line[3]
+            # Ignore non-standard chroms,
+            # scaffolds, etc.
+            if chrom not in chroms:
+                continue
             # Get region
             region = Region()
             if region.is_unique(

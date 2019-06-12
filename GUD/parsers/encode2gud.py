@@ -16,6 +16,7 @@ import subprocess
 
 # Import from GUD module
 from GUD import GUDglobals
+from GUD.ORM.chrom import Chrom
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.histone_modification import HistoneModification
@@ -312,6 +313,9 @@ def encode_to_gud(user, pwd, host, port, db,
         # Create table
         table.__table__.create(bind=engine)
 
+    # Get valid chromosomes
+    chroms = Chrom.chrom_sizes(session)
+
     # For each line...
     for line in GUDglobals.parse_tsv_file(
         metadata_file
@@ -420,9 +424,9 @@ def encode_to_gud(user, pwd, host, port, db,
                 experiment_target
             )
         )
-#        # Remove dummy dir
-#        if os.path.isdir(exp_dummy_dir):
-#            shutil.rmtree(exp_dummy_dir)
+        # Remove dummy dir
+        if os.path.isdir(exp_dummy_dir):
+            shutil.rmtree(exp_dummy_dir)
         # Create dummy dir
         if not os.path.isdir(exp_dummy_dir):
             os.mkdir(exp_dummy_dir)
@@ -450,37 +454,41 @@ def encode_to_gud(user, pwd, host, port, db,
                 exp_dummy_dir,
                 "%s.bed" % accession
             )
-            # Why Oriol, why?!
-            # Because:
-            # 1) ignores non-standard
-            #    chroms (e.g. scaffolds); and
-            # 2) ensures that start < end.
-            if not os.path.exists(bed_file):
-                os.system(
-                    """
-                    zcat %s |\
-                    grep -P "^(chr)?([0-9]{1,2}|[MXY])" |\
-                    sort -k 1,1 -k2,2n |\
-                    awk -v chrs="%s" \
-                    '{\
-                        split(chrs,arr," ");\
-                        for(i in arr){\
-                            dict[arr[i]] = "";\
-                        };\
-                        if($1 in dict){\
-                            if($2<$3){\
-                                print $0;
-                            }
-                        }   
-                    }' > %s""" % (
-                        gz_bed_file,
-                        " ".join(
-                            GUDglobals.chroms +\
-                            ["chr%s" % c for c in GUDglobals.chroms]
-                        ),
-                        bed_file
-                    )
-                )
+            os.system(
+                "zcat %s > %s" \
+                % (gz_bed_file, bed_file)
+            )
+#            # Why Oriol, why?!
+#            # Because:
+#            # 1) ignores non-standard
+#            #    chroms (e.g. scaffolds); and
+#            # 2) ensures that start < end.
+#            if not os.path.exists(bed_file):
+#                os.system(
+#                    """
+#                    zcat %s |\
+#                    grep -P "^(chr)?([0-9]{1,2}|[MXY])" |\
+#                    sort -k 1,1 -k2,2n |\
+#                    awk -v chrs="%s" \
+#                    '{\
+#                        split(chrs,arr," ");\
+#                        for(i in arr){\
+#                            dict[arr[i]] = "";\
+#                        };\
+#                        if($1 in dict){\
+#                            if($2<$3){\
+#                                print $0;
+#                            }
+#                        }   
+#                    }' > %s""" % (
+#                        gz_bed_file,
+#                        " ".join(
+#                            GUDglobals.chroms +\
+#                            ["chr%s" % c for c in GUDglobals.chroms]
+#                        ),
+#                        bed_file
+#                    )
+#                )
         # Cluster regions
         if cluster:
             # Initialize
@@ -599,34 +607,42 @@ def encode_to_gud(user, pwd, host, port, db,
                 chrom = line[0]
                 start = int(line[1])
                 end = int(line[2])
-                # Get region
-                region = Region()
-                if region.is_unique(
-                    session,
-                    chrom,
-                    start,
-                    end
-                ):
-                    # Insert region
-                    region.bin = assign_bin(start, end)
-                    region.chrom = chrom
-                    region.start = start
-                    region.end = end
-                    session.add(region)
-                    session.commit()
-                reg = region.select_unique(
-                    session,
-                    chrom,
-                    start,
-                    end
-                )
-                regions.append(reg.uid)
+                # Ignore non-standard chroms,
+                # scaffolds, etc.
+                if chrom in chroms:
+                    # Get region
+                    region = Region()
+                    if region.is_unique(
+                        session,
+                        chrom,
+                        start,
+                        end
+                    ):
+                        # Insert region
+                        region.bin = assign_bin(start, end)
+                        region.chrom = chrom
+                        region.start = start
+                        region.end = end
+                        session.add(region)
+                        session.commit()
+                    reg = region.select_unique(
+                        session,
+                        chrom,
+                        start,
+                        end
+                    )
+                    regions.append(reg.uid)
+                # ... Else...
+                else:
+                    regions.append(None)
             # For each line...
             for line in GUDglobals.parse_tsv_file(
                 "%s.cluster" % cluster_file
             ):
                 # Get region
-                reg_uid = regions[int(line[0]) - 1] 
+                reg_uid = regions[int(line[0]) - 1]
+                # Skip invalid region
+                if not reg_uid: continue
                 # Get sample
                 sam_uid = accession2sample[label2accession[line[-1]]]
                 # Get accessibility feature
@@ -707,8 +723,9 @@ def encode_to_gud(user, pwd, host, port, db,
                         samples[biosample]["cell_line"],
                         samples[biosample]["treatment"]
                     )
-#        # Remove dummy dir
-#        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
+        # Remove dummy dir
+        if os.path.isdir(exp_dummy_dir):
+            shutil.rmtree(exp_dummy_dir)
 
 #-------------#
 # Main        #
