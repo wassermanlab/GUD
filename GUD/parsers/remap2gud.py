@@ -526,7 +526,7 @@ def remap_to_gud(user, pwd, host, port, db,
                         session,
                         reg_uid,
                         sam_uid,
-                        exp.uid,
+                        experiment.uid,
                         sou.uid,
                         experiment_target
                     )
@@ -534,7 +534,8 @@ def remap_to_gud(user, pwd, host, port, db,
                     if is_unique:
                         feat.regionID = reg_uid
                         feat.sampleID = sam_uid
-                        feat.experimentID = exp.uid
+                        feat.experimentID =\
+                            experiment.uid
                         feat.sourceID = sou.uid
                         if feat_type == "histone":
                             feat.histone_type =\
@@ -599,7 +600,7 @@ def remap_to_gud(user, pwd, host, port, db,
                             session,
                             reg_uid,
                             sam_uid,
-                            exp.uid,
+                            experiment.uid,
                             sou.uid,
                             experiment_target
                         )
@@ -607,7 +608,8 @@ def remap_to_gud(user, pwd, host, port, db,
                         if is_unique:
                             feat.regionID = reg_uid
                             feat.sampleID = sam_uid
-                            feat.experimentID = exp.uid
+                            feat.experimentID =\
+                                experiment.uid
                             feat.sourceID = sou.uid
                             if feat_type == "histone":
                                 feat.histone_type =\
