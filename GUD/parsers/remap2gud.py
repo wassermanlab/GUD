@@ -369,9 +369,12 @@ def remap_to_gud(user, pwd, host, port, db,
             dummy_dir, directory
         )
         # Get TF name
-        m = re.search("^ChIP-seq.(.+)$", directory)
+        m = re.search(
+            "^ChIP-seq.(.+)$",
+            directory
+        )
         experiment_target = m.group(1)
-        if experiment_target != "CTCF": continue
+        if experiment_target != "ZNF274": continue
         # Skip if not directory
         if not os.path.isdir(
             exp_dummy_dir
