@@ -235,6 +235,10 @@ def remap_to_gud(user, pwd, host, port, db,
         experiment.name = experiment_type
         session.add(experiment)
         session.commit()
+    exp = source.select_by_name(
+        session,
+        experiment_type
+    )
 
     # Get samples
     for line in GUDglobals.parse_tsv_file(
@@ -526,7 +530,7 @@ def remap_to_gud(user, pwd, host, port, db,
                         session,
                         reg_uid,
                         sam_uid,
-                        experiment.uid,
+                        exp.uid,
                         sou.uid,
                         experiment_target
                     )
@@ -535,7 +539,7 @@ def remap_to_gud(user, pwd, host, port, db,
                         feat.regionID = reg_uid
                         feat.sampleID = sam_uid
                         feat.experimentID =\
-                            experiment.uid
+                            exp.uid
                         feat.sourceID = sou.uid
                         feat.tf = experiment_target
                         session.add(feat)
@@ -596,7 +600,7 @@ def remap_to_gud(user, pwd, host, port, db,
                             session,
                             reg_uid,
                             sam_uid,
-                            experiment.uid,
+                            exp.uid,
                             sou.uid,
                             experiment_target
                         )
@@ -605,7 +609,7 @@ def remap_to_gud(user, pwd, host, port, db,
                             feat.regionID = reg_uid
                             feat.sampleID = sam_uid
                             feat.experimentID =\
-                                experiment.uid
+                                exp.uid
                             feat.sourceID = sou.uid
                             feat.tf = experiment_target
                             session.add(feat)
