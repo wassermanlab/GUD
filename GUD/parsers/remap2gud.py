@@ -328,15 +328,14 @@ def remap_to_gud(user, pwd, host, port, db,
             exp_dummy_dir
         ): continue
 
-        # Skip if already done
+        # Skip if completed
+        completed_file = os.path.join(
+            dummy_dir,
+            "%s.completed" % directory
+        )
         if not os.path.exists(
             completed_file
         ):
-            # Initialize
-            completed_file = os.path.join(
-                dummy_dir,
-                "%s.completed" % directory
-            )
             # For each BED file...
             for bed_file in os.listdir(
                 exp_dummy_dir
