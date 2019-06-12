@@ -186,6 +186,7 @@ def remap_to_gud(user, pwd, host, port, db,
 
     # Initialize
     samples = {}
+    accessions2samples = {}
     table = TFBinding()
     experiment_type = "ChIP-seq"
     set_tempdir(dummy_dir)
@@ -258,6 +259,42 @@ def remap_to_gud(user, pwd, host, port, db,
             "cell_line": cell_line,
             "cancer": cancer
         })
+
+    # For each sample...
+    for s in samples:
+        # Get sample
+        sample = Sample()
+        if sample.is_unique(
+            session,
+            samples[s]["cell_or_tissue"],
+            samples[s]["treatment"],
+            samples[s]["cell_line"],
+            samples[s]["cancer"]
+        ):
+            sample.name =\
+                samples[s]["cell_or_tissue"]
+            sample.treatment =\
+                samples[s]["treatment"]
+            sample.cell_line =\
+                samples[s]["cell_line"]
+            sample.cancer =\
+                samples[s]["cancer"]
+            session.add(sample)
+            session.commit()
+        sam = sample.select_unique(
+            session,
+            samples[s]["cell_or_tissue"],
+            samples[s]["treatment"],
+            samples[s]["cell_line"],
+            samples[s]["cancer"]
+        )
+        accession2sample.setdefault(
+            s,
+            sam.uid
+        )
+    print(accession2sample)
+    exit(0)
+
 
     # Create table
     if not engine.has_table(table.__tablename__):
@@ -400,50 +437,52 @@ def remap_to_gud(user, pwd, host, port, db,
                 exp_dummy_dir,
                 "regCluster"
             )
-            # Create BED file list
-            if not os.path.exists(bed_files):
-                # For each BED file...
-                for bed_file in os.listdir(
-                    exp_dummy_dir
-                ):
-                    # Skip non-BED files
-                    if not bed_file.endswith(".bed"):
-                        continue
-                    # Skip regCluster BED file
-                    if bed_file == "regCluster.bed":
-                        continue
-                    # Add file to list
-                    GUDglobals.write(
-                        bed_files,
-                        os.path.join(
-                            exp_dummy_dir,
-                            bed_file
+            # Try clustering...
+            try
+                # Create BED file list
+                if not os.path.exists(bed_files):
+                    # For each BED file...
+                    for bed_file in os.listdir(
+                        exp_dummy_dir
+                    ):
+                        # Skip non-BED files
+                        if not bed_file.endswith(".bed"):
+                            continue
+                        # Skip regCluster BED file
+                        if bed_file == "regCluster.bed":
+                            continue
+                        # Add file to list
+                        GUDglobals.write(
+                            bed_files,
+                            os.path.join(
+                                exp_dummy_dir,
+                                bed_file
+                            )
                         )
+                # Make table of tables
+                if not os.path.exists(table_file):
+                    process = subprocess.check_output(
+                        [
+                            "regClusterMakeTableOfTables",
+                            "uw01",
+                            bed_files,
+                            table_file
+                        ],
+                        stderr=subprocess.STDOUT
                     )
-            # Make table of tables
-            if not os.path.exists(table_file):
-                process = subprocess.check_output(
-                    [
-                        "regClusterMakeTableOfTables",
-                        "uw01",
-                        bed_files,
-                        table_file
-                    ],
-                    stderr=subprocess.STDOUT
-                )
-            # Make clusters
-            if not os.path.exists(
-                "%s.cluster" % cluster_file
-            ):
-                process = subprocess.check_output(
-                    [
-                        "regCluster",
-                        table_file,
-                        "%s.cluster" % cluster_file,
-                        "%s.bed" % cluster_file
-                    ],
-                    stderr=subprocess.STDOUT
-                )
+                # Make clusters
+                if not os.path.exists(
+                    "%s.cluster" % cluster_file
+                ):
+                    process = subprocess.check_output(
+                        [
+                            "regCluster",
+                            table_file,
+                            "%s.cluster" % cluster_file,
+                            "%s.bed" % cluster_file
+                        ],
+                        stderr=subprocess.STDOUT
+                    )
             exit(0)
             # For each accession, biosample...
             for accession, biosample in metadata[k]:
