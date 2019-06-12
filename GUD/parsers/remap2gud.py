@@ -40,6 +40,8 @@ inserts ReMap transcription factor ChIP-seq data into GUD.
 
 optional arguments:
   -h, --help          show this help message and exit
+  -c, --cluster       cluster genome regions by UCSC's regCluster
+                      (default = False)
   --dummy-dir DIR     dummy directory (default = "/tmp/")
   --source STR        source name (default = "ReMap")
 
