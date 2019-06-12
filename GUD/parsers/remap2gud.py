@@ -368,17 +368,19 @@ def remap_to_gud(user, pwd, host, port, db,
         exp_dummy_dir = os.path.join(
             dummy_dir, directory
         )
+        # Skip if not directory
+        if not os.path.isdir(
+            exp_dummy_dir
+        ): continue
+
         # Get TF name
         m = re.search(
             "^ChIP-seq.(.+)$",
             directory
         )
         experiment_target = m.group(1)
-        if experiment_target != "ZNF274": continue
-        # Skip if not directory
-        if not os.path.isdir(
-            exp_dummy_dir
-        ): continue
+        if experiment_target != "GATA2":
+            continue
 
         # Skip if completed
         completed_file = os.path.join(
@@ -436,41 +438,42 @@ def remap_to_gud(user, pwd, host, port, db,
         if cluster:
             # Initialize
             regions = []
-            bed_files = os.path.join(
-                exp_dummy_dir,
-                "files.txt"
-            )
-            table_file = os.path.join(
-                exp_dummy_dir,
-                "tableOfTables.txt"
-            )
-            cluster_file = os.path.join(
-                exp_dummy_dir,
-                "regCluster"
-            )
-            # Create BED file list
-            if not os.path.exists(bed_files):
-                # For each BED file...
-                for bed_file in os.listdir(
-                    exp_dummy_dir
-                ):
-                    # Skip non-BED files
-                    if not bed_file.endswith(".bed"):
-                        continue
-                    # Skip regCluster BED file
-                    if bed_file == "regCluster.bed":
-                        continue
-                    # Add file to list
-                    GUDglobals.write(
-                        bed_files,
-                        os.path.join(
-                            exp_dummy_dir,
-                            bed_file
+            # Try...
+            try:
+                bed_files = os.path.join(
+                    exp_dummy_dir,
+                    "files.txt"
+                )
+                table_file = os.path.join(
+                    exp_dummy_dir,
+                    "tableOfTables.txt"
+                )
+                cluster_file = os.path.join(
+                    exp_dummy_dir,
+                    "regCluster"
+                )
+                # Create BED file list
+                if not os.path.exists(bed_files):
+                    # For each BED file...
+                    for bed_file in os.listdir(
+                        exp_dummy_dir
+                    ):
+                        # Skip non-BED files
+                        if not bed_file.endswith(".bed"):
+                            continue
+                        # Skip regCluster BED file
+                        if bed_file == "regCluster.bed":
+                            continue
+                        # Add file to list
+                        GUDglobals.write(
+                            bed_files,
+                            os.path.join(
+                                exp_dummy_dir,
+                                bed_file
+                            )
                         )
-                    )
-            # Make table of tables
-            if not os.path.exists(table_file):
-                try:
+                # Make table of tables
+                if not os.path.exists(table_file):
                     process = subprocess.check_output(
                         [
                             "regClusterMakeTableOfTables",
@@ -480,13 +483,10 @@ def remap_to_gud(user, pwd, host, port, db,
                         ],
                         stderr=subprocess.STDOUT
                     )
-                except:
-                    pass
-            # Make clusters
-            if not os.path.exists(
-                "%s.cluster" % cluster_file
-            ):
-                try:
+                # Make clusters
+                if not os.path.exists(
+                    "%s.cluster" % cluster_file
+                ):
                     process = subprocess.check_output(
                         [
                             "regCluster",
@@ -496,12 +496,6 @@ def remap_to_gud(user, pwd, host, port, db,
                         ],
                         stderr=subprocess.STDOUT
                     )
-                except:
-                    pass
-            # If clusters file exists...
-            if os.path.exists(
-                "%s.bed" % cluster_file
-            ):
                 # For each line...
                 for line in GUDglobals.parse_tsv_file(
                     "%s.bed" % cluster_file
@@ -568,7 +562,8 @@ def remap_to_gud(user, pwd, host, port, db,
                         feat.tf = experiment_target
                         session.add(feat)
                         session.commit()
-            else:
+            # ... Except...
+            except:
                 # For each BED file...
                 for bed_file in os.listdir(
                     exp_dummy_dir
