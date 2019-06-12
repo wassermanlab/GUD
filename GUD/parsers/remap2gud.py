@@ -235,7 +235,7 @@ def remap_to_gud(user, pwd, host, port, db,
         experiment.name = experiment_type
         session.add(experiment)
         session.commit()
-    exp = source.select_by_name(
+    exp = experiment.select_by_name(
         session,
         experiment_type
     )
