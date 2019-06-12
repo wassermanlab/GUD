@@ -327,51 +327,55 @@ def remap_to_gud(user, pwd, host, port, db,
             dummy_dir,
             "%s.completed" % directory
         )
-#        # Skip if already done
-#        if os.path.exists(
-#            completed_file
-#        ): continue
-#        # For each BED file...
-#        for bed_file in os.listdir(
-#            exp_dummy_dir
-#        ):
-#            # Initialize
-#            lines = []
-#            file_name = os.path.join(
-#                exp_dummy_dir, bed_file
-#            )
-#            # Load BED
-#            a = BedTool(file_name)
-#            # For line in BED...
-#            for l in a:
-#                # If BED12...
-#                if len(l) >= 7:
-#                    lines.append(
-#                        "\t".join(
-#                            l[:7] + \
-#                            [
-#                                str(int(l[6])+1),
-#                                "0,0,0"
-#                            ]
-#                        )
-#                    )
-#            # Load BED from string
-#            a = BedTool(
-#                "\n".join(lines), from_string=True
-#            )
-#            # Sort BED
-#            a = a.sort()
-#            # Save BED
-#            a.saveas(dummy_file)
-#            # Copy dummy BED to original
-#            shutil.copy(
-#                dummy_file,
-#                file_name
-#            )
-#            # Remove dummy BED
-#            os.remove(dummy_file)
-#        # Clean PyBedTools files
-#        cleanup(remove_all=True)
+        # Skip if not directory
+        if not os.path.isdir(
+            exp_dummy_dir
+        ): continue
+        # Skip if already done
+        if os.path.exists(
+            completed_file
+        ): continue
+        # For each BED file...
+        for bed_file in os.listdir(
+            exp_dummy_dir
+        ):
+            # Initialize
+            lines = []
+            file_name = os.path.join(
+                exp_dummy_dir, bed_file
+            )
+            # Load BED
+            a = BedTool(file_name)
+            # For line in BED...
+            for l in a:
+                # If BED12...
+                if len(l) >= 7:
+                    lines.append(
+                        "\t".join(
+                            l[:7] + \
+                            [
+                                str(int(l[6])+1),
+                                "0,0,0"
+                            ]
+                        )
+                    )
+            # Load BED from string
+            a = BedTool(
+                "\n".join(lines), from_string=True
+            )
+            # Sort BED
+            a = a.sort()
+            # Save BED
+            a.saveas(dummy_file)
+            # Copy dummy BED to original
+            shutil.copy(
+                dummy_file,
+                file_name
+            )
+            # Remove dummy BED
+            os.remove(dummy_file)
+        # Clean PyBedTools files
+        cleanup(remove_all=True)
         # Completed
         open(completed_file, "a").close()
     exit(0)
