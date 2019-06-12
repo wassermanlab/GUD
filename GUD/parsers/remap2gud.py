@@ -239,8 +239,6 @@ def remap_to_gud(user, pwd, host, port, db,
         session,
         experiment_type
     )
-    print(exp)
-    exit(0)
 
     # Get samples
     for line in GUDglobals.parse_tsv_file(
