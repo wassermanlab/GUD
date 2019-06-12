@@ -351,8 +351,6 @@ def remap_to_gud(user, pwd, host, port, db,
     for directory in os.listdir(
         dummy_dir
     ):
-        print(directory)
-        exit(0)
         # Initialize
         dummy_file = os.path.join(
             dummy_dir,
@@ -361,6 +359,9 @@ def remap_to_gud(user, pwd, host, port, db,
         exp_dummy_dir = os.path.join(
             dummy_dir, directory
         )
+        # Get TF name
+        m = re.search("^ChIP-seq.(.+)$", directory)
+        experiment_target = m.group(1)
         # Skip if not directory
         if not os.path.isdir(
             exp_dummy_dir
@@ -517,7 +518,8 @@ def remap_to_gud(user, pwd, host, port, db,
                     # Get region
                     reg_uid = regions[int(line[0]) - 1] 
                     # Get sample
-                    sam_uid = accession2sample[label2accession[line[-1]]]
+                    sam_uid =\
+                        accession2sample[line[-1]]
                     # Get TF feature
                     feat = TFBinding()
                     is_unique = feat.is_unique(
@@ -535,7 +537,8 @@ def remap_to_gud(user, pwd, host, port, db,
                         feat.experimentID = exp.uid
                         feat.sourceID = sou.uid
                         if feat_type == "histone":
-                            feat.histone_type = experiment_target
+                            feat.histone_type =\
+                                experiment_target
                         if feat_type == "tf":
                             feat.tf = experiment_target
                         session.add(feat)
@@ -574,7 +577,8 @@ def remap_to_gud(user, pwd, host, port, db,
                             end
                         ):
                             # Insert region
-                            region.bin = assign_bin(start, end)
+                            region.bin =\
+                                assign_bin(start, end)
                             region.chrom = chrom
                             region.start = start
                             region.end = end
@@ -606,7 +610,8 @@ def remap_to_gud(user, pwd, host, port, db,
                             feat.experimentID = exp.uid
                             feat.sourceID = sou.uid
                             if feat_type == "histone":
-                                feat.histone_type = experiment_target
+                                feat.histone_type =\
+                                    experiment_target
                             if feat_type == "tf":
                                 feat.tf = experiment_target
                             session.add(feat)
