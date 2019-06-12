@@ -292,9 +292,6 @@ def remap_to_gud(user, pwd, host, port, db,
             s,
             sam.uid
         )
-    print(accession2sample)
-    exit(0)
-
 
     # Create table
     if not engine.has_table(table.__tablename__):
@@ -482,117 +479,62 @@ def remap_to_gud(user, pwd, host, port, db,
                         ],
                         stderr=subprocess.STDOUT
                     )
-            except: pass
-            exit(0)
-            # For each accession, biosample...
-            for accession, biosample in metadata[k]:
-                # Get sample
-                sample = Sample()
-                if sample.is_unique(
-                    session,
-                    samples[biosample]["cell_or_tissue"],
-                    samples[biosample]["treatment"],
-                    samples[biosample]["cell_line"],
-                    samples[biosample]["cancer"]
+
+                # For each line...
+                for line in GUDglobals.parse_tsv_file(
+                    table_file
                 ):
-                    sample.name =\
-                        samples[biosample]["cell_or_tissue"]
-                    sample.treatment =\
-                        samples[biosample]["treatment"]
-                    sample.cell_line =\
-                        samples[biosample]["cell_line"]
-                    sample.cancer =\
-                        samples[biosample]["cancer"]
-                    session.add(sample)
-                    session.commit()
-                sam = sample.select_unique(
-                    session,
-                    samples[biosample]["cell_or_tissue"],
-                    samples[biosample]["treatment"],
-                    samples[biosample]["cell_line"],
-                    samples[biosample]["cancer"]
-                )
-                accession2sample.setdefault(
-                    accession,
-                    sam.uid
-                )
-            # For each line...
-            for line in GUDglobals.parse_tsv_file(
-                table_file
-            ):
-                m = re.search("%s.%s/(\w+).bed" %\
-                    (
-                        experiment_type.replace(" ", "_"),
-                        str(experiment_target)
-                    ),
-                    line[0]
-                )
-                if m:
-                    label2accession.setdefault(
-                        line[-1],
-                        m.group(1)
+                    m = re.search("%s.%s/(\w+).bed" %\
+                        (
+                            experiment_type.replace(" ", "_"),
+                            str(experiment_target)
+                        ),
+                        line[0]
                     )
-            # For each line...
-            for line in GUDglobals.parse_tsv_file(
-                "%s.bed" % cluster_file
-            ):
-                # Get coordinates
-                chrom = line[0]
-                start = int(line[1])
-                end = int(line[2])
-                # Get region
-                region = Region()
-                if region.is_unique(
-                    session,
-                    chrom,
-                    start,
-                    end
+                    if m:
+                        label2accession.setdefault(
+                            line[-1],
+                            m.group(1)
+                        )
+                # For each line...
+                for line in GUDglobals.parse_tsv_file(
+                    "%s.bed" % cluster_file
                 ):
-                    # Insert region
-                    region.bin = assign_bin(start, end)
-                    region.chrom = chrom
-                    region.start = start
-                    region.end = end
-                    session.add(region)
-                    session.commit()
-                reg = region.select_unique(
-                    session,
-                    chrom,
-                    start,
-                    end
-                )
-                regions.append(reg.uid)
-            # For each line...
-            for line in GUDglobals.parse_tsv_file(
-                "%s.cluster" % cluster_file
-            ):
-                # Get region
-                reg_uid = regions[int(line[0]) - 1] 
-                # Get sample
-                sam_uid = accession2sample[label2accession[line[-1]]]
-                # Get accessibility feature
-                if feat_type == "accessibility":
-                    feat = DNAAccessibility()
-                    is_unique = feat.is_unique(
+                    # Get coordinates
+                    chrom = line[0]
+                    start = int(line[1])
+                    end = int(line[2])
+                    # Get region
+                    region = Region()
+                    if region.is_unique(
                         session,
-                        reg_uid,
-                        sam_uid,
-                        exp.uid,
-                        sou.uid
-                    )
-                # Get histone feature
-                if feat_type == "histone":
-                    feat = HistoneModification()
-                    is_unique = feat.is_unique(
+                        chrom,
+                        start,
+                        end
+                    ):
+                        # Insert region
+                        region.bin = assign_bin(start, end)
+                        region.chrom = chrom
+                        region.start = start
+                        region.end = end
+                        session.add(region)
+                        session.commit()
+                    reg = region.select_unique(
                         session,
-                        reg_uid,
-                        sam_uid,
-                        exp.uid,
-                        sou.uid,
-                        experiment_target
+                        chrom,
+                        start,
+                        end
                     )
-                # Get TF feature
-                if feat_type == "tf":
+                    regions.append(reg.uid)
+                # For each line...
+                for line in GUDglobals.parse_tsv_file(
+                    "%s.cluster" % cluster_file
+                ):
+                    # Get region
+                    reg_uid = regions[int(line[0]) - 1] 
+                    # Get sample
+                    sam_uid = accession2sample[label2accession[line[-1]]]
+                    # Get TF feature
                     feat = TFBinding()
                     is_unique = feat.is_unique(
                         session,
@@ -602,18 +544,21 @@ def remap_to_gud(user, pwd, host, port, db,
                         sou.uid,
                         experiment_target
                     )
-                # Insert feature to GUD
-                if is_unique:
-                    feat.regionID = reg_uid
-                    feat.sampleID = sam_uid
-                    feat.experimentID = exp.uid
-                    feat.sourceID = sou.uid
-                    if feat_type == "histone":
-                        feat.histone_type = experiment_target
-                    if feat_type == "tf":
-                        feat.tf = experiment_target
-                    session.add(feat)
-                    session.commit()
+                    # Insert feature to GUD
+                    if is_unique:
+                        feat.regionID = reg_uid
+                        feat.sampleID = sam_uid
+                        feat.experimentID = exp.uid
+                        feat.sourceID = sou.uid
+                        if feat_type == "histone":
+                            feat.histone_type = experiment_target
+                        if feat_type == "tf":
+                            feat.tf = experiment_target
+                        session.add(feat)
+                        session.commit()
+            except:
+                pass
+            exit(0)
 #        # Do not cluster
 #        else:
 #            # For each accession, biosample...
