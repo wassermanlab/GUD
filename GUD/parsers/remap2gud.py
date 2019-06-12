@@ -323,232 +323,64 @@ def remap_to_gud(user, pwd, host, port, db,
         exp_dummy_dir = os.path.join(
             dummy_dir, directory
         )
-        completed_file = os.path.join(
-            dummy_dir,
-            "%s.completed" % directory
-        )
         # Skip if not directory
         if not os.path.isdir(
             exp_dummy_dir
         ): continue
+
         # Skip if already done
-        if os.path.exists(
+        if not os.path.exists(
             completed_file
-        ): continue
-        # For each BED file...
-        for bed_file in os.listdir(
-            exp_dummy_dir
         ):
             # Initialize
-            lines = []
-            file_name = os.path.join(
-                exp_dummy_dir, bed_file
+            completed_file = os.path.join(
+                dummy_dir,
+                "%s.completed" % directory
             )
-            # Load BED
-            a = BedTool(file_name)
-            # For line in BED...
-            for l in a:
-                # If BED12...
-                if len(l) >= 7:
-                    lines.append(
-                        "\t".join(
-                            l[:7] + \
-                            [
-                                str(int(l[6])+1),
-                                "0,0,0"
-                            ]
-                        )
-                    )
-            # Load BED from string
-            a = BedTool(
-                "\n".join(lines), from_string=True
-            )
-            # Sort BED
-            a = a.sort()
-            # Save BED
-            a.saveas(dummy_file)
-            # Copy dummy BED to original
-            shutil.copy(
-                dummy_file,
-                file_name
-            )
-            # Remove dummy BED
-            os.remove(dummy_file)
-        # Clean PyBedTools files
-        cleanup(remove_all=True)
-        # Completed
-        open(completed_file, "a").close()
-    exit(0)
-
-    # For each line...
-    for line in GUDglobals.parse_tsv_file(
-        metadata_file
-    ):
-        # If first line...
-        if accession_idx is None:
-            accession_idx = line.index(
-                "File accession"
-            )
-            assembly_idx = line.index(
-                "Assembly"
-            )
-            biosample_idx = line.index(
-                "Biosample term name"
-            )
-            experiment_type_idx = line.index(
-                "Assay"
-            )
-            experiment_target_idx = line.index(
-                "Experiment target"
-            )
-            treatment_idx = line.index(
-                "Biosample treatments"
-            )
-            status_idx = line.index(
-                "File Status"
-            )
-            continue
-        # Initialize
-        accession = \
-            line[accession_idx]
-        experiment_type = \
-            line[experiment_type_idx]
-        biosample = \
-            line[biosample_idx]
-        tag = None
-        experiment_target = None
-        m = re.search(
-            "^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$",
-            line[experiment_target_idx]
-        )
-        if m:
-            tag = m.group(1)
-            experiment_target = m.group(2)
-        treatment = \
-            line[treatment_idx]
-        assembly = line[assembly_idx]
-        status = line[status_idx]
-        # Skip tagged samples
-        if tag:
-            print(": "\
-                .join(
-                    [
-                        os.path.basename(__file__),
-                        "warning",
-                        "use of protein tag",
-                        "\"%s\" (\"%s\")" % (
-                            accession,
-                            tag
-                        )
-                    ]
-                )
-            )
-        # Skip treated samples
-        if treatment:
-            print(": "\
-                .join(
-                    [
-                        os.path.basename(__file__),
-                        "warning",
-                        "treated sample",
-                        "\"%s\" (\"%s\")" % (
-                            accession,
-                            treatment
-                        )
-                    ]
-                )
-            )
-            continue
-        # This is a released sample!
-        if assembly == genome and status == "released":
-            # Skip sample
-            if not samples[biosample]["add"]: continue
-            # Get metadata
-            if os.path.exists(
-                os.path.join(
-                    data_dir,
-                    "%s.bed.gz" % accession
-                )
+            # For each BED file...
+            for bed_file in os.listdir(
+                exp_dummy_dir
             ):
-                k = (
-                    experiment_type,
-                    experiment_target
+                # Initialize
+                lines = []
+                file_name = os.path.join(
+                    exp_dummy_dir, bed_file
                 )
-                metadata.setdefault(k, [])
-                metadata[k].append((accession, biosample))
+                # Load BED
+                a = BedTool(file_name)
+                # For line in BED...
+                for l in a:
+                    # If BED12...
+                    if len(l) >= 7:
+                        lines.append(
+                            "\t".join(
+                                l[:7] + \
+                                [
+                                    str(int(l[6])+1),
+                                    "0,0,0"
+                                ]
+                            )
+                        )
+                # Load BED from string
+                a = BedTool(
+                    "\n".join(lines), from_string=True
+                )
+                # Sort BED
+                a = a.sort()
+                # Save BED
+                a.saveas(dummy_file)
+                # Copy dummy BED to original
+                shutil.copy(
+                    dummy_file,
+                    file_name
+                )
+                # Remove dummy BED
+                os.remove(dummy_file)
+            # Clean PyBedTools files
+            cleanup(remove_all=True)
+            # Completed
+            open(completed_file, "a").close()
 
-    # For each experiment, target...
-    for k in sorted(metadata):
-        # Initialize
-        experiment_type = k[0]
-        experiment_target = k[1]
-        exp_dummy_dir = os.path.join(dummy_dir,
-            "%s.%s" % (
-                experiment_type.replace(" ", "_"),
-                experiment_target
-            )
-        )
-#        # Remove dummy dir
-#        if os.path.isdir(exp_dummy_dir):
-#            shutil.rmtree(exp_dummy_dir)
-        # Create dummy dir
-        if not os.path.isdir(exp_dummy_dir):
-            os.mkdir(exp_dummy_dir)
-        # Get experiment
-        experiment = Experiment()
-        if experiment.is_unique(
-            session,
-            experiment_type
-        ):
-            experiment.name = experiment_type
-            session.add(experiment)
-            session.commit()
-        exp = experiment.select_by_name(
-            session,
-            experiment_type
-        )
-        # For each accession, biosample...
-        for accession, biosample in metadata[k]:
-            # Copy BED file
-            gz_bed_file = os.path.join(
-                data_dir,
-                "%s.bed.gz" % accession
-            )
-            bed_file = os.path.join(
-                exp_dummy_dir,
-                "%s.bed" % accession
-            )
-            # Why Oriol, why?!
-            # Because:
-            # 1) ignores non-standard
-            #    chroms (e.g. scaffolds); and
-            # 2) ensures that start < end.
-            if not os.path.exists(bed_file):
-                os.system(
-                    """
-                    zcat %s |\
-                    grep -P "^(chr)?([0-9]{1,2}|[MXY])" |\
-                    sort -k 1,1 -k2,2n |\
-                    awk -v chrs="%s" \
-                    '{\
-                        split(chrs,arr," ");\
-                        for(i in arr){\
-                            dict[arr[i]] = "";\
-                        };\
-                        if($1 in dict){\
-                            if($2<$3){\
-                                print $0;
-                            }
-                        }   
-                    }' > %s""" % (
-                        gz_bed_file,
-                        " ".join(
-                            GUDglobals.chroms +\
-                            ["chr%s" % c for c in GUDglobals.chroms]
-                        ),
-                        bed_file
-                    )
-                )
         # Cluster regions
         if cluster:
             # Initialize
@@ -569,7 +401,7 @@ def remap_to_gud(user, pwd, host, port, db,
             )
             # Create BED file list
             if not os.path.exists(bed_files):
-                # For each file...
+                # For each BED file...
                 for bed_file in os.listdir(
                     exp_dummy_dir
                 ):
@@ -611,6 +443,7 @@ def remap_to_gud(user, pwd, host, port, db,
                     ],
                     stderr=subprocess.STDOUT
                 )
+            exit(0)
             # For each accession, biosample...
             for accession, biosample in metadata[k]:
                 # Get sample
