@@ -17,6 +17,7 @@ import subprocess
 
 # Import from GUD module
 from GUD import GUDglobals
+from GUD.ORM.chrom import Chrom
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
@@ -301,6 +302,12 @@ def remap_to_gud(user, pwd, host, port, db,
     if not engine.has_table(table.__tablename__):
         # Create table
         table.__table__.create(bind=engine)
+
+
+    # Get valid chromosomes
+    chroms = Chrom.chrom_sizes(session)
+    print(chroms)
+    exit(0)
 
     # For each file...
     for bed_file in os.listdir(
