@@ -306,8 +306,6 @@ def remap_to_gud(user, pwd, host, port, db,
 
     # Get valid chromosomes
     chroms = Chrom.chrom_sizes(session)
-    print(chroms)
-    exit(0)
 
     # For each file...
     for bed_file in os.listdir(
@@ -501,34 +499,41 @@ def remap_to_gud(user, pwd, host, port, db,
                     chrom = line[0]
                     start = int(line[1])
                     end = int(line[2])
-                    # Get region
-                    region = Region()
-                    if region.is_unique(
-                        session,
-                        chrom,
-                        start,
-                        end
-                    ):
-                        # Insert region
-                        region.bin = assign_bin(start, end)
-                        region.chrom = chrom
-                        region.start = start
-                        region.end = end
-                        session.add(region)
-                        session.commit()
-                    reg = region.select_unique(
-                        session,
-                        chrom,
-                        start,
-                        end
-                    )
-                    regions.append(reg.uid)
+                    # If valid chromosome...
+                    if chrom in chroms:
+                        # Get region
+                        region = Region()
+                        if region.is_unique(
+                            session,
+                            chrom,
+                            start,
+                            end
+                        ):
+                            # Insert region
+                            region.bin = assign_bin(start, end)
+                            region.chrom = chrom
+                            region.start = start
+                            region.end = end
+                            session.add(region)
+                            session.commit()
+                        reg = region.select_unique(
+                            session,
+                            chrom,
+                            start,
+                            end
+                        )
+                        regions.append(reg.uid)
+                    # ... Else...
+                    else:
+                        regions.append(None)
                 # For each line...
                 for line in GUDglobals.parse_tsv_file(
                     "%s.cluster" % cluster_file
                 ):
                     # Get region
-                    reg_uid = regions[int(line[0]) - 1] 
+                    reg_uid = regions[int(line[0]) - 1]
+                    # Skip invalid regions
+                    if not reg_uid: continue
                     # Get sample
                     sam_uid =\
                         accession2sample[line[-1]]
@@ -577,29 +582,34 @@ def remap_to_gud(user, pwd, host, port, db,
                         chrom = l[0]
                         start = int(l[1])
                         end = int(l[2])
-                        # Get region
-                        region = Region()
-                        if region.is_unique(
-                            session,
-                            chrom,
-                            start,
-                            end
-                        ):
-                            # Insert region
-                            region.bin =\
-                                assign_bin(start, end)
-                            region.chrom = chrom
-                            region.start = start
-                            region.end = end
-                            session.add(region)
-                            session.commit()
-                        reg = region.select_unique(
-                            session,
-                            chrom,
-                            start,
-                            end
-                        )
-                        regions.append(reg.uid)
+                        # If valid chromosome...
+                        if chrom in chroms:
+                            # Get region
+                            region = Region()
+                            if region.is_unique(
+                                session,
+                                chrom,
+                                start,
+                                end
+                            ):
+                                # Insert region
+                                region.bin =\
+                                    assign_bin(
+                                        start,
+                                        end
+                                    )
+                                region.chrom = chrom
+                                region.start = start
+                                region.end = end
+                                session.add(region)
+                                session.commit()
+                            reg = region.select_unique(
+                                session,
+                                chrom,
+                                start,
+                                end
+                            )
+                            regions.append(reg.uid)
                     # For each region...
                     for reg_uid in regions:
                         # Get TF feature
