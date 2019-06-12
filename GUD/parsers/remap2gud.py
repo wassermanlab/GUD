@@ -557,7 +557,7 @@ def remap_to_gud(user, pwd, host, port, db,
                         session.add(feat)
                         session.commit()
             except:
-                pass
+                print("here")
             exit(0)
 #        # Do not cluster
 #        else:
