@@ -438,7 +438,7 @@ def remap_to_gud(user, pwd, host, port, db,
                 "regCluster"
             )
             # Try clustering...
-            try
+            try:
                 # Create BED file list
                 if not os.path.exists(bed_files):
                     # For each BED file...
@@ -483,6 +483,7 @@ def remap_to_gud(user, pwd, host, port, db,
                         ],
                         stderr=subprocess.STDOUT
                     )
+            except: pass
             exit(0)
             # For each accession, biosample...
             for accession, biosample in metadata[k]:
