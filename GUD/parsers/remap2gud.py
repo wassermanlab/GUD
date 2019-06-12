@@ -573,40 +573,40 @@ def remap_to_gud(user, pwd, host, port, db,
                         feat.tf = experiment_target
                     session.add(feat)
                     session.commit()
-        # Do not cluster
-        else:
-            # For each accession, biosample...
-            for accession, biosample in metadata[k]:
-                # If BED file exists...
-                bed_file = os.path.join(
-                    exp_dummy_dir, "%s.bed" % accession)
-                if os.path.exists(bed_file):
-                    # Initialize
-                    histone_type = None
-                    tf_name = None
-                    if feat_type == "histone":
-                        histone_type = experiment_target
-                    if feat_type == "tf":
-                        tf_name = experiment_target
-                    # Insert BED file to GUD database
-                    bed_to_gud_db(
-                        user,
-                        pwd,
-                        host,
-                        port,
-                        db,
-                        bed_file,
-                        feat_type,
-                        exp.name,
-                        samples[biosample]["cell_or_tissue"],
-                        sou.name,
-                        histone_type,
-                        None,
-                        tf_name,
-                        samples[biosample]["cancer"],
-                        samples[biosample]["cell_line"],
-                        samples[biosample]["treatment"]
-                    )
+#        # Do not cluster
+#        else:
+#            # For each accession, biosample...
+#            for accession, biosample in metadata[k]:
+#                # If BED file exists...
+#                bed_file = os.path.join(
+#                    exp_dummy_dir, "%s.bed" % accession)
+#                if os.path.exists(bed_file):
+#                    # Initialize
+#                    histone_type = None
+#                    tf_name = None
+#                    if feat_type == "histone":
+#                        histone_type = experiment_target
+#                    if feat_type == "tf":
+#                        tf_name = experiment_target
+#                    # Insert BED file to GUD database
+#                    bed_to_gud_db(
+#                        user,
+#                        pwd,
+#                        host,
+#                        port,
+#                        db,
+#                        bed_file,
+#                        feat_type,
+#                        exp.name,
+#                        samples[biosample]["cell_or_tissue"],
+#                        sou.name,
+#                        histone_type,
+#                        None,
+#                        tf_name,
+#                        samples[biosample]["cancer"],
+#                        samples[biosample]["cell_line"],
+#                        samples[biosample]["treatment"]
+#                    )
 #        # Remove dummy dir
 #        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
 
