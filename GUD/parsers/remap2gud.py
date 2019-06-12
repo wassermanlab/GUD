@@ -366,6 +366,7 @@ def remap_to_gud(user, pwd, host, port, db,
         # Get TF name
         m = re.search("^ChIP-seq.(.+)$", directory)
         experiment_target = m.group(1)
+        if experiment_target != "CTCF": continue
         # Skip if not directory
         if not os.path.isdir(
             exp_dummy_dir
@@ -614,8 +615,6 @@ def remap_to_gud(user, pwd, host, port, db,
                             feat.tf = experiment_target
                             session.add(feat)
                             session.commit()
-
-            exit(0)
 #        # Do not cluster
 #        else:
 #            # For each accession, biosample...
