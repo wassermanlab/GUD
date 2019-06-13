@@ -378,8 +378,6 @@ def remap_to_gud(user, pwd, host, port, db,
             directory
         )
         experiment_target = m.group(1)
-        if experiment_target != "ZZZ3":
-            continue
 
         # Skip if completed
         completed_file = os.path.join(
