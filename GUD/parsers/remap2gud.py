@@ -625,6 +625,8 @@ def remap_to_gud(user, pwd, host, port, db,
                             end
                         )
                         regions.append(reg.uid)
+                # Clean PyBedTools files
+                cleanup(remove_all=True)
                 # For each region...
                 for reg_uid in regions:
                     # Get TF feature
