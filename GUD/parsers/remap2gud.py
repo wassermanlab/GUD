@@ -402,7 +402,7 @@ def remap_to_gud(user, pwd, host, port, db,
                 a = BedTool(file_name)
                 # For line in BED...
                 for l in a:
-                    # If BED12...
+                    # If BED7...
                     if len(l) >= 7:
                         lines.append(
                             "\t".join(
@@ -437,8 +437,27 @@ def remap_to_gud(user, pwd, host, port, db,
         if cluster:
             # Initialize
             regions = []
-            # Try...
-            try:
+            file_names = []
+            # For each BED file...
+            for bed_file in os.listdir(
+                exp_dummy_dir
+            ):
+                # Skip non-BED files
+                if not bed_file.endswith(".bed"):
+                    continue
+                # Skip regCluster BED file
+                if bed_file == "regCluster.bed":
+                    continue
+                # Add BED file
+                file_names.append(
+                    os.path.join(
+                        exp_dummy_dir,
+                        bed_file
+                    )
+                )
+            # If multiple BED files...
+            if len(file_names) > 1:
+                # Initialize
                 bed_files = os.path.join(
                     exp_dummy_dir,
                     "files.txt"
@@ -454,9 +473,7 @@ def remap_to_gud(user, pwd, host, port, db,
                 # Create BED file list
                 if not os.path.exists(bed_files):
                     # For each BED file...
-                    for bed_file in os.listdir(
-                        exp_dummy_dir
-                    ):
+                    for bed_file in file_names:
                         # Skip non-BED files
                         if not bed_file.endswith(".bed"):
                             continue
@@ -562,83 +579,74 @@ def remap_to_gud(user, pwd, host, port, db,
                         feat.tf = experiment_target
                         session.add(feat)
                         session.commit()
-            # ... Except...
-            except:
-                # For each BED file...
-                for bed_file in os.listdir(
-                    exp_dummy_dir
-                ):
-                    # Skip non-BED files
-                    if not bed_file.endswith(".bed"):
-                        continue
-                    # Skip regCluster BED file
-                    if bed_file == "regCluster.bed":
-                        continue
-                    # Get sample
-                    print(bed_file)
-                    m = re.search("^(.+).bed$", bed_file)
-                    sam_uid = accession2sample[m.group(1)]
-                    # Load BED
-                    file_name = os.path.join(
-                        exp_dummy_dir, bed_file
-                    )
-                    a = BedTool(file_name)
-                    # For line in BED...
-                    for l in a.merge():
-                        # Get coordinates
-                        chrom = l[0]
-                        start = int(l[1])
-                        end = int(l[2])
-                        # If valid chromosome...
-                        if chrom in chroms:
-                            # Get region
-                            region = Region()
-                            if region.is_unique(
-                                session,
-                                chrom,
-                                start,
-                                end
-                            ):
-                                # Insert region
-                                region.bin =\
-                                    assign_bin(
-                                        start,
-                                        end
-                                    )
-                                region.chrom = chrom
-                                region.start = start
-                                region.end = end
-                                session.add(region)
-                                session.commit()
-                            reg = region.select_unique(
-                                session,
-                                chrom,
-                                start,
-                                end
-                            )
-                            regions.append(reg.uid)
-                    # For each region...
-                    for reg_uid in regions:
-                        # Get TF feature
-                        feat = TFBinding()
-                        is_unique = feat.is_unique(
+            # ... Else...
+            else:
+                # Initialize
+                bed_file = file_names[0]
+                # Get sample
+                m = re.search("^(.+).bed$", bed_file)
+                sam_uid = accession2sample[m.group(1)]
+                # Load BED
+                file_name = os.path.join(
+                    exp_dummy_dir, bed_file
+                )
+                a = BedTool(file_name)
+                # For line in BED...
+                for l in a.merge():
+                    # Get coordinates
+                    chrom = l[0]
+                    start = int(l[1])
+                    end = int(l[2])
+                    # If valid chromosome...
+                    if chrom in chroms:
+                        # Get region
+                        region = Region()
+                        if region.is_unique(
                             session,
-                            reg_uid,
-                            sam_uid,
-                            exp.uid,
-                            sou.uid,
-                            experiment_target
-                        )
-                        # Insert feature to GUD
-                        if is_unique:
-                            feat.regionID = reg_uid
-                            feat.sampleID = sam_uid
-                            feat.experimentID =\
-                                exp.uid
-                            feat.sourceID = sou.uid
-                            feat.tf = experiment_target
-                            session.add(feat)
+                            chrom,
+                            start,
+                            end
+                        ):
+                            # Insert region
+                            region.bin =\
+                                assign_bin(
+                                    start,
+                                    end
+                                )
+                            region.chrom = chrom
+                            region.start = start
+                            region.end = end
+                            session.add(region)
                             session.commit()
+                        reg = region.select_unique(
+                            session,
+                            chrom,
+                            start,
+                            end
+                        )
+                        regions.append(reg.uid)
+                # For each region...
+                for reg_uid in regions:
+                    # Get TF feature
+                    feat = TFBinding()
+                    is_unique = feat.is_unique(
+                        session,
+                        reg_uid,
+                        sam_uid,
+                        exp.uid,
+                        sou.uid,
+                        experiment_target
+                    )
+                    # Insert feature to GUD
+                    if is_unique:
+                        feat.regionID = reg_uid
+                        feat.sampleID = sam_uid
+                        feat.experimentID =\
+                            exp.uid
+                        feat.sourceID = sou.uid
+                        feat.tf = experiment_target
+                        session.add(feat)
+                        session.commit()
 #        # Do not cluster
 #        else:
 #            # For each accession, biosample...
