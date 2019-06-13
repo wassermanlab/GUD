@@ -579,6 +579,7 @@ def remap_to_gud(user, pwd, host, port, db,
                         feat.tf = experiment_target
                         session.add(feat)
                         session.commit()
+
             # ... Else...
             else:
                 # Initialize
@@ -588,8 +589,6 @@ def remap_to_gud(user, pwd, host, port, db,
                     "^%s/(.+).bed$" % exp_dummy_dir,
                     bed_file
                 )
-                print(m.group(1))
-                exit(0)
                 sam_uid = accession2sample[m.group(1)]
                 # Load BED
                 a = BedTool(bed_file)
