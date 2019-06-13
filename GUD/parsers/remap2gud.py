@@ -584,13 +584,15 @@ def remap_to_gud(user, pwd, host, port, db,
                 # Initialize
                 bed_file = file_names[0]
                 # Get sample
-                m = re.search("^(.+).bed$", bed_file)
+                m = re.search(
+                    "^%s/(.+).bed$" % exp_dummy_dir,
+                    bed_file
+                )
+                print(m.group(1))
+                exit(0)
                 sam_uid = accession2sample[m.group(1)]
                 # Load BED
-                file_name = os.path.join(
-                    exp_dummy_dir, bed_file
-                )
-                a = BedTool(file_name)
+                a = BedTool(bed_file)
                 # For line in BED...
                 for l in a.merge():
                     # Get coordinates
