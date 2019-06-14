@@ -379,6 +379,18 @@ def remap_to_gud(user, pwd, host, port, db,
         )
         experiment_target = m.group(1)
 
+        # Targets to skip
+        skip = set([
+            "MYC",
+            "LDB1",
+            "MEF2A",
+            "ZNF92",
+            "ZZZ3",
+            "PTTG1"
+        ])
+        if experiment_target in skip:
+            continue
+
         # Skip if completed
         completed_file = os.path.join(
             dummy_dir,
@@ -436,6 +448,7 @@ def remap_to_gud(user, pwd, host, port, db,
             # Initialize
             regions = []
             file_names = []
+            label2accession = {}
             # For each BED file...
             for bed_file in os.listdir(
                 exp_dummy_dir
@@ -512,6 +525,22 @@ def remap_to_gud(user, pwd, host, port, db,
                     )
                 # For each line...
                 for line in GUDglobals.parse_tsv_file(
+                    table_file
+                ):
+                    m = re.search("ChIP-seq.%s/(\w+).bed" %\
+                        (
+                            str(experiment_target)
+                        ),
+                        line[0]
+                    )
+                    if m:
+                        label2accession.setdefault(
+                            line[-1],
+                            m.group(1)
+                        )
+
+                # For each line...
+                for line in GUDglobals.parse_tsv_file(
                     "%s.bed" % cluster_file
                 ):
                     # Get coordinates
@@ -556,7 +585,9 @@ def remap_to_gud(user, pwd, host, port, db,
                     if not reg_uid: continue
                     # Get sample
                     sam_uid =\
-                        accession2sample[line[-1]]
+                        accession2sample[
+                            label2accession[line[-1]]
+                        ]
                     # Get TF feature
                     feat = TFBinding()
                     is_unique = feat.is_unique(
