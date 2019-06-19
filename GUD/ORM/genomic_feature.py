@@ -4,6 +4,7 @@ from Bio.SeqFeature import (
     SeqFeature
 )
 
+
 class GenomicFeature(SeqFeature):
     """
     Implements a Genomic Feature object based
@@ -23,7 +24,7 @@ class GenomicFeature(SeqFeature):
     qualifiers {dict} qualifiers of the feature
     profile {array} of scores per nucleotide
     """
-    
+
     def __init__(
         self,
         chrom,
@@ -120,9 +121,9 @@ class GenomicFeature(SeqFeature):
             # -------------22222------- => True
             # -----22222--------------- => False
             # ---------------22222----- => False
-            if  self.chrom == feat.chrom and \
-                self.start < feat.end and \
-                self.end > feat.start:
+            if self.chrom == feat.chrom and \
+                    self.start < feat.end and \
+                    self.end > feat.start:
 
                 return True
         except:
@@ -135,7 +136,7 @@ class GenomicFeature(SeqFeature):
         return "{}\t{}\t{}\t{}\t{}\t{}".\
             format(
                 self.chrom,
-                self.start, # 0-based for BED format
+                self.start,  # 0-based for BED format
                 self.end,
                 self.id,
                 self.score,
@@ -155,7 +156,18 @@ class GenomicFeature(SeqFeature):
                 "strand={}".format(self.strand)
             )
 
-#def compute_profile(start, end, features):
+    def serialize(self):
+        return {
+            'chrom': self.chrom,
+            'start': self.start,
+            'end': self.end,
+            'id': self.id,
+            'score': self.score,
+            'qualifiers': self.qualifiers,
+        }
+
+
+# def compute_profile(start, end, features):
 #    """
 #    Return a profile (i.e. array of scores) from features
 #    in the given region (i.e. start, end).
@@ -187,7 +199,7 @@ class GenomicFeature(SeqFeature):
 #
 #    return profile
 #
-#def compute_regions(chrom, start, end, profile, exons=[],
+# def compute_regions(chrom, start, end, profile, exons=[],
 #    min_score=0.6, min_length=10, stitch=False,
 #    label="Region", type="region", source=None):
 #    """
@@ -203,8 +215,8 @@ class GenomicFeature(SeqFeature):
 #    regions = []
 #    stitched_regions = []
 #    fine_regions = []
-##    # This should call 6 conserved regions, and merge 2-3-4, and 5-6
-##    profile = array('f', [6.80556863e-01, 9.43449691e-01, 8.37105628e-01, 6.53790967e-01,
+# This should call 6 conserved regions, and merge 2-3-4, and 5-6
+# profile = array('f', [6.80556863e-01, 9.43449691e-01, 8.37105628e-01, 6.53790967e-01,
 ##                            7.94108937e-01, 8.92694225e-01, 8.70977562e-01, 6.24933764e-01,
 ##                            9.30884657e-01, 7.32830332e-01, 7.34998617e-01, 6.10970434e-01,
 ##                            9.99887508e-01, 9.06141433e-01, 8.07754123e-01, 7.44507877e-01,
@@ -251,7 +263,7 @@ class GenomicFeature(SeqFeature):
 ##                            6.24925026e-01, 6.78700171e-01, 7.43820261e-01, 7.15024611e-01,
 ##                            8.05726999e-01, 8.88167621e-01, 6.88128705e-01, 6.59038054e-01,
 ##                            8.89519960e-01, 9.88556404e-01, 7.91321195e-01, 8.90755524e-01,
-##                            9.14818075e-01, 8.34835039e-01, 6.40025535e-01])
+# 9.14818075e-01, 8.34835039e-01, 6.40025535e-01])
 ##    end_idx = len(profile) - 1
 ##    start = start_idx + 1
 ##    end = end_idx + 1
@@ -347,10 +359,10 @@ class GenomicFeature(SeqFeature):
 #            label, type, source)
 #
 #    # Only keep regions larger than min. region length
-#    # that still score above threshold    
+#    # that still score above threshold
 #    for region in sorted(regions + stitched_regions,
 #        key=lambda x: x.end - x.start + 1, reverse=True):
-#        # Initialize 
+#        # Initialize
 #        overlap = False
 #        # Skip short regions
 #        if region.end - region.start + 1 < min_length:
@@ -374,7 +386,7 @@ class GenomicFeature(SeqFeature):
 ## Private     #
 ##-------------#
 #
-#def _stitch_regions(regions, profile, exons=[], min_score=0.6,
+# def _stitch_regions(regions, profile, exons=[], min_score=0.6,
 #    label="Region", type="region", source=None):
 #    """
 #    Stitch regions into larger regions and return those that still
@@ -430,7 +442,7 @@ class GenomicFeature(SeqFeature):
 #                for exon in exons:
 #                    exon_start = exon.start
 #                    exon_end = exon.end
-#                    # exons 2, 5 
+#                    # exons 2, 5
 #                    if exon_start > B_start:
 #                        continue
 #                    # exons 1, 4
@@ -474,7 +486,7 @@ class GenomicFeature(SeqFeature):
 #
 #    return stitched_regions
 #
-#def _score_region(profile):
+# def _score_region(profile):
 #    """
 #    Compute and return score of a region defined by length of
 #    profile array.
