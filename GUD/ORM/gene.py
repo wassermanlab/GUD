@@ -17,6 +17,7 @@ from .source import Source
 
 from sqlalchemy.ext.declarative import declared_attr
 
+
 class Gene(GeneFeature, Base):
 
     __tablename__ = "genes"
@@ -28,91 +29,75 @@ class Gene(GeneFeature, Base):
     cdsEnd = Column("cdsEnd", mysql.INTEGER(unsigned=True), nullable=False)
     exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
     exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
-    # extend_existing = True
+
     @declared_attr
     def __table_args__(cls):
         return (
-        UniqueConstraint(
-            cls.region_id,
-            cls.name,
-            cls.source_id
-        ),
-        # query by bin range
-        Index("ix_regionID", cls.region_id),
-        Index("ix_name", cls.name),
-        Index("ix_name2", cls.name2),
-        {
-            "mysql_engine": "MyISAM",
-            "mysql_charset": "utf8",
-            "extend_existing": True
-        }
-    )
-
-    # @classmethod
-    # def is_unique(cls, session, regionID, name,
-    #               sourceID):
-
-    #     q = session.query(cls)\
-    #         .filter(
-    #             cls.regionID == regionID,
-    #             cls.name == name,
-    #             cls.sourceID == sourceID
-    #     )
-
-    #     return len(q.all()) == 0
-
-    # @classmethod
-    # def select_unique(cls, session, regionID,
-    #                   name, sourceID):
-
-    #     q = session.query(cls)\
-    #         .filter(
-    #             cls.regionID == regionID,
-    #             cls.name == name,
-    #             cls.sourceID == sourceID
-    #     )
-
-    #     return q.first()
-
-    # @classmethod
-    # def select_by_names(cls, session, names=[]):
-    #     """
-    #     Query objects by multiple gene symbols.
-    #     If no genes are provided, return all
-    #     objects.
-    #     """
-    #     q = session.query(cls, Region, Source)\
-    #         .join()\
-    #         .filter(
-    #             Region.uid == cls.regionID,
-    #             Source.uid == cls.sourceID,
-    #     )\
-
-    #     if names:
-    #         q = q.filter(cls.name2.in_(names))
-
-    #     feats = []
-    #     # For each feature...
-    #     for feat in q.all():
-    #         feats.append(
-    #             cls.__as_genomic_feature(feat)
-    #         )
-    #     return feats
-
-    # @classmethod
-    # def get_all_gene_symbols(cls, session):
-    #     """
-    #     Return the gene symbol (name2 field) of all
-    #     objects.
-    #     """
-
-    #     q = session.query(cls.name2).distinct().all()
-
-    #     return [g[0] for g in q]
+            UniqueConstraint(
+                cls.region_id,
+                cls.name,
+                cls.source_id
+            ),
+            # query by bin range
+            Index("ix_regionID", cls.region_id),
+            Index("ix_name", cls.name),
+            Index("ix_name2", cls.name2),
+            {
+                "mysql_engine": "MyISAM",
+                "mysql_charset": "utf8",
+            }
+        )
 
     @classmethod
-    def __as_genomic_feature(self, feat):
+    def select_by_names(cls, session, names=[]):
+        """
+        Query objects by multiple gene symbols.
+        If no genes are provided, return all
+        objects.
+        """
+        q = session.query(cls, Region, Source)\
+            .join()\
+            .filter(Region.uid == cls.regionID, 
+                    Source.uid == cls.sourceID,)\
 
+        if names:
+            q = q.filter(cls.name2.in_(names))
+
+        return q.all()
+
+    @classmethod
+    def get_all_gene_symbols(cls, session):
+        """
+        Return the gene symbol (name2 field) of all objects.
+        """
+        q = session.query(cls.name2).distinct().all()
+        return [g[0] for g in q]
+
+    # for insertion only not in REST
+    @classmethod
+    def is_unique(cls, session, regionID, name, sourceID):
+
+        q = session.query(cls)\
+            .filter(cls.regionID == regionID, 
+                    cls.name == name, 
+                    cls.sourceID == sourceID)
+
+        return len(q.all()) == 0
+
+    # for insertion only not in REST
+    @classmethod
+    def select_unique(cls, session, regionID,
+                      name, sourceID):
+
+        q = session.query(cls)\
+            .filter(cls.regionID == regionID, 
+                    cls.name == name, 
+                    cls.sourceID == sourceID)
+
+        return q.first()
+
+    @classmethod
+    def as_genomic_feature(self, feat):
         # Initialize
         exonStarts = []
         exonEnds = []
@@ -130,14 +115,14 @@ class Gene(GeneFeature, Base):
         # Define qualifiers
         qualifiers = {
             "uid": feat.Gene.uid,
-            "regionID": feat.Gene.regionID,
+            "regionID": feat.Gene.region_id,
             "name": feat.Gene.name,
             "name2": feat.Gene.name2,
             "cdsStart": int(feat.Gene.cdsStart),
             "cdsEnd": int(feat.Gene.cdsEnd),
             "exonStarts": feat.Gene.exonStarts,
             "exonEnds": feat.Gene.exonEnds,
-            "sourceID": feat.Gene.sourceID,
+            "sourceID": feat.Gene.source_id,
             "source": feat.Source.name,
         }
 
@@ -150,15 +135,3 @@ class Gene(GeneFeature, Base):
             feat_id="%s_%s" % (self.__tablename__, feat.Gene.uid),
             qualifiers=qualifiers
         )
-
-    # def __repr__(self):
-
-    #     return "<%s(%s, %s, %s, %s, %s)>" % \
-    #         (
-    #             self.__tablename__,
-    #             "uid={}".format(self.uid),
-    #             "regionID={}".format(self.regionID),
-    #             "name={}".format(self.name),
-    #             "name2={}".format(self.name2),
-    #             "sourceID={}".format(self.sourceID),
-    #         )

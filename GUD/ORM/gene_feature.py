@@ -19,85 +19,61 @@ class GeneFeature(object):
     def __tablename__(cls):
         return cls.__name__.lower()
 
-    uid         = Column("uid", mysql.INTEGER(unsigned=True), primary_key=True)
-    
+    uid = Column("uid", mysql.INTEGER(unsigned=True), primary_key=True)
+
     @declared_attr
     def region_id(cls):
         return Column("regionID", Integer, ForeignKey("regions.uid"),
                       nullable=False)
-    
+
     @declared_attr
     def source_id(cls):
         return Column("sourceID", Integer, ForeignKey("sources.uid"),
                       nullable=False)
-    # @classmethod
-    # def select_by_location(cls, session, chrom,
-    #                        start, end):
-    #     """
-    #     Query objects by genomic location.
-    #     """
-    #     bins = Region._compute_bins(start, end)
-
-    #     q = session.query(cls, Region, Source)\
-    #         .join()\
-    #         .filter(
-    #             Region.uid == cls.regionID,
-    #             Source.uid == cls.sourceID,
-    #     )\
-    #         .filter(
-    #             Region.chrom == chrom,
-    #             Region.start < end,
-    #             Region.end > start
-    #     )\
-    #         .filter(Region.bin.in_(bins))
-
-    #     feats = []
-    #     # For each feature...
-    #     for feat in q.all():
-    #         feats.append(
-    #             cls.__as_genomic_feature(feat)
-    #         )
-    #     return feats
 
     @classmethod
-    def select_by_uids(cls, session, uids,
-                       as_genomic_feature=False):
+    def select_by_location(cls, session, chrom, start, end):
         """
-        Query objects by uid.
+        Query objects by genomic location.
+        """
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(cls, Region, Source)\
+            .join()\
+            .filter(Region.uid == cls.regionID, Source.uid == cls.sourceID,)\
+            .filter(Region.chrom == chrom, 
+                    Region.start < end, 
+                    Region.end > start)\
+            .filter(Region.bin.in_(bins))
+
+        return q.all()
+
+    @classmethod
+    def select_by_uids(cls, session, uids):
+        """
+        Query objects by uids.
         """
         q = session.query(cls, Region, Source).\
             join()\
-            .filter(
-                Region.uid == cls.region_id,
-                Source.uid == cls.source_id,)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
             .filter(cls.uid.in_(uids))
 
-        return cls.__as_genomic_feature(q.first())
-
-    # @classmethod
-    # def select_by_sources(cls, session, sources,
-    #                       as_genomic_feature=False):
-    #     """
-    #     Query objects by uid.
-    #     """
-    #     q = session.query(cls, Region, Source).\
-    #         join()\
-    #         .filter(
-    #             Region.uid == cls.regionID,
-    #             Source.uid == cls.sourceID,)\
-    #         .filter(Source.name.in_(sources))
-
-    #     feats = []
-    #     # For each feature...
-    #     for feat in q.all():
-    #         feats.append(
-    #             cls.__as_genomic_feature(feat)
-    #         )
-    #     return feats
+        return q.all()
 
     @classmethod
-    def __as_genomic_feature(self, feat):
+    def select_by_sources(cls, session, sources, as_genomic_feature=False):
+        """
+        Query objects by sources.
+        """
+        q = session.query(cls, Region, Source).\
+            join()\
+            .filter(Region.uid == cls.regionID, Source.uid == cls.sourceID,)\
+            .filter(Source.name.in_(sources))
 
+        return q.all()
+
+    @classmethod
+    def as_genomic_feature(self, feat):
         return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),
