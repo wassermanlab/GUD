@@ -40,7 +40,7 @@ class GeneFeature(object):
 
         q = session.query(cls, Region, Source)\
             .join()\
-            .filter(Region.uid == cls.regionID, Source.uid == cls.sourceID,)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
             .filter(Region.chrom == chrom, 
                     Region.start < end, 
                     Region.end > start)\
@@ -67,7 +67,7 @@ class GeneFeature(object):
         """
         q = session.query(cls, Region, Source).\
             join()\
-            .filter(Region.uid == cls.regionID, Source.uid == cls.sourceID,)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
             .filter(Source.name.in_(sources))
 
         return q.all()

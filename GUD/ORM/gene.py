@@ -55,13 +55,10 @@ class Gene(GeneFeature, Base):
         If no genes are provided, return all
         objects.
         """
-        q = session.query(cls, Region, Source)\
-            .join()\
-            .filter(Region.uid == cls.regionID, 
-                    Source.uid == cls.sourceID,)\
-
-        if names:
-            q = q.filter(cls.name2.in_(names))
+        q = session.query(cls, Region, Source).\
+            join()\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
+            .filter(cls.name2.in_(names))
 
         return q.all()
 
@@ -78,9 +75,9 @@ class Gene(GeneFeature, Base):
     def is_unique(cls, session, regionID, name, sourceID):
 
         q = session.query(cls)\
-            .filter(cls.regionID == regionID, 
+            .filter(cls.region_id == regionID, 
                     cls.name == name, 
-                    cls.sourceID == sourceID)
+                    cls.source_id == sourceID)
 
         return len(q.all()) == 0
 
@@ -90,9 +87,9 @@ class Gene(GeneFeature, Base):
                       name, sourceID):
 
         q = session.query(cls)\
-            .filter(cls.regionID == regionID, 
+            .filter(cls.region_id == regionID, 
                     cls.name == name, 
-                    cls.sourceID == sourceID)
+                    cls.source_id == sourceID)
 
         return q.first()
 
