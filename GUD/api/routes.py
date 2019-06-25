@@ -1,7 +1,7 @@
 from GUD.api import app
 from GUD.api.db import establish_GUD_session, shutdown_session
 from flask import request, jsonify
-from GUD.ORM import Gene, ShortTandemRepeat
+from GUD.ORM import Gene, ShortTandemRepeat, CNV, ClinVar
 from GUD.ORM.genomic_feature import GenomicFeature
 import re
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest
@@ -87,6 +87,8 @@ def gene_queries(session, resource, names, limit, offset):
     names = names.split(',')
     return resource.select_by_names(session, limit, offset, names)
 
+def clinvar_queries(session, resource, clinvarID, limit, offset):
+    return resource.select_by_clinvarID(session, clinvarID, limit, offset)
 
 def short_tandem_repeat_queries(session, resource, pathogenicity, motif, rotation, limit, offset):
     if pathogenicity is True and all(v is None for v in [motif, rotation]):
@@ -127,24 +129,26 @@ def resource(resource):
     sources = request.args.get('sources', default=None)
     location = request.args.get('location', default=None, type=str)
     result = None
-
     #queries unique to resources
     if (resource == 'genes'):
         names = request.args.get('names', default=None)
         resource = Gene()
         if names is not None and all(v is None for v in [uids, chrom, start, end, sources, location]):
             result = gene_queries(session, resource, names, limit, offset)
-
     elif (resource == 'short_tandem_repeats'):
         pathogenicity   = request.args.get('pathogenicity', default=None, type=bool)
         motif           = request.args.get('motif', default=None)
         rotation        = request.args.get('rotation', default=None, type=bool)
         resource = ShortTandemRepeat()
         if not all(v is None for v in [pathogenicity, motif, rotation]) and all(v is None for v in [uids, chrom, start, end, sources, location]):
-            print(pathogenicity, file=sys.stdout)
-            print(motif, file=sys.stdout)
-            print(rotation, file=sys.stdout)
             result = short_tandem_repeat_queries(session, resource, pathogenicity, motif, rotation, limit, offset)
+    elif (resource == 'copy_number_variants'):
+        resource = CNV()
+    elif (resource == 'clinvar'):
+        clinvarID = request.args.get('clinvar_id', default=None)
+        resource = ClinVar()
+        if clinvarID is not None and all(v is None for v in [uids, chrom, start, end, sources, location]):
+            result = clinvar_queries(session, resource, clinvarID, limit, offset)
     else:
         raise BadRequest('valid resources are genes, short_tandem_repeats,\
              copy_number_variants, clinvar, conservation')
@@ -166,3 +170,8 @@ def resource(resource):
 # http://127.0.0.1:5000/api/v1/genes?sources=refGene
 # str 
 # http://127.0.0.1:5000/api/v1/short_tandem_repeats?pathogenicity=True
+# http://127.0.0.1:5000/api/v1/short_tandem_repeats?motif=ATGGG&rotation=True
+# CNV
+# http://127.0.0.1:5000/api/v1/copy_number_variants?chrom=chr1&start=120672583&end=142552733&location=exact
+# CNV
+# http://127.0.0.1:5000/api/v1/clinvar?clinvar_id=475283

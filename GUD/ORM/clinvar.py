@@ -12,14 +12,13 @@ from .base import Base
 from .region import Region
 from .source import Source
 from .genomic_feature import GenomicFeature
+from .genomicFeature import GF
+from sqlalchemy.ext.declarative import declared_attr
 
-class ClinVar(Base):
+class ClinVar(GF, Base):
 
     __tablename__ = "clinvar"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
-    sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
     ##fields
     ref = Column("ref", mysql.VARCHAR(5000), nullable=False) ## check these
     alt = Column("alt", mysql.VARCHAR(5000), nullable=False) ## check these
@@ -40,81 +39,48 @@ class ClinVar(Base):
     gnomad_genome_af_global = Column("gnomad_genome_af_global", Float)
     gnomad_genome_hom_global = Column("gnomad_genome_hom_global", Float) 
 
-    __table_args__ = (
-        PrimaryKeyConstraint(uid),
-        UniqueConstraint(clinvarID),
+    @declared_attr
+    def __table_args__(cls):
+        return (
+        UniqueConstraint(cls.clinvarID),
 
-        Index("ix_clinvar", regionID),
-        Index("ix_clinvar_id", clinvarID),
+        Index("ix_clinvar", cls.region_id),
+        Index("ix_clinvar_id", cls.clinvarID),
 
         {  
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
         }
     )
-
-    @classmethod
-    def select_by_location(cls, session, chrom,
-        start, end, as_genomic_feature=False):
-        """
-        Query objects by genomic location.
-        """
-
-        bins = Region._compute_bins(start, end)
-
-        q = session.query(cls, Region, Source)\
-            .join()\
-            .filter(
-                Region.uid == cls.regionID,
-                Source.uid == cls.sourceID,
-            )\
-            .filter(
-                Region.chrom == chrom,
-                Region.start < end,
-                Region.end > start
-            )\
-            .filter(Region.bin.in_(bins))
-
-        if as_genomic_feature:
-
-            feats = []
-
-            # For each feature...
-            for feat in q.all():
-                feats.append(
-                    cls.__as_genomic_feature(feat)
-                )
-            return feats
-        return q.all()
    
     @classmethod
-    def select_by_clinvarID(cls, session, clinvarID, as_genomic_feature=False):
+    def select_by_clinvarID(cls, session, clinvarID, limit, offset):
         """
         Query clinvar objects by clinvarID. If no name is provided,
         query all ids.
         """
         q = session.query(cls)
-        q = session.query(cls, Region).\
+        q = session.query(cls, Region, Source).\
         join().\
-        filter(Region.uid == cls.regionID).\
-        filter(cls.clinvarID == clinvarID)
+        filter(Region.uid == cls.region_id,
+                Source.uid == cls.source_id,
+                cls.clinvarID == clinvarID)
         
-        if as_genomic_feature:
-            return cls.__as_genomic_feature(q.first())
-        return q.first()
+        return (q.count(), q.offset(offset).limit(limit))
 
+    # not included in REST
     @classmethod
     def is_unique(cls, session, clinvarID):
         q = session.query(cls).filter(cls.clinvarID == clinvarID)
         return len(q.all()) == 0
 
     @classmethod
-    def __as_genomic_feature(self, feat):
+    def as_genomic_feature(self, feat):
         # Define qualifiers
         qualifiers = {
             "uid": feat.ClinVar.uid,
-            "regionID": feat.ClinVar.regionID,
-            "sourceID": feat.ClinVar.sourceID,
+            "regionID": feat.ClinVar.region_id,
+            "sourceID": feat.ClinVar.source_id,
             "ref": feat.ClinVar.ref,
             "alt": feat.ClinVar.alt,
             "clinvarID": feat.ClinVar.clinvarID,
@@ -135,23 +101,10 @@ class ClinVar(Base):
         }
         return GenomicFeature(
             feat.Region.chrom,
-            int(feat.Region.start),
+            int(feat.Region.start) + 1,
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_id = "%s_%s"%(self.__tablename__, feat.ClinVar.uid),
             qualifiers = qualifiers)
 
-    def __repr__(self):
-        return "<%s(uid={}, regionID={}, sourceID={},\
-        ref={}, alt={}, clinvarID={},\
-        ANN_Annotation={}, ANN_Annotation_Impact={}, ANN_Gene_Name={},\
-        ANN_Gene_ID={}, ANN_Feature_Type={}, ANN_Feature_ID={},\
-        CADD={}, CLNDISDB={}, CLNDN={}, CLNSIG={},\
-        gnomad_exome_af_global={}, gnomad_exome_hom_global={}, gnomad_genome_af_global={}, gnomad_genome_hom_global={})>".format(
-            self.__tablename__,
-            self.uid, self.regionID, self.sourceID, self.ref, self.alt, self.clinvarID,
-            self.ANN_Annotation, self.ANN_Annotation_Impact, self.ANN_Gene_Name,
-            self.ANN_Gene_ID, self.ANN_Feature_Type, self.ANN_Feature_ID,
-            self.CADD, self.CLNDISDB, self.CLNDN, self.CLNSIG, 
-            self.gnomad_exome_af_global, self.gnomad_exome_hom_global,
-            self.gnomad_genome_af_global, self.gnomad_genome_hom_global)
+ 
