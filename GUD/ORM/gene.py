@@ -46,7 +46,7 @@ class Gene(GF, Base):
         )
 
     @classmethod
-    def select_by_names(cls, session, names=[]):
+    def select_by_names(cls, session, limit, offset, names=[]):
         """
         Query objects by multiple gene symbols.
         If no genes are provided, return all
@@ -56,16 +56,17 @@ class Gene(GF, Base):
             join()\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
             .filter(cls.name2.in_(names))
-
-        return q.all()
+            
+        return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def get_all_gene_symbols(cls, session):
+    def get_all_gene_symbols(cls, session, limit, offset):
         """
         Return the gene symbol (name2 field) of all objects.
         """
-        q = session.query(cls.name2).distinct().all()
-        return [g[0] for g in q]
+        q = session.query(cls.name2).distinct()
+            
+        return (q.count(), [g[0] for g in q.offset(offset).limit(limit)])
 
     # for insertion only not in REST
     @classmethod

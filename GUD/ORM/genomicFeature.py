@@ -32,7 +32,7 @@ class GF(object):
                       nullable=False)
 
     @classmethod
-    def select_by_location(cls, session, chrom, start, end):
+    def select_by_location(cls, session, chrom, start, end, limit, offset):
         """
         Query objects by genomic location.
         """
@@ -45,11 +45,11 @@ class GF(object):
                     Region.start < end, 
                     Region.end > start)\
             .filter(Region.bin.in_(bins))
-
-        return q.all()
+            
+        return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def select_by_exact_location(cls, session, chrom, start, end):
+    def select_by_exact_location(cls, session, chrom, start, end, limit, offset):
         """
         Query objects by genomic location.
         """
@@ -63,10 +63,10 @@ class GF(object):
                     Region.start == start, 
                     Region.end == end)
             
-        return q.all()
+        return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def select_by_uids(cls, session, uids):
+    def select_by_uids(cls, session, uids, limit, offset):
         """
         Query objects by uids.
         """
@@ -74,11 +74,11 @@ class GF(object):
             join()\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
             .filter(cls.uid.in_(uids))
-
-        return q.all()
+            
+        return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def select_by_sources(cls, session, sources, as_genomic_feature=False):
+    def select_by_sources(cls, session, sources, limit, offset):
         """
         Query objects by sources.
         """
@@ -86,8 +86,8 @@ class GF(object):
             join()\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
             .filter(Source.name.in_(sources))
-
-        return q.all()
+            
+        return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
     def as_genomic_feature(self, feat):
