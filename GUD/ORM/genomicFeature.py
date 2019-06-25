@@ -97,6 +97,6 @@ class GF(object):
             int(feat.Region.end),
             strand=feat.Region.strand,
             feat_type=self.__tablename__,
-            feat_id="%s_%s" % (self.__tablename__, feat.Gene.uid),
+            feat_id="%s_%s" % (self.__tablename__, self.uid),
             qualifiers=None
         )

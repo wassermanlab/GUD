@@ -1,7 +1,7 @@
 from GUD.api import app
 from GUD.api.db import establish_GUD_session, shutdown_session
 from flask import request, jsonify
-from GUD.ORM import Gene
+from GUD.ORM import Gene, ShortTandemRepeat
 from GUD.ORM.genomic_feature import GenomicFeature
 import re
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest
@@ -15,7 +15,6 @@ import sys, math
 @app.route('/')
 def index():
     return 'HOME'
-
 
 def create_page(resource, result, page, url) -> dict:
     """
@@ -89,8 +88,14 @@ def gene_queries(session, resource, names, limit, offset):
     return resource.select_by_names(session, limit, offset, names)
 
 
-def short_tandem_repeat_queries(rotation, motif, pathogencity):
-    pass
+def short_tandem_repeat_queries(session, resource, pathogenicity, motif, rotation, limit, offset):
+    if pathogenicity is True and all(v is None for v in [motif, rotation]):
+        print(pathogenicity, file=sys.stdout)
+        return resource.select_by_pathogenicity(session, limit, offset)
+    elif rotation is True:
+        return resource.select_by_motif(session, motif.upper(), limit, offset, rotation)
+    else: 
+        return resource.select_by_motif(session, motif.upper(), limit, offset)
 
 
 @app.route('/api/v1/genesymbols')
@@ -131,7 +136,15 @@ def resource(resource):
             result = gene_queries(session, resource, names, limit, offset)
 
     elif (resource == 'short_tandem_repeats'):
-        pass
+        pathogenicity   = request.args.get('pathogenicity', default=None, type=bool)
+        motif           = request.args.get('motif', default=None)
+        rotation        = request.args.get('rotation', default=None, type=bool)
+        resource = ShortTandemRepeat()
+        if not all(v is None for v in [pathogenicity, motif, rotation]) and all(v is None for v in [uids, chrom, start, end, sources, location]):
+            print(pathogenicity, file=sys.stdout)
+            print(motif, file=sys.stdout)
+            print(rotation, file=sys.stdout)
+            result = short_tandem_repeat_queries(session, resource, pathogenicity, motif, rotation, limit, offset)
     else:
         raise BadRequest('valid resources are genes, short_tandem_repeats,\
              copy_number_variants, clinvar, conservation')
@@ -145,8 +158,11 @@ def resource(resource):
     return jsonify(result)
 
 # examples
+# genes
 # http://127.0.0.1:5000/api/v1/genesymbols
 # http://127.0.0.1:5000/api/v1/genes?uids=1
 # http://127.0.0.1:5000/api/v1/genes?names=LOC102725121
 # http://127.0.0.1:5000/api/v1/genes?chrom=chr1&start=11868&end=14362
 # http://127.0.0.1:5000/api/v1/genes?sources=refGene
+# str 
+# http://127.0.0.1:5000/api/v1/short_tandem_repeats?pathogenicity=True

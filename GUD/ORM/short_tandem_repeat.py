@@ -42,17 +42,17 @@ class ShortTandemRepeat(GF, Base):
         )
 
     @classmethod
-    def select_by_pathogenicity(cls, session):
+    def select_by_pathogenicity(cls, session, limit, offset):
         """returns all strs that are pathogenic"""
         q = session.query(cls, Region, Source).\
             join().\
             filter(cls.pathogenicity != 0).\
             filter(Region.uid == cls.region_id, Source.uid == cls.source_id)
 
-        return q.all()
+        return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def select_by_motif(cls, session, motif, compute_rotations=False):
+    def select_by_motif(cls, session, motif, limit, offset, compute_rotations=False):
         """returns all occurences of a certain motif computing 
         rotations if requested"""
         if compute_rotations is True:  # compute the rotations
@@ -70,7 +70,7 @@ class ShortTandemRepeat(GF, Base):
             filter(cls.motif.in_(motifs)).\
             filter(Region.uid == cls.region_id, Source.uid == cls.source_id)
 
-        return q.all()
+        return (q.count(), q.offset(offset).limit(limit))
 
     # not in REST API
     @classmethod
@@ -81,12 +81,12 @@ class ShortTandemRepeat(GF, Base):
         return len(q) == 0
 
     @classmethod
-    def __as_genomic_feature(self, feat):
+    def as_genomic_feature(self, feat):
         # Define qualifiers
         qualifiers = {
             "uid": feat.ShortTandemRepeat.uid,
-            "regionID": feat.ShortTandemRepeat.regionID,
-            "sourceID": feat.ShortTandemRepeat.sourceID,
+            "regionID": feat.ShortTandemRepeat.region_id,
+            "sourceID": feat.ShortTandemRepeat.source_id,
             "motif": feat.ShortTandemRepeat.motif,
             "pathogenicity": feat.ShortTandemRepeat.pathogenicity
         }
