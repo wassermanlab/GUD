@@ -1,28 +1,25 @@
 from sqlalchemy import (
     Column,
-    ForeignKey,
     Index,
     Integer,
-    PrimaryKeyConstraint,
     String,
     UniqueConstraint
 )
 from sqlalchemy.dialects import mysql
 
-from .gene_feature import GeneFeature
+from .genomicFeature import GF
 from .genomic_feature import GenomicFeature
 from .base import Base
 from .region import Region
 from .source import Source
-
 from sqlalchemy.ext.declarative import declared_attr
 
 
-class Gene(GeneFeature, Base):
+class Gene(GF, Base):
 
     __tablename__ = "genes"
-    # inherits uid, regionID, sourceID
 
+    # inherits uid, regionID, sourceID
     name = Column("name", String(75), nullable=False)
     name2 = Column("name2", String(75), nullable=False)
     cdsStart = Column("cdsStart", mysql.INTEGER(unsigned=True), nullable=False)
@@ -125,7 +122,7 @@ class Gene(GeneFeature, Base):
 
         return GenomicFeature(
             feat.Region.chrom,
-            int(feat.Region.start),
+            int(feat.Region.start) + 1,
             int(feat.Region.end),
             strand=feat.Region.strand,
             feat_type="Gene",

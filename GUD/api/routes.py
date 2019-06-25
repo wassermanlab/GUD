@@ -4,9 +4,12 @@ from flask import request, jsonify
 from GUD.ORM import Gene
 from GUD.ORM.genomic_feature import GenomicFeature
 import re
-from werkzeug.exceptions import HTTPException, NotFound
+from werkzeug.exceptions import HTTPException, NotFound, BadRequest
 import sys
 # print(names, file=sys.stdout)
+# errors
+# 400 bad request, client input validation fails
+# 404 not found
 
 
 @app.route('/')
@@ -54,34 +57,102 @@ def gene_symbols():
     return jsonify(result)
 
 
-@app.route('/api/v1/genes')
-def genes():
-    page_size = 20
+@app.route('/api/v1/<resource>')                       
+def resource(resource):
     session = establish_GUD_session()
-    # parameters
-    page        = request.args.get('page', default=None)
-    names       = request.args.get('names', default=None)
+     # parameters
+    page        = request.args.get('page', default=1, type=int)
     uids        = request.args.get('uids', default=None)
     chrom       = request.args.get('chrom', default=None)
     start       = request.args.get('start', default=None)
     end         = request.args.get('end', default=None)
     sources     = request.args.get('sources', default=None)
-    # queries
-    gene = Gene()
+    location    = request.args.get('location', default='within', type=str)
+    if (resource == 'genes'):
+        names       = request.args.get('names', default=None)
+        resource    = Gene()
+        if names is not None:
+            names = names.split(',')
+            result = resource.select_by_names(session, names)
+    elif (resource == 'short_tandem_repeats'):
+        pass
+    else: 
+        raise BadRequest('valid resources are genes, short_tandem_repeats,\
+             copy_number_variants, clinvar, conservation')  
+    
     if uids is not None:
-        uids = uids.split(',')
-        uids = map(int, uids)
-        result = gene.select_by_uids(session, uids)
-    elif names is not None:
-        names = names.split(',')
-        result = gene.select_by_names(session, names)
-    else:
-        result = gene.select_by_location(session, chrom, int(start), int(end))
-    shutdown_session(session)
+        try:
+            uids = uids.split(',')
+            uids = [int(e) for e in uids]
+        except:
+            raise BadRequest("uids must be positive integers seperated by commas (,).")
+        result = resource.select_by_uids(session, uids)
+    elif chrom is not None and start is not None and end is not None:
+        try: 
+            start = int(start) - 1
+            end = int(end)
+        except:
+            raise BadRequest("start and end should be formatted as integers, \
+            chromosomes should be formatted as chrZ.")
+        if location == 'exact':
+            result = resource.select_by_exact_location(session, chrom, start, end)
+        else:
+            result = resource.select_by_location(session, chrom, start, end)
 
-    result = [gene.as_genomic_feature(e) for e in result]
-    result = [e.serialize() for e in result]
+    shutdown_session(session)
+    if len(result) == 0:                                                        # 404 if nothing is found
+        raise NotFound("no refgene genes found by the search.")     
+    result = [resource.as_genomic_feature(e) for e in result]                   # turn to genomicFeature
+    result = [e.serialize() for e in result]                                    # serialize to json
+    result = create_page(result, page, request.url)                                     # pass to create page
+    if result == 404:                                                           # if page range is incorrect    
+        raise NotFound('page range is invalid')     
     return jsonify(result)
+        
+
+# @app.route('/api/v1/genes')
+# def genes():
+#     session = establish_GUD_session()
+#     # parameters
+#     page        = request.args.get('page', default=1, type=int)
+#     names       = request.args.get('names', default=None)
+#     uids        = request.args.get('uids', default=None)
+#     chrom       = request.args.get('chrom', default=None)
+#     start       = request.args.get('start', default=None)
+#     end         = request.args.get('end', default=None)
+#     sources     = request.args.get('sources', default=None)
+#     location    = request.args.get('location', default="exact") ## options, within or exact 
+#     # queries
+#     ## TODO: add pagination 
+#     gene = Gene()
+#     if uids is not None:
+#         try:
+#             uids = uids.split(',')
+#             uids = [int(e) for e in uids]
+#         except:
+#             raise BadRequest("uids must be positive integers seperated by commas (,).")
+#         result = gene.select_by_uids(session, uids)
+#     elif names is not None:
+#         names = names.split(',')
+#         result = gene.select_by_names(session, names)
+#     else:
+#         try: 
+#             start = int(start) - 1
+#             end = int(end)
+#         except:
+#             raise BadRequest("start and end should be formatted as integers, \
+#             chromosomes should be formatted as chrZ.")
+#         if location == 'exact':
+#             result = gene.select_by_exact_location(session, chrom, start, end)
+#         else:
+#             result = gene.select_by_location(session, chrom, start, end)
+#     shutdown_session(session)
+#     if len(result) == 0:
+#         raise NotFound("no refgene genes found by the search.")
+#     result = [gene.as_genomic_feature(e) for e in result]
+#     result = [e.serialize() for e in result]
+#     return jsonify(result)
+
 
 
 # examples
