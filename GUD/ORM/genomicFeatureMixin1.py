@@ -89,11 +89,23 @@ class GFMixin1(object):
             
         return (q.count(), q.offset(offset).limit(limit))
 
+    # for insertion only not in REST
+    # implement in child class
+    @classmethod
+    def is_unique(cls, session):
+        return 0
+
+    # for insertion only not in REST
+    # implement in child class
+    @classmethod
+    def select_unique(cls, session):
+        return 0
+
     @classmethod
     def as_genomic_feature(self, feat):
         return GenomicFeature(
             feat.Region.chrom,
-            int(feat.Region.start) + 1,
+            int(feat.Region.start),
             int(feat.Region.end),
             strand=feat.Region.strand,
             feat_type=self.__tablename__,

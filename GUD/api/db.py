@@ -9,8 +9,8 @@ def establish_GUD_session(
         db_pass=None,
         db_host="ontarget.cmmt.ubc.ca",
         db_port=5506,
-        db_name="hg19"):
-        # db_name="tamar_test"):
+        # db_name="hg19"):
+        db_name="tamar_test"):
     if not db_pass:
         db_pass = ""
 

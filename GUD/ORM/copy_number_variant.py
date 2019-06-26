@@ -57,7 +57,7 @@ class CNV(GFMixin1, Base):
         }
         return GenomicFeature(
             feat.Region.chrom,
-            int(feat.Region.start) + 1,
+            int(feat.Region.start) ,
             int(feat.Region.end),
             strand = feat.Region.strand,
             feat_type = "CopyNumberVariant",

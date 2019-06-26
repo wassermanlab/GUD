@@ -72,7 +72,7 @@ class Conservation(GFMixin1, Base):
 
         return GenomicFeature(
             feat.Region.chrom,
-            int(feat.Region.start) + 1,
+            int(feat.Region.start),
             int(feat.Region.end),
             feat_type="Conservation",
             feat_id="%s_%s" % (self.__tablename__, feat.Conservation.uid),
