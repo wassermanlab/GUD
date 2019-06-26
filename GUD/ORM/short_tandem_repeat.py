@@ -13,11 +13,11 @@ from .base import Base
 from .region import Region
 from .source import Source
 from .genomic_feature import GenomicFeature
-from .genomicFeature import GF
+from .genomicFeatureMixin1 import GFMixin1
 from sqlalchemy.ext.declarative import declared_attr
 
 
-class ShortTandemRepeat(GF, Base):
+class ShortTandemRepeat(GFMixin1, Base):
 
     __tablename__ = "short_tandem_repeats"
 
@@ -75,8 +75,8 @@ class ShortTandemRepeat(GF, Base):
     # not in REST API
     @classmethod
     def is_unique(cls, session, regionID, sourceID, pathogenicity):
-        q = session.query(cls).filter(cls.regionID == regionID,
-                                      cls.sourceID == sourceID, cls.pathogenicity == pathogenicity)
+        q = session.query(cls).filter(cls.region_id == regionID,
+                                      cls.source_id == sourceID, cls.pathogenicity == pathogenicity)
         q = q.all()
         return len(q) == 0
 

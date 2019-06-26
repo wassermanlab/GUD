@@ -7,7 +7,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects import mysql
 
-from .genomicFeature import GF
+from .genomicFeatureMixin1 import GFMixin1
 from .genomic_feature import GenomicFeature
 from .base import Base
 from .region import Region
@@ -15,7 +15,7 @@ from .source import Source
 from sqlalchemy.ext.declarative import declared_attr
 
 
-class Gene(GF, Base):
+class Gene(GFMixin1, Base):
 
     __tablename__ = "genes"
 

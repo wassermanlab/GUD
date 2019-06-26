@@ -19,6 +19,7 @@ from .region import Region
 from .sample import Sample
 from .source import Source
 
+
 class HistoneModification(Base):
 
     __tablename__ = "histone_modifications"
@@ -72,7 +73,7 @@ class HistoneModification(Base):
             histone_type
 
         ),
-        Index("ix_regionID", regionID), # query by bin range
+        Index("ix_regionID", regionID),  # query by bin range
         Index("ix_sampleID", sampleID),
         {
             "mysql_engine": "MyISAM",
@@ -82,8 +83,8 @@ class HistoneModification(Base):
 
     @classmethod
     def is_unique(cls, session, regionID,
-        sampleID, experimentID, sourceID,
-        histone_type):
+                  sampleID, experimentID, sourceID,
+                  histone_type):
 
         q = session.query(cls).\
             filter(
@@ -92,14 +93,14 @@ class HistoneModification(Base):
                 cls.experimentID == experimentID,
                 cls.sourceID == sourceID,
                 cls.histone_type == histone_type
-            )
+        )
 
         return len(q.all()) == 0
 
     @classmethod
     def select_unique(cls, session, regionID,
-        sampleID, experimentID, sourceID,
-        histone_type):
+                      sampleID, experimentID, sourceID,
+                      histone_type):
 
         q = session.query(cls).\
             filter(
@@ -108,7 +109,7 @@ class HistoneModification(Base):
                 cls.experimentID == experimentID,
                 cls.sourceID == sourceID,
                 cls.histone_type == histone_type
-            )
+        )
 
         return q.first()
 

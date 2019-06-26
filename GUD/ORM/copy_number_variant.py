@@ -13,10 +13,10 @@ from .base import Base
 from .region import Region
 from .source import Source
 from .genomic_feature import GenomicFeature
-from .genomicFeature import GF
+from .genomicFeatureMixin1 import GFMixin1
 from sqlalchemy.ext.declarative import declared_attr
 
-class CNV(GF, Base):
+class CNV(GFMixin1, Base):
     __tablename__ = "copy_number_variants"
 
     variant_type = Column("variant_type", String(50), nullable=False)

@@ -14,7 +14,7 @@ from .source import Source
 from sqlalchemy.ext.declarative import declared_attr
 
 
-class GF(object):
+class GFMixin2(object):
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
