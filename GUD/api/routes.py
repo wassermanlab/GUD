@@ -150,12 +150,12 @@ def resource(resource):
     if resource == 'clinvar':
         resource = ClinVar()
         result = clinvar_queries(session, resource, request, limit, offset)
-    # elif resource == 'concervation':
-    #     resource = Conservation()
-    #     result = genomic_feature_mixin1_queries(session, resource, request, limit, offset)
-    # elif resource == 'copy_number_variants':
-    #     resource = CNV()
-    #     result = genomic_feature_mixin1_queries(session, resource, request, limit, offset)
+    elif resource == 'concervation':
+        resource = Conservation()
+        result = genomic_feature_mixin1_queries(session, resource, request, limit, offset)
+    elif resource == 'copy_number_variants':
+        resource = CNV()
+        result = genomic_feature_mixin1_queries(session, resource, request, limit, offset)
     # elif resource == 'genes':
     #     resource = Gene()
     #     result = gene_queries(session, resource, request, limit, offset)
