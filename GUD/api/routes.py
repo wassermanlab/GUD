@@ -55,9 +55,10 @@ def create_page(resource, result, page, url) -> dict:
 
 
 def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
-    keys = sorted(list(request.args))
+    keys = set(request.args)
+    keys.discard('page')
 
-    if ['uids'] == keys:
+    if {'uids'} == keys:
         uids        = request.args.get('uids', default=None)
         try:
             uids = uids.split(',')
@@ -66,11 +67,11 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
             raise BadRequest(
                 "uids must be positive integers seperated by commas (,).")
         result      = resource.select_by_uids(session, uids, limit, offset)
-    elif ['sources'] == keys:
+    elif {'sources'} == keys:
         sources     = request.args.get('sources', default=None)
         sources     = sources.split(',')
         result      = resource.select_by_sources(session, sources, limit, offset)
-    elif ['chrom', 'end', 'location', 'start'] == keys:
+    elif {'chrom', 'end', 'location', 'start'} == keys:
         chrom       = request.args.get('chrom', default=None, type=str)
         end         = request.args.get('end', default=None)
         location    = request.args.get('location', default=None, type=str)
@@ -105,7 +106,9 @@ def gene_queries(session, resource, names, limit, offset):
 
 
 def clinvar_queries(session, resource, request, limit, offset):
-    if ['clinvar_id'] == list(request.args):
+    keys = set(request.args)
+    keys.discard('page')
+    if {'clinvar_id'} == keys:
         clinvarID = request.args.get('clinvar_id')
         return resource.select_by_clinvarID(session, clinvarID, limit, offset)
     else: 
