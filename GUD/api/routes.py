@@ -100,9 +100,15 @@ def genomic_feature_mixin2_queries(session, resource, uids, chrom, start, end, s
     pass
 
 
-def gene_queries(session, resource, names, limit, offset):
-    names = names.split(',')
-    return resource.select_by_names(session, limit, offset, names)
+def gene_queries(session, resource, request, limit, offset):
+    keys = set(request.args)
+    keys.discard('page')
+    if {'names'} == keys:
+        names = request.args.get('names', default=None)
+        names = names.split(',')
+        return resource.select_by_names(session, limit, offset, names)
+    else: 
+        return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
 
 
 def clinvar_queries(session, resource, request, limit, offset):
@@ -114,14 +120,18 @@ def clinvar_queries(session, resource, request, limit, offset):
     else: 
         return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
 
-def short_tandem_repeat_queries(session, resource, pathogenicity, motif, rotation, limit, offset):
-    if pathogenicity is True and all(v is None for v in [motif, rotation]):
-        print(pathogenicity, file=sys.stdout)
-        return resource.select_by_pathogenicity(session, limit, offset)
-    elif rotation is True:
+def short_tandem_repeat_queries(session, resource, request, limit, offset):
+    keys = set(request.args)
+    keys.discard('page')
+    if {'pathogenicity'} == keys:
+            pathogenicity = request.args.get('pathogenicity', default=None, type=bool)
+            return resource.select_by_pathogenicity(session, limit, offset)
+    elif {'motif'} == keys or {'motif', 'rotation'} == keys:
+        motif = request.args.get('motif', default=None)
+        rotation = request.args.get('rotation', default=False, type=bool)
         return resource.select_by_motif(session, motif.upper(), limit, offset, rotation)
     else:
-        return resource.select_by_motif(session, motif.upper(), limit, offset)
+        return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
 
 
 @app.route('/api/v1/genesymbols')
@@ -156,15 +166,15 @@ def resource(resource):
     elif resource == 'copy_number_variants':
         resource = CNV()
         result = genomic_feature_mixin1_queries(session, resource, request, limit, offset)
-    # elif resource == 'genes':
-    #     resource = Gene()
-    #     result = gene_queries(session, resource, request, limit, offset)
-    # elif resource == 'short_tandem_repeats':
-    #     resource = ShortTandemRepeat()
-    #     result = short_tandem_repeat_queries(session, resource, request, limit, offset)
-    # else:
-    #     raise BadRequest('valid resources are genes, short_tandem_repeats,\
-    #          copy_number_variants, clinvar, conservation')
+    elif resource == 'genes':
+        resource = Gene()
+        result = gene_queries(session, resource, request, limit, offset)
+    elif resource == 'short_tandem_repeats':
+        resource = ShortTandemRepeat()
+        result = short_tandem_repeat_queries(session, resource, request, limit, offset)
+    else:
+        raise BadRequest('valid resources are genes, short_tandem_repeats,\
+             copy_number_variants, clinvar, conservation')
 
 
     shutdown_session(session)
@@ -173,82 +183,12 @@ def resource(resource):
 
 
 
-
-
-
-
-    # # parameters
-    # uids = request.args.get('uids', default=None)
-    # chrom = request.args.get('chrom', default=None)
-    # start = request.args.get('start', default=None)
-    # end = request.args.get('end', default=None)
-    # sources = request.args.get('sources', default=None)
-    # location = request.args.get('location', default=None, type=str)
-    # samples = request.args.get('samples', default=None, type=str)
-    # experiments = request.args.get('experiments', default=None, type=str)
-
-    # session = establish_GUD_session()
-    # offset = (page-1)*20
-    # limit = 20
-    # result = None
-
-    # # queries unique to resources
-    # if (resource == 'genes'):
-    #     names = request.args.get('names', default=None)
-    #     resource = Gene()
-    #     if names is not None and all(v is None for v in [uids, chrom, start, end, sources, location]):
-    #         result = gene_queries(session, resource, names, limit, offset)
-    
-    # elif (resource == 'short_tandem_repeats'):
-    #     pathogenicity = request.args.get(
-    #         'pathogenicity', default=None, type=bool)
-    #     motif = request.args.get('motif', default=None)
-    #     rotation = request.args.get('rotation', default=None, type=bool)
-    #     resource = ShortTandemRepeat()
-    #     if not all(v is None for v in [pathogenicity, motif, rotation]) and all(v is None for v in [uids, chrom, start, end, sources, location]):
-    #         result = short_tandem_repeat_queries(
-    #             session, resource, pathogenicity, motif, rotation, limit, offset)
-    
-    # elif (resource == 'copy_number_variants'):
-    #     resource = CNV()
-    
-    # elif (resource == 'concervation'):
-    #     resource = Conservation()
-    
-    # elif (resource == 'clinvar'):
-    #     clinvarID = request.args.get('clinvar_id', default=None)
-    #     resource = ClinVar()
-    #     if clinvarID is not None and all(v is None for v in [uids, chrom, start, end, sources, location]):
-    #         result = clinvar_queries(
-    #             session, resource, clinvarID, limit, offset)
-    
-    # else:
-    #     raise BadRequest('valid resources are genes, short_tandem_repeats,\
-    #          copy_number_variants, clinvar, conservation')
-    # # general queries mixin 1
-    # if result is None and resource in ['concervation', 'clinvar', 'genes', 'short_tandem_repeats', 'copy_number_variants']:
-    #     result = genomic_feature_mixin1_queries(
-    #         session, resource, uids, chrom, start, end, sources, location, limit, offset)
-    # # general queries mixin 2
-    # if result is None and resource in ['dna_accessibility', 'enhancers', 'histone_modifications',
-    #                                    'tads', 'rmsk', 'tf_binding', 'tss']:
-    #     result = genomic_feature_mixin2_queries(session, resource, uids, chrom,
-    #                                             start, end, sources, location,
-    #                                             sample, experiment, limit,
-    #                                             offset)
-
-    # shutdown_session(session)
-    # # pass to create page
-    # result = create_page(resource, result, page, request.url)
-    # return jsonify(result)
-
-
 # examples
 # genes
 # http://127.0.0.1:5000/api/v1/genesymbols
 # http://127.0.0.1:5000/api/v1/genes?uids=1
 # http://127.0.0.1:5000/api/v1/genes?names=LOC102725121
-# http://127.0.0.1:5000/api/v1/genes?chrom=chr1&start=11868&end=14362
+# http://127.0.0.1:5000/api/v1/genes?chrom=chr1&start=11869&end=14362 ######
 # http://127.0.0.1:5000/api/v1/genes?sources=refGene
 # str
 # http://127.0.0.1:5000/api/v1/short_tandem_repeats?pathogenicity=True
