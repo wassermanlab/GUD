@@ -17,12 +17,13 @@ __organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
 __version__ = "0.0.1"
 
 from Bio import SeqIO
-import csv
 import gzip
+import pandas
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 import sys
+from zipfile import ZipFile
 
 __all__ = ["ORM", "scripts", "parsers"]
 
@@ -131,138 +132,137 @@ class Globals(object):
     # Input/Output #
     #--------------#
 
-    def _get_file_handle(self,
-        file_name, gz=False, mode="rt"):
+    def _get_file_handle(self, file_name, mode="r"):
 
         # Initialize
         raiseValueError = False
         
         # Open file handle
-        if gz or file_name.endswith(".gz"):
+        if file_name.endswith(".gz"):
             try:
-                fh = gzip.open(file_name, mode)
+                handle = gzip.open(file_name, mode)
             except:
                 raiseValueError = True
+
+        elif file_name.endswith(".zip"):
+            try:
+                zf = ZipFile(file_name, mode)
+                for f in zf.infolist():
+
+                    handle = zf.open(f, mode)
+                    break
+            except:
+                raiseValueError = True
+
         else:
             try:
-                fh = open(file_name, mode)
+                handle = open(file_name, mode)
             except:
                 raiseValueError = True
         
         if raiseValueError:
-            raise ValueError(
-                "Could not open file handle: %s" % \
-                file_name
-            )
+            raise ValueError("Could not open file handle: %s" % file_name)
 
-        return fh
+        return(handle)
 
-    def parse_file(self, file_name, gz=False):
+    def parse_file(self, file_name):
         """
-        This function parses a file and yields lines
-        one by one.
+        This function parses a file and yields lines one by one.
 
         @input:
         file_name {str}
-        gz {bool} use the gzip module
 
         @yield: {str}
         """
 
         # Get file handle
-        fh = self._get_file_handle(file_name, gz)
+        handle = self._get_file_handle(file_name)
 
         # For each line...
-        for line in fh:
-            yield line.strip("\n")
+        for line in handle:
 
-        fh.close()
+            yield(line.strip("\n"))
 
-    def parse_csv_file(self, file_name, gz=False,
-        delimiter=","):
+        handle.close()
+
+    def parse_csv_file(self, file_name, delimiter=","):
         """
-        This function parses a CSV file and yields
-        lines one by one as a list.
+        This function parses a CSV file and yields lines one by one as a list.
 
         @input:
         file_name {str}
-        gz {bool} use the gzip module
         delimiter {str} e.g. "\t"; default = ","
 
         @yield: {list}
         """
 
         # Get file handle
-        fh = self._get_file_handle(file_name, gz)
+        handle = self._get_file_handle(file_name)
 
-        # For each line...
-        for line in csv.reader(
-            fh, delimiter=delimiter
-        ):
-            yield line
+        # Read in chunks
+        for chunk in pandas.read_csv(handle, encoding="utf8", sep=delimiter, chunksize=1024):
+            for index, row in chunk.iterrows():
 
-        fh.close()
+                yield(row.tolist())
 
-    def parse_tsv_file(self, file_name, gz=False):
+        handle.close()
+
+    def parse_tsv_file(self, file_name):
         """
-        This function parses a tab-separated values
-        file and yields lines one by one as a list.
+        This function parses a TSV file and yields lines one by one as a list.
 
         @input:
         file_name {str}
-        gz {bool} use the gzip module
 
         @yield: {list}
         """
 
         # For each line...
-        for line in self.parse_csv_file(
-            file_name, gz, delimiter="\t"
-        ):
-            yield line
+        for line in self.parse_csv_file(file_name, delimiter="\t"):
 
-    def parse_fasta_file(self, file_name, gz=False):
+            yield(line)
+
+    def parse_fasta_file(self, file_name):
         """
-        This function parses a FASTA file and yields
-        sequences one by one as a list of length 2
-        (i.e. [{header}, {sequence}]).
+        This function parses a FASTA file and yields sequences one by one as a
+        list of length 2 (i.e. [{header}, {sequence}]).
 
         @input:
         file_name {str}
-        gz {bool} use the gzip module to open the file
 
         @yield: {list}
         """
 
         # Get file handle
-        fh = self._get_file_handle(file_name, gz)
+        handle = self._get_file_handle(file_name)
 
         # For each SeqRecord...
-        for seq_record in SeqIO.parse(fh, "fasta"):
+        for seq_record in SeqIO.parse(handle, "fasta"):
             # Initialize
             header = seq_record.id
             sequence = str(seq_record.seq).upper()
 
-            yield header, sequence
+            yield(header, sequence)
 
-        fh.close()
+        handle.close()
 
     def write(self, file_name=None, content=None):
         """
-        This function writes content to a file or,
-        if no file is provided, to STDOUT. Content
-        will be appended at the end of the file.
+        This function writes content to a file or, if no file is provided,
+        to STDOUT. Content will be appended at the end of the file.
         """
 
         if file_name:
+
             # Get file handle
-            fh = self._get_file_handle(
-                file_name, mode="a"
-            )
+            handle = self._get_file_handle(file_name, mode="a")
+
             # Write
-            fh.write("%s\n" % content)
-            fh.close()
+            handle.write("%s\n" % content)
+            handle.close()
+
         else:
+
             sys.stdout.write("%s\n" % content)
 
     #--------------#
@@ -296,10 +296,7 @@ class Globals(object):
             )
             session = Session(engine)
         except:
-            raise ValueError(
-                "Could not connect to GUD db: %s" \
-                % gud_db
-            )
+            raise ValueError("Could not connect to GUD db: %s" % gud_db)
 
         return session
 
