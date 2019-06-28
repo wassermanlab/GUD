@@ -201,7 +201,7 @@ def _upsert_experiment(session, experiment):
 
 def _upsert_gene(session, gene):
 
-    if Gene.is_unique(session, gene.regionID, gene.name, gene.sourceID):
+    if Gene.is_unique(session, gene.regionID, gene.sourceID, gene.name):
         session.add(gene)
         session.flush()
 
