@@ -241,28 +241,29 @@ def _process_data_in_chunks(data_file, insert_function, threads=1):
     from itertools import islice
     from multiprocessing import Pool
 
+    # Initialize
+    pool = Pool()
+
     # Get iterable
     iterable = GUDglobals.parse_tsv_file(data_file)
 
     # Get chunks
     chunks = _grouper(iterable)
 
-    with Pool() as p:
+    while True:
 
-        while True:
+        # Groups chunks for multiprocessing
+        grouped_chunks = [list(chunk) for chunk in islice(chunks, threads)]
 
-            # Groups chunks for multiprocessing
-            grouped_chunks = [list(chunk) for chunk in islice(chunks, threads)]
+        if grouped_chunks:
+            pool.map(insert_function, grouped_chunks)
 
-            if grouped_chunks:
-                p.map(insert_function, grouped_chunks)
-
-            else:
-                break
-
+        else:
             break
 
-def _grouper(iterable, n=1000, fillvalue=None):
+        break
+
+def _grouper(iterable, n=100, fillvalue=None):
 
     import sys
     # Python 3+

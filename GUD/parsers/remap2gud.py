@@ -154,7 +154,7 @@ def remap_to_gud(user, pwd, host, port, db, genome, samples_file, merge=False, d
         _initialize_gud_db(user, pwd, host, port, db, genome)
 
     # Get engine/session
-    engine, Session = _initialize_engine_session(db_name)
+    engine, Session = _initialize_engine_session(db_name, threads)
     session = Session()
 
     # Create table
