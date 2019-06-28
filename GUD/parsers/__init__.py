@@ -149,7 +149,7 @@ def _handle_bytes(bytes):
 #--------------#
 
 def _get_db_name(user, pwd, host, port, db):
-    return("mysql://{}:{}@{}:{}/{}".format(user, pwd, host, port, db))
+    return("mysql+pymysql://{}:{}@{}:{}/{}".format(user, pwd, host, port, db))
 
 def _initialize_engine_session(db_name):
 

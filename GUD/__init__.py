@@ -279,7 +279,7 @@ class Globals(object):
 
         if not db_pass: db_pass = ""
     
-        gud_db = "mysql://{}:{}@{}:{}/{}".format(
+        gud_db = "mysql+pymysql://{}:{}@{}:{}/{}".format(
             db_user,
             db_pass,
             db_host,
