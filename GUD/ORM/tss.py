@@ -34,6 +34,20 @@ class TSS(Base):
         nullable=False
     )
 
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
+    experimentID = Column(
+        "experimentID",
+        Integer,
+        ForeignKey("experiments.uid"),
+        nullable=False
+    )
+
     gene = Column(
         "gene",
         String(75),
@@ -54,20 +68,6 @@ class TSS(Base):
     avg_expression_levels = Column(
         "avg_expression_levels",
         mysql.LONGBLOB, nullable=False
-    )
-
-    experimentID = Column(
-        "experimentID",
-        Integer,
-        ForeignKey("experiments.uid"),
-        nullable=False
-    )
-
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
-        nullable=False
     )
 
     __table_args__ = (

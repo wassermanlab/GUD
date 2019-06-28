@@ -34,6 +34,13 @@ class DNAAccessibility(Base):
         nullable=False
     )
 
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
     sampleID = Column(
         "sampleID",
         Integer,
@@ -45,13 +52,6 @@ class DNAAccessibility(Base):
         "experimentID",
         Integer,
         ForeignKey("experiments.uid"),
-        nullable=False
-    )
-
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
         nullable=False
     )
 

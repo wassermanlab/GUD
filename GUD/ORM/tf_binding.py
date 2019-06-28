@@ -35,6 +35,13 @@ class TFBinding(Base):
         nullable=False
     )
 
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
     sampleID = Column(
         "sampleID",
         Integer,
@@ -46,13 +53,6 @@ class TFBinding(Base):
         "experimentID",
         Integer,
         ForeignKey("experiments.uid"),
-        nullable=False
-    )
-
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
         nullable=False
     )
 
@@ -69,7 +69,7 @@ class TFBinding(Base):
             sampleID,
             experimentID,
             sourceID,
-            tf
+            tf,
 
         ),
         Index("ix_regionID", regionID), # query by bin range
@@ -81,9 +81,7 @@ class TFBinding(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID,
-        sampleID, experimentID, sourceID,
-        tf):
+    def is_unique(cls, session, regionID, sampleID, experimentID, sourceID, tf):
 
         q = session.query(cls).\
             filter(
@@ -91,15 +89,13 @@ class TFBinding(Base):
                 cls.sampleID == sampleID,
                 cls.experimentID == experimentID,
                 cls.sourceID == sourceID,
-                cls.tf == tf
+                cls.tf == tf,
             )
 
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, regionID,
-        sampleID, experimentID, sourceID,
-        tf):
+    def select_unique(cls, session, regionID, sampleID, experimentID, sourceID, tf):
 
         q = session.query(cls).\
             filter(
@@ -107,7 +103,7 @@ class TFBinding(Base):
                 cls.sampleID == sampleID,
                 cls.experimentID == experimentID,
                 cls.sourceID == sourceID,
-                cls.tf == tf
+                cls.tf == tf,
             )
 
         return q.first()
@@ -122,5 +118,5 @@ class TFBinding(Base):
                 "sampleID={}".format(self.sampleID),
                 "experimentID={}".format(self.experimentID),
                 "sourceID={}".format(self.sourceID),
-                "tf={}".format(self.tf)
+                "tf={}".format(self.tf),
             )

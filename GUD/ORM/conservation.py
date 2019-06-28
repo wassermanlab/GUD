@@ -30,14 +30,14 @@ class Conservation(Base):
         nullable=False
     )
 
-    score = Column("score", Float)
-
     sourceID = Column(
         "sourceID",
         Integer,
         ForeignKey("sources.uid"),
         nullable=False
     )
+
+    score = Column("score", Float)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
@@ -53,25 +53,23 @@ class Conservation(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID,
-        sourceID):
+    def is_unique(cls, session, regionID, sourceID):
 
         q = session.query(cls)\
             .filter(
                 cls.regionID == regionID,
-                cls.sourceID == sourceID
+                cls.sourceID == sourceID,
             )
 
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, regionID,
-        sourceID):
+    def select_unique(cls, session, regionID, sourceID):
 
         q = session.query(cls)\
             .filter(
                 cls.regionID == regionID,
-                cls.sourceID == sourceID
+                cls.sourceID == sourceID,
             )
 
         return q.first()
@@ -94,7 +92,7 @@ class Conservation(Base):
             .filter(
                 Region.chrom == chrom,
                 Region.start < end,
-                Region.end > start
+                Region.end > start,
             )\
             .filter(Region.bin.in_(bins))
 
@@ -117,9 +115,9 @@ class Conservation(Base):
         
         qualifiers = {
             "uid": feat.Conservation.uid,
-            "regionID": feat.Conservation.regionID, 
+            "regionID": feat.Conservation.regionID,
+            "sourceID": feat.Conservation.sourceID,
             "score": feat.Conservation.score,
-            "sourceID": feat.Conservation.sourceID, 
             }
 
         return GenomicFeature(
@@ -142,6 +140,6 @@ class Conservation(Base):
                 self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
+                "sourceID={}".format(self.sourceID),
                 "score={}".format(self.score),
-                "sourceID={}".format(self.sourceID)
             )

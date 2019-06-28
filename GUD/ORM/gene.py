@@ -30,6 +30,13 @@ class Gene(Base):
         nullable=False
     )
 
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
     name = Column(
         "name",
         String(75),
@@ -66,19 +73,12 @@ class Gene(Base):
         nullable=False
     )
 
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
-        nullable=False
-    )
-
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(
             regionID,
-            name,
-            sourceID
+            sourceID,
+            name
         ),
         Index("ix_regionID", regionID), # query by bin range
         Index("ix_name", name),
@@ -90,34 +90,31 @@ class Gene(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID, name,
-        sourceID):
+    def is_unique(cls, session, regionID, sourceID, name):
 
         q = session.query(cls)\
             .filter(
                 cls.regionID == regionID,
+                cls.sourceID == sourceID,
                 cls.name == name,
-                cls.sourceID == sourceID
             )
 
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, regionID,
-        name, sourceID):
+    def select_unique(cls, session, regionID, sourceID, name):
 
         q = session.query(cls)\
             .filter(
                 cls.regionID == regionID,
+                cls.sourceID == sourceID,
                 cls.name == name,
-                cls.sourceID == sourceID
             )
 
         return q.first()
 
     @classmethod
-    def select_by_location(cls, session, chrom,
-        start, end, as_genomic_feature=False):
+    def select_by_location(cls, session, chrom, start, end, as_genomic_feature=False):
         """
         Query objects by genomic location.
         """
@@ -133,7 +130,7 @@ class Gene(Base):
             .filter(
                 Region.chrom == chrom,
                 Region.start < end,
-                Region.end > start
+                Region.end > start,
             )\
             .filter(Region.bin.in_(bins))
 
@@ -152,8 +149,7 @@ class Gene(Base):
         return q.all()
 
     @classmethod
-    def select_by_name(cls, session, name,
-        as_genomic_feature=False):
+    def select_by_name(cls, session, name, as_genomic_feature=False):
         """
         Query objects by gene symbol.
         """
@@ -181,8 +177,7 @@ class Gene(Base):
         return q.all()
 
     @classmethod
-    def select_by_names(cls, session, names=[],
-        as_genomic_feature=False):
+    def select_by_names(cls, session, names=[], as_genomic_feature=False):
         """
         Query objects by multiple gene symbols.
         If no genes are provided, return all
@@ -214,8 +209,7 @@ class Gene(Base):
         return q.all()
 
     @classmethod
-    def select_by_uid(cls, session, uid,
-        as_genomic_feature=False):
+    def select_by_uid(cls, session, uid, as_genomic_feature=False):
         """
         Query objects by uid.
         """
@@ -224,7 +218,8 @@ class Gene(Base):
             join().\
             filter(cls.uid == uid,
                 Region.uid == cls.regionID,
-                Source.uid == cls.sourceID,)
+                Source.uid == cls.sourceID,
+            )
 
         if as_genomic_feature:
             return cls.__as_genomic_feature(
@@ -298,14 +293,14 @@ class Gene(Base):
         qualifiers = {
             "uid": feat.Gene.uid,
             "regionID": feat.Gene.regionID,
+            "sourceID": feat.Gene.sourceID,
+            "source": feat.Source.name,
             "name": feat.Gene.name,
             "name2": feat.Gene.name2,
             "cdsStart": int(feat.Gene.cdsStart),
             "cdsEnd": int(feat.Gene.cdsEnd),
             "exonStarts": feat.Gene.exonStarts,
-            "exonEnds": feat.Gene.exonEnds,
-            "sourceID": feat.Gene.sourceID,
-            "source": feat.Source.name,           
+            "exonEnds": feat.Gene.exonEnds,      
         }
 
         return GenomicFeature(
@@ -329,7 +324,7 @@ class Gene(Base):
                 self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
+                "sourceID={}".format(self.sourceID),
                 "name={}".format(self.name),
                 "name2={}".format(self.name2),
-                "sourceID={}".format(self.sourceID),
             )

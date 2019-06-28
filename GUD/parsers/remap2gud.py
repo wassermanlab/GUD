@@ -3,36 +3,50 @@
 import argparse
 from binning import assign_bin
 import getpass
+from multiprocessing import cpu_count
+from multiprocessing import current_process
 import os
 from pybedtools import BedTool, cleanup, set_tempdir
 import re
 import shutil
+from sqlalchemy_utils import database_exists
 import subprocess
+import sys
+import tarfile
+import time
+# Python 3+
+if sys.version_info > (3, 0):
+    from urllib.request import urlretrieve
+# Python 2.7
+else:
+    from urllib import urlretrieve
 
 # Import from GUD module
 from GUD import GUDglobals
+from GUD.ORM.experiment import Experiment
+from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
+from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-#from .bed2gud import bed_to_gud_db
-from .initialize import initialize_gud_db
-from . import _get_chroms, _get_db_name, _get_experiment, _get_session, _get_source
+from . import _get_chroms, _get_db_name, _get_experiment, _get_region, _get_sample, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_experiment, _upsert_region, _upsert_sample, _upsert_source, _upsert_tf
 
 usage_msg = """
-usage: %s --data-dir DIR --samples FILE [-h] [options]
+usage: %s --genome STR --samples FILE [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
 inserts ReMap transcription factor ChIP-seq data into GUD.
 
-  --data-dir DIR      directory where data was downloaded
-  --samples FILE      ENCODE samples (manually-curated)
+  --genome STR        genome assembly
+  --samples FILE      ReMap samples (manually-curated)
 
 optional arguments:
   -h, --help          show this help message and exit
-  -c, --cluster       cluster genome regions by UCSC's regCluster 
-                      (default = False)
   --dummy-dir DIR     dummy directory (default = "/tmp/")
-  --source STR        source name (default = "ReMap")
+  -m, --merge         merge genomic regions using bedtools
+                      (default = False)
+  -t, --threads       number of additional threads to use
+                      (default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
@@ -40,7 +54,7 @@ mysql arguments:
   -p STR, --pwd STR   password (default = ignore this option)
   -P STR, --port STR  port number (default = %s)
   -u STR, --user STR  user name (default = current user)
-""" % (usage_msg, GUDglobals.db_name, GUDglobals.db_port)
+""" % (usage_msg, (cpu_count() - 1), GUDglobals.db_name, GUDglobals.db_port)
 
 #-------------#
 # Functions   #
@@ -54,15 +68,15 @@ def parse_args():
     parser = argparse.ArgumentParser(add_help=False)
 
     # Mandatory args
-    parser.add_argument("--data-dir")
+    parser.add_argument("--genome")
     parser.add_argument("--samples")
 
     # Optional args
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
-    optional_group.add_argument("-c", "--cluster", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("--source", default="ReMap")
+    optional_group.add_argument("-m", "--merge", action="store_true")
+    optional_group.add_argument("-t", "--threads", default=(cpu_count() - 1))
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
@@ -89,8 +103,16 @@ def check_args(args):
         exit(0)
 
     # Check mandatory arguments
-    if not args.data_dir or not args.samples:
-        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "arguments \"--data-dir\" \"--samples\" are required\n"]
+    if not args.genome or not args.samples:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "arguments \"--genome\" \"--samples\" are required\n"]
+        print(": ".join(error))
+        exit(0)
+
+    # Check "-t" argument
+    try:
+        args.threads = int(args.threads)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"-t\" \"--threads\"", "invalid int value", "\"%s\"\n" % args.threads]
         print(": ".join(error))
         exit(0)
 
@@ -103,397 +125,245 @@ def main():
     # Parse arguments
     args = parse_args()
 
-    # Insert ENCODE data
-    remap_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.data_dir, args.samples, args.cluster, args.dummy_dir, args.source)
+    # Insert ReMap data
+    remap_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.samples, args.merge, args.dummy_dir, args.threads)
 
-def remap_to_gud(user, pwd, host, port, db, data_dir, samples_file, cluster=False, dummy_dir="/tmp/", source_name="ReMap"):
+def remap_to_gud(user, pwd, host, port, db, genome, samples_file, merge=False, dummy_dir="/tmp/", threads=1):
+    """
+    python -m GUD.parsers.remap2gud --genome hg19 --samples ./samples/ReMap.tsv --dummy-dir ./tmp/ --merge
+    """
+
+    # Globals
+    global chroms
+    global engine
+    global experiment
+    global Session
+    global samples
+    global source
 
     # Initialize
-    global session
-    table = TFBinding()
     experiment_type = "ChIP-seq"
+    source_name = "ReMap"
     set_tempdir(dummy_dir) # i.e. for pyBedTools
 
-    # Get DB name
+    # Get database name
     db_name = _get_db_name(user, pwd, host, port, db)
 
-    # Get session
-    session = _get_session(db_name)
+    # If database does not exist...
+    if not database_exists(db_name):
+        _initialize_gud_db(user, pwd, host, port, db, genome)
 
-    # Get source
-    global sou
-    sou = _get_source(source_name)
+    # Get engine/session
+    engine, Session = _initialize_engine_session(db_name)
+    session = Session()
+
+    # Create table
+    if not engine.has_table(TFBinding.__tablename__):
+        TFBinding.__table__.create(bind=engine)
+
+    # Get valid chromosomes
+    chroms = _get_chroms(session)
 
     # Get experiment
-    global exp
-    exp = _get_experiment(session, experiment_type)
+    experiment = Experiment()
+    experiment.name = experiment_type
+    _upsert_experiment(session, experiment)
+    experiment = _get_experiment(session, experiment_type)    
 
     # Get samples
-    global samples
-    samples = _get_samples(sample_file)
+    samples = _get_samples(session, samples_file)
 
-    # Get sample to uid
-    global sample2uid
-    sample2uid = _get_sample_to_uid(session, samples)
+    # Get source
+    source = Source()
+    source.name = source_name
+    _upsert_source(session, source)
+    source = _get_source(session, source_name)
 
-    if not engine.has_table(table.__tablename__):
-        # Create table
-        table.__table__.create(bind=engine)
+    # Download data
+    dummy_file = _download_data(genome, dummy_dir)
 
-    # Unwind ChIP-seq data from 1x BED per TF to 1x BED per TF per sample
-    _unwind_bed_files(data_dir, dummy_dir)
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
 
-    # For each directory...
-    for d in os.listdir(dummy_dir):
-        # Initialize
-        dummy_file = os.path.join(dummy_dir, "%s.bed" % d)
-        exp_dummy_dir = os.path.join(dummy_dir, d)
-        # Skip if not directory
-        if not os.path.isdir(exp_dummy_dir):
-            continue
-        # Skip if completed
-        completed_file = os.path.join(dummy_dir, "%s.completed" % directory)
-        if os.path.exists(completed_file):
-            continue
-        # Sort BED files
-        _sort_bed_files(exp_dummy_dir)
-        # Cluster BED files
-        if cluster:
-            _cluster(exp_dummy_dir)
-        # Do not cluster
-        else:
-            _do_not_cluster(exp_dummy_dir)
+    # For each BED file...
+    for bed_file in _unwind_bed_files(dummy_file, dummy_dir):
 
-        # Completed
-        open(completed_file, "a").close()
-#        # Do not cluster
-#        else:
-#            # For each accession, biosample...
-#            for accession, biosample in metadata[k]:
-#                # If BED file exists...
-#                bed_file = os.path.join(
-#                    exp_dummy_dir, "%s.bed" % accession)
-#                if os.path.exists(bed_file):
-#                    # Initialize
-#                    histone_type = None
-#                    tf_name = None
-#                    if feat_type == "histone":
-#                        histone_type = experiment_target
-#                    if feat_type == "tf":
-#                        tf_name = experiment_target
-#                    # Insert BED file to GUD database
-#                    bed_to_gud_db(
-#                        user,
-#                        pwd,
-#                        host,
-#                        port,
-#                        db,
-#                        bed_file,
-#                        feat_type,
-#                        exp.name,
-#                        samples[biosample]["cell_or_tissue"],
-#                        sou.name,
-#                        histone_type,
-#                        None,
-#                        tf_name,
-#                        samples[biosample]["cancer"],
-#                        samples[biosample]["cell_line"],
-#                        samples[biosample]["treatment"]
-#                    )
-#        # Remove dummy dir
-#        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
+        # Prepare data
+        data_file = _preprocess_data(bed_file, dummy_dir, merge)
 
-def _get_samples(file_name):
+        # Parallelize inserts to the database
+        _process_data_in_chunks(data_file, _insert_data_in_chunks, threads)
+
+        # Remove data file
+        if os.path.exists(data_file):
+            os.remove(data_file)
+
+    # Dispose session
+    Session.remove()
+
+    # # Remove downloaded file
+    # if os.path.exists(dummy_file):
+    #     os.remove(dummy_file)
+
+def _get_samples(session, file_name):
 
     # Initialize
     samples = {}
+    bugged_samples = {
+        "LNCAPABL": "LNCAP"
+    }
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(file_name):
-        # Initialize 
-        cell_type = line[0]
-        cell_or_tissue = line[6]
-        if line[7] == "Yes": add = True
-        else: add = False
-        if line[8] == "Yes": treatment = True
-        else: treatment = False
-        if line[9] == "Yes": cell_line = True
-        else: cell_line = False
-        if line[10] == "Yes": cancer = True
-        else: cancer = False
-        # Add sample
-        samples.setdefault(cell_type, {"cell_or_tissue": cell_or_tissue, "treatment": treatment, "cell_line": cell_line, "cancer": cancer, "add": add})
+
+        # If add...
+        if line[7] == "Yes":
+
+            # Get sample
+            sample = Sample()
+            sample.name = line[6]
+            sample.treatment = False
+            if line[8] == "Yes":
+                sample.treatment = True
+            sample.cell_line = False
+            if line[9] == "Yes":
+                sample.cell_line = True
+            sample.cancer = False
+            if line[10] == "Yes":
+                sample.cancer = True
+
+            # Upsert sample
+            _upsert_sample(session, sample)
+
+            # Get sample ID
+            sample = _get_sample(session, sample.name, sample.treatment, sample.cell_line, sample.cancer)
+
+            # Add sample
+            samples.setdefault(line[0], sample.uid)
+
+    # For each sample...
+    for sample in bugged_samples:
+
+        # Fix sample
+        samples[sample] = samples[bugged_samples[sample]]
 
     return(samples)
 
-def _get_sample_to_uid(session, samples):
+def _download_data(genome, dummy_dir="/tmp/"):
 
     # Initialize
-    sample2uid = {}
+    url = "http://tagc.univ-mrs.fr/remap/download/remap2018/%s/MACS" % genome
+    ftp_file = "remap2018_TF_archive_all_macs2_%s_v1_2.tar.gz" % genome
 
-    for s in samples:
-        # Initialize
-        add = samples[s]["add"]
-        cell_or_tissue = samples[s]["cell_or_tissue"]
-        treatment = samples[s]["treatment"]
-        cell_line = samples[s]["cell_line"]
-        cancer = samples[s]["cancer"]
-        # Skip sample
-        if not add:
-            continue
-        # Get sample
-        sample = Sample()
-        if sample.is_unique(session, cell_or_tissue, treatment, cell_line, cancer):
-            sample.name = cell_or_tissue
-            sample.treatment = treatment
-            sample.cell_line = cell_line
-            sample.cancer = cancer
-            session.add(sample)
-            session.commit()
-        sam = sample.select_unique(session, cell_or_tissue, treatment, cell_line, cancer)
-        sample2uid.setdefault(s, sam.uid)
+    # Download data
+    dummy_file = os.path.join(dummy_dir, ftp_file)
+    if not os.path.exists(dummy_file):
+        f = urlretrieve(os.path.join(url, ftp_file), dummy_file)
 
-    return(sample2uid)
+    return(dummy_file)
 
-def _unwind_bed_files(data_dir, dummy_dir="/tmp/"):
+def _unwind_bed_files(file_name, dummy_dir="/tmp/"):
+    """
+    Unwinds tarball into 1x BED file per TF.
+    """
 
-    # For each file...
-    for bed_file in os.listdir(data_dir):
-        # Skip non-BED files
-        if not bed_file.endswith(".bed") and not bed_file.endswith(".bed.gz"):
-            continue
-        # Get TF name
-        m = re.search("^remap\d{4}_(.+)_all_.+.bed", bed_file)
-        if m:
-            # Initialize
-            exp_dummy_dir = os.path.join(dummy_dir, "ChIP-seq.%s" % m.group(1))
-            # Skip if already done
-            if os.path.isdir(exp_dummy_dir):
-                continue
-            # Create dummy dir
-            if not os.path.isdir(exp_dummy_dir):
-                os.mkdir(exp_dummy_dir)
-            # For each line...
-            bed_file = os.path.join(data_dir, bed_file)
-            for line in GUDglobals.parse_tsv_file(bed_file):
-                # Initialize
-                d, tf, s = line[3].split(".")
-                tf = tf.split("_")
-                s = s.split("_")
-                # Fix sample
-                if s[0] == "LNCAPABL":
-                    s[0] == "LNCAP"
-                # If sample exists...
-                if s[0] in samples and tf[0] == m.group(1):
-                    # Write
-                    dummy_file = os.path.join(exp_dummy_dir, "%s.bed" % s[0])
-                    GUDglobals.write(dummy_file, "\t".join(line))
+    with tarfile.open(file_name) as tar:
 
-def _sort_bed_files(directory):
+        # For each member...
+        for member in tar.getmembers():
 
-    # For each BED file...
-    for bed_file in os.listdir(directory):
-        # Initialize
-        lines = []
-        # Load BED file
-        bed = BedTool(os.path.join(directory, bed_file))
-        # For each line...
-        for line in bed:
-            # If BED7+...
-            if len(line) >= 7:
-                extra = [str(int(l[6])+1), "0,0,0"]
-                lines.append("\t".join(line[:7] + extra))
-        # Load BED from string
-        bed = BedTool("\n".join(lines), from_string=True)
+            # Skip if BED file already exists
+            bed_file = os.path.join(dummy_dir, member.name)
+            if not os.path.exists(bed_file):
+                tar.extract(member, dummy_dir)
+
+            yield(bed_file)
+
+def _preprocess_data(file_name, dummy_dir="/tmp/", merge=False):
+
+    # Initialize
+    m = re.search("remap2018_(.+)_all_macs2", file_name)
+    tf = m.group(1)
+
+    # Skip if intersection file already exists
+    bed_file = os.path.join(dummy_dir, "%s.bed" % tf)
+    if not os.path.exists(bed_file):
+
         # Sort BED
-        bed = bed.sort()
-        # Save BED
-        bed.saveas(dummy_file)
-        # Copy dummy BED to original
-        shutil.copy(dummy_file, file_name)
-        # Remove dummy BED
-        os.remove(dummy_file)
-    # Clean PyBedTools files
-    cleanup(remove_all=True)
+        a = BedTool(file_name)
+        a = a.sort()
 
-def _cluster(directory):
+        # Merge BED
+        if merge:
+            b = a.merge()
+        else:
+            b = a
 
-    # Initialize
-    file_names = []
+        # Intersect
+        a.intersect(b, wa=True, wb=True).saveas(bed_file)
 
-    # For each BED file...
-    for bed_file in os.listdir(exp_dummy_dir):
-        # Skip non-BED files
-        if not bed_file.endswith(".bed"):
-            continue
-        # Skip regCluster BED file
-        if bed_file == "regCluster.bed":
-            continue
-        # Add BED file
-        file_names.append(os.path.join(exp_dummy_dir, bed_file))
-    # If multiple BED files...
-    if len(file_names) > 1:
-        _regCluster(file_names, directory)
-    # ... Else...
-    else:
-        _merge(file_names[0], directory)
-
-def _regCluster(file_names, directory):
-
-    # Initialize
-    label2sample = {}
-
-    # Get TF name
-    m = re.search("ChIP-seq.(.+)$", directory)
-    experiment_target = m.group(1)
-    # Run regCluster
-    table_file, cluster_file, bed_file = _run_regCluster(file_names, directory)
-    # For each line...
-    for line in GUDglobals.parse_tsv_file(table_file):
-        m = re.search("%s/(\w+).bed$" % str(experiment_target), line[0])
-        if m:
-            label2sample.setdefault(line[-1], m.group(1))
-    # Insert regions
-    _insert_regions_from_bed(bed_file)
-    # Get regions
-    regions = _get_regions_from_bed(bed_file)
-    # Insert features
-    _insert_features(regions, label2sample)
-
-def _run_regCluster(file_names, directory):
-
-    # If BED list file does not exist...
-    bed_files = os.path.join(directory, "files.txt")
-    if not os.path.exists(bed_files):
-        # For each BED file...
-        for bed_file in file_names:
-            # Skip non-BED files
-            if not bed_file.endswith(".bed"):
-                continue
-            # Skip regCluster BED file
-            if bed_file == "regCluster.bed":
-                continue
-            # Add file to list
-            GUDglobals.write(bed_files, bed_file)
-    # If table of tables file does not exist...
-    table_file = os.path.join(directory, "tableOfTables.txt")
-    if not os.path.exists(table_file):
-        # Make table of tables
-        cmd = "regClusterMakeTableOfTables uw01 %s %s" (bed_files, table_file)
-        process = subprocess.call(cmd, shell=True)
-    # If cluster file does not exist 
-    cluster_file = os.path.join(directory, "regCluster.cluster")
-    bed_file = os.path.join(directory, "regCluster.bed")
-    if not os.path.exists("%s.cluster" % cluster_file):
-        # Cluster
-        cmd = "regCluster %s %s %s" (table_file, cluster_file, bed_file)
-        process = subprocess.call(cmd, shell=True)
-
-    return(table_file, cluster_file, bed_file)
-
-
-
-def _insert_features(regions, label2sample=None):
-        # For each line...
-    for line in GUDglobals.parse_tsv_file(
-        "%s.cluster" % cluster_file
-    ):
-        # Get region
-        reg_uid = regions[int(line[0]) - 1]
-        # Skip invalid region
-        if not reg_uid: continue
-        # Get sample
-        sam_uid =\
-            accession2sample[
-                label2accession[line[-1]]
-            ]
-        # Get TF feature
-        feat = TFBinding()
-        is_unique = feat.is_unique(
-            session,
-            reg_uid,
-            sam_uid,
-            exp.uid,
-            sou.uid,
-            experiment_target
-        )
-        # Insert feature to GUD
-        if is_unique:
-            feat.regionID = reg_uid
-            feat.sampleID = sam_uid
-            feat.experimentID =\
-                exp.uid
-            feat.sourceID = sou.uid
-            feat.tf = experiment_target
-            session.add(feat)
-            session.commit()
-
-
-def _merge(file_name):
-
-        # Get sample
-        m = re.search("^%s/(.+).bed$" % directory, bed_file)
-        sam_uid = accession2sample[m.group(1)]
-        # Load BED
-        a = BedTool(bed_file)
-        # For line in BED...
-        for l in a.merge():
-            # Get coordinates
-            chrom = l[0]
-            start = int(l[1])
-            end = int(l[2])
-            # If valid chromosome...
-            if chrom in chroms:
-                # Get region
-                region = Region()
-                if region.is_unique(
-                    session,
-                    chrom,
-                    start,
-                    end
-                ):
-                    # Insert region
-                    region.bin =\
-                        assign_bin(
-                            start,
-                            end
-                        )
-                    region.chrom = chrom
-                    region.start = start
-                    region.end = end
-                    session.add(region)
-                    session.commit()
-                reg = region.select_unique(
-                    session,
-                    chrom,
-                    start,
-                    end
-                )
-                regions.append(reg.uid)
         # Clean PyBedTools files
         cleanup(remove_all=True)
-        # For each region...
-        for reg_uid in regions:
-            # Get TF feature
-            feat = TFBinding()
-            is_unique = feat.is_unique(
-                session,
-                reg_uid,
-                sam_uid,
-                exp.uid,
-                sou.uid,
-                experiment_target
-            )
-            # Insert feature to GUD
-            if is_unique:
-                feat.regionID = reg_uid
-                feat.sampleID = sam_uid
-                feat.experimentID =\
-                    exp.uid
-                feat.sourceID = sou.uid
-                feat.tf = experiment_target
-                session.add(feat)
-                session.commit()
+
+    return(bed_file)
+
+def _insert_data_in_chunks(chunk):
+
+    print(current_process().name)
+
+    # Initialize
+    session = Session()
+
+    # For each line...
+    for line in chunk:
+
+        # Skip empty lines
+        if not line:
+            continue
+
+        # Get region
+        region = Region()
+        region.chrom = line[9]
+        region.start = int(line[10])
+        region.end = int(line[11])
+        region.bin = assign_bin(region.start, region.end)
+
+        # Ignore non-standard chroms, scaffolds, etc.
+        if region.chrom not in chroms:
+            continue
+
+        # Get TF, sample
+        m = re.search("^\S+\.(\S+)\.(\S+)$", line[3])
+        n = re.search("^(\w+)", m.group(1))
+        tf_name = n.group(1)
+        n = re.search("^(\w+)", m.group(2))
+        sample_name = n.group(1)
+
+        # Ignore samples
+        if sample_name not in samples:
+            continue
+
+        # Upsert region
+        _upsert_region(session, region)
+
+        # Get region ID
+        region = _get_region(session, region.chrom, region.start, region.end, region.strand)
+
+        # Get TF
+        tf = TFBinding()
+        tf.regionID = region.uid
+        tf.sampleID = samples[sample_name]
+        tf.experimentID = experiment.uid
+        tf.sourceID = source.uid
+        tf.tf = tf_name
+
+        # Upsert tf
+        _upsert_tf(session, tf)
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
 
 #-------------#
 # Main        #

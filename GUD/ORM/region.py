@@ -86,18 +86,17 @@ class Region(Base):
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, chrom, start, end,
-        strand=None):
+    def select_unique(cls, session, chrom, start, end, strand=None):
 
         q = session.query(cls)\
             .filter(
                 cls.chrom == chrom,
                 cls.start == int(start),
                 cls.end == int(end),
-                cls.strand == strand
+                cls.strand == strand,
             )
 
-        return q.first()
+        return(q.first())
 
     @classmethod
     def select_by_bin_range(cls, session, chrom,

@@ -5,20 +5,11 @@ Contains Python parsers with which to populate GUD
 from io import BytesIO
 from ftplib import FTP
 import gzip
-from itertools import islice
-from multiprocessing import Pool
 import os
 import re
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database
-import sys
-# Python 3+
-if sys.version_info > (3, 0):
-    from itertools import zip_longest
-# Python 2.7
-else:
-    from itertools import izip_longest as zip_longest
 
 from GUD import GUDglobals
 from GUD.ORM.chrom import Chrom
@@ -28,6 +19,7 @@ from GUD.ORM.gene import Gene
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
+from GUD.ORM.tf_binding import TFBinding
 
 #--------------#
 # Initializer  #
@@ -162,7 +154,7 @@ def _get_db_name(user, pwd, host, port, db):
 def _initialize_engine_session(db_name):
 
     # Initialize
-    engine = create_engine(db_name)
+    engine = create_engine(db_name, pool_pre_ping=True)
     session_factory = sessionmaker(bind=engine)
     Session = scoped_session(session_factory)
 
@@ -181,6 +173,13 @@ def _get_experiment(session, experiment_type):
 def _get_region(session, chrom, start, end, strand=None):
     return(Region.select_unique(session, chrom, start, end, strand))
 
+def _get_sample(session, name, treatment, cell_line, cancer):
+    """
+    @classmethod
+    def select_unique(cls, session, name, treatment, cell_line, cancer):
+    """
+    return(Sample.select_unique(session, name, treatment, cell_line, cancer))
+
 def _get_source(session, source_name):
     return(Source.select_by_name(session, source_name))
 
@@ -196,7 +195,7 @@ def _upsert_conservation(session, conservation):
 
 def _upsert_experiment(session, experiment):
 
-    if Experiment.is_unique(session, experiment.experiment_type):
+    if Experiment.is_unique(session, experiment.name):
         session.add(experiment)
         session.flush()
 
@@ -212,10 +211,25 @@ def _upsert_region(session, region):
         session.add(region)
         session.flush()
 
+def _upsert_sample(session, sample):
+    """
+    @classmethod
+    def is_unique(cls, session, name, treatment, cell_line, cancer):
+    """
+    if Sample.is_unique(session, sample.name, sample.treatment, sample.cell_line, sample.cancer):
+        session.add(sample)
+        session.flush()
+
 def _upsert_source(session, source):
 
     if Source.is_unique(session, source.name):
         session.add(source)
+        session.flush()
+
+def _upsert_tf(session, tf):
+
+    if TFBinding.is_unique(session, tf.regionID, tf.sampleID, tf.experimentID, tf.sourceID, tf.tf):
+        session.add(tf)
         session.flush()
 
 #--------------#
@@ -223,6 +237,9 @@ def _upsert_source(session, source):
 #--------------#
 
 def _process_data_in_chunks(data_file, insert_function, threads=1):
+
+    from itertools import islice
+    from multiprocessing import Pool
 
     # Get iterable
     iterable = GUDglobals.parse_tsv_file(data_file)
@@ -243,7 +260,17 @@ def _process_data_in_chunks(data_file, insert_function, threads=1):
             else:
                 break
 
-def _grouper(iterable, n=1000, fillvalue=None):
+            break
+
+def _grouper(iterable, n=100, fillvalue=None):
+
+    import sys
+    # Python 3+
+    if sys.version_info > (3, 0):
+        from itertools import zip_longest
+    # Python 2.7
+    else:
+        from itertools import izip_longest as zip_longest
 
     args = [iter(iterable)] * n
 

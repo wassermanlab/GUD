@@ -117,12 +117,18 @@ def main():
     refgene_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.dummy_dir, args.threads)
 
 def refgene_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads=1):
+    """
+    python -m GUD.parsers.refgene2gud --genome hg19 --dummy-dir ./tmp/
+    """
 
     # Globals
     global chroms
     global engine
     global Session
     global source
+
+    # Download data
+    dummy_file = _download_data(genome, dummy_dir)
 
     # Get database name
     db_name = _get_db_name(user, pwd, host, port, db)
@@ -142,9 +148,6 @@ def refgene_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads
     # Get valid chromosomes
     chroms = _get_chroms(session)
 
-    # Download data
-    dummy_file = _download_data(genome, dummy_dir)
-
     # Get source
     source = Source()
     m = re.search("^%s/*(.+).txt.gz$" % dummy_dir, dummy_file) 
@@ -153,10 +156,8 @@ def refgene_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads
     _upsert_source(session, source)
     source = _get_source(session, source_name)
 
-    # Close session
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
-
-    # Dispose of session
     engine.dispose()
 
     # Parallelize inserts to the database
@@ -165,9 +166,9 @@ def refgene_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads
     # Dispose session
     Session.remove()
 
-    # Remove downloaded file
-    if os.path.exists(dummy_file):
-        os.remove(dummy_file)
+    # # Remove downloaded file
+    # if os.path.exists(dummy_file):
+    #     os.remove(dummy_file)
 
 def _download_data(genome, dummy_dir="/tmp/"):
 
@@ -228,10 +229,8 @@ def _insert_data_in_chunks(chunk):
         # Upsert gene
         _upsert_gene(session, gene)
 
-    # Close session
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
-
-    # Dispose of session
     engine.dispose()
 
 #-------------#
