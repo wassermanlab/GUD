@@ -14,6 +14,7 @@ from .sample import Sample
 from .experiment import Experiment
 from sqlalchemy.ext.declarative import declared_attr
 from .genomicFeatureMixin1 import GFMixin1
+import sys
 
 
 class GFMixin2(GFMixin1):
@@ -72,12 +73,15 @@ class GFMixin2(GFMixin1):
         """
         Query objects by experiment name.
         """
-        q = session.query(cls, Region, Source, Sample, Experiment).\
+        e = session.query(Experiment).filter(Experiment.name.in_(experiments)).all()
+        e = [ex.uid for ex in e]
+    
+        q = session.query(cls, Region).\
             join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(Experiment.name.in_(experiments))
-
+            .filter(Region.uid == cls.region_id)\
+            .filter(cls.experiment_id.in_(e))
+        
+        print(q.count(), file=sys.stdout)
         return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
@@ -87,10 +91,9 @@ class GFMixin2(GFMixin1):
         """
         bins = Region._compute_bins(start, end)
 
-        q = session.query(cls, Region, Source, Sample, Experiment)\
+        q = session.query(cls, Region)\
             .join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
+            .filter(Region.uid == cls.region_id)\
             .filter(Region.chrom == chrom,
                     Region.start < end,
                     Region.end > start)\
@@ -105,11 +108,10 @@ class GFMixin2(GFMixin1):
         """
         bins = Region._compute_bins(start, end)
 
-        q = session.query(cls, Region, Source, Sample, Experiment)\
+        q = session.query(cls, Region)\
             .join()\
             .filter(Region.bin.in_(bins))\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
+            .filter(Region.uid == cls.region_id)\
             .filter(Region.chrom == chrom,
                     Region.start == start,
                     Region.end == end)
@@ -121,8 +123,8 @@ class GFMixin2(GFMixin1):
                   sampleID, experimentID, sourceID):
 
         q = session.query(cls).\
-            filter(cls.regionID == regionID, cls.sampleID == sampleID,
-                   cls.experimentID == experimentID, cls.sourceID == sourceID)
+            filter(cls.region_id == regionID, cls.sample_id == sampleID,
+                   cls.experiment_id == experimentID, cls.source_id == sourceID)
 
         return len(q.all()) == 0
 
@@ -131,7 +133,7 @@ class GFMixin2(GFMixin1):
                       sampleID, experimentID, sourceID):
 
         q = session.query(cls).\
-            filter(cls.regionID == regionID, cls.sampleID == sampleID,
-                   cls.experimentID == experimentID, cls.sourceID == sourceID)
+            filter(cls.region_id == regionID, cls.sample_id == sampleID,
+                   cls.experiment_id == experimentID, cls.source_id == sourceID)
 
         return q.first()

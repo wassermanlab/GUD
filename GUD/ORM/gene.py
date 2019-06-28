@@ -110,14 +110,12 @@ class Gene(GFMixin1, Base):
         # Define qualifiers
         qualifiers = {
             "uid": feat.Gene.uid,
-            "regionID": feat.Gene.region_id,
             "name": feat.Gene.name,
             "name2": feat.Gene.name2,
             "cdsStart": int(feat.Gene.cdsStart),
             "cdsEnd": int(feat.Gene.cdsEnd),
             "exonStarts": feat.Gene.exonStarts,
             "exonEnds": feat.Gene.exonEnds,
-            "sourceID": feat.Gene.source_id,
             "source": feat.Source.name,
         }
 

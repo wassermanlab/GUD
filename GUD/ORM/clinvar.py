@@ -79,8 +79,7 @@ class ClinVar(GFMixin1, Base):
         # Define qualifiers
         qualifiers = {
             "uid": feat.ClinVar.uid,
-            "regionID": feat.ClinVar.region_id,
-            "sourceID": feat.ClinVar.source_id,
+            "source": feat.Source.name,
             "ref": feat.ClinVar.ref,
             "alt": feat.ClinVar.alt,
             "clinvarID": feat.ClinVar.clinvarID,

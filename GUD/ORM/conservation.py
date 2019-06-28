@@ -65,9 +65,8 @@ class Conservation(GFMixin1, Base):
 
         qualifiers = {
             "uid": feat.Conservation.uid,
-            "regionID": feat.Conservation.region_id,
             "score": feat.Conservation.score,
-            "sourceID": feat.Conservation.source_id,
+            "source": feat.Source.name,
         }
 
         return GenomicFeature(

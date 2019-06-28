@@ -11,47 +11,31 @@ from sqlalchemy.dialects import mysql
 from .base import Base
 from .region import Region
 from .source import Source
+from .genomic_feature import GenomicFeature
+from .genomicFeatureMixin1 import GFMixin1
+from sqlalchemy.ext.declarative import declared_attr
 
-class RepeatMask(Base):
+class RepeatMask(GFMixin1, Base):
 
     __tablename__ = "rmsk"
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True))
-    regionID = Column("regionID", Integer, ForeignKey('regions.uid'), nullable=False)
-    sourceID = Column("sourceID", Integer, ForeignKey('sources.uid'), nullable=False)
     swScore = Column("swScore", Float, nullable=False)
     repName = Column("repName", String(75), nullable=False)
     repClass = Column("repClass", String(75), nullable=False)
     repFamily = Column("repFamily", String(75), nullable=False)
-    strand = Column("strand", mysql.CHAR(1), nullable=False)
 
-    __table_args__ = (
-        PrimaryKeyConstraint(uid),
-        UniqueConstraint(regionID, sourceID),
+    @declared_attr
+    def __table_args__(cls):
+        return (
+        UniqueConstraint(cls.region_id, cls.source_id),
 
-        Index("ix_rmsk", regionID),
+        Index("ix_rmsk", cls.region_id),
 
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
         }
     )
-
-    @classmethod
-    def select_by_location(cls, session, chrom, start, end):
-        """
-        Query objects based off of their location being within the start only
-        motifs through that  
-         """
-
-        bins = set(containing_bins(start, end) + contained_bins(start, end))
-        
-        q = session.query(cls, Region).\
-        join().\
-        filter(Region.uid == cls.regionID).\
-        filter(Region.chrom == chrom, Region.end > start, Region.start < end).\
-        filter(Region.bin.in_(bins))
-        return q.all()   
 
     @classmethod
     def is_unique(cls, session, regionID, sourceID):
@@ -62,9 +46,23 @@ class RepeatMask(Base):
         else: 
             return False 
 
-    def __str__(self):
-        return "{}\t{}\t{}\t{}".format(self.swScore, self.repName, self.repClass, self.strand)
-
-    def __repr__(self):
-        return "<RMSK(uid={}, regionID={}, sourceID={}, swScore={}, repName={}, repClass={}, strand={})>".format(
-            self.uid, self.regionID, self.sourceID, self.swScore, self.repName, self.repClass, self.strand)
+    @classmethod
+    def as_genomic_feature(self, feat):
+        # Define qualifiers
+        qualifiers = {
+            "uid": feat.RepeatMask.uid,
+            "source": feat.Source.name,
+            "swScore": feat.RepeatMask.swScore,
+            "repName": feat.RepeatMask.repName,
+            "repClass": feat.RepeatMask.repClass,
+            "repFamily": feat.RepeatMask.repFamily,
+            "repClass": feat.RepeatMask.repClass
+        }
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand=feat.Region.strand,
+            feat_type="RepeatMask",
+            feat_id="%s_%s" % (self.__tablename__, feat.RepeatMask.uid),
+            qualifiers=qualifiers)

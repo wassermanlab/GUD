@@ -1,15 +1,11 @@
 from GUD.api import app
 from GUD.api.db import establish_GUD_session, shutdown_session
 from flask import request, jsonify
-from GUD.ORM import Gene, ShortTandemRepeat, CNV, ClinVar, Conservation
+from GUD.ORM import Gene, ShortTandemRepeat, CNV, ClinVar, Conservation, DNAAccessibility
 from GUD.ORM.genomic_feature import GenomicFeature
-import re
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest
-import sys, math
+import sys, math, re
 # print(names, file=sys.stdout)
-# errors
-# 400 bad request, client input validation fails
-# 404 not found
 
 
 @app.route('/')
@@ -59,45 +55,70 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
     keys.discard('page')
 
     if {'uids'} == keys:
-        uids        = request.args.get('uids', default=None)
+        uids = request.args.get('uids', default=None)
         try:
             uids = uids.split(',')
             uids = [int(e) for e in uids]
         except:
             raise BadRequest(
                 "uids must be positive integers seperated by commas (,).")
-        result      = resource.select_by_uids(session, uids, limit, offset)
-    elif {'sources'} == keys:
-        sources     = request.args.get('sources', default=None)
-        sources     = sources.split(',')
-        result      = resource.select_by_sources(session, sources, limit, offset)
-    elif {'chrom', 'end', 'location', 'start'} == keys:
-        chrom       = request.args.get('chrom', default=None, type=str)
-        end         = request.args.get('end', default=None)
-        location    = request.args.get('location', default=None, type=str)
-        start       = request.args.get('start', default=None)
+        if len(uids) > 1000 or len(uids) < 1:
+             raise BadRequest("list of uids must be greater than 0 and less than 1000")
+        result = resource.select_by_uids(session, uids, limit, offset)
+    elif {'chrom', 'end', 'sources', 'start'} == keys:
+        sources = request.args.get('sources', default=None)
+        sources = sources.split(',')
+        chrom = request.args.get('chrom', default=None, type=str)
+        end = request.args.get('end', default=None)
+        location = request.args.get('location', default=None, type=str)
+        start = request.args.get('start', default=None)
         try:
-            start   = int(start) - 1
-            end     = int(end)
+            start = int(start) - 1
+            end = int(end)
+        except:
+            raise BadRequest("start and end should be formatted as integers, \
+            chromosomes should be formatted as chrZ.")
+        if len(sources) > 1000 or len(sources) < 1:
+             raise BadRequest("list of sources must be greater than 0 and less than 1000")       
+        result = resource.select_by_sources(session, chrom, start, end, sources, limit, offset)
+    elif {'chrom', 'end', 'location', 'start'} == keys:
+        chrom = request.args.get('chrom', default=None, type=str)
+        end = request.args.get('end', default=None)
+        location = request.args.get('location', default=None, type=str)
+        start = request.args.get('start', default=None)
+        try:
+            start = int(start) - 1
+            end = int(end)
         except:
             raise BadRequest("start and end should be formatted as integers, \
             chromosomes should be formatted as chrZ.")
         if location == 'exact':
-            result  = resource.select_by_exact_location(
+            result = resource.select_by_exact_location(
                 session, chrom, start, end, limit, offset)
         else:
-            result  = resource.select_by_location(
-                session, chrom, start, end, limit, offset) 
+            result = resource.select_by_location(
+                session, chrom, start, end, limit, offset)
     else:
         raise BadRequest(
-                "invalid combination of parameters for this resource, refer \
+            "invalid combination of parameters for this resource, refer \
                     documentation for correct combination of paramaters")
-    
-    return result
-    
 
-def genomic_feature_mixin2_queries(session, resource, uids, chrom, start, end, sources, location, limit, offset):
-    pass
+    return result
+
+
+def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
+    keys = set(request.args)
+    keys.discard('page')
+    if {'samples'} == keys:
+        samples = request.args.get('samples', default=None)
+        samples = sources.split(',')
+        result = resource.select_by_samples(session, samples, limit, offset)
+    elif {'experiments'} == keys:
+        experiments = request.args.get('experiments', default=None)
+        experiments = experiments.split(',')
+        result = resource.select_by_experiments(session, experiments, limit, offset)
+    else: 
+        return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
 
 
 def gene_queries(session, resource, request, limit, offset):
@@ -106,8 +127,10 @@ def gene_queries(session, resource, request, limit, offset):
     if {'names'} == keys:
         names = request.args.get('names', default=None)
         names = names.split(',')
+        if len(names) > 1000 or len(names) < 1:
+             raise BadRequest("list of names must be greater than 0 and less than 1000")
         return resource.select_by_names(session, limit, offset, names)
-    else: 
+    else:
         return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
 
 
@@ -117,15 +140,17 @@ def clinvar_queries(session, resource, request, limit, offset):
     if {'clinvar_id'} == keys:
         clinvarID = request.args.get('clinvar_id')
         return resource.select_by_clinvarID(session, clinvarID, limit, offset)
-    else: 
+    else:
         return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
+
 
 def short_tandem_repeat_queries(session, resource, request, limit, offset):
     keys = set(request.args)
     keys.discard('page')
     if {'pathogenicity'} == keys:
-            pathogenicity = request.args.get('pathogenicity', default=None, type=bool)
-            return resource.select_by_pathogenicity(session, limit, offset)
+        pathogenicity = request.args.get(
+            'pathogenicity', default=None, type=bool)
+        return resource.select_by_pathogenicity(session, limit, offset)
     elif {'motif'} == keys or {'motif', 'rotation'} == keys:
         motif = request.args.get('motif', default=None)
         rotation = request.args.get('rotation', default=False, type=bool)
@@ -162,25 +187,30 @@ def resource(resource):
         result = clinvar_queries(session, resource, request, limit, offset)
     elif resource == 'concervation':
         resource = Conservation()
-        result = genomic_feature_mixin1_queries(session, resource, request, limit, offset)
+        result = genomic_feature_mixin1_queries(
+            session, resource, request, limit, offset)
     elif resource == 'copy_number_variants':
         resource = CNV()
-        result = genomic_feature_mixin1_queries(session, resource, request, limit, offset)
+        result = genomic_feature_mixin1_queries(
+            session, resource, request, limit, offset)
     elif resource == 'genes':
         resource = Gene()
         result = gene_queries(session, resource, request, limit, offset)
     elif resource == 'short_tandem_repeats':
         resource = ShortTandemRepeat()
-        result = short_tandem_repeat_queries(session, resource, request, limit, offset)
+        result = short_tandem_repeat_queries(
+            session, resource, request, limit, offset)
+    elif resource == 'dna_accessibility':
+        resource = DNAAccessibility()
+        result = genomic_feature_mixin2_queries(
+                session, resource, request, limit, offset)
     else:
         raise BadRequest('valid resources are genes, short_tandem_repeats,\
              copy_number_variants, clinvar, conservation')
 
-
     shutdown_session(session)
     result = create_page(resource, result, page, request.url)
     return jsonify(result)
-
 
 
 # examples
@@ -188,7 +218,7 @@ def resource(resource):
 # http://127.0.0.1:5000/api/v1/genesymbols
 # http://127.0.0.1:5000/api/v1/genes?uids=1
 # http://127.0.0.1:5000/api/v1/genes?names=LOC102725121
-# http://127.0.0.1:5000/api/v1/genes?chrom=chr1&start=11869&end=14362 ######
+# http://127.0.0.1:5000/api/v1/genes?chrom=chr1&start=11869&end=14362&location=exact ######
 # http://127.0.0.1:5000/api/v1/genes?sources=refGene
 # str
 # http://127.0.0.1:5000/api/v1/short_tandem_repeats?pathogenicity=True
@@ -200,4 +230,10 @@ def resource(resource):
 # http://127.0.0.1:5000/api/v1/clinvar?uids=1
 # http://127.0.0.1:5000/api/v1/clinvar?chrom=chr1&start=949422&end=949422&location=exact
 # http://127.0.0.1:5000/api/v1/clinvar?sources=ClinVar_2018-10-28
-
+# dna_accessibility
+# http://127.0.0.1:5000/api/v1/dna_accessibility?uids=1
+# http://127.0.0.1:5000/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=exact 
+# http://127.0.0.1:5000/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=within
+# http://127.0.0.1:5000/api/v1/dna_accessibility?sources=ENCODE
+# http://127.0.0.1:5000/api/v1/dna_accessibility?samples=mesoderm+(heart)
+# http://127.0.0.1:5000/api/v1/dna_accessibility?experiments=DNase-seq

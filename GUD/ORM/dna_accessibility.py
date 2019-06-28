@@ -6,6 +6,7 @@ from .experiment import Experiment
 from .region import Region
 from .sample import Sample
 from .source import Source
+from .genomic_feature import GenomicFeature
 from .genomicFeatureMixin2 import GFMixin2
 from sqlalchemy.ext.declarative import declared_attr
 

@@ -85,8 +85,7 @@ class ShortTandemRepeat(GFMixin1, Base):
         # Define qualifiers
         qualifiers = {
             "uid": feat.ShortTandemRepeat.uid,
-            "regionID": feat.ShortTandemRepeat.region_id,
-            "sourceID": feat.ShortTandemRepeat.source_id,
+            "source": feat.Source.name,
             "motif": feat.ShortTandemRepeat.motif,
             "pathogenicity": feat.ShortTandemRepeat.pathogenicity
         }

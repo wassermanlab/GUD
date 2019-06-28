@@ -49,8 +49,7 @@ class CNV(GFMixin1, Base):
 
         qualifiers = {   
             "uid": feat.CNV.uid, 
-            "regionID": feat.CNV.region_id, 
-            "sourceID": feat.CNV.source_id, 
+            "source": feat.Source.name, 
             "copy_number": feat.CNV.copy_number, 
             "clinical_interpretation": feat.CNV.clinical_interpretation, 
             "variant_type": feat.CNV.variant_type    
