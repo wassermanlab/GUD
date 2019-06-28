@@ -262,7 +262,7 @@ def _process_data_in_chunks(data_file, insert_function, threads=1):
 
             break
 
-def _grouper(iterable, n=100, fillvalue=None):
+def _grouper(iterable, n=1000, fillvalue=None):
 
     import sys
     # Python 3+
