@@ -263,6 +263,9 @@ def _process_data_in_chunks(data_file, insert_function, threads=1):
 
         break
 
+    for chunk in islice(chunks, threads):
+        continue
+
     # Close pool
     pool.close()
 
