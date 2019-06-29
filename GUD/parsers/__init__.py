@@ -263,6 +263,9 @@ def _process_data_in_chunks(data_file, insert_function, threads=1):
 
         break
 
+    # Close pool
+    pool.close()
+
 def _grouper(iterable, n=1000, fillvalue=None):
 
     import sys
