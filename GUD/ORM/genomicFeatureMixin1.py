@@ -62,7 +62,7 @@ class GFMixin1(object):
             .filter(Region.chrom == chrom, 
                     Region.start == start, 
                     Region.end == end)
-            
+
         return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod

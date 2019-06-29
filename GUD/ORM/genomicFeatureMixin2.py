@@ -34,8 +34,7 @@ class GFMixin2(GFMixin1):
         """
         Query objects by uids.
         """
-        q = session.query(cls, Region, Source, Sample, Experiment).\
-            join()\
+        q = session.query(cls, Region, Source, Sample, Experiment)\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
                     Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
             .filter(cls.uid.in_(uids))
@@ -43,46 +42,73 @@ class GFMixin2(GFMixin1):
         return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def select_by_sources(cls, session, sources, limit, offset):
+    def select_by_sources(cls, session, chrom, start, end, sources, limit, offset):
         """
         Query objects by sources.
         """
-        q = session.query(cls, Region, Source, Sample, Experiment).\
-            join()\
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(cls, Region, Source, Sample, Experiment)\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
                     Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(Source.name.in_(sources))
-
-        return (q.count(), q.offset(offset).limit(limit))
+            .filter(Region.chrom == chrom,
+                    Region.start < end,
+                    Region.end > start)\
+            .filter(Region.bin.in_(bins))
+        
+        res = []
+        for i in q.all():
+            if i.Source.name in sources:
+                res.append(i)
+        return (len(res), res[offset:offset+limit])
+            # .filter(Source.name.in_(sources))
+        # return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def select_by_samples(cls, session, samples, limit, offset):
+    def select_by_samples(cls, session, chrom, start, end, samples, limit, offset):
         """
         Query objects by sample name.
         """
-        q = session.query(cls, Region, Source, Sample, Experiment).\
-            join()\
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(cls, Region, Source, Sample, Experiment)\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
                     Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(Sample.name.in_(samples))
+            .filter(Region.chrom == chrom,
+                    Region.start < end,
+                    Region.end > start)\
+            .filter(Region.bin.in_(bins))
 
-        return (q.count(), q.offset(offset).limit(limit))
+        res = []
+        for i in q.all():
+            if i.Sample.name in samples:
+                res.append(i)
+        return (len(res), res[offset:offset+limit])
+            # .filter(Sample.name.in_(samples))
+        # return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def select_by_experiments(cls, session, experiments, limit, offset):
+    def select_by_experiments(cls, session, chrom, start, end, experiments, limit, offset):
         """
         Query objects by experiment name.
         """
-        e = session.query(Experiment).filter(Experiment.name.in_(experiments)).all()
-        e = [ex.uid for ex in e]
-    
-        q = session.query(cls, Region).\
-            join()\
-            .filter(Region.uid == cls.region_id)\
-            .filter(cls.experiment_id.in_(e))
-        
-        print(q.count(), file=sys.stdout)
-        return (q.count(), q.offset(offset).limit(limit))
+
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(cls, Region, Source, Sample, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
+            .filter(Region.chrom == chrom,
+                    Region.start < end,
+                    Region.end > start,)\
+            .filter(Region.bin.in_(bins))
+        res = []
+        for i in q.all():
+            if i.Experiment.name in experiments:
+                res.append(i)
+        return (len(res), res[offset:offset+limit])
+            # .filter(Experiment.name in experiments)\
+        # return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
     def select_by_location(cls, session, chrom, start, end, limit, offset):
@@ -91,9 +117,9 @@ class GFMixin2(GFMixin1):
         """
         bins = Region._compute_bins(start, end)
 
-        q = session.query(cls, Region)\
-            .join()\
-            .filter(Region.uid == cls.region_id)\
+        q = session.query(cls, Region, Source, Sample, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
             .filter(Region.chrom == chrom,
                     Region.start < end,
                     Region.end > start)\
@@ -108,8 +134,9 @@ class GFMixin2(GFMixin1):
         """
         bins = Region._compute_bins(start, end)
 
-        q = session.query(cls, Region)\
-            .join()\
+        q = session.query(cls, Region, Source, Sample, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
             .filter(Region.bin.in_(bins))\
             .filter(Region.uid == cls.region_id)\
             .filter(Region.chrom == chrom,

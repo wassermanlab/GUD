@@ -17,37 +17,34 @@ class DNAAccessibility(GFMixin2, Base):
 
     @declared_attr
     def __table_args__(cls):
-        return  (
-        UniqueConstraint(
-            cls.region_id,
-            cls.sample_id,
-            cls.experiment_id,
-            cls.sample_id
-        ),
-        Index("ix_regionID", cls.region_id), # query by bin range
-        Index("ix_sampleID", cls.sample_id),
-        {
-            "mysql_engine": "MyISAM",
-            "mysql_charset": "utf8"
-        }
-    )
+        return (
+            UniqueConstraint(
+                cls.region_id,
+                cls.sample_id,
+                cls.experiment_id,
+                cls.sample_id
+            ),
+            Index("ix_regionID", cls.region_id),  # query by bin range
+            Index("ix_sampleID", cls.sample_id),
+            {
+                "mysql_engine": "MyISAM",
+                "mysql_charset": "utf8"
+            }
+        )
 
     @classmethod
     def as_genomic_feature(self, feat):
         # Define qualifiers
         qualifiers = {
             "uid": feat.DNAAccessibility.uid,
-            "regionID": feat.DNAAccessibility.region_id,
-            "sourceID": feat.DNAAccessibility.source_id,  
-            "sampleID": feat.DNAAccessibility.sample_id,
-            "experimentID": feat.DNAAccessibility.experiment_id,      
+            "source": feat.Source.name,
+            "sample": feat.Sample.name,
+            "experiment": feat.Experiment.name,
         }
         return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),
             int(feat.Region.end),
-            strand = feat.Region.strand,
-            feat_id = "%s_%s"%(self.__tablename__, feat.DNAAccessibility.uid),
-            qualifiers = qualifiers)
-
- 
+            strand=feat.Region.strand,
+            feat_id="%s_%s" % (self.__tablename__, feat.DNAAccessibility.uid),
+            qualifiers=qualifiers)

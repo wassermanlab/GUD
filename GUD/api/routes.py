@@ -54,6 +54,11 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
     keys = set(request.args)
     keys.discard('page')
 
+    chrom = request.args.get('chrom', default=None, type=str)
+    end = request.args.get('end', default=None)
+    location = request.args.get('location', default=None, type=str)
+    start = request.args.get('start', default=None)
+
     if {'uids'} == keys:
         uids = request.args.get('uids', default=None)
         try:
@@ -68,30 +73,26 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
     elif {'chrom', 'end', 'sources', 'start'} == keys:
         sources = request.args.get('sources', default=None)
         sources = sources.split(',')
-        chrom = request.args.get('chrom', default=None, type=str)
-        end = request.args.get('end', default=None)
-        location = request.args.get('location', default=None, type=str)
-        start = request.args.get('start', default=None)
         try:
             start = int(start) - 1
             end = int(end)
         except:
             raise BadRequest("start and end should be formatted as integers, \
             chromosomes should be formatted as chrZ.")
+        if (end - start) > 1000000:
+            raise BadRequest("start and end must be less than 1000000bp apart")
         if len(sources) > 1000 or len(sources) < 1:
              raise BadRequest("list of sources must be greater than 0 and less than 1000")       
         result = resource.select_by_sources(session, chrom, start, end, sources, limit, offset)
     elif {'chrom', 'end', 'location', 'start'} == keys:
-        chrom = request.args.get('chrom', default=None, type=str)
-        end = request.args.get('end', default=None)
-        location = request.args.get('location', default=None, type=str)
-        start = request.args.get('start', default=None)
         try:
             start = int(start) - 1
             end = int(end)
         except:
             raise BadRequest("start and end should be formatted as integers, \
             chromosomes should be formatted as chrZ.")
+        if (end - start) > 1000000:
+            raise BadRequest("start and end must be less than 1000000bp apart")
         if location == 'exact':
             result = resource.select_by_exact_location(
                 session, chrom, start, end, limit, offset)
@@ -109,14 +110,40 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
 def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
     keys = set(request.args)
     keys.discard('page')
-    if {'samples'} == keys:
+    chrom = request.args.get('chrom', default=None, type=str)
+    end = request.args.get('end', default=None)
+    start = request.args.get('start', default=None)
+    
+    if {'chrom', 'end', 'samples', 'start'} == keys:
         samples = request.args.get('samples', default=None)
-        samples = sources.split(',')
-        result = resource.select_by_samples(session, samples, limit, offset)
-    elif {'experiments'} == keys:
+        samples = samples.split(',')
+        samples = [s.replace("+", " ") for s in samples]
+        try:
+            start = int(start) - 1
+            end = int(end)
+        except:
+            raise BadRequest("start and end should be formatted as integers, \
+            chromosomes should be formatted as chrZ.")
+        if (end - start) > 1000000:
+            raise BadRequest("start and end must be less than 1000000bp apart")
+        if len(samples) > 1000 or len(samples) < 1:
+             raise BadRequest("list of samples must be greater than 0 and less than 1000")       
+        return resource.select_by_samples(session, chrom, start, end, samples, limit, offset)
+    elif {'chrom', 'end', 'experiments', 'start'} == keys:
         experiments = request.args.get('experiments', default=None)
         experiments = experiments.split(',')
-        result = resource.select_by_experiments(session, experiments, limit, offset)
+        try:
+            start = int(start) - 1
+            end = int(end)
+        except:
+            raise BadRequest("start and end should be formatted as integers, \
+            chromosomes should be formatted as chrZ.")
+        if (end - start) > 1000000:
+            raise BadRequest("start and end must be less than 1000000bp apart")
+        if len(experiments) > 1000 or len(experiments) < 1:
+             raise BadRequest("list of samples must be greater than 0 and less than 1000") 
+        return resource.select_by_experiments(session, chrom, start, end, experiments, limit, offset)
+    
     else: 
         return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
 
@@ -219,7 +246,7 @@ def resource(resource):
 # http://127.0.0.1:5000/api/v1/genes?uids=1
 # http://127.0.0.1:5000/api/v1/genes?names=LOC102725121
 # http://127.0.0.1:5000/api/v1/genes?chrom=chr1&start=11869&end=14362&location=exact ######
-# http://127.0.0.1:5000/api/v1/genes?sources=refGene
+# http://127.0.0.1:5000/api/v1/genes?sources=refGene&chrom=chr1&start=11869&end=14362
 # str
 # http://127.0.0.1:5000/api/v1/short_tandem_repeats?pathogenicity=True
 # http://127.0.0.1:5000/api/v1/short_tandem_repeats?motif=ATGGG&rotation=True
@@ -229,11 +256,11 @@ def resource(resource):
 # http://127.0.0.1:5000/api/v1/clinvar?clinvar_id=475283
 # http://127.0.0.1:5000/api/v1/clinvar?uids=1
 # http://127.0.0.1:5000/api/v1/clinvar?chrom=chr1&start=949422&end=949422&location=exact
-# http://127.0.0.1:5000/api/v1/clinvar?sources=ClinVar_2018-10-28
+# http://127.0.0.1:5000/api/v1/clinvar?sources=ClinVar_2018-10-28&chrom=chr1&start=11869&end=14362
 # dna_accessibility
 # http://127.0.0.1:5000/api/v1/dna_accessibility?uids=1
 # http://127.0.0.1:5000/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=exact 
-# http://127.0.0.1:5000/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=within
-# http://127.0.0.1:5000/api/v1/dna_accessibility?sources=ENCODE
-# http://127.0.0.1:5000/api/v1/dna_accessibility?samples=mesoderm+(heart)
-# http://127.0.0.1:5000/api/v1/dna_accessibility?experiments=DNase-seq
+# http://127.0.0.1:5000/api/v1/dna_accessibility?chrom=chr1&start=1&end=100000&location=within
+# http://127.0.0.1:5000/api/v1/dna_accessibility?sources=ENCODE&chrom=chr1&start=1&end=100000
+# http://127.0.0.1:5000/api/v1/dna_accessibility?samples=mesoderm+(heart)&chrom=chr1&start=11869&end=14362
+# http://127.0.0.1:5000/api/v1/dna_accessibility?chrom=chr1&start=1&end=100000&experiments=DNase-seq
