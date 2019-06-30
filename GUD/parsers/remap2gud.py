@@ -335,9 +335,9 @@ def _insert_data_in_chunks(chunk):
 
         # Get TF, sample
         m = re.search("^\S+\.(\S+)\.(\S+)$", line[3])
-        n = re.search("^(\w+)", m.group(1))
+        n = re.search("^([^_]+)", m.group(1))
         tf_name = n.group(1)
-        n = re.search("^(\w+)", m.group(2))
+        n = re.search("^([^_]+)", m.group(2))
         sample_name = n.group(1)
 
         # Ignore samples
