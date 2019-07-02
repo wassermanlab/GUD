@@ -243,7 +243,7 @@ def _upsert_tf(session, tf):
 # Multiprocess #
 #--------------#
 
-def _process_data_in_chunks(data_file, insert_function, threads=1):
+def _process_data_in_chunks(data_file, insert_function, threads=1, test=False):
 
     from itertools import islice
     from multiprocessing import Pool
@@ -268,10 +268,12 @@ def _process_data_in_chunks(data_file, insert_function, threads=1):
         else:
             break
 
-        break
+        if test:
+            break
 
-    for chunk in islice(chunks, threads):
-        continue
+    if test:
+        for chunk in islice(chunks, threads):
+            continue
 
     # Close pool
     pool.close()
