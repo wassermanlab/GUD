@@ -19,7 +19,7 @@ else:
 # Import from GUD module
 from GUD import GUDglobals
 from GUD.ORM.region import Region
-from GUD.ORM.repeat_mask import RepeatMask
+from GUD.ORM.blacklist import BlackList
 from GUD.ORM.source import Source
 from . import _get_chroms, _get_db_name, _get_region, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_region,_upsert_repeat, _upsert_source
 
@@ -113,12 +113,12 @@ def main():
     # Parse arguments
     args = parse_args()
 
-    # Insert repeat mask data
-    rmsk_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.dummy_dir, args.threads)
+    # Insert blastlisted regions
+    blacklist_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.dummy_dir, args.threads)
 
-def rmsk_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads=1):
+def blacklist_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads=1):
     """
-    python -m GUD.parsers.rmsk2gud --genome hg19 --dummy-dir ./tmp/
+    python -m GUD.parsers.blacklist2gud --genome hg19 --dummy-dir ./tmp/
     """
 
     # Globals

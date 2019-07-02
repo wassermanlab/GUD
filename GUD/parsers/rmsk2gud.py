@@ -19,9 +19,9 @@ else:
 # Import from GUD module
 from GUD import GUDglobals
 from GUD.ORM.region import Region
-from GUD.ORM.repeat_mask import RepeatMask
+from GUD.ORM.mask import Mask
 from GUD.ORM.source import Source
-from . import _get_chroms, _get_db_name, _get_region, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_region,_upsert_repeat, _upsert_source
+from . import _get_chroms, _get_db_name, _get_region, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_mask, _upsert_region, _upsert_source
 
 usage_msg = """
 usage: %s --genome STR [-h] [options]
@@ -142,8 +142,8 @@ def rmsk_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads=1)
     session = Session()
 
     # Create table
-    if not engine.has_table(RepeatMask.__tablename__):
-        RepeatMask.__table__.create(bind=engine)
+    if not engine.has_table(Mask.__tablename__):
+        Mask.__table__.create(bind=engine)
 
     # Get valid chromosomes
     chroms = _get_chroms(session)
@@ -215,17 +215,15 @@ def _insert_data_in_chunks(chunk):
         # Get region ID
         region = _get_region(session, region.chrom, region.start, region.end, region.strand)
 
-        # Get repeat
-        repeat = RepeatMask()
-        repeat.regionID = region.uid
-        repeat.sourceID = source.uid
-        repeat.repName = line[10]
-        repeat.repClass = line[11]
-        repeat.repFamily = line[12]
-        repeat.swScore = float(line[1])
+        # Get mask
+        mask = Mask()
+        mask.regionID = region.uid
+        mask.sourceID = source.uid
+        mask.name = "%s," % ",".join(line[10:12+1])
+        mask.score = float(line[1])
 
-        # Upsert repeat
-        _upsert_repeat(session, repeat)
+        # Upsert mask
+        _upsert_mask(session, mask)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
