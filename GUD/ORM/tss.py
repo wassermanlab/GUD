@@ -1,365 +1,210 @@
 import re
 from sqlalchemy import (
-    and_,
-    or_,
     Column,
     Index,
     Integer,
-    PrimaryKeyConstraint,
     String,
     ForeignKey,
     UniqueConstraint
 )
 from sqlalchemy.dialects import mysql
-
 from .base import Base
 from .experiment import Experiment
 from .gene import Gene
-from .genomic_feature import GenomicFeature
 from .region import Region
 from .source import Source
+from .genomic_feature import GenomicFeature
+from .genomicFeatureMixin2 import GFMixin2
+from sqlalchemy.ext.declarative import declared_attr
 
-class TSS(Base):
+
+class TSS(GFMixin2, Base):
 
     __tablename__ = "transcription_start_sites"
 
-    uid = Column(
-        "uid",
-        mysql.INTEGER(unsigned=True)
-    )
+    gene = Column("gene", String(75), ForeignKey("genes.name2"))
 
-    regionID = Column(
-        "regionID",
-        Integer,
-        ForeignKey("regions.uid"),
-        nullable=False
-    )
+    tss = Column("tss", mysql.INTEGER(unsigned=True))
 
-    gene = Column(
-        "gene",
-        String(75),
-        ForeignKey("genes.name2")
-    )
+    @declared_attr
+    def sample_id(cls):
+        return Column("sampleIDs", mysql.LONGBLOB, nullable=False)
 
-    tss = Column(
-        "tss",
-        mysql.INTEGER(unsigned=True)
-    )
+    avg_expression_levels = Column("avg_expression_levels", mysql.LONGBLOB,
+    nullable=False)
 
-    sampleIDs = Column(
-        "sampleIDs",
-        mysql.LONGBLOB,
-        nullable=False
-    )
-
-    avg_expression_levels = Column(
-        "avg_expression_levels",
-        mysql.LONGBLOB, nullable=False
-    )
-
-    experimentID = Column(
-        "experimentID",
-        Integer,
-        ForeignKey("experiments.uid"),
-        nullable=False
-    )
-
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
-        nullable=False
-    )
-
-    __table_args__ = (
-        PrimaryKeyConstraint(uid),
-        # multiple TSSs might overlap:
-        # e.g. p16@IGF2,p1@INS-IGF2,p1@INS
-        UniqueConstraint(
-            regionID,
-            experimentID,
-            sourceID,
-            gene,
-            tss
-        ),
-        Index("ix_regionID", regionID), # query by bin range
-        Index("ix_gene_tss", gene, tss),
-        {
-            "mysql_engine": "MyISAM",
-            "mysql_charset": "utf8"
-        }
-    )
+    @declared_attr
+    def __table_args__(cls):
+        return (
+            # multiple TSSs might overlap:
+            # e.g. p16@IGF2,p1@INS-IGF2,p1@INS
+            UniqueConstraint(
+                cls.region_id,
+                cls.sample_id,
+                cls.experiment_id,
+                cls.gene,
+                cls.tss
+            ),
+            Index("ix_regionID", cls.region_id),  # query by bin range
+            Index("ix_gene_tss", cls.gene, cls.tss),
+            {
+                "mysql_engine": "MyISAM",
+                "mysql_charset": "utf8"
+            }
+        )
 
     @classmethod
     def is_unique(cls, session, regionID, sourceID,
-        experimentID, gene, tss):
+                  experimentID, gene, tss):
 
         q = session.query(cls)\
-            .filter(
-                cls.regionID == regionID,
-                cls.sourceID == sourceID,
-                cls.experimentID == experimentID,
-                cls.gene == gene,
-                cls.tss == tss
-            )
+            .filter(cls.regionID == regionID, cls.sourceID == sourceID,
+            cls.experimentID == experimentID, cls.gene == gene, cls.tss == tss)
 
         return len(q.all()) == 0
 
-
     @classmethod
-    def select_unique(cls, session, regionID,
-        sourceID, experimentID, gene, tss):
+    def select_unique(cls, session, regionID, sourceID, experimentID, gene, tss):
 
         q = session.query(cls)\
-            .filter(
-                cls.regionID == regionID,
-                cls.sourceID == sourceID,
-                cls.experimentID == experimentID,
-                cls.gene == gene,
-                cls.tss == tss
-            )
+            .filter(cls.regionID == regionID, cls.sourceID == sourceID,
+             cls.experimentID == experimentID, cls.gene == gene,
+             cls.tss == tss)
 
         return q.first()
 
     @classmethod
-    def select_by_uid(cls, session, uid,
-        as_genomic_feature=False):
+    def select_by_uids(cls, session, uids, limit, offset):
         """
-        Query objects by uid.
+        Query objects by uids.
         """
+        q = session.query(cls, Region, Source, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Experiment.uid == cls.experiment_id)\
+            .filter(cls.uid.in_(uids))
 
-        q = session.query(
-                cls,
-                Experiment,
-                Region,
-                Source
-            )\
-            .join()\
-            .filter(
-                Experiment.uid == cls.experimentID,
-                Region.uid == cls.regionID,
-                Source.uid == cls.sourceID
-            ).filter(cls.uid == uid)
-
-        if as_genomic_feature:
-            return cls.__as_genomic_feature(
-                q.first()
-            )
-
-        return q.first()
+        return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def select_by_uids(cls, session, uids=[],
-        as_genomic_feature=False):
+    def select_by_genes(cls, session, genes, limit, offset):
         """
         Query objects by multiple uids.
         If no uids are provided, return all
         objects.
         """
 
-        q = session.query(
-                cls,
-                Experiment,
-                Region,
-                Source
-            )\
+        q = session.query(cls, Experiment, Region, Source)\
             .join()\
-            .filter(
-                Experiment.uid == cls.experimentID,
-                Region.uid == cls.regionID,
-                Source.uid == cls.sourceID
-            )
-
-        if uids:
-            q = q.filter(cls.uid.in_(uids))
-
-        if as_genomic_feature:
-
-            feats = []
-
-            # For each feature...
-            for feat in q.all():
-                feats.append(
-                    cls.__as_genomic_feature(feat)
-                )
-
-            return feats
-
-        return q.all()
-
-    @classmethod
-    def select_by_gene(cls, session, gene,
-        as_genomic_feature=False):
-        """
-        Query objects by uid.
-        """
-
-        q = session.query(
-                cls,
-                Experiment,
-                Region,
-                Source
-            )\
-            .join()\
-            .filter(
-                Experiment.uid == cls.experimentID,
-                Region.uid == cls.regionID,
-                Source.uid == cls.sourceID
-            ).filter(cls.gene == gene)
-
-        if as_genomic_feature:
-
-            feats = []
-
-            # For each feature...
-            for feat in q.all():
-                feats.append(
-                    cls.__as_genomic_feature(feat)
-                )
-
-            return feats
-
-        return q.all()
-
-    @classmethod
-    def select_by_genes(cls, session, genes=[],
-        as_genomic_feature=False):
-        """
-        Query objects by multiple uids.
-        If no uids are provided, return all
-        objects.
-        """
-
-        q = session.query(
-                cls,
-                Experiment,
-                Region,
-                Source
-            )\
-            .join()\
-            .filter(
-                Experiment.uid == cls.experimentID,
-                Region.uid == cls.regionID,
-                Source.uid == cls.sourceID
-            )
+            .filter(Experiment.uid == cls.experimentID,
+                    Region.uid == cls.regionID, Source.uid == cls.sourceID)
 
         if genes:
             q = q.filter(cls.gene.in_(genes))
 
-        if as_genomic_feature:
-
-            feats = []
-
-            # For each feature...
-            for feat in q.all():
-                feats.append(
-                    cls.__as_genomic_feature(feat)
-                )
-
-            return feats
-
-        return q.all()
+        return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def select_all_genic_tss(cls, session,
-        as_genomic_feature=False):
+    def select_all_genic_tss(cls, session, limit, offset):
         """
         Query all objects associated with a gene.
         """
 
-        q = session.query(
-                cls,
-                Experiment,
-                Region,
-                Source
-            )\
-            .join()\
-            .filter(
-                Experiment.uid == cls.experimentID,
-                Region.uid == cls.regionID,
-                Source.uid == cls.sourceID
-            ).filter(
-                cls.gene != None
-            )
+        q = session.query(cls, Experiment, Region, Source)\
+            .filter(Experiment.uid == cls.experimentID,
+            Region.uid == cls.regionID, Source.uid == cls.sourceID)\
+            .filter(cls.gene != None)
 
-        if as_genomic_feature:
+        return (q.count(), q.offset(offset).limit(limit))
 
-            feats = []
+    @classmethod
+    def select_by_sources(cls, session, chrom, start, end, sources, limit, offset):
+        """
+        Query objects by sources.
+        """
+        bins = Region._compute_bins(start, end)
 
-            # For each feature...
-            for feat in q.all():
-                feats.append(
-                    cls.__as_genomic_feature(feat)
-                )
+        q = session.query(cls, Region, Source, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Experiment.uid == cls.experiment_id)\
+            .filter(Region.chrom == chrom,
+                    Region.start < end,
+                    Region.end > start)\
+            .filter(Region.bin.in_(bins))
+        
+        res = []
+        for i in q.all():
+            if i.Source.name in sources:
+                res.append(i)
+        return (len(res), res[offset:offset+limit])
+            # .filter(Source.name.in_(sources))
+        # return (q.count(), q.offset(offset).limit(limit))
 
-            return feats
+    @classmethod
+    def select_by_samples(cls, session, chrom, start, end, samples, limit, offset):
+        """
+        Query objects by sample name.
+        """
+        return False
 
-        return q.all()
+    @classmethod
+    def select_by_experiments(cls, session, chrom, start, end, experiments, limit, offset):
+        """
+        Query objects by experiment name.
+        """
+
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(cls, Region, Source, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Experiment.uid == cls.experiment_id)\
+            .filter(Region.chrom == chrom,
+                    Region.start < end,
+                    Region.end > start,)\
+            .filter(Region.bin.in_(bins))
+        res = []
+        for i in q.all():
+            if i.Experiment.name in experiments:
+                res.append(i)
+        return (len(res), res[offset:offset+limit])
+            # .filter(Experiment.name in experiments)\
+        # return (q.count(), q.offset(offset).limit(limit))
+
+    @classmethod
+    def select_by_location(cls, session, chrom, start, end, limit, offset):
+        """
+        Query objects by genomic location.
+        """
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(cls, Region, Source, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Experiment.uid == cls.experiment_id)\
+            .filter(Region.chrom == chrom,
+                    Region.start < end,
+                    Region.end > start)\
+            .filter(Region.bin.in_(bins))
+
+        return (q.count(), q.offset(offset).limit(limit))
+
+    @classmethod
+    def select_by_exact_location(cls, session, chrom, start, end, limit, offset):
+        """
+        Query objects by genomic location.
+        """
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(cls, Region, Source, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Experiment.uid == cls.experiment_id)\
+            .filter(Region.bin.in_(bins))\
+            .filter(Region.uid == cls.region_id)\
+            .filter(Region.chrom == chrom,
+                    Region.start == start,
+                    Region.end == end)
+
+        return (q.count(), q.offset(offset).limit(limit))
 
 
-#    @classmethod
-#    def select_by_gene_tss(cls, session, gene,
-#        tss, as_genomic_feature=False):
-#        """
-#        Query objects by gene TSS.
-#        """
-#
-#        q = session.query(
-#                cls,
-#                Experiment,
-#                Region,
-#                Source
-#            )\
-#            .join()\
-#            .filter(
-#                Experiment.uid == cls.experimentID,
-#                Region.uid == cls.regionID,
-#                Source.uid == cls.sourceID
-#            ).filter(
-#                cls.gene == gene,
-#                cls.tss == tss
-#            )
-#
-#        if as_genomic_feature:
-#
-#            feats = []
-#
-#            # For each feature...
-#            for feat in q.all():
-#                feats.append(
-#                    cls.__as_genomic_feature(feat)
-#                )
-#
-#            return cls.__as_genomic_feature(
-#                q.first()
-#            )
-#
-#        return q.first()
-#
-#    @classmethod
-#    def select_by_multiple_tss(cls, session, tss=[]):
-#        """
-#        Query objects by multiple TSSs. If no TSSs
-#        are provided, return all objects. TSSs are
-#        to be provided as a two-dimensional list in
-#        the form: [[geneA, tss1], [geneA, tss2], ...]
-#        """
-#
-#        # Initialize
-#        ands = []
-#
-#        # For each gene, TSS pair...
-#        for i, j in tss:
-#            ands.append(
-#                and_(
-#                    cls.gene == i,
-#                    cls.tss == j
-#                )
-#            )
-#
-#        q = session.query(cls).filter(or_(*ands))
-#
-#        return q.all()
 
     @classmethod
     def __as_genomic_feature(self, feat):
@@ -373,7 +218,7 @@ class TSS(Base):
         for i in str(feat.TSS.sampleIDs).split(","):
             if i.isdigit():
                 sampleIDs.append(int(i))
-        
+
         # For each exon end...
         for i in str(feat.TSS.avg_expression_levels).split(","):
             if isfloat.match(i):
@@ -382,40 +227,20 @@ class TSS(Base):
         # Define qualifiers
         qualifiers = {
             "uid": feat.TSS.uid,
-            "regionID": feat.TSS.regionID,
             "gene": feat.TSS.gene,
             "tss": feat.TSS.tss,
-            "sampleIDs": feat.TSS.sampleIDs,
+            "sampleIDs": feat.TSS.sample_id,
             "avg_expression_levels": feat.TSS.avg_expression_levels,
-            "experimentID": feat.TSS.experimentID,
-            "sourceID": feat.TSS.sourceID,
             "experiment": feat.Experiment.name,
-            "source" : feat.Source.name,            
+            "source": feat.Source.name,
         }
 
         return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),
             int(feat.Region.end),
-            strand = feat.Region.strand,
-            feat_type = "TSS",
-            feat_id = "%s_%s"%(self.__tablename__, feat.TSS.uid),
-            qualifiers = qualifiers
+            strand=feat.Region.strand,
+            feat_type="TSS",
+            feat_id="%s_%s" % (self.__tablename__, feat.TSS.uid),
+            qualifiers=qualifiers
         )
-
-    def __repr__(self):
-
-        return "<%s(%s, %s, %s, %s, %s, %s, %s, %s)>" % \
-            (   
-                self.__tablename__,
-                "uid={}".format(self.uid),
-                "regionID={}".format(self.regionID),
-                "gene={}".format(self.gene),
-                "tss={}".format(self.tss),
-                "sampleIDs={}".format(self.sampleIDs),
-                "avg_expression_levels={}".format(
-                    self.avg_expression_levels
-                ),
-                "experimentID={}".format(self.experimentID),
-                "sourceID={}".format(self.sourceID)
-            )

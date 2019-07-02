@@ -4,10 +4,7 @@ from binning import (
 )
 from sqlalchemy import (
     Column,
-    ForeignKey,
     Index,
-    Integer,
-    PrimaryKeyConstraint,
     String,
     UniqueConstraint
 )
@@ -18,108 +15,73 @@ from .experiment import Experiment
 from .region import Region
 from .sample import Sample
 from .source import Source
+from .genomic_feature import GenomicFeature
+from .genomicFeatureMixin2 import GFMixin2
+from sqlalchemy.ext.declarative import declared_attr
 
-class TFBinding(Base):
+
+class TFBinding(GFMixin2, Base):
 
     __tablename__ = "tf_binding"
 
-    uid = Column(
-        "uid",
-        mysql.INTEGER(unsigned=True)
-    )
+    tf = Column("tf", String(25), nullable=False)
 
-    regionID = Column(
-        "regionID",
-        Integer,
-        ForeignKey("regions.uid"),
-        nullable=False
-    )
-
-    sampleID = Column(
-        "sampleID",
-        Integer,
-        ForeignKey("samples.uid"),
-        nullable=False
-    )
-
-    experimentID = Column(
-        "experimentID",
-        Integer,
-        ForeignKey("experiments.uid"),
-        nullable=False
-    )
-
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
-        nullable=False
-    )
-
-    tf = Column(
-        "tf",
-        String(25),
-        nullable=False
-    )
-
-    __table_args__ = (
-        PrimaryKeyConstraint(uid),
-        UniqueConstraint(
-            regionID,
-            sampleID,
-            experimentID,
-            sourceID,
-            tf
-
-        ),
-        Index("ix_regionID", regionID), # query by bin range
-        Index("ix_sampleID", sampleID),
-        {
-            "mysql_engine": "MyISAM",
-            "mysql_charset": "utf8"
-        }
-    )
+    @declared_attr
+    def __table_args__(cls):
+        return (
+            UniqueConstraint(
+                cls.region_id,
+                cls.sample_id,
+                cls.experiment_id,
+                cls.sample_id,
+                cls.tf
+            ),
+            Index("ix_regionID", cls.region_id),  # query by bin range
+            Index("ix_sampleID", cls.sample_id),
+            {
+                "mysql_engine": "MyISAM",
+                "mysql_charset": "utf8"
+            }
+        )
 
     @classmethod
     def is_unique(cls, session, regionID,
-        sampleID, experimentID, sourceID,
-        tf):
+                  sampleID, experimentID, sourceID,
+                  tf):
 
         q = session.query(cls).\
-            filter(
-                cls.regionID == regionID,
-                cls.sampleID == sampleID,
-                cls.experimentID == experimentID,
-                cls.sourceID == sourceID,
-                cls.tf == tf
-            )
+            filter(cls.regionID == regionID, cls.sampleID == sampleID,
+                   cls.experimentID == experimentID, cls.sourceID == sourceID,
+                   cls.tf == tf)
 
         return len(q.all()) == 0
 
     @classmethod
     def select_unique(cls, session, regionID,
-        sampleID, experimentID, sourceID,
-        tf):
+                      sampleID, experimentID, sourceID,
+                      tf):
 
         q = session.query(cls).\
-            filter(
-                cls.regionID == regionID,
-                cls.sampleID == sampleID,
-                cls.experimentID == experimentID,
-                cls.sourceID == sourceID,
-                cls.tf == tf
-            )
+            filter(cls.regionID == regionID, cls.sampleID == sampleID,
+                   cls.experimentID == experimentID, cls.sourceID == sourceID,
+                   cls.tf == tf)
 
         return q.first()
 
-    def __repr__(self):
-
-        return "<TFBinding(%s, %s, %s, %s, %s, %s)>" % \
-            (
-                "uid={}".format(self.uid),
-                "regionID={}".format(self.regionID),
-                "sampleID={}".format(self.sampleID),
-                "experimentID={}".format(self.experimentID),
-                "sourceID={}".format(self.sourceID),
-                "tf={}".format(self.tf)
-            )
+    @classmethod
+    def as_genomic_feature(self, feat):
+        # Define qualifiers
+        qualifiers = {
+            "uid": feat.TFBinding.uid,
+            "source": feat.Source.name,
+            "sample": feat.Sample.name,
+            "experiment": feat.Experiment.name,
+            "tf": feat.TFBinding.tf
+        }
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand=feat.Region.strand,
+            feat_id="%s_%s" % (self.__tablename__, feat.TFBinding.uid),
+            qualifiers=qualifiers)
