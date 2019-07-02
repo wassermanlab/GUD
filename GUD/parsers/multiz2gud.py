@@ -118,7 +118,7 @@ def main():
 
 def conservation_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads=1):
     """
-    python -m GUD.parsers.conserv2gud --genome hg19 --dummy-dir ./tmp/
+    python -m GUD.parsers.multiz2gud --genome hg19 --dummy-dir ./tmp/
     """
 
     # Globals
@@ -229,8 +229,8 @@ def _insert_data_in_chunks(chunk):
         # Get conservation
         conservation = Conservation()
         conservation.regionID = region.uid
-        conservation.score = float(line[6])
         conservation.sourceID = source.uid
+        conservation.score = float(line[6])
 
         # Upsert conservation
         _upsert_conservation(session, conservation)

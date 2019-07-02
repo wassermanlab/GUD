@@ -17,6 +17,7 @@ from GUD.ORM.conservation import Conservation
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.gene import Gene
 from GUD.ORM.region import Region
+from GUD.ORM.repeat_mask import RepeatMask
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
@@ -209,6 +210,12 @@ def _upsert_region(session, region):
 
     if Region.is_unique(session, region.chrom, region.start, region.end, region.strand):
         session.add(region)
+        session.flush()
+
+def _upsert_repeat(session, repeat):
+
+    if RepeatMask.is_unique(session, repeat.regionID, repeat.sourceID):
+        session.add(repeat)
         session.flush()
 
 def _upsert_sample(session, sample):
