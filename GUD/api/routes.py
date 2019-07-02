@@ -12,7 +12,6 @@ import sys, math, re
 def index():
     return 'HOME'
 
-
 def create_page(resource, result, page, url) -> dict:
     """
     returns 404 error or a page

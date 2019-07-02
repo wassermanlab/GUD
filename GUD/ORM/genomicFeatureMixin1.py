@@ -42,8 +42,8 @@ class GFMixin1(object):
             .join()\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
             .filter(Region.chrom == chrom, 
-                    Region.start < end, 
-                    Region.end > start)\
+                    Region.start <= end, 
+                    Region.end >= start)\
             .filter(Region.bin.in_(bins))
             
         return (q.count(), q.offset(offset).limit(limit))
