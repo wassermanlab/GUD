@@ -155,7 +155,7 @@ def _get_db_name(user, pwd, host, port, db):
 def _initialize_engine_session(db_name):
 
     # Initialize
-    engine = create_engine(db_name, pool_pre_ping=True, pool_recycle=1800, pool_size=20, max_overflow=0)
+    engine = create_engine(db_name, pool_size=20, max_overflow=0, pool_pre_ping=True, pool_recycle=360)
     session_factory = sessionmaker(bind=engine)
     Session = scoped_session(session_factory)
 
