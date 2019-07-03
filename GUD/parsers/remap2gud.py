@@ -196,8 +196,6 @@ def remap_to_gud(user, pwd, host, port, db, genome, samples_file, merge=False, d
         if os.path.exists(data_file):
             os.remove(data_file)
 
-        break
-
     # Dispose session
     Session.remove()
 
