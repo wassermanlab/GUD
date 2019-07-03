@@ -63,24 +63,11 @@ class Sample(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(
-            name,
-            treatment,
-            cell_line,
-            cancer
-        ),
+        UniqueConstraint(name, X, Y, treatment, cell_line, cancer),
         Index("ix_name", name),
-        Index(
-            "ix_name_fulltext",
-            name,
-            mysql_prefix="FULLTEXT"
-        ),
-        Index(
-            "ix_treatment_cell_line_cancer",
-            treatment,
-            cell_line,
-            cancer
-        ),
+        Index("ix_name_fulltext", name, mysql_prefix="FULLTEXT"),
+        Index("ix_sex", X, Y),
+        Index("ix_treatment_cell_line_cancer", treatment, cell_line, cancer),
         {
             "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
@@ -88,12 +75,21 @@ class Sample(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, name, treatment,
+    def is_unique(cls, session, name, X, Y, treatment,
         cell_line, cancer):
 
+        if X:
+            if X.isdigit():
+                X = int(X)
+        if Y:
+            if Y.isdigit():
+                Y = int(Y)
+    
         q = session.query(cls)\
             .filter(
                 cls.name == name,
+                cls.X == X,
+                cls.Y == Y,
                 cls.treatment == int(treatment),
                 cls.cell_line == int(cell_line),
                 cls.cancer == int(cancer)
@@ -102,12 +98,21 @@ class Sample(Base):
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, name, treatment,
+    def select_unique(cls, session, name, X, Y, treatment,
         cell_line, cancer):
+
+        if X:
+            if X.isdigit():
+                X = int(X)
+        if Y:
+            if Y.isdigit():
+                Y = int(Y)
 
         q = session.query(cls)\
             .filter(
                 cls.name == name,
+                cls.X == X,
+                cls.Y == Y,
                 cls.treatment == int(treatment),
                 cls.cell_line == int(cell_line),
                 cls.cancer == int(cancer)

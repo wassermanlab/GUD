@@ -196,6 +196,8 @@ def remap_to_gud(user, pwd, host, port, db, genome, samples_file, merge=False, d
         if os.path.exists(data_file):
             os.remove(data_file)
 
+        break
+
     # Dispose session
     Session.remove()
 
@@ -234,7 +236,7 @@ def _get_samples(session, file_name):
             _upsert_sample(session, sample)
 
             # Get sample ID
-            sample = _get_sample(session, sample.name, sample.treatment, sample.cell_line, sample.cancer)
+            sample = _get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
 
             # Add sample
             samples.setdefault(line[0], sample.uid)

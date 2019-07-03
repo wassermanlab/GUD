@@ -174,12 +174,12 @@ def _get_experiment(session, experiment_type):
 def _get_region(session, chrom, start, end, strand=None):
     return(Region.select_unique(session, chrom, start, end, strand))
 
-def _get_sample(session, name, treatment, cell_line, cancer):
+def _get_sample(session, name, X, Y, treatment, cell_line, cancer):
     """
     @classmethod
     def select_unique(cls, session, name, treatment, cell_line, cancer):
     """
-    return(Sample.select_unique(session, name, treatment, cell_line, cancer))
+    return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
 
 def _get_source(session, source_name):
     return(Source.select_by_name(session, source_name))
@@ -221,9 +221,9 @@ def _upsert_region(session, region):
 def _upsert_sample(session, sample):
     """
     @classmethod
-    def is_unique(cls, session, name, treatment, cell_line, cancer):
+    def is_unique(cls, session, name, X, Y, treatment, cell_line, cancer):
     """
-    if Sample.is_unique(session, sample.name, sample.treatment, sample.cell_line, sample.cancer):
+    if Sample.is_unique(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer):
         session.add(sample)
         session.flush()
 
