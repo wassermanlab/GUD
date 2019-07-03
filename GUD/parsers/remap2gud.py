@@ -146,6 +146,9 @@ def remap_to_gud(user, pwd, host, port, db, genome, samples_file, merge=False, d
     source_name = "ReMap"
     set_tempdir(dummy_dir) # i.e. for pyBedTools
 
+    # Download data
+    dummy_file = _download_data(genome, dummy_dir)
+
     # Get database name
     db_name = _get_db_name(user, pwd, host, port, db)
 
@@ -178,9 +181,6 @@ def remap_to_gud(user, pwd, host, port, db, genome, samples_file, merge=False, d
     source.name = source_name
     _upsert_source(session, source)
     source = _get_source(session, source_name)
-
-    # Download data
-    dummy_file = _download_data(genome, dummy_dir)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()

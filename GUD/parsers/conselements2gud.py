@@ -18,13 +18,9 @@ else:
 
 # Import from GUD module
 from GUD import GUDglobals
-from GUD.ORM.dna_accessibility import DNAAccessibility
-from GUD.ORM.experiment import Experiment
-from GUD.ORM.histone_modification import HistoneModification
+from GUD.ORM.conservation import Conservation
 from GUD.ORM.region import Region
-from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
-from GUD.ORM.tf_binding import TFBinding
 from . import _get_chroms, _get_db_name, _get_region, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_conservation, _upsert_region, _upsert_source
 
 usage_msg = """
@@ -32,12 +28,9 @@ usage: %s --genome STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
-inserts features from ENCODE (Encyclopedia of DNA Elements)
-into GUD.
+inserts features from the UCSC's "phastConsElements100way" table into GUD.
 
   --genome STR        genome assembly
-  --samples FILE      ENCODE samples (manually-curated)
-  --feature STR       type of genomic feature
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -66,14 +59,11 @@ def parse_args():
 
     # Mandatory args
     parser.add_argument("--genome")
-    parser.add_argument("--samples")
-    parser.add_argument("--feature")
 
     # Optional args
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("-m", "--merge", action="store_true")
     optional_group.add_argument("-t", "--threads", default=(cpu_count() - 1))
     
     # MySQL args
@@ -101,20 +91,10 @@ def check_args(args):
         exit(0)
 
     # Check mandatory arguments
-    if not args.genome or not args.samples or not args.feature:
-        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\" \"--samples\" \"--feature\" are required\n"]
+    if not args.genome:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\" is required\n"]
         print(": ".join(error))
         exit(0)
-
-    # Check for invalid feature
-    valid_features = ["accessibility", "histone", "tf"]
-    if args.feature not in valid_features:
-        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--feature\"", "invalid choice", "\"%s\" (choose from" % args.feature, "%s)\n" % " ".join(["\"%s\"" % i for i in feats])]
-        print(": ".join(error))
-        exit(0)
-
-    if args.genome == "hg38":
-        args.genome = "GRCh38"
 
     # Check "-t" argument
     try:
@@ -133,12 +113,12 @@ def main():
     # Parse arguments
     args = parse_args()
 
-    # Insert ENCODE data
-    encode_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.samples, args.feature, args.merge, args.dummy_dir, args.threads)
+    # Insert conservation data
+    conservation_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.dummy_dir, args.threads)
 
-def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, merge=False, dummy_dir="/tmp/", threads=1):
+def conservation_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads=1):
     """
-    python -m GUD.parsers.encode2gud --genome hg19 --samples --dummy-dir ./tmp/
+    python -m GUD.parsers.conselements2gud --genome hg19 --dummy-dir ./tmp/
     """
 
     # Globals
@@ -146,14 +126,9 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
     global engine
     global Session
     global source
-    global table
-
-    # Initialize
-    source_name = "ENCODE"
-    set_tempdir(dummy_dir) # i.e. for pyBedTools
 
     # Download data
-    dummy_file = _download_data(genome, feat_type, dummy_dir)
+    dummy_file = _download_data(genome, dummy_dir)
 
     # Get database name
     db_name = _get_db_name(user, pwd, host, port, db)
@@ -167,26 +142,16 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
     session = Session()
 
     # Create table
-    if feat_type == "accessibility":
-        table = DNAAccessibility()
-    elif feat_type == "histone":
-        table = HistoneModification()
-    else:
-        table = TFBinding()
-
-    if not engine.has_table(table.__tablename__):
-        table.__table__.create(bind=engine)
-
-    exit(0)
+    if not engine.has_table(Conservation.__tablename__):
+        Conservation.__table__.create(bind=engine)
 
     # Get valid chromosomes
     chroms = _get_chroms(session)
 
-    # Get samples
-    samples = _get_samples(session, samples_file)
-
     # Get source
     source = Source()
+    m = re.search("^%s/*(.+).txt.gz$" % dummy_dir, dummy_file) 
+    source_name = m.group(1)
     source.name = source_name
     _upsert_source(session, source)
     source = _get_source(session, source_name)
@@ -205,77 +170,30 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
     # if os.path.exists(dummy_file):
     #     os.remove(dummy_file)
 
-def _download_data(genome, feat_type, dummy_dir="/tmp/"):
+def _download_data(genome, dummy_dir="/tmp/"):
 
     # Initialize
-    url = "https://www.encodeproject.org/metadata/type=Experiment"
+    ftp_files = []
+    url = "ftp://hgdownload.soe.ucsc.edu/goldenPath/%s/database" % genome
+    regexp = re.compile("(phastConsElements[0-9]+way.txt.gz)")
 
-    # Add experiment to URL
-    if feat_type == "histone":
-        experiment_url = "&assay_title=Histone%2BChIP-seq"
-    url += experiment_url
+    # List files in URL
+    u = urlopen(url)
+    content = u.read().decode("utf-8")
+    for file_name in filter(regexp.search, content.split("\n")):
+        m = re.search("(phastConsElements[0-9]+way.txt.gz)", file_name)
+        n = re.search("phastConsElements([0-9]+)way.txt.gz", m.group(1))
+        ftp_files.append((int(n.group(1)), m.group(1)))
 
-    # Add organism to URL
-    if genome == "hg19" or genome == "GRCh38":
-        organism_url = "&replicates.library.biosample.donor.organism.scientific_name=Homo%2Bsapiens"
-    url += organism_url
-
-    # Add genome assembly
-    assembly_url = "&assembly=%s" % genome
-    url += assembly_url
-
-    # Add extra to URL
-    extra_url = "&files.file_type=bed%2BnarrowPeak&status=released"
-    url += extra_url
+    # Sort files
+    ftp_files.sort(key=lambda x: x[0], reverse=True)
 
     # Download data
-    metadata_file = os.path.join(url, "metadata.tsv")
-    dummy_file = os.path.join(dummy_dir, "metadata.tsv")
+    dummy_file = os.path.join(dummy_dir, ftp_files[0][1])
     if not os.path.exists(dummy_file):
-        f = urlretrieve(metadata_file, dummy_file)
+        f = urlretrieve(os.path.join(url, ftp_files[0][1]), dummy_file)
 
     return(dummy_file)
-
-def _get_samples(session, file_name):
-
-    # Initialize
-    samples = {}
-
-    # For each line...
-    for line in GUDglobals.parse_tsv_file(file_name):
-
-        # If add...
-        if line[3] == "Yes":
-
-            # Get sample
-            sample = Sample()
-            sample.name = line[2]
-            sample.treatment = False
-            if line[4] == "Yes":
-                sample.treatment = True
-            sample.cell_line = False
-            if line[5] == "Yes":
-                sample.cell_line = True
-            sample.cancer = False
-            if line[6] == "Yes":
-                sample.cancer = True
-
-            # Upsert sample
-            _upsert_sample(session, sample)
-
-            # Get sample ID
-            sample = _get_sample(session, sample.name, sample.treatment, sample.cell_line, sample.cancer)
-
-            # Add sample
-            samples.setdefault(line[0], sample.uid)
-
-    # For each sample...
-    for sample in bugged_samples:
-
-        # Fix sample
-        samples[sample] = samples[bugged_samples[sample]]
-
-    return(samples)
 
 def _insert_data_in_chunks(chunk):
 
@@ -312,7 +230,7 @@ def _insert_data_in_chunks(chunk):
         conservation = Conservation()
         conservation.regionID = region.uid
         conservation.sourceID = source.uid
-        conservation.score = float(line[6])
+        conservation.score = float(line[-1])
 
         # Upsert conservation
         _upsert_conservation(session, conservation)
