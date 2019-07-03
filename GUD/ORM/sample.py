@@ -2,6 +2,7 @@ from sqlalchemy import (
     Boolean,
     Column,
     Index,
+    Integer,
     PrimaryKeyConstraint,
     String,
     UniqueConstraint
@@ -30,6 +31,16 @@ class Sample(Base):
         "name",
         String(250),
         nullable=False
+    )
+
+    X = Column(
+        "X_chroms",
+        mysql.SMALLINT(unsigned=True)
+    )
+
+    Y = Column(
+        "Y_chroms",
+        mysql.SMALLINT(unsigned=True)
     )
 
     treatment = Column(

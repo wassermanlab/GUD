@@ -6,15 +6,16 @@ import getpass
 from multiprocessing import cpu_count
 from multiprocessing import current_process
 import os
+from pybedtools import BedTool, cleanup, set_tempdir
 import re
 from sqlalchemy_utils import database_exists
 import sys
 # Python 3+
 if sys.version_info > (3, 0):
-    from urllib.request import urlopen, urlretrieve
+    from urllib.request import urlretrieve
 # Python 2.7
 else:
-    from urllib import urlopen, urlretrieve
+    from urllib import urlretrieve
 
 # Import from GUD module
 from GUD import GUDglobals
@@ -25,7 +26,7 @@ from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-from . import _get_chroms, _get_db_name, _get_region, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_conservation, _upsert_region, _upsert_source
+from . import _get_chroms, _get_db_name, _get_experiment, _get_region, _get_sample, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_experiment, _upsert_region, _upsert_sample, _upsert_source, _upsert_tf
 
 usage_msg = """
 usage: %s --genome STR [-h] [options]
@@ -42,6 +43,8 @@ into GUD.
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
+  -m, --merge         merge genomic regions using bedtools
+                      (default = False)
   -t, --threads       number of additional threads to use
                       (default = %s)
 
@@ -113,9 +116,6 @@ def check_args(args):
         print(": ".join(error))
         exit(0)
 
-    if args.genome == "hg38":
-        args.genome = "GRCh38"
-
     # Check "-t" argument
     try:
         args.threads = int(args.threads)
@@ -144,7 +144,9 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
     # Globals
     global chroms
     global engine
+    global experiment
     global Session
+    global samples
     global source
     global table
 
@@ -152,8 +154,8 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
     source_name = "ENCODE"
     set_tempdir(dummy_dir) # i.e. for pyBedTools
 
-    # Download data
-    dummy_file = _download_data(genome, feat_type, dummy_dir)
+    # Download metadata
+    metadata_file = _download_data(genome, feat_type, dummy_dir)
 
     # Get database name
     db_name = _get_db_name(user, pwd, host, port, db)
@@ -177,13 +179,13 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
     if not engine.has_table(table.__tablename__):
         table.__table__.create(bind=engine)
 
-    exit(0)
-
     # Get valid chromosomes
     chroms = _get_chroms(session)
 
     # Get samples
     samples = _get_samples(session, samples_file)
+    print(samples)
+    exit(0)
 
     # Get source
     source = Source()
@@ -209,6 +211,10 @@ def _download_data(genome, feat_type, dummy_dir="/tmp/"):
 
     # Initialize
     url = "https://www.encodeproject.org/metadata/type=Experiment"
+
+    # Fix hg38
+    if genome == "hg38":
+        genome = "GRCh38"
 
     # Add experiment to URL
     if feat_type == "histone":
@@ -268,12 +274,6 @@ def _get_samples(session, file_name):
 
             # Add sample
             samples.setdefault(line[0], sample.uid)
-
-    # For each sample...
-    for sample in bugged_samples:
-
-        # Fix sample
-        samples[sample] = samples[bugged_samples[sample]]
 
     return(samples)
 

@@ -8,12 +8,9 @@ from multiprocessing import current_process
 import os
 from pybedtools import BedTool, cleanup, set_tempdir
 import re
-import shutil
 from sqlalchemy_utils import database_exists
-import subprocess
 import sys
 import tarfile
-import time
 # Python 3+
 if sys.version_info > (3, 0):
     from urllib.request import urlretrieve
