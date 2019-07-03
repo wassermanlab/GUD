@@ -52,8 +52,8 @@ class GFMixin2(GFMixin1):
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
                     Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
             .filter(Region.chrom == chrom,
-                    Region.start <= end,
-                    Region.end >= start)\
+                    Region.start < end,
+                    Region.end > start)\
             .filter(Region.bin.in_(bins))
         
         res = []

@@ -60,12 +60,11 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
 
     if {'uids'} == keys:
         uids = request.args.get('uids', default=None)
-        try:
-            uids = uids.split(',')
-            uids = [int(e) for e in uids]
-        except:
-            raise BadRequest(
-                "uids must be positive integers seperated by commas (,).")
+        uids = uids.split(',')
+        for i in range(len(uids)):
+            if uids[i].isdigit():
+                 uids[i] = int(uids[i])
+        print(uids, file=sys.stdout)
         if len(uids) > 1000 or len(uids) < 1:
              raise BadRequest("list of uids must be greater than 0 and less than 1000")
         result = resource.select_by_uids(session, uids, limit, offset)
