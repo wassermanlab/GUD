@@ -230,7 +230,7 @@ def _insert_data_in_chunks(chunk):
         conservation = Conservation()
         conservation.regionID = region.uid
         conservation.sourceID = source.uid
-        conservation.score = float(line[-1])
+        conservation.score = 1.0
 
         # Upsert conservation
         _upsert_conservation(session, conservation)
