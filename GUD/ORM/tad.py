@@ -72,7 +72,7 @@ class TAD(GFMixin2, Base):
 
         return q.first()
 
-    def __as_genomic_feature(self, feat):
+    def as_genomic_feature(self, feat):
 
         # Define qualifiers
         qualifiers = {

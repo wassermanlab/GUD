@@ -8,10 +8,7 @@ import flask
 from flask import request, jsonify, json
 
 # ============== gfmixin1 ============== #
-
-with app.test_request_context('/api/v1/clinvar?clinvar_id=475283'):
-    assert flask.request.args['clinvar_id'] == '475283'
-
+@pytest.mark.skip(reason="tamar_test")
 def test_clinvar():
     #select_by_location
     with app.test_client() as c:
@@ -46,6 +43,7 @@ def test_clinvar():
         assert len(data['results']) == 1
         assert data['results'][0]['id'] == "clinvar_1"
 
+@pytest.mark.skip(reason="tamar_test")
 def test_copy_number_variants():
     #select_by_location
     with app.test_client() as c:
@@ -72,6 +70,7 @@ def test_copy_number_variants():
         data = json.loads(resp.data)
         assert data['size'] == 116
 
+@pytest.mark.skip(reason="tamar_test")
 def test_gene():
     #select_by_location
     with app.test_client() as c:
@@ -108,8 +107,9 @@ def test_gene():
         data = json.loads(resp.data)
         assert data['size'] == 28194
 
+@pytest.mark.skip(reason="tamar_test")
 def test_short_tandem_repeat():
-#select_by_location
+    #select_by_location
     with app.test_client() as c:
         resp = c.get('/api/v1/short_tandem_repeats?chrom=chr1&start=11869&end=14362&location=within')
         data = json.loads(resp.data)
@@ -144,15 +144,14 @@ def test_short_tandem_repeat():
         data = json.loads(resp.data)
         assert data['size'] == 92
     
-
-# def test_conservation(client):
+# def test_conservation(client): # TODO
 #     #select_by_location
 #     #select_by_exact_location
 #     #select_by_uids
 #     #select_by_sources
 #     return False
 
-# def test_repeat_mask():
+# def test_repeat_mask():       # TODO
 #     #select_by_location
 #     #select_by_exact_location
 #     #select_by_uids
@@ -160,33 +159,131 @@ def test_short_tandem_repeat():
 #     return False
 
 # # ============== gfmixin2 ============== #
-# def test_dna_accessibility(client):
+def test_dna_accessibility():   
+    with app.test_client() as c:        ## location exact
+        resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=exact')
+        data = json.loads(resp.data)
+        assert data['size'] == 167
+    with app.test_client() as c:        ## location within
+        resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=within')
+        data = json.loads(resp.data)
+        assert data['size'] == 168
+    with app.test_client() as c:        ## uids
+        resp = c.get('/api/v1/dna_accessibility?uids=1')
+        data = json.loads(resp.data)
+        assert data['results'][0]['id'] == "dna_accessibility_1"
+    with app.test_client() as c:        ## sources
+        resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&sources=ENCODE')
+        data = json.loads(resp.data)
+        assert data['size'] == 168
+    with app.test_client() as c:        ## samples
+        resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&samples=fibroblast+(dermis)')
+        data = json.loads(resp.data)
+        assert data['size'] == 1
+    with app.test_client() as c:        ## experiments 
+        resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&experiments=DNase-seq')
+        data = json.loads(resp.data)
+        assert data['size'] == 167 
+
+def test_enhancer():            
+    with app.test_client() as c:        ## location exact
+        resp = c.get('/api/v1/enhancers?chrom=chr1&start=858257&end=858648&location=exact')
+        data = json.loads(resp.data)
+        assert data['results'][0]['id'] == "enhancers_1"
+    with app.test_client() as c:        ## location within
+        resp = c.get('/api/v1/enhancers?chrom=chr1&start=858257&end=858648&location=within')
+        data = json.loads(resp.data)
+        assert data['size'] == 66
+    with app.test_client() as c:        ## uids
+        resp = c.get('/api/v1/enhancers?uids=1')
+        data = json.loads(resp.data)
+        assert data['results'][0]['id'] == "enhancers_1"
+    with app.test_client() as c:        ## sources
+        resp = c.get('/api/v1/enhancers?chrom=chr1&start=858257&end=858648&sources=FANTOM5')
+        data = json.loads(resp.data)
+        assert data['size'] == 66
+    with app.test_client() as c:        ## samples
+        resp = c.get('/api/v1/enhancers?chrom=chr1&start=858257&end=858648&samples=MCF-7')
+        data = json.loads(resp.data)
+        assert data['size'] == 1
+    with app.test_client() as c:        ## experiments 
+        resp = c.get('/api/v1/enhancers?chrom=chr1&start=858257&end=858648&experiments=CAGE')
+        data = json.loads(resp.data)
+        assert data['size'] == 66
+
+def test_histone_modification():    # TODO ++
+    with app.test_client() as c:        ## location exact
+        resp = c.get('/api/v1/histone_modifications?chrom=chr1&start=911020&end=912066&location=exact')
+        data = json.loads(resp.data)
+        assert data['size'] == 37
+    with app.test_client() as c:        ## location within
+        resp = c.get('/api/v1/histone_modifications?chrom=chr1&start=911020&end=912066&location=within')
+        data = json.loads(resp.data)
+        assert data['size'] == 740
+    with app.test_client() as c:        ## uids
+        resp = c.get('/api/v1/histone_modifications?uids=500')
+        data = json.loads(resp.data)
+        assert data['results'][0]['id'] == 'histone_modifications_500'
+    with app.test_client() as c:        ## sources
+        resp = c.get('/api/v1/histone_modifications?chrom=chr1&start=911020&end=912066&sources=ENCODE')
+        data = json.loads(resp.data)
+        assert data['size'] == 740
+    with app.test_client() as c:        ## samples
+        resp = c.get('/api/v1/histone_modifications?chrom=chr1&start=911020&end=912066&samples=mucosa+(colon)')
+        data = json.loads(resp.data)
+        assert data['size'] == 3
+    with app.test_client() as c:        ## experiments 
+        resp = c.get('/api/v1/histone_modifications?chrom=chr1&start=911020&end=912066&experiments=ChIP-seq')
+        data = json.loads(resp.data)
+        assert data['size'] == 740
+
+# def test_tad():     # TODO ++
 #     return False
 
-# def test_enhancer(client):
+# def test_tf_binding():  # TOD ++
 #     return False
 
-# def test_histone_modification(client):
-#     return False
-
-# def test_tad(client):
-#     return False
-
-# def test_tf_binding(client):
-#     return False
-
-# def test_tss(client):
+# def test_tss():         # TODO ++
 #     return False
 
 # # ============== other ============== #
-# def test_sample(client):
+# def test_sample():      # TODO ++
 #     return False
 
-# def test_experiment(client):
+# def test_experiment():  # TODO ++
 #     return False
 
-# def test_source(client):
+# def test_source():      # TODO ++
 #     return False
 
-# def test_chrom(client):
+# def test_chrom():       # TODO ++
 #     return False
+
+# def test_expression():       # TODO ++
+#     return False
+
+
+#  with app.test_client() as c:        ## location exact
+        # resp = c.get('/api/v1/resource?chrom=x&start=x&end=x&location=exact')
+        # data = json.loads(resp.data)
+        # assert x == y 
+    # with app.test_client() as c:        ## location within
+        # resp = c.get('/api/v1/resource?chrom=x&start=x&end=x&location=within')
+        # data = json.loads(resp.data)
+        # assert x == y 
+    # with app.test_client() as c:        ## uids
+        # resp = c.get('/api/v1/resource?uids=305056')
+        # data = json.loads(resp.data)
+        # assert x == y 
+    # with app.test_client() as c:        ## sources
+        # resp = c.get('/api/v1/resource?chrom=x&start=x&end=x&sources=x')
+        # data = json.loads(resp.data)
+        # assert x == y 
+    # with app.test_client() as c:        ## samples
+        # resp = c.get('/api/v1/resource?chrom=x&start=x&end=x&samples=x')
+        # data = json.loads(resp.data)
+        # assert x == y 
+    # with app.test_client() as c:        ## experiments 
+        # resp = c.get('/api/v1/resource?chrom=x&start=x&end=x&experiments=x')
+        # data = json.loads(resp.data)
+        # assert x == y 

@@ -25,8 +25,6 @@ class Enhancer(GFMixin2, Base):
 
     __tablename__ = "enhancers"
 
-  
-
     @declared_attr
     def __table_args__(cls):
         return (
@@ -44,19 +42,13 @@ class Enhancer(GFMixin2, Base):
         }
     )
 
-    def __as_genomic_feature(self, feat):
-
-        # Define qualifiers
+    def as_genomic_feature(self, feat):
         qualifiers = {
             "uid": feat.Enhancer.uid,  
             "source": feat.Source.name,
             "sample": feat.Sample.name,
             "experiment": feat.Experiment.name,            
         }
-        # qualifiers = {
-        #     "uid": feat.ClinVar.uid}
-
-        # qualifiers = qualifiers
 
         return GenomicFeature(
             feat.Region.chrom,

@@ -1,7 +1,8 @@
 from GUD.api import app
 from GUD.api.db import establish_GUD_session, shutdown_session
 from flask import request, jsonify
-from GUD.ORM import Gene, ShortTandemRepeat, CNV, ClinVar, Conservation, DNAAccessibility
+from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation, 
+DNAAccessibility, Enhancer, HistoneModification, TAD, TFBinding)
 from GUD.ORM.genomic_feature import GenomicFeature
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest
 import sys, math, re
@@ -229,6 +230,22 @@ def resource(resource):
         resource = DNAAccessibility()
         result = genomic_feature_mixin2_queries(
                 session, resource, request, limit, offset)
+    elif resource == 'histone_modifications':
+        resource = HistoneModification()
+        result = genomic_feature_mixin2_queries(
+                session, resource, request, limit, offset)
+    elif resource == 'enhancers':
+        resource = Enhancer()
+        result = genomic_feature_mixin2_queries(
+                session, resource, request, limit, offset)
+    elif resource == 'tads':
+        resource = TAD()
+        result = genomic_feature_mixin2_queries(
+                session, resource, request, limit, offset)
+    elif resource == 'tf_binding':
+        resource = TFBinding()
+        result = genomic_feature_mixin2_queries(
+                session, resource, request, limit, offset)
     else:
         raise BadRequest('valid resources are genes, short_tandem_repeats,\
              copy_number_variants, clinvar, conservation')
@@ -237,28 +254,3 @@ def resource(resource):
     result = create_page(resource, result, page, request.url)
     return jsonify(result)
 
-
-# examples
-# genes
-# http://127.0.0.1:5000/api/v1/genesymbols
-# http://127.0.0.1:5000/api/v1/genes?uids=1
-# http://127.0.0.1:5000/api/v1/genes?names=LOC102725121
-# http://127.0.0.1:5000/api/v1/genes?chrom=chr1&start=11869&end=14362&location=exact ######
-# http://127.0.0.1:5000/api/v1/genes?sources=refGene&chrom=chr1&start=11869&end=14362
-# str
-# http://127.0.0.1:5000/api/v1/short_tandem_repeats?pathogenicity=True
-# http://127.0.0.1:5000/api/v1/short_tandem_repeats?motif=ATGGG&rotation=True
-# CNV
-# http://127.0.0.1:5000/api/v1/copy_number_variants?chrom=chr1&start=120672583&end=142552733&location=exact
-# Clinvar
-# http://127.0.0.1:5000/api/v1/clinvar?clinvar_id=475283
-# http://127.0.0.1:5000/api/v1/clinvar?uids=1
-# http://127.0.0.1:5000/api/v1/clinvar?chrom=chr1&start=949422&end=949422&location=exact
-# http://127.0.0.1:5000/api/v1/clinvar?sources=ClinVar_2018-10-28&chrom=chr1&start=11869&end=14362
-# dna_accessibility
-# http://127.0.0.1:5000/api/v1/dna_accessibility?uids=1
-# http://127.0.0.1:5000/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=exact 
-# http://127.0.0.1:5000/api/v1/dna_accessibility?chrom=chr1&start=1&end=100000&location=within
-# http://127.0.0.1:5000/api/v1/dna_accessibility?sources=ENCODE&chrom=chr1&start=1&end=100000
-# http://127.0.0.1:5000/api/v1/dna_accessibility?samples=mesoderm+(heart)&chrom=chr1&start=11869&end=14362
-# http://127.0.0.1:5000/api/v1/dna_accessibility?chrom=chr1&start=1&end=100000&experiments=DNase-seq

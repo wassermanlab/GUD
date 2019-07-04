@@ -207,7 +207,7 @@ class TSS(GFMixin2, Base):
 
 
     @classmethod
-    def __as_genomic_feature(self, feat):
+    def as_genomic_feature(self, feat):
 
         # Initialize
         isfloat = re.compile("\d+(\.\d+)?")
