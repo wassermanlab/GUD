@@ -9,6 +9,7 @@ import os
 from pybedtools import BedTool, cleanup, set_tempdir
 import re
 from sqlalchemy_utils import database_exists
+import subprocess
 import sys
 # Python 3+
 if sys.version_info > (3, 0):
@@ -208,22 +209,16 @@ def _download_data(genome, dummy_dir="/tmp/"):
 
 def _preprocess_data(file_name, dummy_dir="/tmp/", merge=False):
 
-    # Initialize
-    intervals = []
+    # Create BED file
     m = re.search("(phastConsElements[0-9]+way).txt.gz", file_name)
-
-    # For each line...
-    for line in GUDglobals.parse_tsv_file(file_name):
-        intervals.append("%s\t%s\t%s" % (line[1], line[2], line[3]))
-
-    print("here")
-
-    # Skip if intersection file already exists
     bed_file = os.path.join(dummy_dir, "%s.bed" % m.group(1))
+    subprocess.call("zless %s | cut -f 1-3 > %s" % (file_name, bed_file), shell=True)
+
+    # Skip if intersection file already exists   
     if not os.path.exists(bed_file):
 
         # Sort BED
-        a = BedTool("\n".join(intervals), from_string=True)
+        a = BedTool(bed_file)
         a = a.sort()
 
         # Merge BED
