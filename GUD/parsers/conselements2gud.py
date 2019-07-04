@@ -6,10 +6,8 @@ import getpass
 from multiprocessing import cpu_count
 from multiprocessing import current_process
 import os
-from pybedtools import BedTool, cleanup, set_tempdir
 import re
 from sqlalchemy_utils import database_exists
-import subprocess
 import sys
 # Python 3+
 if sys.version_info > (3, 0):
@@ -37,8 +35,6 @@ inserts features from the UCSC's "phastConsElements100way" table into GUD.
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
-  -m, --merge         merge genomic regions using bedtools
-                      with \"-d\" = 10 (default = False)
   -t, --threads       number of additional threads to use
                       (default = %s)
 
@@ -68,7 +64,6 @@ def parse_args():
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("-m", "--merge", action="store_true")
     optional_group.add_argument("-t", "--threads", default=(cpu_count() - 1))
     
     # MySQL args
@@ -119,9 +114,9 @@ def main():
     args = parse_args()
 
     # Insert conservation data
-    conservation_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.merge, args.dummy_dir, args.threads)
+    conservation_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.dummy_dir, args.threads)
 
-def conservation_to_gud(user, pwd, host, port, db, genome, merge=False, dummy_dir="/tmp/", threads=1):
+def conservation_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads=1):
     """
     python -m GUD.parsers.conselements2gud --genome hg19 --dummy-dir ./tmp/
     """
@@ -165,15 +160,8 @@ def conservation_to_gud(user, pwd, host, port, db, genome, merge=False, dummy_di
     session.close()
     engine.dispose()
 
-    # Prepare data
-    data_file = _preprocess_data(dummy_file, dummy_dir, merge)
-    exit(0)
     # Parallelize inserts to the database
-    _process_data_in_chunks(data_file, _insert_data_in_chunks, threads)
-
-    # Remove data file
-    if os.path.exists(data_file):
-        os.remove(data_file)
+    _process_data_in_chunks(dummy_file, _insert_data_in_chunks, threads)
 
     # Dispose session
     Session.remove()
@@ -206,34 +194,6 @@ def _download_data(genome, dummy_dir="/tmp/"):
         f = urlretrieve(os.path.join(url, ftp_files[0][1]), dummy_file)
 
     return(dummy_file)
-
-def _preprocess_data(file_name, dummy_dir="/tmp/", merge=False):
-
-    # Create BED file
-    m = re.search("(phastConsElements[0-9]+way).txt.gz", file_name)
-    bed_file = os.path.join(dummy_dir, "%s.bed" % m.group(1))
-    subprocess.call("zless %s | cut -f 1-3 > %s" % (file_name, bed_file), shell=True)
-
-    # Skip if intersection file already exists   
-    if not os.path.exists(bed_file):
-
-        # Sort BED
-        a = BedTool(bed_file)
-        a = a.sort()
-
-        # Merge BED
-        if merge:
-            b = a.merge(d=10)
-        else:
-            b = a
-
-        # Intersect
-        b.saveas(bed_file)
-
-        # Clean PyBedTools files
-        cleanup(remove_all=True)
-
-    return(bed_file)
 
 def _insert_data_in_chunks(chunk):
 
