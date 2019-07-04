@@ -3,6 +3,7 @@
 import argparse
 from binning import assign_bin
 import getpass
+import math
 from multiprocessing import cpu_count
 from multiprocessing import current_process
 import os
@@ -62,7 +63,7 @@ mysql arguments:
 
 class EncodeMetadata:
 
-    def __init__(self, accession, biosample, download_url, experiment_type, experiment_target, genome, output_format, output_type, status, treatments):
+    def __init__(self, accession, biosample, download_url, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments):
         """
         m = re.search(
             "^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$",
@@ -74,15 +75,15 @@ class EncodeMetadata:
         """
 
         # Fix hg38
-        if genome == "GRCh38":
-            genome = "hg38"
+        if genome_assembly == "GRCh38":
+            genome_assembly = "hg38"
 
         self.accession = accession
         self.biosample = biosample
         self.download_url = download_url
         self.experiment_type = experiment_type
         self.experiment_target = experiment_target
-        self.genome = genome
+        self.genome_assembly = genome_assembly
         self.output_format = output_format
         self.output_type = output_type
         self.status = status
@@ -228,7 +229,10 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
     engine.dispose()
 
     # Parse metadata
-    metadata = _parse_metadata(metadata_file)
+    metadata = _parse_metadata(genome, metadata_file)
+
+    # Group metadata by experiment and target
+    grouped_metadata = _group_metadata(metadata)
     exit(0)
 
     # Parallelize inserts to the database
@@ -244,7 +248,9 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
 def _download_metadata(genome, feat_type, dummy_dir="/tmp/"):
 
     # Initialize
-    url = "https://www.encodeproject.org/metadata/type=Experiment"
+    url = "https://www.encodeproject.org/metadata/type=Experiment&status=released&files.file_type=bigWig"
+
+    #%26assay_slims%3DDNA%2Baccessibility%26assembly%3DGRCh38/metadata.tsv
 
     # Fix hg38
     if genome == "hg38":
@@ -252,27 +258,26 @@ def _download_metadata(genome, feat_type, dummy_dir="/tmp/"):
 
     # Add experiment to URL
     if feat_type == "histone":
-        experiment_url = "&assay_title=Histone%2BChIP-seq"
+        experiment_url = "&assay_title=Histone%2BChIP-seq&assay_slims=DNA%2Bbinding"
+    if feat_type == "tf":
+        experiment_url = "&assay_title=TF%2BChIP-seq&assay_slims=DNA%2Bbinding"
     url += experiment_url
-
-    # Add organism to URL
-    if genome == "hg19" or genome == "GRCh38":
-        organism_url = "&replicates.library.biosample.donor.organism.scientific_name=Homo%2Bsapiens"
-    url += organism_url
 
     # Add genome assembly
     assembly_url = "&assembly=%s" % genome
     url += assembly_url
 
     # Add extra to URL
-    extra_url = "&files.file_type=bed%2BnarrowPeak&status=released"
+    extra_url = "&files.file_type=bed%2BnarrowPeak"
     url += extra_url
 
     # Download data
     metadata_file = os.path.join(url, "metadata.tsv")
-    dummy_file = os.path.join(dummy_dir, "metadata.tsv")
+    dummy_file = os.path.join(dummy_dir, "metadata.%s.%s.tsv" % (genome, feat_type))
     if not os.path.exists(dummy_file):
         f = urlretrieve(metadata_file, dummy_file)
+
+    exit(0)
 
     return(dummy_file)
 
@@ -311,27 +316,69 @@ def _get_samples(session, file_name):
 
     return(samples)
 
-def _parse_metadata(metadata_file):
+def _parse_metadata(genome, metadata_file, test=False):
 
     # Initialize
-    metadata = {}
+    metadata = set()
     accession_idx = None
 
     # For each line...
     for line in GUDglobals.parse_tsv_file(metadata_file):
-        print(line)
+
         # If first line...
         if accession_idx is not None:
-        #     # Initialize
-        #     accession = line[accession_idx]
-        #     expclear
-        # eriment_type = line[experiment_type_idx]
-        #     biosample = line[biosample_idx]
-        #     experiment_target = line[experiment_target_idx]
-        # treatment = \
-        #     line[treatment_idx]
-        # assembly = line[assembly_idx]
-        # status = line[status_idx]
+
+            # Initialize
+            accession = line[accession_idx]
+            biosample = line[biosample_idx]
+            download_url = line[download_idx]
+            experiment_type = line[experiment_type_idx]
+            experiment_target = line[experiment_target_idx]
+            genome_assembly = line[genome_assembly_idx]
+            output_format = line[output_format_idx]
+            output_type = line[output_type_idx]
+            status = line[status_idx]
+            treatments = line[treatment_idx]
+
+            if test:
+                if biosample not in samples:
+                    print(biosample)
+
+            # ENCODE metadata object
+            metadata_object = EncodeMetadata(accession, biosample, download_url, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments)
+
+            # Add metadata
+            if metadata_object.genome_assembly == genome and metadata_object.status == "released" and type(metadata_object.treatments) is float:
+                metadata_objects.add(object)
+
+        else:
+            # Get indices
+            accession_idx = line.index("File accession")
+            biosample_idx = line.index("Biosample term name")
+            download_idx = line.index("File download URL")
+            experiment_type_idx = line.index("Assay")
+            experiment_target_idx = line.index("Experiment target")
+            genome_assembly_idx = line.index("Assembly")
+            output_format_idx = line.index("File format")
+            output_type_idx = line.index("Output type")
+            status_idx = line.index("File Status")
+            treatment_idx = line.index("Biosample treatments")
+
+    return(metadata)
+
+def _group_metadata(metadata):
+
+    # Initialize
+    grouped_metadata = {}
+
+    # For each ENCODE metadata object...
+    for metadata_object in metadata:
+
+        # Group metadata
+        grouped_metadata.setdefault()
+
+    return(grouped_metadata)
+
         # # Skip tagged samples
         # if tag:
         #     print(": "\
@@ -380,19 +427,6 @@ def _parse_metadata(metadata_file):
         #         )
         #         metadata.setdefault(k, [])
         #         metadata[k].append((accession, biosample))
-            pass
-        else:
-            # Get indices
-            accession_idx = line.index("File accession")
-            biosample_idx = line.index("Biosample term name")
-            download_idx = line.index("File download URL")
-            experiment_type_idx = line.index("Assay")
-            experiment_target_idx = line.index("Experiment target")
-            output_format_idx = line.index("File format")
-            output_type_idx = line.index("Output type")
-            genome_idx = line.index("Assembly")
-            status_idx = line.index("File Status")
-            treatment_idx = line.index("Biosample treatments")
 
 def _insert_data_in_chunks(chunk):
 
