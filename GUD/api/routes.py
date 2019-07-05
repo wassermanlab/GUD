@@ -78,8 +78,8 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
         except:
             raise BadRequest("start and end should be formatted as integers, \
             chromosomes should be formatted as chrZ.")
-        if (end - start) > 1000000:
-            raise BadRequest("start and end must be less than 1000000bp apart")
+        if (end - start) > 4000000:
+            raise BadRequest("start and end must be less than 4000000bp apart")
         if len(sources) > 1000 or len(sources) < 1:
              raise BadRequest("list of sources must be greater than 0 and less than 1000")       
         result = resource.select_by_sources(session, chrom, start, end, sources, limit, offset)
@@ -90,8 +90,8 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
         except:
             raise BadRequest("start and end should be formatted as integers, \
             chromosomes should be formatted as chrZ.")
-        if (end - start) > 1000000:
-            raise BadRequest("start and end must be less than 1000000bp apart")
+        if (end - start) > 4000000:
+            raise BadRequest("start and end must be less than 4000000bp apart")
         if location == 'exact':
             result = resource.select_by_exact_location(
                 session, chrom, start, end, limit, offset)
@@ -123,8 +123,8 @@ def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
         except:
             raise BadRequest("start and end should be formatted as integers, \
             chromosomes should be formatted as chrZ.")
-        if (end - start) > 1000000:
-            raise BadRequest("start and end must be less than 1000000bp apart")
+        if (end - start) > 4000000:
+            raise BadRequest("start and end must be less than 4000000bp apart")
         if len(samples) > 1000 or len(samples) < 1:
              raise BadRequest("list of samples must be greater than 0 and less than 1000")       
         return resource.select_by_samples(session, chrom, start, end, samples, limit, offset)
@@ -137,8 +137,8 @@ def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
         except:
             raise BadRequest("start and end should be formatted as integers, \
             chromosomes should be formatted as chrZ.")
-        if (end - start) > 1000000:
-            raise BadRequest("start and end must be less than 1000000bp apart")
+        if (end - start) > 4000000:
+            raise BadRequest("start and end must be less than 4000000bp apart")
         if len(experiments) > 1000 or len(experiments) < 1:
              raise BadRequest("list of samples must be greater than 0 and less than 1000") 
         return resource.select_by_experiments(session, chrom, start, end, experiments, limit, offset)

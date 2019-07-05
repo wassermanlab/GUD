@@ -237,14 +237,83 @@ def test_histone_modification():    # TODO ++
         data = json.loads(resp.data)
         assert data['size'] == 740
 
-# def test_tad():     # TODO ++
-#     return False
+def test_tad():     
+    with app.test_client() as c:        ## location exact
+        resp = c.get('/api/v1/tads?chrom=chr1&start=720001&end=3600000&location=exact')
+        data = json.loads(resp.data)
+        assert data['size'] == 3 
+    with app.test_client() as c:        ## location within
+        resp = c.get('/api/v1/tads?chrom=chr1&start=720001&end=3600000&location=within')
+        data = json.loads(resp.data)
+        assert data['size'] == 71
+    with app.test_client() as c:        ## uids
+        resp = c.get('/api/v1/tads?uids=1')
+        data = json.loads(resp.data)
+        assert data['results'][0]['id'] == 'tads_1'
+    with app.test_client() as c:        ## sources
+        resp = c.get('/api/v1/tads?chrom=chr1&start=720001&end=3600000&sources=3D-genome')
+        data = json.loads(resp.data)
+        assert data['size'] == 71
+    with app.test_client() as c:        ## samples
+        resp = c.get('/api/v1/tads?chrom=chr1&start=720001&end=3600000&samples=A-549')
+        data = json.loads(resp.data)
+        assert data['size'] == 1
+    with app.test_client() as c:        ## experiments 
+        resp = c.get('/api/v1/tads?chrom=chr1&start=720001&end=3600000&experiments=Hi-C')
+        data = json.loads(resp.data)
+        assert data['size'] == 36
 
-# def test_tf_binding():  # TOD ++
-#     return False
+def test_tf_binding():  
+    with app.test_client() as c:        ## location exact
+        resp = c.get('/api/v1/tf_binding?chrom=chr1&start=847861&end=848080&location=exact')
+        data = json.loads(resp.data)
+        assert data['size'] == 1
+    with app.test_client() as c:        ## location within
+        resp = c.get('/api/v1/tf_binding?chrom=chr1&start=847861&end=848080&location=within')
+        data = json.loads(resp.data)
+        assert data['size'] == 117 
+    with app.test_client() as c:        ## uids
+        resp = c.get('/api/v1/tf_binding?uids=1')
+        data = json.loads(resp.data)
+        assert data['results'][0]['id'] == 'tf_binding_1'
+    with app.test_client() as c:        ## sources
+        resp = c.get('/api/v1/tf_binding?chrom=chr1&start=847861&end=848080&sources=ReMap')
+        data = json.loads(resp.data)
+        assert data['size'] == 117
+    with app.test_client() as c:        ## samples
+        resp = c.get('/api/v1/tf_binding?chrom=chr1&start=847861&end=848080&samples=Hep-G2')
+        data = json.loads(resp.data)
+        assert data['size'] == 6
+    with app.test_client() as c:        ## experiments 
+        resp = c.get('/api/v1/tf_binding?chrom=chr1&start=847861&end=848080&experiments=ChIP-seq')
+        data = json.loads(resp.data)
+        assert data['size'] == 117
 
 # def test_tss():         # TODO ++
-#     return False
+#  with app.test_client() as c:        ## location exact
+        # resp = c.get('/api/v1/resource?chrom=x&start=x&end=x&location=exact')
+        # data = json.loads(resp.data)
+        # assert x == y 
+    # with app.test_client() as c:        ## location within
+        # resp = c.get('/api/v1/resource?chrom=x&start=x&end=x&location=within')
+        # data = json.loads(resp.data)
+        # assert x == y 
+    # with app.test_client() as c:        ## uids
+        # resp = c.get('/api/v1/resource?uids=305056')
+        # data = json.loads(resp.data)
+        # assert x == y 
+    # with app.test_client() as c:        ## sources
+        # resp = c.get('/api/v1/resource?chrom=x&start=x&end=x&sources=x')
+        # data = json.loads(resp.data)
+        # assert x == y 
+    # with app.test_client() as c:        ## samples
+        # resp = c.get('/api/v1/resource?chrom=x&start=x&end=x&samples=x')
+        # data = json.loads(resp.data)
+        # assert x == y 
+    # with app.test_client() as c:        ## experiments 
+        # resp = c.get('/api/v1/resource?chrom=x&start=x&end=x&experiments=x')
+        # data = json.loads(resp.data)
+        # assert x == y 
 
 # # ============== other ============== #
 # def test_sample():      # TODO ++

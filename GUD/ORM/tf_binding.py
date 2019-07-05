@@ -45,6 +45,27 @@ class TFBinding(GFMixin2, Base):
         )
 
     @classmethod
+    def select_by_tf(cls, session, chrom, start, end, tf, limit, offset):
+        """
+        Query objects by sources.
+        """
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(cls, Region, Source, Sample, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
+            .filter(Region.chrom == chrom,
+                    Region.start < end,
+                    Region.end > start)\
+            .filter(Region.bin.in_(bins))
+        
+        res = []
+        for i in q.all():
+            if i.TFBinding.tf in tf:
+                res.append(i)
+        return (len(res), res[offset:offset+limit])
+
+    @classmethod
     def is_unique(cls, session, regionID,
                   sampleID, experimentID, sourceID,
                   tf):
