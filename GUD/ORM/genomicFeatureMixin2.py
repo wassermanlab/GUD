@@ -30,88 +30,7 @@ class GFMixin2(GFMixin1):
                       nullable=False)
 
     @classmethod
-    def select_by_uids(cls, session, uids, limit, offset):
-        """
-        Query objects by uids.
-        """
-        q = session.query(cls, Region, Source, Sample, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(cls.uid.in_(uids))
-
-        return (q.count(), q.offset(offset).limit(limit))
-
-    @classmethod
-    def select_by_sources(cls, session, chrom, start, end, sources, limit, offset):
-        """
-        Query objects by sources.
-        """
-        bins = Region._compute_bins(start, end)
-
-        q = session.query(cls, Region, Source, Sample, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(Region.chrom == chrom,
-                    Region.start < end,
-                    Region.end > start)\
-            .filter(Region.bin.in_(bins))
-        
-        res = []
-        for i in q.all():
-            if i.Source.name in sources:
-                res.append(i)
-        return (len(res), res[offset:offset+limit])
-            # .filter(Source.name.in_(sources))
-        # return (q.count(), q.offset(offset).limit(limit))
-
-    @classmethod
-    def select_by_samples(cls, session, chrom, start, end, samples, limit, offset):
-        """
-        Query objects by sample name.
-        """
-        bins = Region._compute_bins(start, end)
-
-        q = session.query(cls, Region, Source, Sample, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(Region.chrom == chrom,
-                    Region.start < end,
-                    Region.end > start)\
-            .filter(Region.bin.in_(bins))
-
-        res = []
-        for i in q.all():
-            if i.Sample.name in samples:
-                res.append(i)
-        return (len(res), res[offset:offset+limit])
-            # .filter(Sample.name.in_(samples))
-        # return (q.count(), q.offset(offset).limit(limit))
-
-    @classmethod
-    def select_by_experiments(cls, session, chrom, start, end, experiments, limit, offset):
-        """
-        Query objects by experiment name.
-        """
-
-        bins = Region._compute_bins(start, end)
-
-        q = session.query(cls, Region, Source, Sample, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(Region.chrom == chrom,
-                    Region.start < end,
-                    Region.end > start,)\
-            .filter(Region.bin.in_(bins))
-        res = []
-        for i in q.all():
-            if i.Experiment.name in experiments:
-                res.append(i)
-        return (len(res), res[offset:offset+limit])
-            # .filter(Experiment.name in experiments)\
-        # return (q.count(), q.offset(offset).limit(limit))
-
-    @classmethod
-    def select_by_location(cls, session, chrom, start, end, limit, offset):
+    def select_by_overlapping_location(cls, session, chrom, start, end):
         """
         Query objects by genomic location.
         """
@@ -125,10 +44,27 @@ class GFMixin2(GFMixin1):
                     Region.end > start)\
             .filter(Region.bin.in_(bins))
 
-        return (q.count(), q.offset(offset).limit(limit))
+        return q
+    
+    @classmethod
+    def select_by_within_location(cls, session, chrom, start, end):
+        """
+        Query objects by genomic location.
+        """
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(cls, Region, Source, Sample, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
+            .filter(Region.chrom == chrom,
+                    Region.start > start,
+                    Region.end < end)\
+            .filter(Region.bin.in_(bins))
+        
+        return q
 
     @classmethod
-    def select_by_exact_location(cls, session, chrom, start, end, limit, offset):
+    def select_by_exact_location(cls, session, chrom, start, end):
         """
         Query objects by genomic location.
         """
@@ -142,8 +78,81 @@ class GFMixin2(GFMixin1):
             .filter(Region.chrom == chrom,
                     Region.start == start,
                     Region.end == end)
+        return q
+
+    @classmethod
+    def select_by_location(cls, session, chrom, start, end, location, limit = None, offset = None):
+        
+        if location == 'exact':
+            q = cls.select_by_exact_location(session, chrom, start, end)
+        elif location == 'within':
+            q = cls.select_by_within_location(session, chrom, start, end)
+        elif location == 'overlapping':
+            q = cls.select_by_overlapping_location(session, chrom, start, end)
+        else: 
+            return []
+        
+        if limit == None and offset == None:
+            return q
+        return (q.count(), q.offset(offset).limit(limit))
+
+    @classmethod
+    def select_by_uids(cls, session, uids, limit, offset):
+        """
+        Query objects by uids.
+        """
+        q = session.query(cls, Region, Source, Sample, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
+            .filter(cls.uid.in_(uids))
 
         return (q.count(), q.offset(offset).limit(limit))
+
+    @classmethod
+    def select_by_sources(cls, session, chrom, start, end, location, sources, limit, offset):
+        """
+        Query objects by sources.
+        """
+        q = cls.select_by_location(session, chrom, start, end, location)
+        
+        res = []
+        for i in q.all():
+            if i.Source.name in sources:
+                res.append(i)
+        return (len(res), res[offset:offset+limit])
+            # .filter(Source.name.in_(sources))
+        # return (q.count(), q.offset(offset).limit(limit))
+
+    @classmethod
+    def select_by_samples(cls, session, chrom, start, end, samples, location,  limit, offset):
+        """
+        Query objects by sample name.
+        """
+        q = cls.select_by_location(session, chrom, start, end, location)
+
+        res = []
+        for i in q.all():
+            if i.Sample.name in samples:
+                res.append(i)
+        return (len(res), res[offset:offset+limit])
+            # .filter(Sample.name.in_(samples))
+        # return (q.count(), q.offset(offset).limit(limit))
+
+    @classmethod
+    def select_by_experiments(cls, session, chrom, start, end, experiments, location,  limit, offset):
+        """
+        Query objects by experiment name.
+        """
+
+        q = cls.select_by_location(session, chrom, start, end, location)
+
+        res = []
+        for i in q.all():
+            if i.Experiment.name in experiments:
+                res.append(i)
+        return (len(res), res[offset:offset+limit])
+            # .filter(Experiment.name in experiments)\
+        # return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
     def is_unique(cls, session, regionID,

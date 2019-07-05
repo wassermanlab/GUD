@@ -1,17 +1,20 @@
 from GUD.api import app
 from GUD.api.db import establish_GUD_session, shutdown_session
 from flask import request, jsonify
-from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation, 
-DNAAccessibility, Enhancer, HistoneModification, TAD, TFBinding)
+from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation,
+                     DNAAccessibility, Enhancer, HistoneModification, TAD, TFBinding, TSS)
 from GUD.ORM.genomic_feature import GenomicFeature
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest
-import sys, math, re
+import sys
+import math
+import re
 # print(names, file=sys.stdout)
 
 
 @app.route('/')
 def index():
     return 'HOME'
+
 
 def create_page(resource, result, page, url) -> dict:
     """
@@ -64,25 +67,36 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
         uids = uids.split(',')
         for i in range(len(uids)):
             if uids[i].isdigit():
-                 uids[i] = int(uids[i])
+                uids[i] = int(uids[i])
         print(uids, file=sys.stdout)
         if len(uids) > 1000 or len(uids) < 1:
-             raise BadRequest("list of uids must be greater than 0 and less than 1000")
+            raise BadRequest(
+                "list of uids must be greater than 0 and less than 1000")
         result = resource.select_by_uids(session, uids, limit, offset)
-    elif {'chrom', 'end', 'sources', 'start'} == keys:
-        sources = request.args.get('sources', default=None)
-        sources = sources.split(',')
+    elif {'chrom', 'end', 'sources', 'start'} == keys or {'chrom', 'end', 'start'} == keys:
         try:
             start = int(start) - 1
             end = int(end)
         except:
-            raise BadRequest("start and end should be formatted as integers, \
-            chromosomes should be formatted as chrZ.")
+            raise BadRequest("start and end should be formatted as integers")
+        if re.fullmatch('^chr(X|Y|[1-9]|1[0-9]|2[0-2])$', chrom) == None:
+            raise BadRequest("chromosome should be formatted as chrZ where z \
+                is X, Y, or 1-22")
         if (end - start) > 4000000:
             raise BadRequest("start and end must be less than 4000000bp apart")
+        
+
         if len(sources) > 1000 or len(sources) < 1:
-             raise BadRequest("list of sources must be greater than 0 and less than 1000")       
-        result = resource.select_by_sources(session, chrom, start, end, sources, limit, offset)
+            raise BadRequest(
+                "list of sources must be greater than 0 and less than 1000")
+        
+        sources = request.args.get('sources', default=None)
+        sources = sources.split(',')
+        result = resource.select_by_sources(
+            session, chrom, start, end, sources, limit, offset)
+    
+    
+    
     elif {'chrom', 'end', 'location', 'start'} == keys:
         try:
             start = int(start) - 1
@@ -112,38 +126,37 @@ def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
     chrom = request.args.get('chrom', default=None, type=str)
     end = request.args.get('end', default=None)
     start = request.args.get('start', default=None)
-    
-    if {'chrom', 'end', 'samples', 'start'} == keys:
-        samples = request.args.get('samples', default=None)
-        samples = samples.split(',')
-        samples = [s.replace("+", " ") for s in samples]
+    location = request.args.get('location', default='within')
+
+    if {'chrom', 'end', 'location', 'samples', 'start'} == keys or \
+            {'chrom', 'end', 'experiments', 'location', 'start'} == keys:
         try:
             start = int(start) - 1
             end = int(end)
         except:
-            raise BadRequest("start and end should be formatted as integers, \
-            chromosomes should be formatted as chrZ.")
+            raise BadRequest("start and end should be formatted as integers")
+        if re.fullmatch('^chr(X|Y|[1-9]|1[0-9]|2[0-2])$', chrom) == None:
+            raise BadRequest("chromosome should be formatted as chrZ where z \
+                is X, Y, or 1-22")
         if (end - start) > 4000000:
             raise BadRequest("start and end must be less than 4000000bp apart")
-        if len(samples) > 1000 or len(samples) < 1:
-             raise BadRequest("list of samples must be greater than 0 and less than 1000")       
-        return resource.select_by_samples(session, chrom, start, end, samples, limit, offset)
-    elif {'chrom', 'end', 'experiments', 'start'} == keys:
-        experiments = request.args.get('experiments', default=None)
-        experiments = experiments.split(',')
-        try:
-            start = int(start) - 1
-            end = int(end)
-        except:
-            raise BadRequest("start and end should be formatted as integers, \
-            chromosomes should be formatted as chrZ.")
-        if (end - start) > 4000000:
-            raise BadRequest("start and end must be less than 4000000bp apart")
-        if len(experiments) > 1000 or len(experiments) < 1:
-             raise BadRequest("list of samples must be greater than 0 and less than 1000") 
-        return resource.select_by_experiments(session, chrom, start, end, experiments, limit, offset)
-    
-    else: 
+        if 'samples' in keys:
+            samples = request.args.get('samples', default=None)
+            samples = samples.split(',')
+            samples = [s.replace("+", " ") for s in samples]
+            if len(samples) > 1000 or len(samples) < 1:
+            raise BadRequest(
+                "list of samples must be greater than 0 and less than 1000")
+            return resource.select_by_samples(session, chrom, start, end, samples, limit, offset)
+        elif 'experiments' in keys:
+            experiments = request.args.get('experiments', default=None)
+            experiments = experiments.split(',')
+
+            if len(experiments) > 1000 or len(experiments) < 1:
+                raise BadRequest(
+                    "list of samples must be greater than 0 and less than 1000")
+            return resource.select_by_experiments(session, chrom, start, end, experiments, limit, offset)
+    else:
         return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
 
 
@@ -154,7 +167,8 @@ def gene_queries(session, resource, request, limit, offset):
         names = request.args.get('names', default=None)
         names = names.split(',')
         if len(names) > 1000 or len(names) < 1:
-             raise BadRequest("list of names must be greater than 0 and less than 1000")
+            raise BadRequest(
+                "list of names must be greater than 0 and less than 1000")
         return resource.select_by_names(session, limit, offset, names)
     else:
         return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
@@ -185,6 +199,18 @@ def short_tandem_repeat_queries(session, resource, request, limit, offset):
         return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
 
 
+def tad_queries(session, resource, request, limit, offset):
+    return false
+
+
+def tf_binding_queries(session, resource, request, limit, offset):
+    return false
+
+
+def tss_queries(session, resource, request, limit, offset):
+    return false
+
+
 @app.route('/api/v1/genesymbols')
 def gene_symbols():
     url = request.url
@@ -208,44 +234,42 @@ def resource(resource):
     limit = 20
     result = None
 
-    if resource == 'clinvar':
-        resource = ClinVar()
-        result = clinvar_queries(session, resource, request, limit, offset)
-    elif resource == 'concervation':
-        resource = Conservation()
-        result = genomic_feature_mixin1_queries(
-            session, resource, request, limit, offset)
-    elif resource == 'copy_number_variants':
-        resource = CNV()
-        result = genomic_feature_mixin1_queries(
-            session, resource, request, limit, offset)
-    elif resource == 'genes':
-        resource = Gene()
-        result = gene_queries(session, resource, request, limit, offset)
-    elif resource == 'short_tandem_repeats':
-        resource = ShortTandemRepeat()
-        result = short_tandem_repeat_queries(
-            session, resource, request, limit, offset)
-    elif resource == 'dna_accessibility':
-        resource = DNAAccessibility()
+    # if resource == 'clinvar':
+    #     resource = ClinVar()
+    #     result = clinvar_queries(session, resource, request, limit, offset)
+    # elif resource == 'concervation':
+    #     resource = Conservation()
+    #     result = genomic_feature_mixin1_queries(
+    #         session, resource, request, limit, offset)
+    # elif resource == 'copy_number_variants':
+    #     resource = CNV()
+    #     result = genomic_feature_mixin1_queries(
+    #         session, resource, request, limit, offset)
+    # elif resource == 'genes':
+    #     resource = Gene()
+    #     result = gene_queries(session, resource, request, limit, offset)
+    # elif resource == 'short_tandem_repeats':
+    #     resource = ShortTandemRepeat()
+    #     result = short_tandem_repeat_queries(
+    #         session, resource, request, limit, offset)
+    if resource in ['dna_accessibility', 'histone_modifications', 'enhancers']:
+        if resource == 'dna_accessibility':
+            resource = DNAAccessibility()
+        elif resource == 'histone_modifications':
+            resource = HistoneModification()
+        elif resource == 'enhancers':
+            resource = Enhancer()
         result = genomic_feature_mixin2_queries(
-                session, resource, request, limit, offset)
-    elif resource == 'histone_modifications':
-        resource = HistoneModification()
-        result = genomic_feature_mixin2_queries(
-                session, resource, request, limit, offset)
-    elif resource == 'enhancers':
-        resource = Enhancer()
-        result = genomic_feature_mixin2_queries(
-                session, resource, request, limit, offset)
+            session, resource, request, limit, offset)
     elif resource == 'tads':
         resource = TAD()
-        result = genomic_feature_mixin2_queries(
-                session, resource, request, limit, offset)
+        result = tad_queries(session, resource, request, limit, offset)
     elif resource == 'tf_binding':
         resource = TFBinding()
-        result = genomic_feature_mixin2_queries(
-                session, resource, request, limit, offset)
+        result = tf_binding_queries(session, resource, request, limit, offset)
+    elif resource == 'tss':
+        resource = TSS()
+        result = tss_queries(session, resource, request, limit, offset)
     else:
         raise BadRequest('valid resources are genes, short_tandem_repeats,\
              copy_number_variants, clinvar, conservation')
@@ -253,4 +277,3 @@ def resource(resource):
     shutdown_session(session)
     result = create_page(resource, result, page, request.url)
     return jsonify(result)
-
