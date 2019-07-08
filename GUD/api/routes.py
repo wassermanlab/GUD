@@ -73,7 +73,7 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
             raise BadRequest(
                 "list of uids must be greater than 0 and less than 1000")
         result = resource.select_by_uids(session, uids, limit, offset)
-    elif {'chrom', 'end', 'sources', 'start'} == keys or {'chrom', 'end', 'start'} == keys:
+    elif {'chrom', 'end', 'location', 'sources', 'start'} == keys or {'chrom', 'end', 'location', 'start'} == keys:
         try:
             start = int(start) - 1
             end = int(end)
@@ -84,39 +84,14 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
                 is X, Y, or 1-22")
         if (end - start) > 4000000:
             raise BadRequest("start and end must be less than 4000000bp apart")
-        
-
-        if len(sources) > 1000 or len(sources) < 1:
-            raise BadRequest(
-                "list of sources must be greater than 0 and less than 1000")
-        
-        sources = request.args.get('sources', default=None)
-        sources = sources.split(',')
-        result = resource.select_by_sources(
-            session, chrom, start, end, sources, limit, offset)
-    
-    
-    
-    elif {'chrom', 'end', 'location', 'start'} == keys:
-        try:
-            start = int(start) - 1
-            end = int(end)
-        except:
-            raise BadRequest("start and end should be formatted as integers, \
-            chromosomes should be formatted as chrZ.")
-        if (end - start) > 4000000:
-            raise BadRequest("start and end must be less than 4000000bp apart")
-        if location == 'exact':
-            result = resource.select_by_exact_location(
-                session, chrom, start, end, limit, offset)
+        if location not in ['within', 'overlapping', 'exact']:
+            raise BadRequest("location must be specified as withing, overlapping, or exact")
+        if 'sources' in keys:
+            sources = request.args.get('sources', default=None)
+            sources = sources.split(',')
+            result = resource.select_by_sources(session, chrom, start, end, sources, location, limit, offset)
         else:
-            result = resource.select_by_location(
-                session, chrom, start, end, limit, offset)
-    else:
-        raise BadRequest(
-            "invalid combination of parameters for this resource, refer \
-                    documentation for correct combination of paramaters")
-
+            result = resource.select_by_location(session, chrom, start, end, location, limit, offset)
     return result
 
 
@@ -126,7 +101,7 @@ def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
     chrom = request.args.get('chrom', default=None, type=str)
     end = request.args.get('end', default=None)
     start = request.args.get('start', default=None)
-    location = request.args.get('location', default='within')
+    location = request.args.get('location', default=None)
 
     if {'chrom', 'end', 'location', 'samples', 'start'} == keys or \
             {'chrom', 'end', 'experiments', 'location', 'start'} == keys:
@@ -140,6 +115,8 @@ def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
                 is X, Y, or 1-22")
         if (end - start) > 4000000:
             raise BadRequest("start and end must be less than 4000000bp apart")
+        if location not in ['within', 'overlapping', 'exact']:
+            raise BadRequest("location must be specified as withing, overlapping, or exact")
         if 'samples' in keys:
             samples = request.args.get('samples', default=None)
             samples = samples.split(',')
