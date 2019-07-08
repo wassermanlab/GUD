@@ -49,7 +49,7 @@ class GFMixin1(object):
         return q
 
     @classmethod
-    def select_by_within_location(cls, session, chrom, start, end, limit, offset):
+    def select_by_within_location(cls, session, chrom, start, end):
         """
         Query objects by genomic location.
         """
@@ -66,7 +66,7 @@ class GFMixin1(object):
         return q
 
     @classmethod
-    def select_by_exact_location(cls, session, chrom, start, end, limit, offset):
+    def select_by_exact_location(cls, session, chrom, start, end):
         """
         Query objects by genomic location.
         """
@@ -118,8 +118,6 @@ class GFMixin1(object):
         """
         Query objects by sources.
         """
-
-        bins = Region._compute_bins(start, end)
 
         q = cls.select_by_location(session, chrom, start, end, location)
         q = q.filter(Source.name.in_(sources))

@@ -56,23 +56,20 @@ def create_page(resource, result, page, url) -> dict:
 def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
     keys = set(request.args)
     keys.discard('page')
-
     chrom = request.args.get('chrom', default=None, type=str)
     end = request.args.get('end', default=None)
     location = request.args.get('location', default=None, type=str)
     start = request.args.get('start', default=None)
-
     if {'uids'} == keys:
         uids = request.args.get('uids', default=None)
         uids = uids.split(',')
         for i in range(len(uids)):
             if uids[i].isdigit():
                 uids[i] = int(uids[i])
-        print(uids, file=sys.stdout)
         if len(uids) > 1000 or len(uids) < 1:
             raise BadRequest(
                 "list of uids must be greater than 0 and less than 1000")
-        result = resource.select_by_uids(session, uids, limit, offset)
+        return resource.select_by_uids(session, uids, limit, offset)
     elif {'chrom', 'end', 'location', 'sources', 'start'} == keys or {'chrom', 'end', 'location', 'start'} == keys:
         try:
             start = int(start) - 1
@@ -89,10 +86,8 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
         if 'sources' in keys:
             sources = request.args.get('sources', default=None)
             sources = sources.split(',')
-            result = resource.select_by_sources(session, chrom, start, end, sources, location, limit, offset)
-        else:
-            result = resource.select_by_location(session, chrom, start, end, location, limit, offset)
-    return result
+            return resource.select_by_sources(session, chrom, start, end, sources, location, limit, offset)
+        return resource.select_by_location(session, chrom, start, end, location, limit, offset)
 
 
 def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
@@ -122,8 +117,8 @@ def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
             samples = samples.split(',')
             samples = [s.replace("+", " ") for s in samples]
             if len(samples) > 1000 or len(samples) < 1:
-            raise BadRequest(
-                "list of samples must be greater than 0 and less than 1000")
+                raise BadRequest(
+                    "list of samples must be greater than 0 and less than 1000")
             return resource.select_by_samples(session, chrom, start, end, samples, limit, offset)
         elif 'experiments' in keys:
             experiments = request.args.get('experiments', default=None)
@@ -181,7 +176,7 @@ def tad_queries(session, resource, request, limit, offset):
 
 
 def tf_binding_queries(session, resource, request, limit, offset):
-    return false
+    return False
 
 
 def tss_queries(session, resource, request, limit, offset):
@@ -211,25 +206,25 @@ def resource(resource):
     limit = 20
     result = None
 
-    # if resource == 'clinvar':
-    #     resource = ClinVar()
-    #     result = clinvar_queries(session, resource, request, limit, offset)
-    # elif resource == 'concervation':
-    #     resource = Conservation()
-    #     result = genomic_feature_mixin1_queries(
-    #         session, resource, request, limit, offset)
-    # elif resource == 'copy_number_variants':
-    #     resource = CNV()
-    #     result = genomic_feature_mixin1_queries(
-    #         session, resource, request, limit, offset)
-    # elif resource == 'genes':
-    #     resource = Gene()
-    #     result = gene_queries(session, resource, request, limit, offset)
-    # elif resource == 'short_tandem_repeats':
-    #     resource = ShortTandemRepeat()
-    #     result = short_tandem_repeat_queries(
-    #         session, resource, request, limit, offset)
-    if resource in ['dna_accessibility', 'histone_modifications', 'enhancers']:
+    if resource == 'clinvar':
+        resource = ClinVar()
+        result = clinvar_queries(session, resource, request, limit, offset)
+    elif resource == 'concervation':
+        resource = Conservation()
+        result = genomic_feature_mixin1_queries(
+            session, resource, request, limit, offset)
+    elif resource == 'copy_number_variants':
+        resource = CNV()
+        result = genomic_feature_mixin1_queries(
+            session, resource, request, limit, offset)
+    elif resource == 'genes':
+        resource = Gene()
+        result = gene_queries(session, resource, request, limit, offset)
+    elif resource == 'short_tandem_repeats':
+        resource = ShortTandemRepeat()
+        result = short_tandem_repeat_queries(
+            session, resource, request, limit, offset)
+    elif resource in ['dna_accessibility', 'histone_modifications', 'enhancers']:
         if resource == 'dna_accessibility':
             resource = DNAAccessibility()
         elif resource == 'histone_modifications':
