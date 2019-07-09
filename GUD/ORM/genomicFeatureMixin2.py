@@ -113,8 +113,7 @@ class GFMixin2(GFMixin1):
         """
         Query objects by sources.
         """
-        q = cls.select_by_location(session, chrom, start, end, location)
-        
+        q = cls.select_by_location(session, chrom, start, end, location)     
         res = []
         for i in q.all():
             if i.Source.name in sources:

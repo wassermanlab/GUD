@@ -114,7 +114,7 @@ class GFMixin1(object):
         return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
-    def select_by_sources(cls, session, chrom, start, end, sources, location, limit, offset):
+    def select_by_sources(cls, session, chrom, start, end, location, sources, limit, offset):
         """
         Query objects by sources.
         """

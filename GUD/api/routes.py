@@ -86,7 +86,7 @@ def genomic_feature_mixin1_queries(session, resource, request, limit, offset):
         if 'sources' in keys:
             sources = request.args.get('sources', default=None)
             sources = sources.split(',')
-            return resource.select_by_sources(session, chrom, start, end, sources, location, limit, offset)
+            return resource.select_by_sources(session, chrom, start, end, location, sources, limit, offset)
         return resource.select_by_location(session, chrom, start, end, location, limit, offset)
 
 
@@ -119,7 +119,7 @@ def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
             if len(samples) > 1000 or len(samples) < 1:
                 raise BadRequest(
                     "list of samples must be greater than 0 and less than 1000")
-            return resource.select_by_samples(session, chrom, start, end, samples, limit, offset)
+            return resource.select_by_samples(session, chrom, start, end, samples, location,  limit, offset)
         elif 'experiments' in keys:
             experiments = request.args.get('experiments', default=None)
             experiments = experiments.split(',')
@@ -127,7 +127,7 @@ def genomic_feature_mixin2_queries(session, resource, request, limit, offset):
             if len(experiments) > 1000 or len(experiments) < 1:
                 raise BadRequest(
                     "list of samples must be greater than 0 and less than 1000")
-            return resource.select_by_experiments(session, chrom, start, end, experiments, limit, offset)
+            return resource.select_by_experiments(session, chrom, start, end, experiments, location,  limit, offset)
     else:
         return genomic_feature_mixin1_queries(session, resource, request, limit, offset)
 
@@ -159,11 +159,7 @@ def clinvar_queries(session, resource, request, limit, offset):
 def short_tandem_repeat_queries(session, resource, request, limit, offset):
     keys = set(request.args)
     keys.discard('page')
-    if {'pathogenicity'} == keys:
-        pathogenicity = request.args.get(
-            'pathogenicity', default=None, type=bool)
-        return resource.select_by_pathogenicity(session, limit, offset)
-    elif {'motif'} == keys or {'motif', 'rotation'} == keys:
+    if {'motif'} == keys or {'motif', 'rotation'} == keys:
         motif = request.args.get('motif', default=None)
         rotation = request.args.get('rotation', default=False, type=bool)
         return resource.select_by_motif(session, motif.upper(), limit, offset, rotation)
@@ -172,7 +168,17 @@ def short_tandem_repeat_queries(session, resource, request, limit, offset):
 
 
 def tad_queries(session, resource, request, limit, offset):
-    return false
+    keys = set(request.args)
+    keys.discard('page')
+    if {'restriction_enzymes'} == keys:
+        restriction_enzymes = request.args.get('restriction_enzymes', default=None)
+        restriction_enzymes = restriction_enzymes.split(',')
+        if len(restriction_enzymes) > 1000 or len(restriction_enzymes) < 1:
+            raise BadRequest(
+                "list of restriction enzymes must be greater than 0 and less than 1000")
+        return resource.select_by_restriction_enzymes(session, restriction_enzymes, limit, offset)
+    else:
+        return genomic_feature_mixin2_queries(session, resource, request, limit, offset)
 
 
 def tf_binding_queries(session, resource, request, limit, offset):
@@ -195,6 +201,19 @@ def gene_symbols():
     result = create_page(False, result, page, url)
     return jsonify(result)
 
+@app.route('/api/v1/short_tandem_repeats/pathogenic')
+def pathogenic_str():
+    page = request.args.get('page', default=1, type=int)
+    if (page <= 0):
+        raise BadRequest('pages must be positive integers')
+    session     = establish_GUD_session()
+    offset      = (page-1)*20
+    limit       = 20
+    resource    = ShortTandemRepeat()
+    result      =  resource.select_by_pathogenicity(session, limit, offset)
+    shutdown_session(session)
+    result      = create_page(resource, result, page, request.url)
+    return jsonify(result)
 
 @app.route('/api/v1/<resource>')
 def resource(resource):
