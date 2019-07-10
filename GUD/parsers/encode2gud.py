@@ -3,7 +3,6 @@
 import argparse
 from binning import assign_bin
 import getpass
-import math
 from multiprocessing import cpu_count
 from multiprocessing import current_process
 import os
@@ -19,7 +18,7 @@ else:
     from urllib import urlretrieve
 
 # Import from GUD module
-from GUD import GUDglobals
+from GUD import GUDUtils
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.histone_modification import HistoneModification
@@ -27,7 +26,7 @@ from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-from . import _get_chroms, _get_db_name, _get_experiment, _get_region, _get_sample, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_experiment, _upsert_region, _upsert_sample, _upsert_source, _upsert_tf
+from . import ParseUtils
 
 usage_msg = """
 usage: %s --genome STR [-h] [options]
@@ -39,23 +38,24 @@ into GUD.
 
   --genome STR        genome assembly
   --samples FILE      ENCODE samples (manually-curated)
-  --feature STR       type of genomic feature
+  --feature STR       type of genomic feature ("atac-seq"
+                      "accessibility", "histone" or "tf")
 
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
   -m, --merge         merge genomic regions using bedtools
                       (default = False)
-  -t, --threads       number of additional threads to use
+  --threads INT       number of additional threads to use
                       (default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
   -H STR, --host STR  host name (default = "localhost")
   -p STR, --pwd STR   password (default = ignore this option)
-  -P STR, --port STR  port number (default = %s)
+  -P INT, --port INT  port number (default = %s)
   -u STR, --user STR  user name (default = current user)
-""" % (usage_msg, (cpu_count() - 1), GUDglobals.db_name, GUDglobals.db_port)
+""" % (usage_msg, (cpu_count() - 1), GUDUtils.db, GUDUtils.port)
 
 #-------------#
 # Classes     #
@@ -63,7 +63,7 @@ mysql arguments:
 
 class EncodeMetadata:
 
-    def __init__(self, accession, biosample, download_url, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments):
+    def __init__(self, accession, biosample, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments):
         """
         m = re.search(
             "^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$",
@@ -81,6 +81,7 @@ class EncodeMetadata:
         self.accession = accession
         self.biosample = biosample
         self.download_url = download_url
+        self.experiment_accession = experiment_accession
         self.experiment_type = experiment_type
         self.experiment_target = experiment_target
         self.genome_assembly = genome_assembly
@@ -110,14 +111,14 @@ def parse_args():
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
     optional_group.add_argument("-m", "--merge", action="store_true")
-    optional_group.add_argument("-t", "--threads", default=(cpu_count() - 1))
+    optional_group.add_argument("--threads", default=(cpu_count() - 1))
     
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=GUDglobals.db_name)
+    mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
     mysql_group.add_argument("-H", "--host", default="localhost")
     mysql_group.add_argument("-p", "--pwd")
-    mysql_group.add_argument("-P", "--port", default=GUDglobals.db_port)
+    mysql_group.add_argument("-P", "--port", default=GUDUtils.port)
     mysql_group.add_argument("-u", "--user", default=getpass.getuser())
 
     args = parser.parse_args()
@@ -143,9 +144,9 @@ def check_args(args):
         exit(0)
 
     # Check for invalid feature
-    valid_features = ["accessibility", "histone", "tf"]
+    valid_features = ["atac-seq", "accessibility", "histone", "tf"]
     if args.feature not in valid_features:
-        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--feature\"", "invalid choice", "\"%s\" (choose from" % args.feature, "%s)\n" % " ".join(["\"%s\"" % i for i in feats])]
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--feature\"", "invalid choice", "\"%s\" (choose from" % args.feature, "%s)\n" % " ".join(["\"%s\"" % i for i in valid_features])]
         print(": ".join(error))
         exit(0)
 
@@ -161,15 +162,30 @@ def check_args(args):
     if not args.pwd:
         args.pwd = ""
 
+    # Check MySQL port
+    try:
+        args.port = int(args.port)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"-P\" \"--port\"", "invalid int value", "\"%s\"\n" % args.port]
+        print(": ".join(error))
+        exit(0)
+
 def main():
 
     # Parse arguments
     args = parse_args()
 
-    # Insert ENCODE data
-    encode_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.samples, args.feature, args.merge, args.dummy_dir, args.threads)
+    # Set MySQL options
+    GUDUtils.user = args.user
+    GUDUtils.pwd  = args.pwd
+    GUDUtils.host = args.host
+    GUDUtils.port = args.port
+    GUDUtils.db = args.db
 
-def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, merge=False, dummy_dir="/tmp/", threads=1):
+    # Insert ENCODE data
+    encode_to_gud(args.genome, args.samples, args.feature, args.merge, args.dummy_dir, args.threads)
+
+def encode_to_gud(genome, samples_file, feat_type, merge=False, dummy_dir="/tmp/", threads=1):
     """
     python -m GUD.parsers.encode2gud --genome hg19 --samples --dummy-dir ./tmp/
     """
@@ -191,14 +207,14 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
     metadata_file = _download_metadata(genome, feat_type, dummy_dir)
 
     # Get database name
-    db_name = _get_db_name(user, pwd, host, port, db)
+    db_name = GUDUtils._get_db_name()
 
     # If database does not exist...
     if not database_exists(db_name):
-        _initialize_gud_db(user, pwd, host, port, db, genome)
+        ParseUtils.initialize_gud_db(db_name, genome)
 
     # Get engine/session
-    engine, Session = _initialize_engine_session(db_name)
+    engine, Session = GUDUtils._get_engine_session(db_name)
     session = Session()
 
     # Create table
@@ -208,12 +224,11 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
         table = HistoneModification()
     else:
         table = TFBinding()
-
     if not engine.has_table(table.__tablename__):
         table.__table__.create(bind=engine)
 
     # Get valid chromosomes
-    chroms = _get_chroms(session)
+    chroms = ParseUtils.get_chroms(session)
 
     # Get samples
     samples = _get_samples(session, samples_file)
@@ -221,8 +236,8 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
     # Get source
     source = Source()
     source.name = source_name
-    _upsert_source(session, source)
-    source = _get_source(session, source_name)
+    ParseUtils.upsert_source(session, source)
+    source = ParseUtils.get_source(session, source_name)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
@@ -231,8 +246,18 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
     # Parse metadata
     metadata = _parse_metadata(genome, metadata_file)
 
+    exit(0)
+    print(len(metadata))
+
+    # Filter metadata (i.e. keep the best BED file per experiment)
+    filtered_metadata = _filter_metadata(metadata)
+
+    print(len(filtered_metadata))
+
+    exit(0)
+
     # Group metadata by experiment and target
-    grouped_metadata = _group_metadata(metadata)
+    grouped_metadata = _group_metadata(filtered_metadata)
     exit(0)
 
     # Parallelize inserts to the database
@@ -248,36 +273,32 @@ def encode_to_gud(user, pwd, host, port, db, genome, samples_file, feat_type, me
 def _download_metadata(genome, feat_type, dummy_dir="/tmp/"):
 
     # Initialize
-    url = "https://www.encodeproject.org/metadata/type=Experiment&status=released&files.file_type=bigWig"
-
-    #%26assay_slims%3DDNA%2Baccessibility%26assembly%3DGRCh38/metadata.tsv
+    url = "https://www.encodeproject.org/metadata/type=Experiment&status=released"
 
     # Fix hg38
     if genome == "hg38":
         genome = "GRCh38"
 
     # Add experiment to URL
-    if feat_type == "histone":
-        experiment_url = "&assay_title=Histone%2BChIP-seq&assay_slims=DNA%2Bbinding"
-    if feat_type == "tf":
-        experiment_url = "&assay_title=TF%2BChIP-seq&assay_slims=DNA%2Bbinding"
+    if feat_type == "atac-seq":
+        experiment_url = "&assay_title=ATAC-seq&assay_slims=DNA%2Baccessibility&files.file_type=bam"
+    elif feat_type == "accessibility":
+        experiment_url = "&assay_title=DNase-seq&assay_title=FAIRE-seq&assay_slims=DNA%2Baccessibility&files.file_type=bed%2BnarrowPeak"
+    elif feat_type == "histone":
+        experiment_url = "&assay_title=Histone%2BChIP-seq&assay_slims=DNA%2Bbinding&files.file_type=bed%2BnarrowPeak"
+    else:
+        # TF
+        experiment_url = "&assay_title=TF%2BChIP-seq&assay_slims=DNA%2Bbinding&files.file_type=bed%2BnarrowPeak"
     url += experiment_url
 
     # Add genome assembly
-    assembly_url = "&assembly=%s" % genome
-    url += assembly_url
-
-    # Add extra to URL
-    extra_url = "&files.file_type=bed%2BnarrowPeak"
-    url += extra_url
+    url += "&assembly=%s" % genome
 
     # Download data
     metadata_file = os.path.join(url, "metadata.tsv")
     dummy_file = os.path.join(dummy_dir, "metadata.%s.%s.tsv" % (genome, feat_type))
     if not os.path.exists(dummy_file):
         f = urlretrieve(metadata_file, dummy_file)
-
-    exit(0)
 
     return(dummy_file)
 
@@ -287,7 +308,7 @@ def _get_samples(session, file_name):
     samples = {}
 
     # For each line...
-    for line in GUDglobals.parse_tsv_file(file_name):
+    for line in ParseUtils.parse_tsv_file(file_name):
 
         # If add...
         if line[3] == "Yes":
@@ -306,24 +327,25 @@ def _get_samples(session, file_name):
                 sample.cancer = True
 
             # Upsert sample
-            _upsert_sample(session, sample)
+            ParseUtils.upsert_sample(session, sample)
 
             # Get sample ID
-            sample = _get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
+            sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
 
             # Add sample
-            samples.setdefault(line[0], sample.uid)
+            # samples.setdefault(line[0], sample.uid)
+            samples.setdefault(line[0], None)
 
     return(samples)
 
-def _parse_metadata(genome, metadata_file, test=False):
+def _parse_metadata(genome, metadata_file, test=True):
 
     # Initialize
-    metadata = set()
+    metadata_objects = set()
     accession_idx = None
 
     # For each line...
-    for line in GUDglobals.parse_tsv_file(metadata_file):
+    for line in ParseUtils.parse_tsv_file(metadata_file):
 
         # If first line...
         if accession_idx is not None:
@@ -332,6 +354,7 @@ def _parse_metadata(genome, metadata_file, test=False):
             accession = line[accession_idx]
             biosample = line[biosample_idx]
             download_url = line[download_idx]
+            experiment_accession = line[experiment_acc_idx]
             experiment_type = line[experiment_type_idx]
             experiment_target = line[experiment_target_idx]
             genome_assembly = line[genome_assembly_idx]
@@ -345,17 +368,18 @@ def _parse_metadata(genome, metadata_file, test=False):
                     print(biosample)
 
             # ENCODE metadata object
-            metadata_object = EncodeMetadata(accession, biosample, download_url, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments)
+            metadata_object = EncodeMetadata(accession, biosample, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments)
 
             # Add metadata
             if metadata_object.genome_assembly == genome and metadata_object.status == "released" and type(metadata_object.treatments) is float:
-                metadata_objects.add(object)
+                metadata_objects.add(metadata_object)
 
         else:
             # Get indices
             accession_idx = line.index("File accession")
-            biosample_idx = line.index("Biosample term name")
+             = line.index("Biosample term name")
             download_idx = line.index("File download URL")
+            experiment_acc_idx = line.index("Experiment accession")
             experiment_type_idx = line.index("Assay")
             experiment_target_idx = line.index("Experiment target")
             genome_assembly_idx = line.index("Assembly")
@@ -364,7 +388,42 @@ def _parse_metadata(genome, metadata_file, test=False):
             status_idx = line.index("File Status")
             treatment_idx = line.index("Biosample treatments")
 
-    return(metadata)
+    return(metadata_objects)
+
+def _filter_metadata(metadata):
+
+    # Initialize
+    grouped_metadata = {}
+    filtered_metadata = set()
+    output_types = ["optimal idr thresholded peaks", "pseudoreplicated idr thresholded peaks", "peaks", "alignments"]
+
+    # For each ENCODE metadata object...
+    for metadata_object in metadata:
+
+        # Group metadata by experiment accession
+        grouped_metadata.setdefault(metadata_object.experiment_accession, [])
+        grouped_metadata[metadata_object.experiment_accession].append(metadata_object)
+
+    # For each experiment accession...
+    for experiment_acc in grouped_metadata:
+
+        # Initialize
+        exit_loop = False
+
+        # For each output type...
+        for out_type in output_types:
+
+            # For each ENCODE metadata object...
+            for metadata_object in grouped_metadata[experiment_acc]:
+
+                if metadata_object.output_type == out_type:
+                    filtered_metadata.add(metadata_object)
+                    exit_loop = True
+
+            if exit_loop:
+                break
+
+    return(filtered_metadata)
 
 def _group_metadata(metadata):
 

@@ -17,34 +17,35 @@ else:
     from urllib import urlopen, urlretrieve
 
 # Import from GUD module
-from GUD import GUDglobals
+from GUD import GUDUtils
 from GUD.ORM.conservation import Conservation
 from GUD.ORM.region import Region
 from GUD.ORM.source import Source
-from . import _get_chroms, _get_db_name, _get_region, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_conservation, _upsert_region, _upsert_source
+from . import ParseUtils
 
 usage_msg = """
 usage: %s --genome STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
-inserts features from the UCSC's "phastConsElements100way" table into GUD.
+inserts features from the UCSC's "phastConsElements100way" table
+into GUD.
 
   --genome STR        genome assembly
 
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
-  -t, --threads       number of additional threads to use
+  --threads INT       number of additional threads to use
                       (default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
   -H STR, --host STR  host name (default = "localhost")
   -p STR, --pwd STR   password (default = ignore this option)
-  -P STR, --port STR  port number (default = %s)
+  -P INT, --port INT  port number (default = %s)
   -u STR, --user STR  user name (default = current user)
-""" % (usage_msg, (cpu_count() - 1), GUDglobals.db_name, GUDglobals.db_port)
+""" % (usage_msg, (cpu_count() - 1), GUDUtils.db, GUDUtils.port)
 
 #-------------#
 # Functions   #
@@ -64,14 +65,14 @@ def parse_args():
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("-t", "--threads", default=(cpu_count() - 1))
+    optional_group.add_argument("--threads", default=(cpu_count() - 1))
     
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=GUDglobals.db_name)
+    mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
     mysql_group.add_argument("-H", "--host", default="localhost")
     mysql_group.add_argument("-p", "--pwd")
-    mysql_group.add_argument("-P", "--port", default=GUDglobals.db_port)
+    mysql_group.add_argument("-P", "--port", default=GUDUtils.port)
     mysql_group.add_argument("-u", "--user", default=getpass.getuser())
 
     args = parser.parse_args()
@@ -108,15 +109,30 @@ def check_args(args):
     if not args.pwd:
         args.pwd = ""
 
+    # Check MySQL port
+    try:
+        args.port = int(args.port)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"-P\" \"--port\"", "invalid int value", "\"%s\"\n" % args.port]
+        print(": ".join(error))
+        exit(0)
+
 def main():
 
     # Parse arguments
     args = parse_args()
 
-    # Insert conservation data
-    conservation_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.dummy_dir, args.threads)
+    # Set MySQL options
+    GUDUtils.user = args.user
+    GUDUtils.pwd  = args.pwd
+    GUDUtils.host = args.host
+    GUDUtils.port = args.port
+    GUDUtils.db = args.db
 
-def conservation_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads=1):
+    # Insert conservation data
+    conservation_to_gud(args.genome, args.dummy_dir, args.threads)
+
+def conservation_to_gud(genome, dummy_dir="/tmp/", threads=1):
     """
     python -m GUD.parsers.conselements2gud --genome hg19 --dummy-dir ./tmp/
     """
@@ -131,37 +147,42 @@ def conservation_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", th
     dummy_file = _download_data(genome, dummy_dir)
 
     # Get database name
-    db_name = _get_db_name(user, pwd, host, port, db)
-
-    # If database does not exist...
-    if not database_exists(db_name):
-        _initialize_gud_db(user, pwd, host, port, db, genome)
+    db_name = GUDUtils._get_db_name()
 
     # Get engine/session
-    engine, Session = _initialize_engine_session(db_name)
-    session = Session()
+    engine, Session = GUDUtils._get_engine_session(db_name)
+
+    # Initialize parser utilities
+    ParseUtils.genome = genome
+    ParseUtils.dbname = db_name
+    ParseUtils.engine = engine
+
+    # If database does not exist...
+    ParseUtils.initialize_gud_db()
 
     # Create table
-    if not engine.has_table(Conservation.__tablename__):
-        Conservation.__table__.create(bind=engine)
+    ParseUtils.create_table(Conservation)
+
+    # Start a new session
+    session = Session()
 
     # Get valid chromosomes
-    chroms = _get_chroms(session)
+    chroms = ParseUtils.get_chroms(session)
 
     # Get source
     source = Source()
     m = re.search("^%s/*(.+).txt.gz$" % dummy_dir, dummy_file) 
     source_name = m.group(1)
     source.name = source_name
-    _upsert_source(session, source)
-    source = _get_source(session, source_name)
+    ParseUtils.upsert_source(session, source)
+    source = ParseUtils.get_source(session, source_name)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
 
     # Parallelize inserts to the database
-    _process_data_in_chunks(dummy_file, _insert_data_in_chunks, threads)
+    ParseUtils.process_data_in_chunks(dummy_file, _insert_data_in_chunks, threads)
 
     # Dispose session
     Session.remove()
@@ -199,7 +220,7 @@ def _insert_data_in_chunks(chunk):
 
     print(current_process().name)
 
-    # Initialize
+    # Start a new session
     session = Session()
 
     # For each line...
@@ -221,10 +242,10 @@ def _insert_data_in_chunks(chunk):
             continue
 
         # Upsert region
-        _upsert_region(session, region)
+        ParseUtils.upsert_region(session, region)
 
         # Get region ID
-        region = _get_region(session, region.chrom, region.start, region.end, region.strand)
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end, region.strand)
 
         # Get conservation
         conservation = Conservation()
@@ -233,7 +254,7 @@ def _insert_data_in_chunks(chunk):
         conservation.score = 1.0
 
         # Upsert conservation
-        _upsert_conservation(session, conservation)
+        ParseUtils.upsert_conservation(session, conservation)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
