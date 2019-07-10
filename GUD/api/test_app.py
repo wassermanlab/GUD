@@ -8,7 +8,7 @@ import flask
 from flask import request, jsonify, json
 
 # ============== gfmixin1 ============== #
-@pytest.mark.skip(reason="tamar_test")
+# @pytest.mark.skip(reason="tamar_test")
 def test_clinvar():
     #select_by_location
     with app.test_client() as c:
@@ -25,10 +25,10 @@ def test_clinvar():
         assert data['results'][0]['id'] == "clinvar_1"
     #select_by_uids
     with app.test_client() as c:
-        resp = c.get('/api/v1/clinvar?uids=104')
+        resp = c.get('/api/v1/clinvar?uids=105&chrom=chr1&start=979722&end=979780&location=within')##
         data = json.loads(resp.data)
         assert len(data['results']) == 1
-        assert data['results'][0]['id'] == "clinvar_104"
+        assert data['results'][0]['id'] == "clinvar_105"
     #select_by_sources
     with app.test_client() as c:
         resp = c.get('/api/v1/clinvar?sources=ClinVar_2018-10-28&chrom=chr1&start=979722&end=979780&location=within')
@@ -38,10 +38,10 @@ def test_clinvar():
         assert data['results'][1]['id'] == "clinvar_106"
     #select_by_clinvarID
     with app.test_client() as c:
-        resp = c.get('/api/v1/clinvar?clinvar_id=475283')
+        resp = c.get('/api/v1/clinvar?clinvar_ids=541159&chrom=chr1&start=979722&end=979780&location=within')##
         data = json.loads(resp.data)
         assert len(data['results']) == 1
-        assert data['results'][0]['id'] == "clinvar_1"
+        assert data['results'][0]['id'] == "clinvar_105"
 
 @pytest.mark.skip(reason="tamar_test")
 def test_copy_number_variants():
@@ -103,7 +103,7 @@ def test_gene():
         assert data['size'] == 1
     #get_all_gene_symbols
     with app.test_client() as c:
-        resp = c.get('/api/v1/genesymbols')
+        resp = c.get('/api/v1/genes/symbols')
         data = json.loads(resp.data)
         assert data['size'] == 28194
 
@@ -159,7 +159,7 @@ def test_short_tandem_repeat():
 #     return False
 
 # # ============== gfmixin2 ============== #
-# @pytest.mark.skip(reason="hg19")
+@pytest.mark.skip(reason="hg19")
 def test_dna_accessibility():   
     with app.test_client() as c:        ## location exact
         resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=exact')
@@ -185,7 +185,7 @@ def test_dna_accessibility():
         resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&experiments=DNase-seq&location=overlapping')
         data = json.loads(resp.data)
         assert data['size'] == 167 
-# @pytest.mark.skip(reason="hg19")
+@pytest.mark.skip(reason="hg19")
 def test_enhancer():            
     with app.test_client() as c:        ## location exact
         resp = c.get('/api/v1/enhancers?chrom=chr1&start=858257&end=858648&location=exact')
@@ -211,7 +211,7 @@ def test_enhancer():
         resp = c.get('/api/v1/enhancers?chrom=chr1&start=858257&end=858648&experiments=CAGE&location=overlapping')
         data = json.loads(resp.data)
         assert data['size'] == 66
-# @pytest.mark.skip(reason="hg19")
+@pytest.mark.skip(reason="hg19")
 def test_histone_modification():    # TODO ++
     with app.test_client() as c:        ## location exact
         resp = c.get('/api/v1/histone_modifications?chrom=chr1&start=911020&end=912066&location=exact')
@@ -237,7 +237,7 @@ def test_histone_modification():    # TODO ++
         resp = c.get('/api/v1/histone_modifications?chrom=chr1&start=911020&end=912066&experiments=ChIP-seq&location=overlapping')
         data = json.loads(resp.data)
         assert data['size'] == 740
-# @pytest.mark.skip(reason="hg19")
+@pytest.mark.skip(reason="hg19")
 def test_tad():   
     with app.test_client() as c:        ## location exact
         resp = c.get('/api/v1/tads?restriction_enzymes=HindIII')

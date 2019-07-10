@@ -83,7 +83,7 @@ class GFMixin1(object):
         return q
 
     @classmethod
-    def select_by_location(cls, session, chrom, start, end, location,  limit = None, offset = None):
+    def select_by_location(cls, session, chrom, start, end, location):
         """
         Query objects by genomic location.
         """
@@ -95,34 +95,28 @@ class GFMixin1(object):
         elif location == 'overlapping':
             q = cls.select_by_overlapping_location(session, chrom, start, end)
         else:
-            return []
+            return False
 
-        if limit == None and offset == None:
-            return q
-        return (q.count(), q.offset(offset).limit(limit))
+        return q
 
     @classmethod
-    def select_by_uids(cls, session, uids, limit, offset):
+    def select_by_uids(cls, session, query, uids):
         """
-        Query objects by uids.
+        filter query by uids.
         """
-        q = session.query(cls, Region, Source).\
-            join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
-            .filter(cls.uid.in_(uids))
+        q = query.filter(cls.uid.in_(uids))
 
-        return (q.count(), q.offset(offset).limit(limit))
+        return q
 
     @classmethod
-    def select_by_sources(cls, session, chrom, start, end, location, sources, limit, offset):
+    def select_by_sources(cls, session, query, sources):
         """
-        Query objects by sources.
+       filter query by sources.
         """
 
-        q = cls.select_by_location(session, chrom, start, end, location)
-        q = q.filter(Source.name.in_(sources))
+        q = query.filter(Source.name.in_(sources))
 
-        return (q.count(), q.offset(offset).limit(limit))
+        return q
 
     # for insertion only not in REST
     # implement in child class

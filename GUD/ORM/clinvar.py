@@ -54,19 +54,14 @@ class ClinVar(GFMixin1, Base):
     )
    
     @classmethod
-    def select_by_clinvarID(cls, session, clinvarID, limit, offset):
+    def select_by_clinvarID(cls, session, query, clinvarIDs):
         """
-        Query clinvar objects by clinvarID. If no name is provided,
-        query all ids.
+        filter query by location
         """
-        q = session.query(cls)
-        q = session.query(cls, Region, Source).\
-        join().\
-        filter(Region.uid == cls.region_id,
-                Source.uid == cls.source_id,
-                cls.clinvarID == clinvarID)
-        
-        return (q.count(), q.offset(offset).limit(limit))
+
+        q = query.filter(cls.clinvarID.in_(clinvarIDs))
+
+        return q
 
     # not included in REST
     @classmethod
