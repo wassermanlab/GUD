@@ -43,7 +43,7 @@ def test_clinvar():
         assert len(data['results']) == 1
         assert data['results'][0]['id'] == "clinvar_105"
 
-@pytest.mark.skip(reason="tamar_test")
+# @pytest.mark.skip(reason="tamar_test")
 def test_copy_number_variants():
     #select_by_location
     with app.test_client() as c:
@@ -60,7 +60,7 @@ def test_copy_number_variants():
         assert data['results'][0]['id'] == "copy_number_variants_nssv1609233"
     #select_by_uids
     with app.test_client() as c:
-        resp = c.get('/api/v1/copy_number_variants?uids=nssv1609233')
+        resp = c.get('/api/v1/copy_number_variants?uids=nssv1609233&chrom=chr1&start=852862&end=1008286&location=overlapping')
         data = json.loads(resp.data)
         assert len(data['results']) == 1
         assert data['results'][0]['id'] == "copy_number_variants_nssv1609233"
@@ -70,7 +70,7 @@ def test_copy_number_variants():
         data = json.loads(resp.data)
         assert data['size'] == 116
 
-@pytest.mark.skip(reason="tamar_test")
+# @pytest.mark.skip(reason="tamar_test")
 def test_gene():
     #select_by_location
     with app.test_client() as c:
@@ -87,7 +87,7 @@ def test_gene():
         assert data['results'][0]['id'] == "genes_1"
     #select_by_uids
     with app.test_client() as c:
-        resp = c.get('/api/v1/genes?uids=1')
+        resp = c.get('/api/v1/genes?chrom=chr1&start=11869&end=14362&location=exact&uids=1')
         data = json.loads(resp.data)
         assert len(data['results']) == 1
         assert data['results'][0]['id'] == "genes_1"
@@ -98,7 +98,7 @@ def test_gene():
         assert data['size'] == 3
     #select_by_names
     with app.test_client() as c:
-        resp = c.get('/api/v1/genes?names=DDX11L1')
+        resp = c.get('/api/v1/genes?chrom=chr1&start=11869&end=14362&sources=refGene&location=overlapping&names=DDX11L1')
         data = json.loads(resp.data)
         assert data['size'] == 1
     #get_all_gene_symbols

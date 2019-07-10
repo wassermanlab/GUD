@@ -8,6 +8,7 @@ from werkzeug.exceptions import HTTPException, NotFound, BadRequest
 import sys, math, re
 # print(names, file=sys.stdout)
 
+## HELPER FUNCTIONS ##
 
 def create_page(resource, query, page, url) -> dict:
     """
@@ -24,9 +25,11 @@ def create_page(resource, query, page, url) -> dict:
         raise BadRequest('Page range is invalid, valid range for this query is between 1 and ' +
                          str(math.ceil(result_size/page_size)-1))
 
-    if (resource != False):
+    if resource is not False:
         results = [resource.as_genomic_feature(e) for e in results]
         results = [e.serialize() for e in results]
+    else:
+        results = [g[0] for g in results]
 
     json = {'size': result_size,
             'results': results}
@@ -59,8 +62,6 @@ def genomic_feature_mixin1_queries(session, resource, request):
     if keys['sources'] is not None:
         q = resource.select_by_sources(session, q, keys['sources'])
     return q
-
-## HELPER FUNCTIONS ##
 
 
 def check_page(request):
@@ -150,6 +151,38 @@ def clinvar():
     result = create_page(clinvar, q, page, request.url)
     return jsonify(result)
 
+@app.route('/api/v1/copy_number_variants')
+def mixin1():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = CNV()
+    q = genomic_feature_mixin1_queries(session, resource, request)
+    shutdown_session(session)
+    result = create_page(resource, q, page, request.url)
+    return jsonify(result)
+
+@app.route('/api/v1/genes')
+def genes():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = Gene()
+    q = genomic_feature_mixin1_queries(session, resource, request)
+    names = check_split(request.args.get('names', default=None))
+    if names is not None:
+        q = resource.select_by_names(session, q, names) 
+    shutdown_session(session)
+    result = create_page(resource, q, page, request.url)
+    return jsonify(result)
+
+@app.route('/api/v1/genes/symbols')
+def gene_symbols():
+    url = request.url
+    session = establish_GUD_session()
+    page = int(request.args.get('page', default=1))
+    q = Gene().get_all_gene_symbols(session)
+    shutdown_session(session)
+    result = create_page(False, q, page, url)
+    return jsonify(result)
 
 @app.route('/')
 def index():
