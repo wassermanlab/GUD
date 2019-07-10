@@ -124,7 +124,7 @@ def test_short_tandem_repeat():
         assert data['results'][0]['id'] == "short_tandem_repeats_305056"
     #select_by_uids
     with app.test_client() as c:
-        resp = c.get('/api/v1/short_tandem_repeats?uids=305056')
+        resp = c.get('/api/v1/short_tandem_repeats?chrom=chr1&start=14070&end=14081&location=exact&uids=305056')
         data = json.loads(resp.data)
         assert len(data['results']) == 1
         assert data['results'][0]['id'] == "short_tandem_repeats_305056"
@@ -140,9 +140,9 @@ def test_short_tandem_repeat():
         assert data['size'] == 26
     #select_by_motif
     with app.test_client() as c:
-        resp = c.get('/api/v1/short_tandem_repeats?motif=ATGGG&rotation=True')
+        resp = c.get('/api/v1/short_tandem_repeats?motif=GCT&rotation=True&chrom=chr1&start=11869&end=3004362&location=overlapping')
         data = json.loads(resp.data)
-        assert data['size'] == 92
+        assert data['size'] == 12
     
 # def test_conservation(client): # TODO
 #     #select_by_location

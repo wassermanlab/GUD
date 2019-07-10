@@ -184,6 +184,32 @@ def gene_symbols():
     result = create_page(False, q, page, url)
     return jsonify(result)
 
+@app.route('/api/v1/short_tandem_repeats')
+def strs():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = ShortTandemRepeat()
+    q = genomic_feature_mixin1_queries(session, resource, request)
+    names = check_split(request.args.get('names', default=None))
+    try: 
+        motif = request.args.get('motif', default=None, type = str)
+        rotation = request.args.get('rotation', default=False, type = bool)
+    except:
+        raise BadRequest('rotation must be set to True or False if motif is given')
+    if motif is not None:
+        q = resource.select_by_motif(session, motif, q, rotation)
+    result = create_page(resource, q, page, request.url)
+    return jsonify(result)
+
+@app.route('/api/v1/short_tandem_repeats/pathogenic')
+def pathogenic_strs():
+    page        = check_page(request)
+    session     = establish_GUD_session()
+    resource    = ShortTandemRepeat()
+    q           =  resource.select_by_pathogenicity(session)
+    result      = create_page(resource, q, page, request.url)
+    return jsonify(result)
+    
 @app.route('/')
 def index():
     return 'HOME'

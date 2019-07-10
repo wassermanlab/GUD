@@ -7,7 +7,7 @@ from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint, Integer
 )
-from sqlalchemy.dialects import mysql
+from sqlalchemy.dialects import mysql       
 
 from .base import Base
 from .region import Region
@@ -42,17 +42,17 @@ class ShortTandemRepeat(GFMixin1, Base):
         )
 
     @classmethod
-    def select_by_pathogenicity(cls, session, limit, offset):
+    def select_by_pathogenicity(cls, session):
         """returns all strs that are pathogenic"""
         q = session.query(cls, Region, Source).\
             join().\
             filter(cls.pathogenicity != 0).\
             filter(Region.uid == cls.region_id, Source.uid == cls.source_id)
 
-        return (q.count(), q.offset(offset).limit(limit))
+        return q
 
     @classmethod
-    def select_by_motif(cls, session, motif, limit, offset, compute_rotations=False):
+    def select_by_motif(cls, session, motif, query, compute_rotations=False):
         """returns all occurences of a certain motif computing 
         rotations if requested"""
         if compute_rotations is True:  # compute the rotations
@@ -65,12 +65,9 @@ class ShortTandemRepeat(GFMixin1, Base):
         else:
             motifs = [motif]
 
-        q = session.query(cls, Region, Source).\
-            join().\
-            filter(cls.motif.in_(motifs)).\
-            filter(Region.uid == cls.region_id, Source.uid == cls.source_id)
+        q = query.filter(cls.motif.in_(motifs))
 
-        return (q.count(), q.offset(offset).limit(limit))
+        return q
 
     # not in REST API
     @classmethod
