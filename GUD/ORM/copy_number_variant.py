@@ -27,6 +27,7 @@ class CNV(GFMixin1, Base):
     @declared_attr
     def __table_args__(cls):
         return (
+        Index("ix_source_id", cls.source_id),
         Index("ix_cnv", cls.region_id),
         Index("ix_cnv_uid", cls.uid),
         Index("ix_cnv_clinical_interpretation", cls.clinical_interpretation),

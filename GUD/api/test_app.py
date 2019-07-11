@@ -50,7 +50,7 @@ def test_copy_number_variants():
         resp = c.get('/api/v1/copy_number_variants?chrom=chr1&start=852862&end=1008286&location=overlapping')
         data = json.loads(resp.data)
         assert len(data['results']) == 20
-        assert data['results'][0]['id'] == 	"copy_number_variants_nssv1609233"
+        assert data['results'][0]['id'] == 	"copy_number_variants_nssv13653606"
         assert data['size'] == 116
     #select_by_exact_location
     with app.test_client() as c:
@@ -107,7 +107,7 @@ def test_gene():
         data = json.loads(resp.data)
         assert data['size'] == 28194
 
-@pytest.mark.skip(reason="tamar_test")
+# @pytest.mark.skip(reason="tamar_test")
 def test_short_tandem_repeat():
     #select_by_location
     with app.test_client() as c:

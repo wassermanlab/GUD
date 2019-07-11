@@ -28,6 +28,7 @@ class Source(Base):
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(name),
+        Index("ix_uid", uid),
         Index("ix_name", name),
         {
             "mysql_engine": "MyISAM",

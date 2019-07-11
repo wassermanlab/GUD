@@ -44,6 +44,7 @@ class ClinVar(GFMixin1, Base):
         return (
         UniqueConstraint(cls.clinvarID),
 
+        Index("ix_source_id", cls.source_id),
         Index("ix_clinvar", cls.region_id),
         Index("ix_clinvar_id", cls.clinvarID),
 
