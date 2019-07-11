@@ -185,7 +185,8 @@ def test_dna_accessibility():
         resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&experiments=DNase-seq&location=overlapping')
         data = json.loads(resp.data)
         assert data['size'] == 167 
-@pytest.mark.skip(reason="hg19")
+
+# @pytest.mark.skip(reason="hg19")
 def test_enhancer():            
     with app.test_client() as c:        ## location exact
         resp = c.get('/api/v1/enhancers?chrom=chr1&start=858257&end=858648&location=exact')
@@ -196,7 +197,7 @@ def test_enhancer():
         data = json.loads(resp.data)
         assert data['size'] == 66
     with app.test_client() as c:        ## uids
-        resp = c.get('/api/v1/enhancers?uids=1')
+        resp = c.get('/api/v1/enhancers?uids=1&chrom=chr1&start=858257&end=858648&location=overlapping')
         data = json.loads(resp.data)
         assert data['results'][0]['id'] == "enhancers_1"
     with app.test_client() as c:        ## sources
@@ -211,7 +212,8 @@ def test_enhancer():
         resp = c.get('/api/v1/enhancers?chrom=chr1&start=858257&end=858648&experiments=CAGE&location=overlapping')
         data = json.loads(resp.data)
         assert data['size'] == 66
-@pytest.mark.skip(reason="hg19")
+
+# @pytest.mark.skip(reason="hg19")
 def test_histone_modification():    # TODO ++
     with app.test_client() as c:        ## location exact
         resp = c.get('/api/v1/histone_modifications?chrom=chr1&start=911020&end=912066&location=exact')
@@ -237,6 +239,7 @@ def test_histone_modification():    # TODO ++
         resp = c.get('/api/v1/histone_modifications?chrom=chr1&start=911020&end=912066&experiments=ChIP-seq&location=overlapping')
         data = json.loads(resp.data)
         assert data['size'] == 740
+
 @pytest.mark.skip(reason="hg19")
 def test_tad():   
     with app.test_client() as c:        ## location exact

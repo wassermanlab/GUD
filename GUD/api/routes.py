@@ -17,7 +17,6 @@ def create_page(resource, query, page, url) -> dict:
     """
     returns 404 error or a page
     """
-    print(query.all(), file=sys.stdout)
     page_size = 20
     offset = (page-1)*page_size
     json = {}
@@ -231,17 +230,88 @@ def pathogenic_strs():
     return jsonify(result)
 
 
+@app.route('/api/v1/enhancers')
 @app.route('/api/v1/dna_accessibility')
 def mixin2():
     page = check_page(request)
     session = establish_GUD_session()
-    resource = DNAAccessibility()
+    if (request.path == '/api/v1/dna_accessibility'):
+        resource = DNAAccessibility()
+    elif (request.path == '/api/v1/enhancers'):
+        resource = Enhancer()
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     shutdown_session(session)
     result = create_page(resource, q, page, request.url)
     return jsonify(result)
 
+@app.route('/api/v1/histone_modifications')
+def histone_modifications():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = HistoneModification()
+    histone_types = check_split(request.args.get('histone_types', default=None))
+    q = genomic_feature_mixin1_queries(session, resource, request)
+    q = genomic_feature_mixin2_queries(session, resource, request, q)
+    if histone_types is not None: 
+        q = resource.select_by_histone_type(q, histone_types)
+    shutdown_session(session) 
+    result = create_page(resource, q, page, request.url)
+    return jsonify(result)
+
+@app.route('/api/v1/tads')
+def tads():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = TAD()
+    restriction_enzymes = check_split(request.args.get('restriction_enzymes', default=None))
+    q = genomic_feature_mixin1_queries(session, resource, request)
+    q = genomic_feature_mixin2_queries(session, resource, request, q)
+    if restriction_enzymes is not None:
+        q = resource.select_by_restriction_enzymes(q, restriction_enzymes)
+    shutdown_session(session) 
+    result = create_page(resource, q, page, request.url)
+    return jsonify(result)
+
+@app.route('/api/v1/tf_binding')
+def tf_binding():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = TFBinding()
+    tfs = check_split(request.args.get('tfs', default=None))
+    q = genomic_feature_mixin1_queries(session, resource, request)
+    q = genomic_feature_mixin2_queries(session, resource, request, q)
+    if tfs is not None:
+        q = resource.select_by_tf(q, tfs)
+    shutdown_session(session) 
+    result = create_page(resource, q, page, request.url)
+    return jsonify(result)
+
+@app.route('/api/v1/tss')
+def tss():
+    samples = request.args.get('samples', default=None, type=str)
+    if samples is not None:
+        return BadRequest('Cannot query TSS table by sample')
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = TSS()
+    genes = check_split(request.args.get('genes', default=None))
+    q = genomic_feature_mixin1_queries(session, resource, request)
+    q = genomic_feature_mixin2_queries(session, resource, request, q)
+    if genes is not None: 
+        q = resource.select_by_genes(q, genes)
+    shutdown_session(session) 
+    result = create_page(resource, q, page, request.url)
+    return jsonify(result)
+
+@app.route('/api/v1/tss/genic')
+def genic_tss():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = TSS()
+    q = resource.select_all_genic_tss(session)
+    result = create_page(resource, q, page, request.url)
+    return jsonify(result)
 
 @app.route('/')
 def index():

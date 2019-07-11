@@ -49,17 +49,14 @@ class TAD(GFMixin2, Base):
             }
         )
     @classmethod
-    def select_by_restriction_enzymes(cls, session, restriction_enzymes, limit, offset):
+    def select_by_restriction_enzymes(cls, query ,restriction_enzymes):
         """
         Query objects by sources.
         """
 
-        q = session.query(cls, Region, Source, Sample, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(cls.restriction_enzyme.in_(restriction_enzymes))
+        q = query.filter(cls.restriction_enzyme.in_(restriction_enzymes))
         
-        return (q.count(), q.offset(offset).limit(limit))
+        return q
 
     @classmethod
     def is_unique(cls, session, regionID,

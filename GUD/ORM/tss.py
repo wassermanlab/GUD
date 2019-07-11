@@ -74,103 +74,7 @@ class TSS(GFMixin2, Base):
         return q.first()
 
     @classmethod
-    def select_by_uids(cls, session, uids, limit, offset):
-        """
-        Query objects by uids.
-        """
-        q = session.query(cls, Region, Source, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Experiment.uid == cls.experiment_id)\
-            .filter(cls.uid.in_(uids))
-
-        return (q.count(), q.offset(offset).limit(limit))
-
-    @classmethod
-    def select_by_genes(cls, session, genes, limit, offset):
-        """
-        Query objects by multiple uids.
-        If no uids are provided, return all
-        objects.
-        """
-
-        q = session.query(cls, Experiment, Region, Source)\
-            .join()\
-            .filter(Experiment.uid == cls.experimentID,
-                    Region.uid == cls.regionID, Source.uid == cls.sourceID)
-
-        if genes:
-            q = q.filter(cls.gene.in_(genes))
-
-        return (q.count(), q.offset(offset).limit(limit))
-
-    @classmethod
-    def select_all_genic_tss(cls, session, limit, offset):
-        """
-        Query all objects associated with a gene.
-        """
-
-        q = session.query(cls, Experiment, Region, Source)\
-            .filter(Experiment.uid == cls.experimentID,
-            Region.uid == cls.regionID, Source.uid == cls.sourceID)\
-            .filter(cls.gene != None)
-
-        return (q.count(), q.offset(offset).limit(limit))
-
-    @classmethod
-    def select_by_sources(cls, session, chrom, start, end, sources, limit, offset):
-        """
-        Query objects by sources.
-        """
-        bins = Region._compute_bins(start, end)
-
-        q = session.query(cls, Region, Source, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Experiment.uid == cls.experiment_id)\
-            .filter(Region.chrom == chrom,
-                    Region.start < end,
-                    Region.end > start)\
-            .filter(Region.bin.in_(bins))
-        
-        res = []
-        for i in q.all():
-            if i.Source.name in sources:
-                res.append(i)
-        return (len(res), res[offset:offset+limit])
-            # .filter(Source.name.in_(sources))
-        # return (q.count(), q.offset(offset).limit(limit))
-
-    @classmethod
-    def select_by_samples(cls, session, chrom, start, end, samples, limit, offset):
-        """
-        Query objects by sample name.
-        """
-        return False
-
-    @classmethod
-    def select_by_experiments(cls, session, chrom, start, end, experiments, limit, offset):
-        """
-        Query objects by experiment name.
-        """
-
-        bins = Region._compute_bins(start, end)
-
-        q = session.query(cls, Region, Source, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Experiment.uid == cls.experiment_id)\
-            .filter(Region.chrom == chrom,
-                    Region.start < end,
-                    Region.end > start,)\
-            .filter(Region.bin.in_(bins))
-        res = []
-        for i in q.all():
-            if i.Experiment.name in experiments:
-                res.append(i)
-        return (len(res), res[offset:offset+limit])
-            # .filter(Experiment.name in experiments)\
-        # return (q.count(), q.offset(offset).limit(limit))
-
-    @classmethod
-    def select_by_location(cls, session, chrom, start, end, limit, offset):
+    def select_by_overlapping_location(cls, session, chrom, start, end):
         """
         Query objects by genomic location.
         """
@@ -184,10 +88,27 @@ class TSS(GFMixin2, Base):
                     Region.end > start)\
             .filter(Region.bin.in_(bins))
 
-        return (q.count(), q.offset(offset).limit(limit))
+        return q
+    
+    @classmethod
+    def select_by_within_location(cls, session, chrom, start, end):
+        """
+        Query objects by genomic location.
+        """
+        bins = Region._compute_bins(start, end)
+
+        q = session.query(cls, Region, Source, Experiment)\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                    Experiment.uid == cls.experiment_id)\
+            .filter(Region.chrom == chrom,
+                    Region.start > start,
+                    Region.end < end)\
+            .filter(Region.bin.in_(bins))
+        
+        return q
 
     @classmethod
-    def select_by_exact_location(cls, session, chrom, start, end, limit, offset):
+    def select_by_exact_location(cls, session, chrom, start, end):
         """
         Query objects by genomic location.
         """
@@ -201,10 +122,65 @@ class TSS(GFMixin2, Base):
             .filter(Region.chrom == chrom,
                     Region.start == start,
                     Region.end == end)
+        return q
+   
+    @classmethod
+    def select_by_uids(cls, query, uids):
+        """
+        Query objects by uids.
+        """
+        q = query.filter(cls.uid.in_(uids))
 
-        return (q.count(), q.offset(offset).limit(limit))
+        return q
 
+    @classmethod
+    def select_by_genes(cls, query, genes):
+        """
+        select by genes
+        """
 
+        q = query.filter(cls.gene.in_(genes))
+
+        return q
+
+    @classmethod ## TODO
+    def select_all_genic_tss(cls, session):
+        """
+        Query all objects associated with a gene.
+        """
+        q = session.query(cls, Region, Source, Experiment).\
+            filter(Region.uid == cls.region_id, Source.uid == cls.source_id, 
+            Experiment.uid == cls.experiment_id).filter(cls.gene != None) 
+
+        return q
+        
+    @classmethod 
+    def select_by_sources(cls, session, query, chrom):
+        """
+        Query objects by sources.
+        """
+        s = [value for value, in session.query(Source.uid).filter(Source.name.in_(sources)).all()]
+        q = query.filter(Source.uid.in_(s))   
+
+        return q
+
+    @classmethod 
+    def select_by_samples(cls, session, query, samples):
+        """
+        Query objects by sample name.
+        """
+        return query
+
+    @classmethod ## TODO
+    def select_by_experiments(cls, session, query, experiments):
+        """
+        Query objects by experiment name.
+        """
+
+        s = [value for value, in session.query(Experiment.uid).filter(Experiment.name.in_(experiments)).all()]
+        q = query.filter(Experiment.uid.in_(s))   
+
+        return q
 
     @classmethod
     def as_genomic_feature(self, feat):

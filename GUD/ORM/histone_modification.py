@@ -49,6 +49,16 @@ class HistoneModification(GFMixin2, Base):
         )
 
     @classmethod
+    def select_by_histone_type(cls, query ,histone_type):
+        """
+        Query objects by sources.
+        """
+
+        q = query.filter(cls.histone_type.in_(histone_type))
+        
+        return q
+
+    @classmethod
     def is_unique(cls, session, regionID, sampleID, experimentID, sourceID,
                   histone_type):
 
