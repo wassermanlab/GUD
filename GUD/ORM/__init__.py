@@ -35,8 +35,8 @@ from .experiment import Experiment
 from .expression import Expression
 from .gene import Gene
 from .histone_modification import HistoneModification
+from .mask import Mask
 from .region import Region
-from .repeat_mask import RepeatMask
 from .sample import Sample
 from .short_tandem_repeat import ShortTandemRepeat
 from .source import Source

@@ -30,6 +30,13 @@ class Gene(Base):
         nullable=False
     )
 
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
     name = Column(
         "name",
         String(75),
@@ -66,19 +73,12 @@ class Gene(Base):
         nullable=False
     )
 
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
-        nullable=False
-    )
-
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(
             regionID,
-            name,
-            sourceID
+            sourceID,
+            name
         ),
         Index("ix_regionID", regionID), # query by bin range
         Index("ix_name", name),
@@ -90,34 +90,31 @@ class Gene(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID, name,
-        sourceID):
+    def is_unique(cls, session, regionID, sourceID, name):
 
         q = session.query(cls)\
             .filter(
                 cls.regionID == regionID,
+                cls.sourceID == sourceID,
                 cls.name == name,
-                cls.sourceID == sourceID
             )
 
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, regionID,
-        name, sourceID):
+    def select_unique(cls, session, regionID, sourceID, name):
 
         q = session.query(cls)\
             .filter(
                 cls.regionID == regionID,
+                cls.sourceID == sourceID,
                 cls.name == name,
-                cls.sourceID == sourceID
             )
 
         return q.first()
 
     @classmethod
-    def select_by_location(cls, session, chrom,
-        start, end, as_genomic_feature=False):
+    def select_by_location(cls, session, chrom, start, end, as_genomic_feature=False):
         """
         Query objects by genomic location.
         """
@@ -133,7 +130,7 @@ class Gene(Base):
             .filter(
                 Region.chrom == chrom,
                 Region.start < end,
-                Region.end > start
+                Region.end > start,
             )\
             .filter(Region.bin.in_(bins))
 
@@ -152,8 +149,7 @@ class Gene(Base):
         return q.all()
 
     @classmethod
-    def select_by_name(cls, session, name,
-        as_genomic_feature=False):
+    def select_by_name(cls, session, name, as_genomic_feature=False):
         """
         Query objects by gene symbol.
         """
@@ -181,8 +177,7 @@ class Gene(Base):
         return q.all()
 
     @classmethod
-    def select_by_names(cls, session, names=[],
-        as_genomic_feature=False):
+    def select_by_names(cls, session, names=[], as_genomic_feature=False):
         """
         Query objects by multiple gene symbols.
         If no genes are provided, return all
@@ -214,15 +209,17 @@ class Gene(Base):
         return q.all()
 
     @classmethod
-    def select_by_uid(cls, session, uid,
-        as_genomic_feature=False):
+    def select_by_uid(cls, session, uid, as_genomic_feature=False):
         """
         Query objects by uid.
         """
 
         q = session.query(cls, Region, Source).\
             join().\
-            filter(cls.uid == uid)
+            filter(cls.uid == uid,
+                Region.uid == cls.regionID,
+                Source.uid == cls.sourceID,
+            )
 
         if as_genomic_feature:
             return cls.__as_genomic_feature(
@@ -275,32 +272,35 @@ class Gene(Base):
     @classmethod
     def __as_genomic_feature(self, feat):
 
-        # Initialize
-        exonStarts = []
-        exonEnds = []
+        # Note for Oriol:
+        # Move this within your code!!!
 
-        # For each exon start...
-        for i in str(feat.Gene.exonStarts).split(","):
-            if i.isdigit():
-                exonStarts.append(int(i))
-        
-        # For each exon end...
-        for i in str(feat.Gene.exonEnds).split(","):
-            if i.isdigit():
-                exonStarts.append(int(i))
+#        # Initialize
+#        exonStarts = []
+#        exonEnds = []
+#
+#        # For each exon start...
+#        for i in str(feat.Gene.exonStarts).split(","):
+#            if i.isdigit():
+#                exonStarts.append(int(i))
+#        
+#        # For each exon end...
+#        for i in str(feat.Gene.exonEnds).split(","):
+#            if i.isdigit():
+#                exonStarts.append(int(i))
 
         # Define qualifiers
         qualifiers = {
             "uid": feat.Gene.uid,
             "regionID": feat.Gene.regionID,
+            "sourceID": feat.Gene.sourceID,
+            "source": feat.Source.name,
             "name": feat.Gene.name,
             "name2": feat.Gene.name2,
             "cdsStart": int(feat.Gene.cdsStart),
             "cdsEnd": int(feat.Gene.cdsEnd),
             "exonStarts": feat.Gene.exonStarts,
-            "exonEnds": feat.Gene.exonEnds,
-            "sourceID": feat.Gene.sourceID,
-            "source": feat.Source.name,           
+            "exonEnds": feat.Gene.exonEnds,      
         }
 
         return GenomicFeature(
@@ -308,8 +308,12 @@ class Gene(Base):
             int(feat.Region.start),
             int(feat.Region.end),
             strand = feat.Region.strand,
-            feat_type = "Gene",
-            feat_id = "%s_%s"%(self.__tablename__, feat.Gene.uid),
+            feat_type = self.__tablename__,
+            feat_id = "%s_%s" % \
+                (
+                    self.__tablename__,
+                    feat.Gene.uid
+                ),
             qualifiers = qualifiers
         )
 
@@ -320,7 +324,7 @@ class Gene(Base):
                 self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
+                "sourceID={}".format(self.sourceID),
                 "name={}".format(self.name),
                 "name2={}".format(self.name2),
-                "sourceID={}".format(self.sourceID),
             )

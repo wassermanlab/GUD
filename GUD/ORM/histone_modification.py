@@ -35,6 +35,13 @@ class HistoneModification(Base):
         nullable=False
     )
 
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
     sampleID = Column(
         "sampleID",
         Integer,
@@ -46,13 +53,6 @@ class HistoneModification(Base):
         "experimentID",
         Integer,
         ForeignKey("experiments.uid"),
-        nullable=False
-    )
-
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
         nullable=False
     )
 
@@ -69,7 +69,7 @@ class HistoneModification(Base):
             sampleID,
             experimentID,
             sourceID,
-            histone_type
+            histone_type,
 
         ),
         Index("ix_regionID", regionID), # query by bin range
@@ -81,9 +81,7 @@ class HistoneModification(Base):
     )
 
     @classmethod
-    def is_unique(cls, session, regionID,
-        sampleID, experimentID, sourceID,
-        histone_type):
+    def is_unique(cls, session, regionID, sampleID, experimentID, sourceID, histone_type):
 
         q = session.query(cls).\
             filter(
@@ -91,15 +89,13 @@ class HistoneModification(Base):
                 cls.sampleID == sampleID,
                 cls.experimentID == experimentID,
                 cls.sourceID == sourceID,
-                cls.histone_type == histone_type
+                cls.histone_type == histone_type,
             )
 
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, regionID,
-        sampleID, experimentID, sourceID,
-        histone_type):
+    def select_unique(cls, session, regionID, sampleID, experimentID, sourceID, histone_type):
 
         q = session.query(cls).\
             filter(
@@ -107,15 +103,16 @@ class HistoneModification(Base):
                 cls.sampleID == sampleID,
                 cls.experimentID == experimentID,
                 cls.sourceID == sourceID,
-                cls.histone_type == histone_type
+                cls.histone_type == histone_type,
             )
 
         return q.first()
 
     def __repr__(self):
 
-        return "<HistoneModification(%s, %s, %s, %s, %s, %s)>" % \
+        return "<%s(%s, %s, %s, %s, %s, %s)>" % \
             (
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "regionID={}".format(self.regionID),
                 "sampleID={}".format(self.sampleID),

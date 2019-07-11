@@ -22,7 +22,6 @@ usage: gene2region.py (--gene [STR ...] | --gene-file FILE)
 """
 
 help_msg = """%s
-
 delimits a region for the given gene(s) based on TAD boundaries,
 UTRs of nearby genes, or genomic distance (in kb).
 

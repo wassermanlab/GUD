@@ -15,6 +15,7 @@ except: from urllib.parse import unquote
 
 # Import from GUD module
 from GUD import GUDglobals
+from GUD.ORM.chrom import Chrom
 from GUD.ORM.enhancer import Enhancer
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.expression import Expression
@@ -31,7 +32,6 @@ usage: %s  --matrix FILE --samples FILE --feature STR
 os.path.basename(__file__)
 
 help_msg = """%s
-
 inserts "enhancer" and "tss" features from the FANTOM5 consortium
 into GUD. "--matrix" refers to:
 
@@ -320,6 +320,9 @@ def fantom_to_gud_db(user, pwd, host, port, db,
             matrix_file
         )
 
+    # Get valid chromosomes
+    chroms = Chrom.chrom_sizes(session)
+
     # For each line...
     for line in lines:
         # Skip comments
@@ -374,8 +377,7 @@ def fantom_to_gud_db(user, pwd, host, port, db,
                         peak_ids.add((None, 1))
             # Ignore non-standard chroms,
             # scaffolds, etc.
-            m = re.search("^chr(\S+)$", chrom)
-            if not m.group(1) in GUDglobals.chroms:
+            if chrom not in chroms:
                 continue
             # Get region
             region = Region()

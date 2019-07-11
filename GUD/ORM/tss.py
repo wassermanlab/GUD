@@ -1,4 +1,3 @@
-import re
 from sqlalchemy import (
     and_,
     or_,
@@ -35,6 +34,20 @@ class TSS(Base):
         nullable=False
     )
 
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
+    experimentID = Column(
+        "experimentID",
+        Integer,
+        ForeignKey("experiments.uid"),
+        nullable=False
+    )
+
     gene = Column(
         "gene",
         String(75),
@@ -55,20 +68,6 @@ class TSS(Base):
     avg_expression_levels = Column(
         "avg_expression_levels",
         mysql.LONGBLOB, nullable=False
-    )
-
-    experimentID = Column(
-        "experimentID",
-        Integer,
-        ForeignKey("experiments.uid"),
-        nullable=False
-    )
-
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
-        nullable=False
     )
 
     __table_args__ = (
@@ -364,21 +363,6 @@ class TSS(Base):
     @classmethod
     def __as_genomic_feature(self, feat):
 
-        # Initialize
-        isfloat = re.compile("\d+(\.\d+)?")
-        sampleIDs = []
-        avg_expression_levels = []
-
-        # For each exon start...
-        for i in str(feat.TSS.sampleIDs).split(","):
-            if i.isdigit():
-                sampleIDs.append(int(i))
-        
-        # For each exon end...
-        for i in str(feat.TSS.avg_expression_levels).split(","):
-            if isfloat.match(i):
-                avg_expression_levels.append(float(i))
-
         # Define qualifiers
         qualifiers = {
             "uid": feat.TSS.uid,
@@ -386,7 +370,8 @@ class TSS(Base):
             "gene": feat.TSS.gene,
             "tss": feat.TSS.tss,
             "sampleIDs": feat.TSS.sampleIDs,
-            "avg_expression_levels": feat.TSS.avg_expression_levels,
+            "avg_expression_levels": \
+                feat.TSS.avg_expression_levels,
             "experimentID": feat.TSS.experimentID,
             "sourceID": feat.TSS.sourceID,
             "experiment": feat.Experiment.name,
@@ -398,8 +383,12 @@ class TSS(Base):
             int(feat.Region.start),
             int(feat.Region.end),
             strand = feat.Region.strand,
-            feat_type = "TSS",
-            feat_id = "%s_%s"%(self.__tablename__, feat.TSS.uid),
+            feat_type = self.__tablename__,
+            feat_id = "%s_%s" % \
+                (
+                    self.__tablename__,
+                    feat.TSS.uid
+                ),
             qualifiers = qualifiers
         )
 

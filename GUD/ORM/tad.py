@@ -37,6 +37,13 @@ class TAD(Base):
         nullable=False
     )
 
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
     sampleID = Column(
         "sampleID",
         Integer,
@@ -48,13 +55,6 @@ class TAD(Base):
         "experimentID",
         Integer,
         ForeignKey("experiments.uid"),
-        nullable=False
-    )
-
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
         nullable=False
     )
 
@@ -223,8 +223,12 @@ class TAD(Base):
             int(feat.Region.start),
             int(feat.Region.end),
             strand=feat.Region.strand,
-            feat_type="TAD",
-            feat_id = "%s_%s"%(self.__tablename__, feat.TAD.uid),
+            feat_type = self.__tablename__,
+            feat_id = "%s_%s" % \
+                (
+                    self.__tablename__,
+                    feat.TAD.uid
+                ),
             qualifiers=qualifiers
         )
 

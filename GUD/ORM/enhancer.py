@@ -35,6 +35,13 @@ class Enhancer(Base):
         nullable=False
     )
 
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
+        nullable=False
+    )
+
     sampleID = Column(
         "sampleID",
         Integer,
@@ -46,13 +53,6 @@ class Enhancer(Base):
         "experimentID",
         Integer,
         ForeignKey("experiments.uid"),
-        nullable=False
-    )
-
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
         nullable=False
     )
 
@@ -164,8 +164,12 @@ class Enhancer(Base):
             int(feat.Region.start),
             int(feat.Region.end),
             strand = feat.Region.strand,
-            feat_type = "Enhancer",
-            feat_id = "%s_%s"%(self.__tablename__, feat.Enhancer.uid),
+            feat_type = self.__tablename__,
+            feat_id = "%s_%s" % \
+                (
+                    self.__tablename__,
+                    feat.Enhancer.uid
+                ),
             qualifiers = qualifiers
         )
 
