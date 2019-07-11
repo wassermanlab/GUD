@@ -8,7 +8,7 @@ import flask
 from flask import request, jsonify, json
 
 # ============== gfmixin1 ============== #
-# @pytest.mark.skip(reason="tamar_test")
+@pytest.mark.skip(reason="tamar_test")
 def test_clinvar():
     #select_by_location
     with app.test_client() as c:
@@ -43,7 +43,7 @@ def test_clinvar():
         assert len(data['results']) == 1
         assert data['results'][0]['id'] == "clinvar_105"
 
-# @pytest.mark.skip(reason="tamar_test")
+@pytest.mark.skip(reason="tamar_test")
 def test_copy_number_variants():
     #select_by_location
     with app.test_client() as c:
@@ -70,7 +70,7 @@ def test_copy_number_variants():
         data = json.loads(resp.data)
         assert data['size'] == 116
 
-# @pytest.mark.skip(reason="tamar_test")
+@pytest.mark.skip(reason="tamar_test")
 def test_gene():
     #select_by_location
     with app.test_client() as c:
@@ -107,7 +107,7 @@ def test_gene():
         data = json.loads(resp.data)
         assert data['size'] == 28194
 
-# @pytest.mark.skip(reason="tamar_test")
+@pytest.mark.skip(reason="tamar_test")
 def test_short_tandem_repeat():
     #select_by_location
     with app.test_client() as c:
@@ -159,7 +159,7 @@ def test_short_tandem_repeat():
 #     return False
 
 # # ============== gfmixin2 ============== #
-@pytest.mark.skip(reason="hg19")
+# @pytest.mark.skip(reason="hg19")
 def test_dna_accessibility():   
     with app.test_client() as c:        ## location exact
         resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=exact')
@@ -170,15 +170,15 @@ def test_dna_accessibility():
         data = json.loads(resp.data)
         assert data['size'] == 168
     with app.test_client() as c:        ## uids
-        resp = c.get('/api/v1/dna_accessibility?uids=1')
+        resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=overlapping&uids=1')
         data = json.loads(resp.data)
         assert data['results'][0]['id'] == "dna_accessibility_1"
     with app.test_client() as c:        ## sources
-        resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&sources=ENCODE&location=overlapping')
+        resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=overlapping&sources=ENCODE')
         data = json.loads(resp.data)
         assert data['size'] == 168
     with app.test_client() as c:        ## samples
-        resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&samples=fibroblast+(dermis)&location=overlapping')
+        resp = c.get('/api/v1/dna_accessibility?chrom=chr1&start=10410&end=10606&location=overlapping&sources=ENCODE&samples=mesoderm+(heart)')
         data = json.loads(resp.data)
         assert data['size'] == 1
     with app.test_client() as c:        ## experiments 

@@ -5,15 +5,19 @@ from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation,
                      DNAAccessibility, Enhancer, HistoneModification, TAD, TFBinding, TSS)
 from GUD.ORM.genomic_feature import GenomicFeature
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest
-import sys, math, re
+import sys
+import math
+import re
 # print(names, file=sys.stdout)
 
 ## HELPER FUNCTIONS ##
+
 
 def create_page(resource, query, page, url) -> dict:
     """
     returns 404 error or a page
     """
+    print(query.all(), file=sys.stdout)
     page_size = 20
     offset = (page-1)*page_size
     json = {}
@@ -48,19 +52,28 @@ def create_page(resource, query, page, url) -> dict:
 
 
 def genomic_feature_mixin1_queries(session, resource, request):
-    keys = set(request.args)
-    keys.discard('page')
     keys = get_mixin1_keys(request)
 
     # location query
+
     q = resource.select_by_location(
         session, keys['chrom'], keys['start'], keys['end'], keys['location'])
-    # add uids
+    # uid query
     if keys['uids'] is not None:
-        # add sources
         q = resource.select_by_uids(session, q, keys['uids'])
+    # sources query
     if keys['sources'] is not None:
         q = resource.select_by_sources(session, q, keys['sources'])
+    return q
+
+
+def genomic_feature_mixin2_queries(session, resource, request, query):
+    keys = get_mixin2_keys(request)
+    q = query
+    if keys['experiments'] is not None:
+        q = resource.select_by_experiments(session, q, keys['experiments'])
+    if keys['samples'] is not None:
+        q = resource.select_by_samples(session, q, keys['samples'])
     return q
 
 
@@ -74,7 +87,7 @@ def check_page(request):
     return page
 
 
-def check_split(str_list, integer = False):
+def check_split(str_list, integer=False):
     if str_list == None:
         return None
     s = str_list.split(',')
@@ -86,7 +99,7 @@ def check_split(str_list, integer = False):
             s = [int(i) for i in s]
         except:
             raise BadRequest('list query parameter needs to be integer')
-    
+
     return s
 
 
@@ -135,21 +148,23 @@ def get_mixin2_keys(request):
     keys['samples'] = check_split(request.args.get('samples', default=None))
     return keys
 
-
 ## ROUTES ##
+
 
 @app.route('/api/v1/clinvar')
 def clinvar():
     page = check_page(request)
     session = establish_GUD_session()
     clinvar = ClinVar()
-    clinvarIDs = check_split(request.args.get('clinvar_ids', default=None), True)
+    clinvarIDs = check_split(request.args.get(
+        'clinvar_ids', default=None), True)
     q = genomic_feature_mixin1_queries(session, clinvar, request)
     if clinvarIDs is not None:
         q = clinvar.select_by_clinvarID(session, q, clinvarIDs)
     shutdown_session(session)
     result = create_page(clinvar, q, page, request.url)
     return jsonify(result)
+
 
 @app.route('/api/v1/copy_number_variants')
 def mixin1():
@@ -161,6 +176,7 @@ def mixin1():
     result = create_page(resource, q, page, request.url)
     return jsonify(result)
 
+
 @app.route('/api/v1/genes')
 def genes():
     page = check_page(request)
@@ -169,10 +185,11 @@ def genes():
     q = genomic_feature_mixin1_queries(session, resource, request)
     names = check_split(request.args.get('names', default=None))
     if names is not None:
-        q = resource.select_by_names(session, q, names) 
+        q = resource.select_by_names(session, q, names)
     shutdown_session(session)
     result = create_page(resource, q, page, request.url)
     return jsonify(result)
+
 
 @app.route('/api/v1/genes/symbols')
 def gene_symbols():
@@ -184,6 +201,7 @@ def gene_symbols():
     result = create_page(False, q, page, url)
     return jsonify(result)
 
+
 @app.route('/api/v1/short_tandem_repeats')
 def strs():
     page = check_page(request)
@@ -191,25 +209,41 @@ def strs():
     resource = ShortTandemRepeat()
     q = genomic_feature_mixin1_queries(session, resource, request)
     names = check_split(request.args.get('names', default=None))
-    try: 
-        motif = request.args.get('motif', default=None, type = str)
-        rotation = request.args.get('rotation', default=False, type = bool)
+    try:
+        motif = request.args.get('motif', default=None, type=str)
+        rotation = request.args.get('rotation', default=False, type=bool)
     except:
-        raise BadRequest('rotation must be set to True or False if motif is given')
+        raise BadRequest(
+            'rotation must be set to True or False if motif is given')
     if motif is not None:
         q = resource.select_by_motif(session, motif, q, rotation)
     result = create_page(resource, q, page, request.url)
     return jsonify(result)
 
+
 @app.route('/api/v1/short_tandem_repeats/pathogenic')
 def pathogenic_strs():
-    page        = check_page(request)
-    session     = establish_GUD_session()
-    resource    = ShortTandemRepeat()
-    q           =  resource.select_by_pathogenicity(session)
-    result      = create_page(resource, q, page, request.url)
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = ShortTandemRepeat()
+    q = resource.select_by_pathogenicity(session)
+    result = create_page(resource, q, page, request.url)
     return jsonify(result)
-    
+
+
+@app.route('/api/v1/dna_accessibility')
+def mixin2():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = DNAAccessibility()
+    q = genomic_feature_mixin1_queries(session, resource, request)
+    q = genomic_feature_mixin2_queries(session, resource, request, q)
+    shutdown_session(session)
+    result = create_page(resource, q, page, request.url)
+    return jsonify(result)
+
+
 @app.route('/')
 def index():
     return 'HOME'
+# print(names, file=sys.stdout)

@@ -59,6 +59,7 @@ class Sample(Base):
             cancer
         ),
         Index("ix_name", name),
+        Index("ix_uid", uid),
         Index(
             "ix_name_fulltext",
             name,

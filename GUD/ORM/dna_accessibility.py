@@ -25,6 +25,8 @@ class DNAAccessibility(GFMixin2, Base):
                 cls.sample_id
             ),
             Index("ix_regionID", cls.region_id),  # query by bin range
+            Index("ix_sourceID", cls.sample_id),
+            Index("ix_experimentID", cls.experiment_id),
             Index("ix_sampleID", cls.sample_id),
             {
                 "mysql_engine": "MyISAM",
