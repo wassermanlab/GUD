@@ -371,7 +371,7 @@ class ParseUtililities:
     # Multiprocess #
     #--------------#
 
-    def process_data_in_chunks(self, data_file, insert_function, threads=1, test=True):
+    def process_data_in_chunks(self, data_file, insert_function, test=False, threads=1):
 
         from itertools import islice
         from multiprocessing import Pool

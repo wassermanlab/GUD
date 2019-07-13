@@ -34,8 +34,10 @@ inserts features from the UCSC's "refGene" table into GUD.
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
-  --threads INT       number of additional threads to use
-                      (default = %s)
+  -t, --test          test mode (if specified, limits inserts
+                      to the database to ~1,000 features times
+                      the number of threads; default = False)
+  --threads INT       number of threads to use (default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
@@ -63,6 +65,7 @@ def parse_args():
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
+    optional_group.add_argument("--test", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
     
     # MySQL args
@@ -128,9 +131,9 @@ def main():
     GUDUtils.db = args.db
 
     # Insert RefGene data
-    refgene_to_gud(args.genome, args.dummy_dir, args.threads)
+    refgene_to_gud(args.genome, args.dummy_dir, args.test, args.threads)
 
-def refgene_to_gud(genome, dummy_dir="/tmp/", threads=1):
+def refgene_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     """
     python -m GUD.parsers.refgene2gud --genome hg19 --dummy-dir ./tmp/
     """
@@ -180,7 +183,7 @@ def refgene_to_gud(genome, dummy_dir="/tmp/", threads=1):
     engine.dispose()
 
     # Parallelize inserts to the database
-    ParseUtils.process_data_in_chunks(dummy_file, _insert_data_in_chunks, threads)
+    ParseUtils.process_data_in_chunks(dummy_file, _insert_data_in_chunks, test, threads)
 
     # Remove session
     Session.remove()
