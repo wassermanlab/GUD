@@ -35,8 +35,9 @@ inserts features from the UCSC's "multiz100way" table into GUD.
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
-  --threads INT       number of additional threads to use
-                      (default = %s)
+  -l, --limit         limit the total number of inserts to
+                      ~1K per thread (default = False)
+  --threads INT       number of threads to use (default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
@@ -64,6 +65,7 @@ def parse_args():
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
+    optional_group.add_argument("-t", "--test", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
     
     # MySQL args
@@ -129,18 +131,23 @@ def main():
     GUDUtils.db = args.db
 
     # Insert conservation data
-    conservation_to_gud(args.genome, args.dummy_dir, args.threads)
+    conservation_to_gud(args.genome, args.dummy_dir, args.test, args.threads)
 
-def conservation_to_gud(genome, dummy_dir="/tmp/", threads=1):
+def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     """
     python -m GUD.parsers.multiz2gud --genome hg19 --dummy-dir ./tmp/
     """
 
-    # Globals
+    # Initialize
     global chroms
     global engine
     global Session
     global source
+
+    # Testing
+    if test:
+        global current_process
+        from multiprocessing import current_process
 
     # Download data
     dummy_file = _download_data(genome, dummy_dir)
@@ -181,14 +188,14 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", threads=1):
     engine.dispose()
 
     # Parallelize inserts to the database
-    ParseUtils.process_data_in_chunks(dummy_file, _insert_data_in_chunks, threads)
+    ParseUtils.process_data_in_chunks(dummy_file, _insert_data_in_chunks, test, threads)
 
     # Dispose session
     Session.remove()
 
-    # # Remove downloaded file
-    # if os.path.exists(dummy_file):
-    #     os.remove(dummy_file)
+    # Remove downloaded file
+    if os.path.exists(dummy_file) and not test:
+        os.remove(dummy_file)
 
 def _download_data(genome, dummy_dir="/tmp/"):
 
@@ -217,10 +224,14 @@ def _download_data(genome, dummy_dir="/tmp/"):
 
 def _insert_data_in_chunks(chunk):
 
-    print(current_process().name)
-
-    # Start a new session
+    # Initialize
     session = Session()
+
+    # Testing
+    try:
+        print(current_process().name)
+    except:
+        pass
 
     # For each line...
     for line in chunk:

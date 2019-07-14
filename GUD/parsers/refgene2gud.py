@@ -4,7 +4,6 @@ import argparse
 from binning import assign_bin
 import getpass
 from multiprocessing import cpu_count
-from multiprocessing import current_process
 import os
 import re
 import sys
@@ -34,9 +33,8 @@ inserts features from the UCSC's "refGene" table into GUD.
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
-  -t, --test          test mode (if specified, limits inserts
-                      to the database to ~1,000 features times
-                      the number of threads; default = False)
+  -t, --test          limit the total of inserts to ~1K per
+                      thread for testing (default = False)
   --threads INT       number of threads to use (default = %s)
 
 mysql arguments:
@@ -65,7 +63,7 @@ def parse_args():
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("--test", action="store_true")
+    optional_group.add_argument("-t", "--test", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
     
     # MySQL args
@@ -135,14 +133,19 @@ def main():
 
 def refgene_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     """
-    python -m GUD.parsers.refgene2gud --genome hg19 --dummy-dir ./tmp/
+    e.g. python -m GUD.parsers.refgene2gud --genome hg38 --dummy-dir ./tmp/ --test -P 3306
     """
 
-    # Globals
+    # Initialize
     global chroms
     global engine
     global Session
     global source
+
+    # Testing
+    if test:
+        global current_process
+        from multiprocessing import current_process
 
     # Download data
     dummy_file = _download_data(genome, dummy_dir)
@@ -188,9 +191,9 @@ def refgene_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     # Remove session
     Session.remove()
 
-    # # Remove downloaded file
-    # if os.path.exists(dummy_file):
-    #     os.remove(dummy_file)
+    # Remove downloaded file
+    if os.path.exists(dummy_file) and not test:
+        os.remove(dummy_file)
 
 def _download_data(genome, dummy_dir="/tmp/"):
 
@@ -207,10 +210,14 @@ def _download_data(genome, dummy_dir="/tmp/"):
 
 def _insert_data_in_chunks(chunk):
 
-    print(current_process().name)
-
-    # Start a new session
+    # Initialize
     session = Session()
+
+    # Testing
+    try:
+        print(current_process().name)
+    except:
+        pass
 
     # For each line...
     for line in chunk:

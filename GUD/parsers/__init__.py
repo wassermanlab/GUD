@@ -371,7 +371,7 @@ class ParseUtililities:
     # Multiprocess #
     #--------------#
 
-    def process_data_in_chunks(self, data_file, insert_function, test=False, threads=1):
+    def process_data_in_chunks(self, data_file, insert_function, limit=False, threads=1):
 
         from itertools import islice
         from multiprocessing import Pool
@@ -396,10 +396,10 @@ class ParseUtililities:
             else:
                 break
 
-            if test:
+            if limit:
                 break
 
-        if test:
+        if limit:
             for chunk in islice(chunks, threads):
                 continue
 
