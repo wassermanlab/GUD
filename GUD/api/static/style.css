@@ -1,0 +1,17 @@
+:root{
+    --dark-blue: #05386B;
+    --dark-green: #379683;
+    --middle-green: #5CDB95;
+    --light-green: #8EE4AF;
+    --pale-green: #EDF5E1;
+    
+}
+
+body {  padding-top: 50px; 
+        font-family: montserrat, sans-serif;
+        background-color: #EDF5E1;
+        color: #05386B
+  }
+.jumbotron {
+    background-color: #8EE4AF;
+}
