@@ -125,7 +125,7 @@ class TSS(GFMixin2, Base):
         return q
    
     @classmethod
-    def select_by_uids(cls, query, uids):
+    def select_by_uids(cls, session, query, uids):
         """
         Query objects by uids.
         """
@@ -155,7 +155,7 @@ class TSS(GFMixin2, Base):
         return q
         
     @classmethod 
-    def select_by_sources(cls, session, query, chrom):
+    def select_by_sources(cls, session, query, sources):
         """
         Query objects by sources.
         """
@@ -191,7 +191,7 @@ class TSS(GFMixin2, Base):
         avg_expression_levels = []
 
         # For each exon start...
-        for i in str(feat.TSS.sampleIDs).split(","):
+        for i in str(feat.TSS.sample_id).split(","):
             if i.isdigit():
                 sampleIDs.append(int(i))
 

@@ -2,37 +2,38 @@ from GUD.api import app
 from GUD.api.db import establish_GUD_session, shutdown_session
 from flask import request, jsonify
 from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation,
-                     DNAAccessibility, Enhancer, HistoneModification, TAD, TFBinding, TSS)
+                     DNAAccessibility, Enhancer, HistoneModification, TAD, 
+                     TFBinding, TSS, Chrom, Sample, Experiment, Source, Expression)
 from GUD.ORM.genomic_feature import GenomicFeature
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest
 import sys
 import math
 import re
+page_size = 20
 # print(names, file=sys.stdout)
 
 ## HELPER FUNCTIONS ##
 
+def get_genomic_feature_results(resource, query, page) -> tuple:
+    offset = (page-1)*page_size
+    results = query.offset(offset).limit(page_size)
+    results = [resource.as_genomic_feature(e) for e in results]
+    results = [e.serialize() for e in results]
+    return (query.count(), results)
 
-def create_page(resource, query, page, url) -> dict:
+def create_page(result_tuple, query, page, url) -> dict:
     """
     returns 404 error or a page
     """
-    page_size = 20
     offset = (page-1)*page_size
     json = {}
-    result_size = query.count()
-    results = query.offset(offset).limit(page_size)
+    result_size = result_tuple[0]
+    results = result_tuple[1]
     if result_size == 0:
         raise NotFound('No results from this query')
     if offset > result_size:
         raise BadRequest('Page range is invalid, valid range for this query is between 1 and ' +
                          str(math.ceil(result_size/page_size)-1))
-
-    if resource is not False:
-        results = [resource.as_genomic_feature(e) for e in results]
-        results = [e.serialize() for e in results]
-    else:
-        results = [g[0] for g in results]
 
     json = {'size': result_size,
             'results': results}
@@ -154,14 +155,15 @@ def get_mixin2_keys(request):
 def clinvar():
     page = check_page(request)
     session = establish_GUD_session()
-    clinvar = ClinVar()
+    resource = ClinVar()
     clinvarIDs = check_split(request.args.get(
         'clinvar_ids', default=None), True)
-    q = genomic_feature_mixin1_queries(session, clinvar, request)
+    q = genomic_feature_mixin1_queries(session, resource, request)
     if clinvarIDs is not None:
-        q = clinvar.select_by_clinvarID(session, q, clinvarIDs)
+        q = resource.select_by_clinvarID(session, q, clinvarIDs)
     shutdown_session(session)
-    result = create_page(clinvar, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
     return jsonify(result)
 
 
@@ -172,7 +174,8 @@ def mixin1():
     resource = CNV()
     q = genomic_feature_mixin1_queries(session, resource, request)
     shutdown_session(session)
-    result = create_page(resource, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
     return jsonify(result)
 
 
@@ -186,7 +189,8 @@ def genes():
     if names is not None:
         q = resource.select_by_names(session, q, names)
     shutdown_session(session)
-    result = create_page(resource, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
     return jsonify(result)
 
 
@@ -197,7 +201,11 @@ def gene_symbols():
     page = int(request.args.get('page', default=1))
     q = Gene().get_all_gene_symbols(session)
     shutdown_session(session)
-    result = create_page(False, q, page, url)
+    offset = (page-1)*page_size
+    result = q.offset(offset).limit(page_size)
+    result =  [g[0] for g in result]
+    result_tuple = (q.count(), result)
+    result = create_page(False, q, page, url)                                   
     return jsonify(result)
 
 
@@ -216,7 +224,9 @@ def strs():
             'rotation must be set to True or False if motif is given')
     if motif is not None:
         q = resource.select_by_motif(session, motif, q, rotation)
-    result = create_page(resource, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
+    shutdown_session(session)
     return jsonify(result)
 
 
@@ -226,7 +236,9 @@ def pathogenic_strs():
     session = establish_GUD_session()
     resource = ShortTandemRepeat()
     q = resource.select_by_pathogenicity(session)
-    result = create_page(resource, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
+    shutdown_session(session)
     return jsonify(result)
 
 
@@ -242,7 +254,8 @@ def mixin2():
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     shutdown_session(session)
-    result = create_page(resource, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/histone_modifications')
@@ -256,7 +269,8 @@ def histone_modifications():
     if histone_types is not None: 
         q = resource.select_by_histone_type(q, histone_types)
     shutdown_session(session) 
-    result = create_page(resource, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/tads')
@@ -270,7 +284,8 @@ def tads():
     if restriction_enzymes is not None:
         q = resource.select_by_restriction_enzymes(q, restriction_enzymes)
     shutdown_session(session) 
-    result = create_page(resource, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/tf_binding')
@@ -284,7 +299,8 @@ def tf_binding():
     if tfs is not None:
         q = resource.select_by_tf(q, tfs)
     shutdown_session(session) 
-    result = create_page(resource, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/tss')
@@ -301,7 +317,8 @@ def tss():
     if genes is not None: 
         q = resource.select_by_genes(q, genes)
     shutdown_session(session) 
-    result = create_page(resource, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/tss/genic')
@@ -310,7 +327,92 @@ def genic_tss():
     session = establish_GUD_session()
     resource = TSS()
     q = resource.select_all_genic_tss(session)
-    result = create_page(resource, q, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page)
+    result = create_page(result_tuple, q, page, request.url)
+    return jsonify(result)
+
+@app.route('/api/v1/chroms')
+def chroms():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = Chrom()
+    q = resource.select_all_chroms(session)
+    offset = (page-1)*page_size
+    results = q.offset(offset).limit(page_size)
+    results = [e.serialize() for e in results]
+    result_tuple = (q.count(), results)
+    result = create_page(result_tuple, q, page, request.url)
+    shutdown_session(session)
+    return jsonify(result)
+
+@app.route('/api/v1/sources')
+def sources():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = Source()
+    q = resource.select_all_sources(session)
+    offset = (page-1)*page_size
+    results = q.offset(offset).limit(page_size)
+    results = [e.serialize() for e in results]
+    result_tuple = (q.count(), results)
+    result = create_page(result_tuple, q, page, request.url)
+    shutdown_session(session)
+    return jsonify(result)
+
+@app.route('/api/v1/samples')
+def samples():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = Sample()
+    q = resource.select_all_samples(session)
+    offset = (page-1)*page_size
+    results = q.offset(offset).limit(page_size)
+    results = [e.serialize() for e in results]
+    result_tuple = (q.count(), results)
+    result = create_page(result_tuple, q, page, request.url)
+    shutdown_session(session)
+    return jsonify(result)
+
+@app.route('/api/v1/experiments')
+def experiments():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = Experiment()
+    q = resource.select_all_experiments(session)
+    offset = (page-1)*page_size
+    results = q.offset(offset).limit(page_size)
+    results = [e.serialize() for e in results]
+    result_tuple = (q.count(), results)
+    result = create_page(result_tuple, q, page, request.url)
+    shutdown_session(session)
+    return jsonify(result)
+
+@app.route('/api/v1/expression')
+def expression():
+    page = check_page(request)
+    session = establish_GUD_session()
+    resource = Expression()
+    q = None
+    max_tpm = request.args.get('max_tpm', default=None)    
+    min_tpm = request.args.get('min_tpm', default=None)  
+    samples = check_split(request.args.get('samples', default=None))  
+    if max_tpm is not None and min_tpm is not None: 
+        try:
+            max_tpm = float(max_tpm)
+            min_tpm = float(min_tpm)
+            print(min_tpm, file=sys.stdout)
+            q = resource.select_by_expression(session, min_tpm, max_tpm, q)
+        except:
+            raise BadRequest('max and min tpm must be floats')
+    if samples is not None:
+        q = resource.select_by_samples(session, samples, q)
+
+    offset = (page-1)*page_size
+    results = q.offset(offset).limit(page_size)
+    results = [resource.serialize(e) for e in results]
+    result_tuple = (q.count(), results)
+    result = create_page(result_tuple, q, page, request.url)
+    shutdown_session(session)
     return jsonify(result)
 
 @app.route('/')

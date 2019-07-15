@@ -15,34 +15,21 @@ from .base import Base
 from .sample import Sample
 from .tss import TSS
 
+
 class Expression(Base):
 
     __tablename__ = "expression"
 
-    uid = Column(
-        "uid",
-        mysql.INTEGER(unsigned=True)
-    )
+    uid = Column("uid", mysql.INTEGER(unsigned=True))
 
-    tssID = Column(
-        "tssID",
-        Integer,
-        ForeignKey("transcription_start_sites.uid"),
-        nullable=False
-    )
+    tssID = Column("tssID", Integer, ForeignKey(
+        "transcription_start_sites.uid"), nullable=False)
 
-    sampleID = Column(
-        "sampleID",
-        Integer,
-        ForeignKey("samples.uid"),
-        nullable=False
-    )
+    sampleID = Column("sampleID", Integer, ForeignKey(
+        "samples.uid"), nullable=False)
 
     avg_expression_level = Column(
-        "avg_expression_level",
-        Float,
-        nullable=False
-    )
+        "avg_expression_level", Float, nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
@@ -55,6 +42,14 @@ class Expression(Base):
         }
     )
 
+    def serialize(self, feat):
+        return {
+            'uid': feat.Expression.uid,
+            'tssID': feat.Expression.tssID,
+            'sample': feat.Sample.name,
+            'avg_tpm': feat.Expression.avg_expression_level,
+            }
+
     @classmethod
     def is_unique(cls, session, tssID, sampleID):
 
@@ -62,44 +57,24 @@ class Expression(Base):
             .filter(
                 cls.tssID == tssID,
                 cls.sampleID == sampleID
-            )
+        )
 
         return len(q.all()) == 0
 
     @classmethod
     def select_unique(cls, session, tssID,
-        sampleID):
+                      sampleID):
 
         q = session.query(cls)\
             .filter(
                 cls.tssID == tssID,
                 cls.sampleID == sampleID
-            )
+        )
 
         return q.first()
 
     @classmethod
-    def select_by_sample(cls,
-        session, sample, min_tpm=100.0):
-        """
-        Query objects with a min. expression in 
-        sample name.
-        """
-
-        q = session.query(cls, Sample)\
-            .join()\
-            .filter(
-                Sample.uid == cls.sampleID,
-                TSS.uid == cls.tssID
-            )\
-            .filter(Sample.name == sample)\
-            .filter(cls.avg_expression_level >= min_tpm)
-
-        return q.all()
-
-    @classmethod
-    def select_by_samples(cls, session,
-        samples=[], min_tpm=100.0):
+    def select_by_samples(cls, session, samples, query = None):
         """
         Query objects with a min. expression in 
         one or more sample names.
@@ -107,19 +82,35 @@ class Expression(Base):
         objects with a min. expression in any
         sample.
         """
-
-        q = session.query(cls, Sample)\
-            .join()\
-            .filter(
-                Sample.uid == cls.sampleID,
-                TSS.uid == cls.tssID
+        if query is not None:
+            q = query.filter(Sample.name.in_(samples))
+        else:
+            q = session.query(cls, Sample)\
+                .join()\
+                .filter(
+                    Sample.uid == cls.sampleID
             )\
-            .filter(cls.avg_expression_level >= min_tpm)
+                .filter(Sample.name.in_(samples))
 
-        if samples:
-            q = q.filter(Sample.name.in_(samples))
+        return q
 
-        return q.all()
+    @classmethod
+    def select_by_expression(cls, session, min_tpm, max_tpm, query = None):
+        """
+        Query objects by expression level
+        """
+        if query is not None:
+            q = query.filter(max_tpm >= cls.avg_expression_level >= min_tpm)
+        else:
+            q = session.query(cls, Sample)\
+                .join()\
+                .filter(
+                    Sample.uid == cls.sampleID
+            )\
+                .filter(cls.avg_expression_level >= min_tpm)\
+                .filter(max_tpm >= cls.avg_expression_level)
+
+        return q
 
     def __repr__(self):
 

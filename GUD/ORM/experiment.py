@@ -13,17 +13,9 @@ class Experiment(Base):
 
     __tablename__ = "experiments"
 
-    uid = Column(
-        "uid",
-        mysql.INTEGER(unsigned=True),
-        nullable=False
-    )
+    uid = Column( "uid", mysql.INTEGER(unsigned=True), nullable=False )
 
-    name = Column(
-        "name",
-        String(250),
-        nullable=False
-    )
+    name = Column( "name", String(250), nullable=False )
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
@@ -35,6 +27,16 @@ class Experiment(Base):
             "mysql_charset": "utf8"
         }
     )
+    
+    @classmethod
+    def select_all_experiments(cls, session):
+        """
+        Select all samples
+        """
+
+        q = session.query(cls)
+
+        return q
 
     @classmethod
     def is_unique(cls, session, name):
@@ -46,17 +48,6 @@ class Experiment(Base):
 
     @classmethod
     def select_unique(cls, session, name):
-
-        q = session.query(cls)\
-            .filter(cls.name == name)
-
-        return q.first()
-
-    @classmethod
-    def select_by_name(cls, session, name):
-        """
-        Query objects by experiment name.
-        """
 
         q = session.query(cls)\
             .filter(cls.name == name)
@@ -85,3 +76,9 @@ class Experiment(Base):
                 "uid={}".format(self.uid),
                 "name={}".format(self.name)
             )
+    
+    def serialize(self):
+        return {
+            'uid': self.uid,
+            'name': self.name,
+            }

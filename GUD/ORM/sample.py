@@ -20,36 +20,17 @@ class Sample(Base):
 
     __tablename__ = "samples"
 
-    uid = Column(
-        "uid",
-        mysql.INTEGER(unsigned=True),
-        nullable=False
-    )
+    uid = Column("uid",mysql.INTEGER(unsigned=True),nullable=False)
 
-    name = Column(
-        "name",
-        String(250),
-        nullable=False
-    )
+    name = Column("name",String(250),nullable=False)
 
-    treatment = Column(
-        "treatment",
-        Boolean,
-        nullable=False
-    )
+    treatment = Column("treatment",Boolean,nullable=False)
 
-    cell_line = Column(
-        "cell_line",
-        Boolean,
-        nullable=False
-    )
+    cell_line = Column("cell_line",Boolean,nullable=False)
 
-    cancer = Column(
-        "cancer",
-        Boolean,
-        nullable=False
-    )
+    cancer = Column("cancer",Boolean,nullable=False)
 
+    
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(
@@ -76,6 +57,16 @@ class Sample(Base):
             "mysql_charset": "utf8"
         }
     )
+
+    @classmethod
+    def select_all_samples(cls, session):
+        """
+        Select all samples
+        """
+
+        q = session.query(cls)
+
+        return q
 
     @classmethod
     def is_unique(cls, session, name, treatment,
@@ -106,18 +97,6 @@ class Sample(Base):
         return q.first()
 
     @classmethod
-    def select_by_uid(cls, session, uid):
-        """
-        Query objects by uid.
-        """
-
-        q = session.query(cls).filter(
-            cls.uid == uid
-        )
-
-        return q.first()
-
-    @classmethod
     def select_by_uids(cls, session, uids=[]):
         """
         Query objects by multiple uids.
@@ -129,24 +108,6 @@ class Sample(Base):
 
         if uids:
             q = q.filter(cls.uid.in_(uids))
-
-        return q.all()
-
-    @classmethod
-    def select_by_name(cls, session, name,
-        treatment=False, cell_line=False,
-        cancer=False):
-        """
-        Query objects by sample name. 
-        """
-
-        q = session.query(cls)\
-            .filter(
-                cls.name == name,
-                cls.treatment <= int(treatment),
-                cls.cell_line <= int(cell_line),
-                cls.cancer <= int(cancer)
-            )
 
         return q.all()
 
@@ -220,3 +181,12 @@ class Sample(Base):
                 "cell_line={}".format(self.cell_line),
                 "cancer={}".format(self.cancer)
             )
+
+    def serialize(self):
+        return {
+            'uid': self.uid,
+            'name': self.name,
+            'treatment': self.treatment,
+            'cell_line': self.cell_line,
+            'cancer': self.cancer,
+            }
