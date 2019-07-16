@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+{% endblock head %}
+
+{% block content %}
+{% include "nav.html" %}
+<div class="navbar-fix">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <h1>Live API</h1>
+            </div>
+        </div>
+        <!-- RESOURCE LINE -->
+        <div class="row">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="resourceInput">Resource</label>
+                </div>
+                <select class="custom-select" id="resourceInput">
+                    <option selected>select</option>
+                    <option value="chroms">chroms</option>
+                    <option value="clinvar">clinvar</option>
+                    <option value="conservation">conservation</option>
+                    <option value="copy_number_variants">copy_number_variants</option>
+                    <option value="dna_accessibility">dna_accessibility</option>
+                    <option value="enhancers">enhancers</option>
+                    <option value="experiments">experiments</option>
+                    <option value="genes">genes</option>
+                    <option value="genes/symbols">genes/symbols</option>
+                    <option value="histone_modification">histone_modification</option>
+                    <option value="repeat_masks">repeat_masks</option>
+                    <option value="samples">samples</option>
+                    <option value="sources">sources</option>
+                    <option value="tads">tads</option>
+                    <option value="tf_binding">tf_binding</option>
+                    <option value="tss">tss</option>
+                    <option value="tss/genic">tss/genic</option>
+                </select>
+            </div>
+        </div>
+        <!-- PARAMS LINE -->
+        <div class="row">
+        </div>
+        <!-- GET LINE -->
+        <div class="row">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"
+                    id="inputGroup-sizing-default">GET</span>
+                </div>
+                <input type="text" class="form-control" aria-label="Default"
+                aria-describedby="inputGroup-sizing-default">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button">SEND</button>
+                </div>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button">COPY</button>
+                </div>
+            </div>
+        </div>
+        <!-- RESPONSE LINE -->
+        <div class="row">
+            <h3>Response</h3>
+        </div>
+        <!-- RESPONSE -->
+        <div class="row">
+                <h3>Response</h3>
+            </div>
+    </div>
+</div>
+
+{% endblock content%}

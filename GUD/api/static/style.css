@@ -7,11 +7,20 @@
     
 }
 
-body {  padding-top: 50px; 
+body {  
         font-family: montserrat, sans-serif;
-        background-color: #EDF5E1;
-        color: #05386B
   }
+.navbar-fix {  
+    padding-top: 60px;
+}
 .jumbotron {
-    background-color: #8EE4AF;
+    text-align: center;
+    height: 100vh;
+    width: 100vw;
+}
+.vertical-align {
+  padding-top: 100px 
+}
+.fixed-width {
+  width: 130px 
 }

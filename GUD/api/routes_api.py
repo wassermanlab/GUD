@@ -74,7 +74,6 @@ def strs():
     session = establish_GUD_session()
     resource = ShortTandemRepeat()
     q = genomic_feature_mixin1_queries(session, resource, request)
-    names = check_split(request.args.get('names', default=None))
     try:
         motif = request.args.get('motif', default=None, type=str)
         rotation = request.args.get('rotation', default=False, type=bool)

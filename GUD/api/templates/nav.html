@@ -1,7 +1,28 @@
 {% extends "base.html" %}
 
+{% block head %}
+{{ super() }}
+{% endblock head %}
+
 {% block content %}
-<body>
-    <p>Test String from block !</p>
-</body>
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <a class="navbar-brand" href="{{ url_for('home')}}">
+        <img src="{{ url_for('static', filename='img/DNA.svg')}}" width="30"
+            height="30" class="d-inline-block align-top" alt="">
+        GUD
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse"
+        data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+            <a class="nav-item nav-link" href="{{ url_for('home')}}">Home</a>
+            <a class="nav-item nav-link" href="{{ url_for('live_api')}}">Live API</a>
+            <a class="nav-item nav-link" href="{{ url_for('docs')}}">Documentation</a>
+            <a class="nav-item nav-link" href="{{ url_for('contact')}}">Contact Us</a>
+        </div>
+    </div>
+</nav>
 {% endblock content%}

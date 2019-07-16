@@ -140,4 +140,3 @@ def get_mixin2_keys(request):
         request.args.get('experiments', default=None))
     keys['samples'] = check_split(request.args.get('samples', default=None))
     return keys
-

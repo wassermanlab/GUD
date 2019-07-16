@@ -2,11 +2,18 @@
 
 {% block head %}
 {{ super() }}
-    <!-- if you want to change the <head> somehow, you can do that here -->
 {% endblock head %}
 
 {% block content %}
-<body>
-    <p>Test String from block !</p>
-</body>
+{% include "nav.html" %}
+<div class="jumbotron jumbotron-fluid">
+    <div class="container vertical-align">
+            <h1 class="display-4">GUD</h1>
+            <p>GENOMIC UNIFICATION DATABASE</p>
+            <a class="fixed-width btn btn-primary btn-sm" href="#" role="button">Live API</a>
+            <a class="fixed-width btn btn-primary btn-sm" href="#" role="button">Documentation</a>        
+    </div>
+</div>
+
+
 {% endblock content%}
