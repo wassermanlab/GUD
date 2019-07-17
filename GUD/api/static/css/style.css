@@ -24,3 +24,10 @@ body {
 .fixed-width {
   width: 130px 
 }
+.outer{
+  border-radius: 7px;
+  background-color: lightgrey;
+}
+.response{
+  padding: 20px;
+}

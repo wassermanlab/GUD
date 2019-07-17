@@ -15,60 +15,93 @@
         </div>
         <!-- RESOURCE LINE -->
         <div class="row">
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <label class="input-group-text" for="resourceInput">Resource</label>
+            <div class="col-sm">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="resourceInput">Resource</label>
+                    </div>
+                    <select class="custom-select" id="resourceInput">
+                        <option selected>select</option>
+                        {% for route in routes %}
+                        <option value="{{ route }}">{{ route }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <select class="custom-select" id="resourceInput">
-                    <option selected>select</option>
-                    <option value="chroms">chroms</option>
-                    <option value="clinvar">clinvar</option>
-                    <option value="conservation">conservation</option>
-                    <option value="copy_number_variants">copy_number_variants</option>
-                    <option value="dna_accessibility">dna_accessibility</option>
-                    <option value="enhancers">enhancers</option>
-                    <option value="experiments">experiments</option>
-                    <option value="genes">genes</option>
-                    <option value="genes/symbols">genes/symbols</option>
-                    <option value="histone_modification">histone_modification</option>
-                    <option value="repeat_masks">repeat_masks</option>
-                    <option value="samples">samples</option>
-                    <option value="sources">sources</option>
-                    <option value="tads">tads</option>
-                    <option value="tf_binding">tf_binding</option>
-                    <option value="tss">tss</option>
-                    <option value="tss/genic">tss/genic</option>
-                </select>
             </div>
         </div>
+         <!-- Params -->
+         <div class="row">
+                <div class="col-sm">
+                    <h3>Parameters</h3>
+                </div>
+            </div>
         <!-- PARAMS LINE -->
         <div class="row">
+            <div class="col-sm">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col"></th>
+                            <th scope="col">Key</th>
+                            <th scope="col">Value</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                        type="checkbox" value="" id="rowCheck">
+                                </div>
+                            </th>
+                            <td>KEY</td>
+                            <td>
+                                <input type="text" class="form-control" id="keyInput">
+                            </td>
+                            <td>SOME DESCRIPTION</td>
+                            <td>TRUE</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <!-- GET LINE -->
         <div class="row">
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"
-                    id="inputGroup-sizing-default">GET</span>
-                </div>
-                <input type="text" class="form-control" aria-label="Default"
-                aria-describedby="inputGroup-sizing-default">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button">SEND</button>
-                </div>
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button">COPY</button>
+            <div class="col-sm">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"
+                            id="inputGroup-sizing-default">GET</span>
+                    </div>
+                    <input type="text" class="form-control" aria-label="Default"
+                        aria-describedby="inputGroup-sizing-default">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button">SEND</button>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button">COPY</button>
+                    </div>
                 </div>
             </div>
         </div>
         <!-- RESPONSE LINE -->
         <div class="row">
-            <h3>Response</h3>
+            <div class="col-sm">
+                <h3>Response</h3>
+            </div>
         </div>
         <!-- RESPONSE -->
         <div class="row">
-                <h3>Response</h3>
+            <div class="col-sm">
+                <div class="outer">
+                <div class="response">
+                    No response yet
+                </div>
             </div>
+            </div>
+        </div>
     </div>
 </div>
 
