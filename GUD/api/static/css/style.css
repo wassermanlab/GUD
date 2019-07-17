@@ -26,7 +26,7 @@ body {
 }
 .outer{
   border-radius: 7px;
-  background-color: lightgrey;
+  background-color: #e9ecef;
 }
 .response{
   padding: 20px;

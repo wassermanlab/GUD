@@ -27,3 +27,11 @@ def docs():
 def contact():
     return "CONTACT"
     # return render_template('home.html')
+
+@app.route('/json_docs')
+def json_docs():
+    filename = os.path.join(app.static_folder, 'docs.json')
+    data = None
+    with open(filename) as json_file:
+        data = json.load(json_file)
+    return jsonify(data)
