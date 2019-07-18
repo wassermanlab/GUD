@@ -97,17 +97,26 @@ function build_url() {
     $("#url").val(url);
 }
 
-// on selection of parameter 
+// on selection/deselction of parameter 
 // build url
 
-// on deselection of parameter 
-// build url
+$(document).on('change', '.form-check-input', function () {
+    build_url()
+});
 
 // on change of parameter value
 // build url
-
+$(document).on('change', '.form-control', function () {
+    build_url()
+});
 
 // on send 
 
 // on copy
+$(function () {
+    $("#copyButton").click(function () {
+        var copyText = document.querySelector("#url");
+        copyText.select();
+        document.execCommand("copy");
+});});
 
