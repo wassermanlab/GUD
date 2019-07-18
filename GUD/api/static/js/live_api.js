@@ -89,10 +89,14 @@ function build_url() {
         }
     });
     // combine and set get request row
+    url = resource
+
     parameters = Object.entries(parameters);
-    url = resource + "?" + parameters[0][0] + "=" + parameters[0][1];
-    for (var i = 1; i < parameters.length; i++) {
-        url = url + "&" + parameters[i][0] + "=" + parameters[i][1];
+    if (parameters.length != 0) {
+        url = url + "?" + parameters[0][0] + "=" + parameters[0][1];
+        for (var i = 1; i < parameters.length; i++) {
+            url = url + "&" + parameters[i][0] + "=" + parameters[i][1];
+        }
     }
     $("#url").val(url);
 }
@@ -111,6 +115,15 @@ $(document).on('change', '.form-control', function () {
 });
 
 // on send 
+$(function () {
+    $("#sendButton").click(function () {
+        url = $("#url").val();
+        url = "http://127.0.0.1:5000" + url;
+        $.getJSON(url, function (json) {
+            $(".responseCode").html(JSON.stringify(json, null, 2))
+        });
+    });
+});
 
 // on copy
 $(function () {
@@ -118,5 +131,6 @@ $(function () {
         var copyText = document.querySelector("#url");
         copyText.select();
         document.execCommand("copy");
-});});
+    });
+});
 
