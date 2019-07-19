@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/live_api.js')}}"></script>
+{% endblock head %}
+
+{% block content %}
+{% include "nav.html" %}
+<div class="container navbar-fix">
+    <div class="row">
+        <div class="col-sm">
+            <h1>Live API</h1>
+        </div>
+    </div>
+    <!-- RESOURCE LINE -->
+    <div class="row">
+        <div class="col-sm">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="resourceSelect">Resource</label>
+                </div>
+                <select class="custom-select" id="resourceSelect">
+                    <option selected>select</option>
+                    {% for route in routes %}
+                    <option value="{{ route }}">{{ route }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <!-- Params -->
+    <div class="row">
+        <div class="col-sm">
+            <h3>Parameters</h3>
+        </div>
+    </div>
+    <!-- PARAMS LINE -->
+    <div class="row">
+        <div class="col-sm">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Key</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Required</th>
+                    </tr>
+                </thead>
+                <tbody id="paramRows">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- GET LINE -->
+    <div class="row">
+        <div class="col-sm">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"
+                        id="inputGroup-sizing-default">GET</span>
+                </div>
+                <input type="text" class="form-control" aria-label="Default"
+                    aria-describedby="inputGroup-sizing-default" value=""
+                    id="url" readonly="readonly">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" id="sendButton"
+                        type="button">SEND</button>
+                </div>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button"
+                        id="copyButton">COPY</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- RESPONSE LINE -->
+    <div class="row">
+        <div class="col-sm">
+            <h3>Response</h3>
+        </div>
+    </div>
+    <!-- RESPONSE -->
+    <div class="row">
+        <div class="col-sm">
+            <div class="outer">
+                <div class="response">
+                    <pre class=responseCode>No Response </pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include "footer.html" %}
+{% endblock content%}
