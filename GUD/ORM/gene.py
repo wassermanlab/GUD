@@ -54,7 +54,7 @@ class Gene(GFMixin1, Base):
         objects.
         """
         q = query.filter(cls.name2.in_(names))
-            
+
         return q
 
     @classmethod
@@ -63,7 +63,7 @@ class Gene(GFMixin1, Base):
         Return the gene symbol (name2 field) of all objects.
         """
         q = session.query(cls.name2).distinct()
-            
+
         return q
 
     # for insertion only not in REST
@@ -71,8 +71,8 @@ class Gene(GFMixin1, Base):
     def is_unique(cls, session, regionID, name, sourceID):
 
         q = session.query(cls)\
-            .filter(cls.region_id == regionID, 
-                    cls.name == name, 
+            .filter(cls.region_id == regionID,
+                    cls.name == name,
                     cls.source_id == sourceID)
 
         return len(q.all()) == 0
@@ -83,8 +83,8 @@ class Gene(GFMixin1, Base):
                       name, sourceID):
 
         q = session.query(cls)\
-            .filter(cls.region_id == regionID, 
-                    cls.name == name, 
+            .filter(cls.region_id == regionID,
+                    cls.name == name,
                     cls.source_id == sourceID)
 
         return q.first()

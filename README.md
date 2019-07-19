@@ -13,7 +13,14 @@ GUD requires the following dependencies:
 * [`Python`](https://www.python.org) `≥2.7` or `3.x` with:
     - [`Biopython`](https://biopython.org)
     - [`interval-binning`](https://interval-binning.readthedocs.io/en/latest/)
-    - `MySQL-python`
-    - [`sqlalchemy`](https://www.sqlalchemy.org)
+    - [`macs2`](https://github.com/taoliu/MACS/)
+    - [`pandas`](https://pandas.pydata.org/)
+    - [`PyMySQL`](https://pymysql.readthedocs.io/en/latest/)
+    - [`SQLAlchemy`](https://www.sqlalchemy.org)
     - `SQLAlchemy-FullText-Search`
     - `sqlalchemy-utils`
+
+```
+conda create -n gud -c bioconda python=3.7 pybedtools biopython pymysql
+pip install interval-binning SQLAlchemy-FullText-Search sqlalchemy-utils
+```ma

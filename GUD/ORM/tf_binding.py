@@ -50,7 +50,7 @@ class TFBinding(GFMixin2, Base):
         Query objects by sources.
         """
         q = query.filter(cls.tf.in_(tf))
-        
+
         return q
 
     @classmethod

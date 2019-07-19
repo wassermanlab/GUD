@@ -3,19 +3,22 @@
 import argparse
 from binning import assign_bin
 import getpass
+from multiprocessing import cpu_count
+from multiprocessing import current_process
 import os
+from pybedtools import BedTool, cleanup, set_tempdir
 import re
-import shutil
-from sqlalchemy import create_engine
-from sqlalchemy.orm import (
-    scoped_session,
-    sessionmaker
-)
 from sqlalchemy_utils import database_exists
-import subprocess
+import sys
+# Python 3+
+if sys.version_info > (3, 0):
+    from urllib.request import urlretrieve
+# Python 2.7
+else:
+    from urllib import urlretrieve
 
 # Import from GUD module
-from GUD import GUDglobals
+from GUD import GUDUtils
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.histone_modification import HistoneModification
@@ -23,49 +26,69 @@ from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-from .bed2gud import bed_to_gud_db
-from .initialize import initialize_gud_db
+from . import ParseUtils
 
 usage_msg = """
-usage: %s --genome STR --metadata FILE
-                     --data-dir DIR --samples FILE --feature STR
-                     [-h] [-c] [--dummy-dir DIR] [--source STR]
-                     [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
-""" % \
-os.path.basename(__file__)
+usage: %s --genome STR [-h] [options]
+""" % os.path.basename(__file__)
 
 help_msg = """%s
-
-inserts ENCODE features into GUD. "--metadata" and "--data-dir"
-refer to executing "xargs -n 1 curl -O -L < file.txt". types of
-genomic features include "accessibility", "histone", or "tf".
+inserts features from ENCODE (Encyclopedia of DNA Elements)
+into GUD.
 
   --genome STR        genome assembly
-  --metadata FILE     metadata file
-  --data-dir DIR      directory where data was downloaded
   --samples FILE      ENCODE samples (manually-curated)
-  --feature STR       type of genomic feature
+  --feature STR       type of genomic feature ("atac-seq"
+                      "accessibility", "histone" or "tf")
 
 optional arguments:
   -h, --help          show this help message and exit
-  -c, --cluster       cluster genome regions by UCSC's regCluster
-                      (default = False)
   --dummy-dir DIR     dummy directory (default = "/tmp/")
-  --source STR        source name (default = "ENCODE")
+  -m, --merge         merge genomic regions using bedtools
+                      (default = False)
+  --threads INT       number of additional threads to use
+                      (default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
   -H STR, --host STR  host name (default = "localhost")
   -p STR, --pwd STR   password (default = ignore this option)
-  -P STR, --port STR  port number (default = %s)
+  -P INT, --port INT  port number (default = %s)
   -u STR, --user STR  user name (default = current user)
-""" % \
-(
-    usage_msg,
-    GUDglobals.db_name,
-    GUDglobals.db_port
-)
+""" % (usage_msg, (cpu_count() - 1), GUDUtils.db, GUDUtils.port)
 
+#-------------#
+# Classes     #
+#-------------#
+
+class EncodeMetadata:
+
+    def __init__(self, accession, biosample, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments):
+        """
+        m = re.search(
+            "^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$",
+            
+        )
+        if m:
+            tag = m.group(1)
+            experiment_target = m.group(2)
+        """
+
+        # Fix hg38
+        if genome_assembly == "GRCh38":
+            genome_assembly = "hg38"
+
+        self.accession = accession
+        self.biosample = biosample
+        self.download_url = download_url
+        self.experiment_accession = experiment_accession
+        self.experiment_type = experiment_type
+        self.experiment_target = experiment_target
+        self.genome_assembly = genome_assembly
+        self.output_format = output_format
+        self.output_type = output_type
+        self.status = status
+        self.treatments = treatments
 
 #-------------#
 # Functions   #
@@ -73,82 +96,41 @@ mysql arguments:
 
 def parse_args():
     """
-    This function parses arguments provided via
-    the command line and returns an {argparse}
-    object.
+    This function parses arguments provided via the command line and returns an {argparse} object.
     """
 
-    parser = argparse.ArgumentParser(
-        add_help=False,
-    )
+    parser = argparse.ArgumentParser(add_help=False)
 
     # Mandatory args
     parser.add_argument("--genome")
-    parser.add_argument("--metadata")
-    parser.add_argument("--data-dir")
     parser.add_argument("--samples")
     parser.add_argument("--feature")
 
     # Optional args
-    optional_group = parser.add_argument_group(
-        "optional arguments"
-    )
-    optional_group.add_argument(
-        "-h", "--help",
-        action="store_true"
-    )
-    optional_group.add_argument(
-        "-c", "--cluster",
-        action="store_true"
-    )
-    optional_group.add_argument(
-        "--dummy-dir",
-        default="/tmp/"
-    )
-    optional_group.add_argument(
-        "--source",
-        default="ENCODE"
-    )
-
+    optional_group = parser.add_argument_group("optional arguments")
+    optional_group.add_argument("-h", "--help", action="store_true")
+    optional_group.add_argument("--dummy-dir", default="/tmp/")
+    optional_group.add_argument("-m", "--merge", action="store_true")
+    optional_group.add_argument("--threads", default=(cpu_count() - 1))
+    
     # MySQL args
-    mysql_group = parser.add_argument_group(
-        "mysql arguments"
-    )
-    mysql_group.add_argument(
-        "-d", "--db",
-        default=GUDglobals.db_name,
-    )
-    mysql_group.add_argument(
-        "-H", "--host",
-        default="localhost"
-    )
+    mysql_group = parser.add_argument_group("mysql arguments")
+    mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
+    mysql_group.add_argument("-H", "--host", default="localhost")
     mysql_group.add_argument("-p", "--pwd")
-    mysql_group.add_argument(
-        "-P", "--port",
-        default=GUDglobals.db_port
-    )
-    mysql_group.add_argument(
-        "-u", "--user",
-        default=getpass.getuser()
-    )
+    mysql_group.add_argument("-P", "--port", default=GUDUtils.port)
+    mysql_group.add_argument("-u", "--user", default=getpass.getuser())
 
     args = parser.parse_args()
 
     check_args(args)
 
-    return args
+    return(args)
 
 def check_args(args):
     """
     This function checks an {argparse} object.
     """
-
-    # Initialize
-    feats = [
-        "accessibility",
-        "histone",
-        "tf"
-    ]
 
     # Print help
     if args.help:
@@ -156,560 +138,398 @@ def check_args(args):
         exit(0)
 
     # Check mandatory arguments
-    if (
-        not args.genome or \
-        not args.metadata or \
-        not args.data_dir or \
-        not args.samples or \
-        not args.feature
-    ):
-        print(": "\
-            .join(
-                [
-                    "%s\n%s" % \
-                        (
-                            usage_msg,
-                            os.path.basename(__file__)
-                        ),
-                    "error",
-                    "arguments \"--genome\" \"--metadata\" \"--data-dir\" \"--samples\" \"--feature\" are required\n"
-                ]
-            )
-        )
+    if not args.genome or not args.samples or not args.feature:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\" \"--samples\" \"--feature\" are required\n"]
+        print(": ".join(error))
         exit(0)
 
     # Check for invalid feature
-    if args.feature not in feats:
-        print(": "\
-            .join(
-                [
-                    "%s\n%s" % \
-                        (
-                            usage_msg,
-                            os.path.basename(__file__)
-                        ),
-                    "error",
-                    "argument \"--feature\"",
-                    "invalid choice",
-                    "\"%s\" (choose from" % args.feature,
-                    "%s)\n" % " "\
-                    .join(["\"%s\"" % i for i in feats])
-                ]
-            )
-        )
+    valid_features = ["atac-seq", "accessibility", "histone", "tf"]
+    if args.feature not in valid_features:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--feature\"", "invalid choice", "\"%s\" (choose from" % args.feature, "%s)\n" % " ".join(["\"%s\"" % i for i in valid_features])]
+        print(": ".join(error))
+        exit(0)
+
+    # Check "-t" argument
+    try:
+        args.threads = int(args.threads)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"-t\" \"--threads\"", "invalid int value", "\"%s\"\n" % args.threads]
+        print(": ".join(error))
         exit(0)
 
     # Check MySQL password
     if not args.pwd:
         args.pwd = ""
 
+    # Check MySQL port
+    try:
+        args.port = int(args.port)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"-P\" \"--port\"", "invalid int value", "\"%s\"\n" % args.port]
+        print(": ".join(error))
+        exit(0)
+
 def main():
 
     # Parse arguments
     args = parse_args()
 
-    # Insert ENCODE data
-    encode_to_gud(
-        args.user,
-        args.pwd,
-        args.host,
-        args.port,
-        args.db,
-        args.genome,
-        args.metadata,
-        args.data_dir,
-        args.samples,
-        args.feature,
-        args.cluster,
-        args.dummy_dir,
-        args.source
-    )
+    # Set MySQL options
+    GUDUtils.user = args.user
+    GUDUtils.pwd  = args.pwd
+    GUDUtils.host = args.host
+    GUDUtils.port = args.port
+    GUDUtils.db = args.db
 
-def encode_to_gud(user, pwd, host, port, db,
-    genome, metadata_file, data_dir,
-    samples_file, feat_type, cluster=False,
-    dummy_dir="/tmp/", source_name="ENCODE"):
+    # Insert ENCODE data
+    encode_to_gud(args.genome, args.samples, args.feature, args.merge, args.dummy_dir, args.threads)
+
+def encode_to_gud(genome, samples_file, feat_type, merge=False, dummy_dir="/tmp/", threads=1):
+    """
+    python -m GUD.parsers.encode2gud --genome hg19 --samples --dummy-dir ./tmp/
+    """
+
+    # Globals
+    global chroms
+    global engine
+    global experiment
+    global Session
+    global samples
+    global source
+    global table
 
     # Initialize
-    accession_idx = None
-    assembly_idx = None
-    biosample_idx = None
-    experiment_type_idx = None
-    experiment_target_idx = None
-    treatment_idx = None
-    status_idx = None
-    samples = {}
-    metadata = {}
-    db_name = "mysql://{}:{}@{}:{}/{}".format(
-        user, pwd, host, port, db
-    )
+    source_name = "ENCODE"
+    set_tempdir(dummy_dir) # i.e. for pyBedTools
+
+    # Download metadata
+    metadata_file = _download_metadata(genome, feat_type, dummy_dir)
+
+    # Get database name
+    db_name = GUDUtils._get_db_name()
+
+    # If database does not exist...
     if not database_exists(db_name):
-        initialize_gud_db(
-            user,
-            pwd,
-            host,
-            port,
-            db,
-            genome
-        )
-    session = scoped_session(sessionmaker())
-    engine = create_engine(
-        db_name,
-        echo=False,
-        pool_pre_ping=True
-    )
-    session.remove()
-    session.configure(
-        bind=engine,
-        autoflush=False,
-        expire_on_commit=False
-    )
+        ParseUtils.initialize_gud_db(db_name, genome)
 
-    # Get source
-    source = Source()
-    if source.is_unique(session, source_name):    
-        source.name = source_name
-        session.add(source)
-        session.commit()
-    sou = source.select_by_name(
-        session,
-        source_name
-    )
-
-    # Get samples
-    for line in GUDglobals.parse_tsv_file(
-        samples_file
-    ):
-        # Initialize 
-        sample_name = line[0]
-        sample_type = line[1]
-        cell_or_tissue = line[2]
-        if line[3] == "Yes": add = True
-        else: add = False
-        if line[4] == "Yes": treatment = True
-        else: treatment = False
-        if line[5] == "Yes": cell_line = True
-        else: cell_line = False
-        if line[6] == "Yes": cancer = True
-        else: cancer = False
-        # Get sample
-        samples.setdefault(sample_name, {
-            "sample_type": sample_type,
-            "cell_or_tissue": cell_or_tissue,
-            "add": add,
-            "treatment": treatment,
-            "cell_line": cell_line,
-            "cancer": cancer
-        })
+    # Get engine/session
+    engine, Session = GUDUtils._get_engine_session(db_name)
+    session = Session()
 
     # Create table
     if feat_type == "accessibility":
         table = DNAAccessibility()
-    if feat_type == "histone":
+    elif feat_type == "histone":
         table = HistoneModification()
-    if feat_type == "tf":
+    else:
         table = TFBinding()
     if not engine.has_table(table.__tablename__):
-        # Create table
         table.__table__.create(bind=engine)
 
-    # For each line...
-    for line in GUDglobals.parse_tsv_file(
-        metadata_file
-    ):
-        # If first line...
-        if accession_idx is None:
-            accession_idx = line.index(
-                "File accession"
-            )
-            assembly_idx = line.index(
-                "Assembly"
-            )
-            biosample_idx = line.index(
-                "Biosample term name"
-            )
-            experiment_type_idx = line.index(
-                "Assay"
-            )
-            experiment_target_idx = line.index(
-                "Experiment target"
-            )
-            treatment_idx = line.index(
-                "Biosample treatments"
-            )
-            status_idx = line.index(
-                "File Status"
-            )
-            continue
-        # Initialize
-        accession = \
-            line[accession_idx]
-        experiment_type = \
-            line[experiment_type_idx]
-        biosample = \
-            line[biosample_idx]
-        tag = None
-        experiment_target = None
-        m = re.search(
-            "^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$",
-            line[experiment_target_idx]
-        )
-        if m:
-            tag = m.group(1)
-            experiment_target = m.group(2)
-        treatment = \
-            line[treatment_idx]
-        assembly = line[assembly_idx]
-        status = line[status_idx]
-        # Skip tagged samples
-        if tag:
-            print(": "\
-                .join(
-                    [
-                        os.path.basename(__file__),
-                        "warning",
-                        "use of protein tag",
-                        "\"%s\" (\"%s\")" % (
-                            accession,
-                            tag
-                        )
-                    ]
-                )
-            )
-        # Skip treated samples
-        if treatment:
-            print(": "\
-                .join(
-                    [
-                        os.path.basename(__file__),
-                        "warning",
-                        "treated sample",
-                        "\"%s\" (\"%s\")" % (
-                            accession,
-                            treatment
-                        )
-                    ]
-                )
-            )
-            continue
-        # This is a released sample!
-        if assembly == genome and status == "released":
-            # Skip sample
-            if not samples[biosample]["add"]: continue
-            # Get metadata
-            if os.path.exists(
-                os.path.join(
-                    data_dir,
-                    "%s.bed.gz" % accession
-                )
-            ):
-                k = (
-                    experiment_type,
-                    experiment_target
-                )
-                metadata.setdefault(k, [])
-                metadata[k].append((accession, biosample))
+    # Get valid chromosomes
+    chroms = ParseUtils.get_chroms(session)
 
-    # For each experiment, target...
-    for k in sorted(metadata):
-        # Initialize
-        experiment_type = k[0]
-        experiment_target = k[1]
-        exp_dummy_dir = os.path.join(dummy_dir,
-            "%s.%s" % (
-                experiment_type.replace(" ", "_"),
-                experiment_target
-            )
-        )
-#        # Remove dummy dir
-#        if os.path.isdir(exp_dummy_dir):
-#            shutil.rmtree(exp_dummy_dir)
-        # Create dummy dir
-        if not os.path.isdir(exp_dummy_dir):
-            os.mkdir(exp_dummy_dir)
-        # Get experiment
-        experiment = Experiment()
-        if experiment.is_unique(
-            session,
-            experiment_type
-        ):
-            experiment.name = experiment_type
-            session.add(experiment)
-            session.commit()
-        exp = experiment.select_by_name(
-            session,
-            experiment_type
-        )
-        # For each accession, biosample...
-        for accession, biosample in metadata[k]:
-            # Copy BED file
-            gz_bed_file = os.path.join(
-                data_dir,
-                "%s.bed.gz" % accession
-            )
-            bed_file = os.path.join(
-                exp_dummy_dir,
-                "%s.bed" % accession
-            )
-            # Why Oriol, why?!
-            # Because:
-            # 1) ignores non-standard
-            #    chroms (e.g. scaffolds); and
-            # 2) ensures that start < end.
-            if not os.path.exists(bed_file):
-                os.system(
-                    """
-                    zcat %s |\
-                    grep -P "^(chr)?([0-9]{1,2}|[MXY])" |\
-                    sort -k 1,1 -k2,2n |\
-                    awk -v chrs="%s" \
-                    '{\
-                        split(chrs,arr," ");\
-                        for(i in arr){\
-                            dict[arr[i]] = "";\
-                        };\
-                        if($1 in dict){\
-                            if($2<$3){\
-                                print $0;
-                            }
-                        }   
-                    }' > %s""" % (
-                        gz_bed_file,
-                        " ".join(
-                            GUDglobals.chroms +\
-                            ["chr%s" % c for c in GUDglobals.chroms]
-                        ),
-                        bed_file
-                    )
-                )
-        # Cluster regions
-        if cluster:
+    # Get samples
+    samples = _get_samples(session, samples_file)
+
+    # Get source
+    source = Source()
+    source.name = source_name
+    ParseUtils.upsert_source(session, source)
+    source = ParseUtils.get_source(session, source_name)
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
+
+    # Parse metadata
+    metadata = _parse_metadata(genome, metadata_file)
+
+    exit(0)
+    print(len(metadata))
+
+    # Filter metadata (i.e. keep the best BED file per experiment)
+    filtered_metadata = _filter_metadata(metadata)
+
+    print(len(filtered_metadata))
+
+    exit(0)
+
+    # Group metadata by experiment and target
+    grouped_metadata = _group_metadata(filtered_metadata)
+    exit(0)
+
+    # Parallelize inserts to the database
+    _process_data_in_chunks(dummy_file, _insert_data_in_chunks, threads)
+
+    # Dispose session
+    Session.remove()
+
+    # # Remove downloaded file
+    # if os.path.exists(dummy_file):
+    #     os.remove(dummy_file)
+
+def _download_metadata(genome, feat_type, dummy_dir="/tmp/"):
+
+    # Initialize
+    url = "https://www.encodeproject.org/metadata/type=Experiment&status=released"
+
+    # Fix hg38
+    if genome == "hg38":
+        genome = "GRCh38"
+
+    # Add experiment to URL
+    if feat_type == "atac-seq":
+        experiment_url = "&assay_title=ATAC-seq&assay_slims=DNA%2Baccessibility&files.file_type=bam"
+    elif feat_type == "accessibility":
+        experiment_url = "&assay_title=DNase-seq&assay_title=FAIRE-seq&assay_slims=DNA%2Baccessibility&files.file_type=bed%2BnarrowPeak"
+    elif feat_type == "histone":
+        experiment_url = "&assay_title=Histone%2BChIP-seq&assay_slims=DNA%2Bbinding&files.file_type=bed%2BnarrowPeak"
+    else:
+        # TF
+        experiment_url = "&assay_title=TF%2BChIP-seq&assay_slims=DNA%2Bbinding&files.file_type=bed%2BnarrowPeak"
+    url += experiment_url
+
+    # Add genome assembly
+    url += "&assembly=%s" % genome
+
+    # Download data
+    metadata_file = os.path.join(url, "metadata.tsv")
+    dummy_file = os.path.join(dummy_dir, "metadata.%s.%s.tsv" % (genome, feat_type))
+    if not os.path.exists(dummy_file):
+        f = urlretrieve(metadata_file, dummy_file)
+
+    return(dummy_file)
+
+def _get_samples(session, file_name):
+
+    # Initialize
+    samples = {}
+
+    # For each line...
+    for line in ParseUtils.parse_tsv_file(file_name):
+
+        # If add...
+        if line[3] == "Yes":
+
+            # Get sample
+            sample = Sample()
+            sample.name = line[2]
+            sample.treatment = False
+            if line[4] == "Yes":
+                sample.treatment = True
+            sample.cell_line = False
+            if line[5] == "Yes":
+                sample.cell_line = True
+            sample.cancer = False
+            if line[6] == "Yes":
+                sample.cancer = True
+
+            # Upsert sample
+            ParseUtils.upsert_sample(session, sample)
+
+            # Get sample ID
+            sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
+
+            # Add sample
+            # samples.setdefault(line[0], sample.uid)
+            samples.setdefault(line[0], None)
+
+    return(samples)
+
+def _parse_metadata(genome, metadata_file, test=True):
+
+    # Initialize
+    metadata_objects = set()
+    accession_idx = None
+
+    # For each line...
+    for line in ParseUtils.parse_tsv_file(metadata_file):
+
+        # If first line...
+        if accession_idx is not None:
+
             # Initialize
-            accession2sample = {}
-            label2accession = {}
-            regions = []
-            bed_files = os.path.join(
-                exp_dummy_dir,
-                "files.txt"
-            )
-            table_file = os.path.join(
-                exp_dummy_dir,
-                "tableOfTables.txt"
-            )
-            cluster_file = os.path.join(
-                exp_dummy_dir,
-                "regCluster"
-            )
-            # Create BED file list
-            if not os.path.exists(bed_files):
-                # For each file...
-                for bed_file in os.listdir(
-                    exp_dummy_dir
-                ):
-                    # Skip non-BED files
-                    if not bed_file.endswith(".bed"):
-                        continue
-                    # Skip regCluster BED file
-                    if bed_file == "regCluster.bed":
-                        continue
-                    # Add file to list
-                    GUDglobals.write(
-                        bed_files,
-                        os.path.join(
-                            exp_dummy_dir,
-                            bed_file
-                        )
-                    )
-            # Make table of tables
-            if not os.path.exists(table_file):
-                process = subprocess.check_output(
-                    [
-                        "regClusterMakeTableOfTables",
-                        "uw01",
-                        bed_files,
-                        table_file
-                    ],
-                    stderr=subprocess.STDOUT
-                )
-            # Make clusters
-            if not os.path.exists(
-                "%s.cluster" % cluster_file
-            ):
-                process = subprocess.check_output(
-                    [
-                        "regCluster",
-                        table_file,
-                        "%s.cluster" % cluster_file,
-                        "%s.bed" % cluster_file
-                    ],
-                    stderr=subprocess.STDOUT
-                )
-            # For each accession, biosample...
-            for accession, biosample in metadata[k]:
-                # Get sample
-                sample = Sample()
-                if sample.is_unique(
-                    session,
-                    samples[biosample]["cell_or_tissue"],
-                    samples[biosample]["treatment"],
-                    samples[biosample]["cell_line"],
-                    samples[biosample]["cancer"]
-                ):
-                    sample.name =\
-                        samples[biosample]["cell_or_tissue"]
-                    sample.treatment =\
-                        samples[biosample]["treatment"]
-                    sample.cell_line =\
-                        samples[biosample]["cell_line"]
-                    sample.cancer =\
-                        samples[biosample]["cancer"]
-                    session.add(sample)
-                    session.commit()
-                sam = sample.select_unique(
-                    session,
-                    samples[biosample]["cell_or_tissue"],
-                    samples[biosample]["treatment"],
-                    samples[biosample]["cell_line"],
-                    samples[biosample]["cancer"]
-                )
-                accession2sample.setdefault(
-                    accession,
-                    sam.uid
-                )
-            # For each line...
-            for line in GUDglobals.parse_tsv_file(
-                table_file
-            ):
-                m = re.search("%s.%s/(\w+).bed" %\
-                    (
-                        experiment_type.replace(" ", "_"),
-                        str(experiment_target)
-                    ),
-                    line[0]
-                )
-                if m:
-                    label2accession.setdefault(
-                        line[-1],
-                        m.group(1)
-                    )
-            # For each line...
-            for line in GUDglobals.parse_tsv_file(
-                "%s.bed" % cluster_file
-            ):
-                # Get coordinates
-                chrom = line[0]
-                start = int(line[1])
-                end = int(line[2])
-                # Get region
-                region = Region()
-                if region.is_unique(
-                    session,
-                    chrom,
-                    start,
-                    end
-                ):
-                    # Insert region
-                    region.bin = assign_bin(start, end)
-                    region.chrom = chrom
-                    region.start = start
-                    region.end = end
-                    session.add(region)
-                    session.commit()
-                reg = region.select_unique(
-                    session,
-                    chrom,
-                    start,
-                    end
-                )
-                regions.append(reg.uid)
-            # For each line...
-            for line in GUDglobals.parse_tsv_file(
-                "%s.cluster" % cluster_file
-            ):
-                # Get region
-                reg_uid = regions[int(line[0]) - 1] 
-                # Get sample
-                sam_uid = accession2sample[label2accession[line[-1]]]
-                # Get accessibility feature
-                if feat_type == "accessibility":
-                    feat = DNAAccessibility()
-                    is_unique = feat.is_unique(
-                        session,
-                        reg_uid,
-                        sam_uid,
-                        exp.uid,
-                        sou.uid
-                    )
-                # Get histone feature
-                if feat_type == "histone":
-                    feat = HistoneModification()
-                    is_unique = feat.is_unique(
-                        session,
-                        reg_uid,
-                        sam_uid,
-                        exp.uid,
-                        sou.uid,
-                        experiment_target
-                    )
-                # Get TF feature
-                if feat_type == "tf":
-                    feat = TFBinding()
-                    is_unique = feat.is_unique(
-                        session,
-                        reg_uid,
-                        sam_uid,
-                        exp.uid,
-                        sou.uid,
-                        experiment_target
-                    )
-                # Insert feature to GUD
-                if is_unique:
-                    feat.regionID = reg_uid
-                    feat.sampleID = sam_uid
-                    feat.experimentID = exp.uid
-                    feat.sourceID = sou.uid
-                    if feat_type == "histone":
-                        feat.histone_type = experiment_target
-                    if feat_type == "tf":
-                        feat.tf = experiment_target
-                    session.add(feat)
-                    session.commit()
-        # Do not cluster
+            accession = line[accession_idx]
+            biosample = line[biosample_idx]
+            download_url = line[download_idx]
+            experiment_accession = line[experiment_acc_idx]
+            experiment_type = line[experiment_type_idx]
+            experiment_target = line[experiment_target_idx]
+            genome_assembly = line[genome_assembly_idx]
+            output_format = line[output_format_idx]
+            output_type = line[output_type_idx]
+            status = line[status_idx]
+            treatments = line[treatment_idx]
+
+            if test:
+                if biosample not in samples:
+                    print(biosample)
+
+            # ENCODE metadata object
+            metadata_object = EncodeMetadata(accession, biosample, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments)
+
+            # Add metadata
+            if metadata_object.genome_assembly == genome and metadata_object.status == "released" and type(metadata_object.treatments) is float:
+                metadata_objects.add(metadata_object)
+
         else:
-            # For each accession, biosample...
-            for accession, biosample in metadata[k]:
-                # If BED file exists...
-                bed_file = os.path.join(
-                    exp_dummy_dir, "%s.bed" % accession)
-                if os.path.exists(bed_file):
-                    # Initialize
-                    histone_type = None
-                    tf_name = None
-                    if feat_type == "histone":
-                        histone_type = experiment_target
-                    if feat_type == "tf":
-                        tf_name = experiment_target
-                    # Insert BED file to GUD database
-                    bed_to_gud_db(
-                        user,
-                        pwd,
-                        host,
-                        port,
-                        db,
-                        bed_file,
-                        feat_type,
-                        exp.name,
-                        samples[biosample]["cell_or_tissue"],
-                        sou.name,
-                        histone_type,
-                        None,
-                        tf_name,
-                        samples[biosample]["cancer"],
-                        samples[biosample]["cell_line"],
-                        samples[biosample]["treatment"]
-                    )
-#        # Remove dummy dir
-#        if os.path.isdir(exp_dummy_dir): shutil.rmtree(exp_dummy_dir)
+            # Get indices
+            accession_idx = line.index("File accession")
+             = line.index("Biosample term name")
+            download_idx = line.index("File download URL")
+            experiment_acc_idx = line.index("Experiment accession")
+            experiment_type_idx = line.index("Assay")
+            experiment_target_idx = line.index("Experiment target")
+            genome_assembly_idx = line.index("Assembly")
+            output_format_idx = line.index("File format")
+            output_type_idx = line.index("Output type")
+            status_idx = line.index("File Status")
+            treatment_idx = line.index("Biosample treatments")
+
+    return(metadata_objects)
+
+def _filter_metadata(metadata):
+
+    # Initialize
+    grouped_metadata = {}
+    filtered_metadata = set()
+    output_types = ["optimal idr thresholded peaks", "pseudoreplicated idr thresholded peaks", "peaks", "alignments"]
+
+    # For each ENCODE metadata object...
+    for metadata_object in metadata:
+
+        # Group metadata by experiment accession
+        grouped_metadata.setdefault(metadata_object.experiment_accession, [])
+        grouped_metadata[metadata_object.experiment_accession].append(metadata_object)
+
+    # For each experiment accession...
+    for experiment_acc in grouped_metadata:
+
+        # Initialize
+        exit_loop = False
+
+        # For each output type...
+        for out_type in output_types:
+
+            # For each ENCODE metadata object...
+            for metadata_object in grouped_metadata[experiment_acc]:
+
+                if metadata_object.output_type == out_type:
+                    filtered_metadata.add(metadata_object)
+                    exit_loop = True
+
+            if exit_loop:
+                break
+
+    return(filtered_metadata)
+
+def _group_metadata(metadata):
+
+    # Initialize
+    grouped_metadata = {}
+
+    # For each ENCODE metadata object...
+    for metadata_object in metadata:
+
+        # Group metadata
+        grouped_metadata.setdefault()
+
+    return(grouped_metadata)
+
+        # # Skip tagged samples
+        # if tag:
+        #     print(": "\
+        #         .join(
+        #             [
+        #                 os.path.basename(__file__),
+        #                 "warning",
+        #                 "use of protein tag",
+        #                 "\"%s\" (\"%s\")" % (
+        #                     accession,
+        #                     tag
+        #                 )
+        #             ]
+        #         )
+        #     )
+        # # Skip treated samples
+        # if treatment:
+        #     print(": "\
+        #         .join(
+        #             [
+        #                 os.path.basename(__file__),
+        #                 "warning",
+        #                 "treated sample",
+        #                 "\"%s\" (\"%s\")" % (
+        #                     accession,
+        #                     treatment
+        #                 )
+        #             ]
+        #         )
+        #     )
+        #     continue
+        # # This is a released sample!
+        # if assembly == genome and status == "released":
+        #     # Skip sample
+        #     if not samples[biosample]["add"]: continue
+        #     # Get metadata
+        #     if os.path.exists(
+        #         os.path.join(
+        #             data_dir,
+        #             "%s.bed.gz" % accession
+        #         )
+        #     ):
+        #         k = (
+        #             experiment_type,
+        #             experiment_target
+        #         )
+        #         metadata.setdefault(k, [])
+        #         metadata[k].append((accession, biosample))
+
+def _insert_data_in_chunks(chunk):
+
+    print(current_process().name)
+
+    # Initialize
+    session = Session()
+
+    # For each line...
+    for line in chunk:
+
+        # Skip empty lines
+        if not line:
+            continue
+
+        # Get region
+        region = Region()
+        region.chrom = line[1]
+        region.start = int(line[2])
+        region.end = int(line[3])
+        region.bin = assign_bin(region.start, region.end)
+
+        # Ignore non-standard chroms, scaffolds, etc.
+        if region.chrom not in chroms:
+            continue
+
+        # Upsert region
+        _upsert_region(session, region)
+
+        # Get region ID
+        region = _get_region(session, region.chrom, region.start, region.end, region.strand)
+
+        # Get conservation
+        conservation = Conservation()
+        conservation.regionID = region.uid
+        conservation.sourceID = source.uid
+        conservation.score = float(line[6])
+
+        # Upsert conservation
+        _upsert_conservation(session, conservation)
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
 
 #-------------#
 # Main        #

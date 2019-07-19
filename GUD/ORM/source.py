@@ -68,8 +68,9 @@ class Source(Base):
 
     def __repr__(self):
 
-        return "<Source(%s, %s)>" % \
+        return "<%s(%s, %s)>" % \
             (
+                self.__tablename__,
                 "uid={}".format(self.uid),
                 "name={}".format(self.name)
             )

@@ -16,6 +16,7 @@ from .genomic_feature import GenomicFeature
 from .genomicFeatureMixin1 import GFMixin1
 from sqlalchemy.ext.declarative import declared_attr
 
+
 class Conservation(GFMixin1, Base):
 
     __tablename__ = "conservation"
@@ -25,20 +26,16 @@ class Conservation(GFMixin1, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-        UniqueConstraint(
-            cls.region_id,
-            cls.source_id
-        ),
-        Index("ix_regionID", cls.region_id),  # query by bin range
-        {
-            "mysql_engine": "MyISAM",
-            "mysql_charset": "utf8"
-        }
-    )
+            UniqueConstraint(cls.region_id, cls.source_id),
+            Index("ix_regionID", cls.region_id),  # query by bin range
+            {
+                "mysql_engine": "MyISAM",
+                "mysql_charset": "utf8"
+            }
+        )
 
     @classmethod
-    def is_unique(cls, session, regionID,
-                  sourceID):
+    def is_unique(cls, session, regionID, sourceID):
 
         q = session.query(cls)\
             .filter(
@@ -49,8 +46,7 @@ class Conservation(GFMixin1, Base):
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, regionID,
-                      sourceID):
+    def select_unique(cls, session, regionID, sourceID):
 
         q = session.query(cls)\
             .filter(

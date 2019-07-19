@@ -35,6 +35,20 @@ class DNAAccessibility(GFMixin2, Base):
         )
 
     @classmethod
+    def select_unique(cls, session, regionID,
+                      sampleID, experimentID, sourceID):
+
+        q = session.query(cls).\
+            filter(
+                cls.regionID == regionID,
+                cls.sampleID == sampleID,
+                cls.experimentID == experimentID,
+                cls.sourceID == sourceID
+        )
+
+        return q.first()
+
+    @classmethod
     def as_genomic_feature(self, feat):
         # Define qualifiers
         qualifiers = {

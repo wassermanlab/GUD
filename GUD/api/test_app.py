@@ -70,7 +70,7 @@ def test_copy_number_variants():
         data = json.loads(resp.data)
         assert data['size'] == 116
 
-@pytest.mark.skip(reason="tamar_test")
+# @pytest.mark.skip(reason="tamar_test")
 def test_gene():
     #select_by_location
     with app.test_client() as c:

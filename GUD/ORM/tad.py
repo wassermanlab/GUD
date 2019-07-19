@@ -48,14 +48,15 @@ class TAD(GFMixin2, Base):
                 "mysql_charset": "utf8"
             }
         )
+
     @classmethod
-    def select_by_restriction_enzymes(cls, query ,restriction_enzymes):
+    def select_by_restriction_enzymes(cls, query, restriction_enzymes):
         """
         Query objects by sources.
         """
 
         q = query.filter(cls.restriction_enzyme.in_(restriction_enzymes))
-        
+
         return q
 
     @classmethod

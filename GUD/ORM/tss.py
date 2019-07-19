@@ -1,4 +1,3 @@
-import re
 from sqlalchemy import (
     Column,
     Index,
@@ -31,7 +30,7 @@ class TSS(GFMixin2, Base):
         return Column("sampleIDs", mysql.LONGBLOB, nullable=False)
 
     avg_expression_levels = Column("avg_expression_levels", mysql.LONGBLOB,
-    nullable=False)
+                                   nullable=False)
 
     @declared_attr
     def __table_args__(cls):
@@ -59,7 +58,7 @@ class TSS(GFMixin2, Base):
 
         q = session.query(cls)\
             .filter(cls.regionID == regionID, cls.sourceID == sourceID,
-            cls.experimentID == experimentID, cls.gene == gene, cls.tss == tss)
+                    cls.experimentID == experimentID, cls.gene == gene, cls.tss == tss)
 
         return len(q.all()) == 0
 
@@ -68,8 +67,8 @@ class TSS(GFMixin2, Base):
 
         q = session.query(cls)\
             .filter(cls.regionID == regionID, cls.sourceID == sourceID,
-             cls.experimentID == experimentID, cls.gene == gene,
-             cls.tss == tss)
+                    cls.experimentID == experimentID, cls.gene == gene,
+                    cls.tss == tss)
 
         return q.first()
 
@@ -89,7 +88,7 @@ class TSS(GFMixin2, Base):
             .filter(Region.bin.in_(bins))
 
         return q
-    
+
     @classmethod
     def select_by_within_location(cls, session, chrom, start, end):
         """
@@ -104,7 +103,7 @@ class TSS(GFMixin2, Base):
                     Region.start > start,
                     Region.end < end)\
             .filter(Region.bin.in_(bins))
-        
+
         return q
 
     @classmethod
@@ -123,7 +122,7 @@ class TSS(GFMixin2, Base):
                     Region.start == start,
                     Region.end == end)
         return q
-   
+
     @classmethod
     def select_by_uids(cls, session, query, uids):
         """
@@ -143,42 +142,44 @@ class TSS(GFMixin2, Base):
 
         return q
 
-    @classmethod ## TODO
+    @classmethod  # TODO
     def select_all_genic_tss(cls, session):
         """
         Query all objects associated with a gene.
         """
         q = session.query(cls, Region, Source, Experiment).\
-            filter(Region.uid == cls.region_id, Source.uid == cls.source_id, 
-            Experiment.uid == cls.experiment_id).filter(cls.gene != None) 
+            filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
+                   Experiment.uid == cls.experiment_id).filter(cls.gene != None)
 
         return q
-        
-    @classmethod 
+
+    @classmethod
     def select_by_sources(cls, session, query, sources):
         """
         Query objects by sources.
         """
-        s = [value for value, in session.query(Source.uid).filter(Source.name.in_(sources)).all()]
-        q = query.filter(Source.uid.in_(s))   
+        s = [value for value, in session.query(
+            Source.uid).filter(Source.name.in_(sources)).all()]
+        q = query.filter(Source.uid.in_(s))
 
         return q
 
-    @classmethod 
+    @classmethod
     def select_by_samples(cls, session, query, samples):
         """
         Query objects by sample name.
         """
         return query
 
-    @classmethod ## TODO
+    @classmethod  # TODO
     def select_by_experiments(cls, session, query, experiments):
         """
         Query objects by experiment name.
         """
 
-        s = [value for value, in session.query(Experiment.uid).filter(Experiment.name.in_(experiments)).all()]
-        q = query.filter(Experiment.uid.in_(s))   
+        s = [value for value, in session.query(Experiment.uid).filter(
+            Experiment.name.in_(experiments)).all()]
+        q = query.filter(Experiment.uid.in_(s))
 
         return q
 
