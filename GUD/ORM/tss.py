@@ -5,7 +5,8 @@ from sqlalchemy import (
     String,
     ForeignKey,
     UniqueConstraint
-)
+) 
+import re 
 from sqlalchemy.dialects import mysql
 from .base import Base
 from .experiment import Experiment

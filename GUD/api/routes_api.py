@@ -22,7 +22,7 @@ def clinvar():
         q = resource.select_by_clinvarID(session, q, clinvarIDs)
     shutdown_session(session)
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
 
@@ -34,7 +34,7 @@ def mixin1():
     q = genomic_feature_mixin1_queries(session, resource, request)
     shutdown_session(session)
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
 
@@ -49,7 +49,7 @@ def genes():
         q = resource.select_by_names(session, q, names)
     shutdown_session(session)
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
 
@@ -64,7 +64,7 @@ def gene_symbols():
     result = q.offset(offset).limit(page_size)
     result =  [g[0] for g in result]
     result_tuple = (q.count(), result)
-    result = create_page(False, q, page, url)                                   
+    result = create_page(result_tuple, page, request.url)                                 
     return jsonify(result)
 
 
@@ -83,7 +83,7 @@ def strs():
     if motif is not None:
         q = resource.select_by_motif(session, motif, q, rotation)
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     shutdown_session(session)
     return jsonify(result)
 
@@ -95,7 +95,7 @@ def pathogenic_strs():
     resource = ShortTandemRepeat()
     q = resource.select_by_pathogenicity(session)
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     shutdown_session(session)
     return jsonify(result)
 
@@ -113,7 +113,7 @@ def mixin2():
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     shutdown_session(session)
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/histone_modifications')
@@ -128,7 +128,7 @@ def histone_modifications():
         q = resource.select_by_histone_type(q, histone_types)
     shutdown_session(session) 
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/tads')
@@ -143,7 +143,7 @@ def tads():
         q = resource.select_by_restriction_enzymes(q, restriction_enzymes)
     shutdown_session(session) 
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/tf_binding')
@@ -158,7 +158,7 @@ def tf_binding():
         q = resource.select_by_tf(q, tfs)
     shutdown_session(session) 
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/tss')
@@ -176,7 +176,7 @@ def tss():
         q = resource.select_by_genes(q, genes)
     shutdown_session(session) 
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/tss/genic')
@@ -186,7 +186,7 @@ def genic_tss():
     resource = TSS()
     q = resource.select_all_genic_tss(session)
     result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/chroms')
@@ -199,7 +199,7 @@ def chroms():
     results = q.offset(offset).limit(page_size)
     results = [e.serialize() for e in results]
     result_tuple = (q.count(), results)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     shutdown_session(session)
     return jsonify(result)
 
@@ -213,7 +213,7 @@ def sources():
     results = q.offset(offset).limit(page_size)
     results = [e.serialize() for e in results]
     result_tuple = (q.count(), results)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     shutdown_session(session)
     return jsonify(result)
 
@@ -227,7 +227,7 @@ def samples():
     results = q.offset(offset).limit(page_size)
     results = [e.serialize() for e in results]
     result_tuple = (q.count(), results)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     shutdown_session(session)
     return jsonify(result)
 
@@ -241,7 +241,7 @@ def experiments():
     results = q.offset(offset).limit(page_size)
     results = [e.serialize() for e in results]
     result_tuple = (q.count(), results)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     shutdown_session(session)
     return jsonify(result)
 
@@ -269,6 +269,6 @@ def expression():
     results = q.offset(offset).limit(page_size)
     results = [resource.serialize(e) for e in results]
     result_tuple = (q.count(), results)
-    result = create_page(result_tuple, q, page, request.url)
+    result = create_page(result_tuple, page, request.url)
     shutdown_session(session)
     return jsonify(result)

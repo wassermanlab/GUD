@@ -14,7 +14,7 @@ def get_genomic_feature_results(resource, query, page) -> tuple:
     results = [e.serialize() for e in results]
     return (query.count(), results)
 
-def create_page(result_tuple, query, page, url) -> dict:
+def create_page(result_tuple, page, url) -> dict:
     """
     returns 404 error or a page
     """
