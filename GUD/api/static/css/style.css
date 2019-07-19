@@ -21,9 +21,11 @@ body {
     text-align: center;
     height: 100vh;
     width: 100vw;
+    background-color: white;
+    background-image: url("../img/background.svg")
 }
 .vertical-align {
-  padding-top: 100px 
+  padding-top: 150px 
 }
 .fixed-width {
   width: 130px 
@@ -42,6 +44,7 @@ body {
   padding: 20px;
 }
 .footer {
+  text-align: center;
   position: absolute;
   bottom: 0;
   width: 100%;
