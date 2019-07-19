@@ -20,13 +20,19 @@ def live_api():
 
 @app.route('/docs')
 def docs():
-    return "DOCS"
-    # return render_template('home.html')
+    filename = os.path.join(app.static_folder, 'docs.json')
+    docs = None
+    with open(filename) as json_file:
+        docs = json.load(json_file)
+    filename2 = os.path.join(app.static_folder, 'docs.titles.json')
+    titles = None
+    with open(filename2) as json_file:
+        titles = json.load(json_file)
+    return render_template('docs.html', docs = docs, titles = titles)
 
 @app.route('/contact')
 def contact():
-    return "CONTACT"
-    # return render_template('home.html')
+    return render_template('contact.html')
 
 @app.route('/json_docs')
 def json_docs():

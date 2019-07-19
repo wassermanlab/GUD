@@ -6,12 +6,16 @@
     --pale-green: #EDF5E1;
     
 }
-
+html {
+  position: relative;
+  min-height: 100%;
+}
 body {  
         font-family: montserrat, sans-serif;
+        margin-bottom: 60px; 
   }
 .navbar-fix {  
-    padding-top: 60px;
+    padding-top: 80px;
 }
 .jumbotron {
     text-align: center;
@@ -24,10 +28,41 @@ body {
 .fixed-width {
   width: 130px 
 }
+.spacing{
+  margin-bottom: 30px;
+  margin-top: 20px;
+}
 .outer{
+  margin-bottom: 20px;
+  margin-top: 20px;
   border-radius: 7px;
   background-color: #e9ecef;
 }
 .response{
   padding: 20px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px; /* Set the fixed height of the footer here */
+  line-height: 60px; /* Vertically center the text there */
+  background-color: #e9ecef;
+}
+.navbar{
+  background-color: white;
+}
+.badge {
+  margin-right: 10px;
+  margin-bottom: 10px;
+  padding: 7px;
+}
+.docsKeys{
+  width: 20%
+}
+.docsDescription{
+  width: 70%
+}
+.docsRequired{
+  width: 10%
 }
