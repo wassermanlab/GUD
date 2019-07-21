@@ -35,13 +35,6 @@ class HistoneModification(Base):
         nullable=False
     )
 
-    sourceID = Column(
-        "sourceID",
-        Integer,
-        ForeignKey("sources.uid"),
-        nullable=False
-    )
-
     sampleID = Column(
         "sampleID",
         Integer,
@@ -53,6 +46,13 @@ class HistoneModification(Base):
         "experimentID",
         Integer,
         ForeignKey("experiments.uid"),
+        nullable=False
+    )
+
+    sourceID = Column(
+        "sourceID",
+        Integer,
+        ForeignKey("sources.uid"),
         nullable=False
     )
 

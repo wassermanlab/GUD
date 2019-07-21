@@ -46,8 +46,7 @@ class Experiment(Base):
     @classmethod
     def select_unique(cls, session, name):
 
-        q = session.query(cls)\
-            .filter(cls.name == name)
+        q = session.query(cls).filter(cls.name == name)
 
         return q.first()
 
@@ -57,8 +56,7 @@ class Experiment(Base):
         Query objects by experiment name.
         """
 
-        q = session.query(cls)\
-            .filter(cls.name == name)
+        q = session.query(cls).filter(cls.name == name)
 
         return q.first()
 

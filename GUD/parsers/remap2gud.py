@@ -157,7 +157,7 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     # Download data
     dummy_file = _download_data(genome, dummy_dir)
 
-     # Get database name
+    # Get database name
     db_name = GUDUtils._get_db_name()
 
     # Get engine/session
@@ -303,16 +303,16 @@ def _preprocess_data(file_name, dummy_dir="/tmp/", merge=False):
 
         # Sort BED
         a = BedTool(file_name)
-        a = a.sort()
+        a = a.sort(stream=True)
 
         # Merge BED
         if merge:
-            b = a.merge()
+            b = a.merge(stream=True)
         else:
             b = a
 
         # Intersect
-        a.intersect(b, wa=True, wb=True).saveas(bed_file)
+        a.intersect(b, wa=True, wb=True, stream=True).saveas(bed_file)
 
         # Clean PyBedTools files
         cleanup(remove_all=True)
@@ -339,9 +339,9 @@ def _insert_data_in_chunks(chunk):
 
         # Get region
         region = Region()
-        region.chrom = line[9]
-        region.start = int(line[10])
-        region.end = int(line[11])
+        region.chrom = line[-3]
+        region.start = int(line[-2])
+        region.end = int(line[-1])
         region.bin = assign_bin(region.start, region.end)
 
         # Ignore non-standard chroms, scaffolds, etc.

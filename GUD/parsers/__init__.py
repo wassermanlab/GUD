@@ -15,8 +15,10 @@ from zipfile import ZipFile
 
 from GUD.ORM.chrom import Chrom
 from GUD.ORM.conservation import Conservation
+from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.gene import Gene
+from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.mask import Mask
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
@@ -297,7 +299,7 @@ class ParseUtililities:
         return(Chrom.chrom_sizes(session))
 
     def get_experiment(self, session, experiment_type):
-        return(Experiment.select_by_name(session, experiment_type))
+        return(Experiment.select_unique(session, experiment_type))
 
     def get_region(self, session, chrom, start, end, strand=None):
         return(Region.select_unique(session, chrom, start, end, strand))
@@ -310,11 +312,17 @@ class ParseUtililities:
         return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
 
     def get_source(self, session, source_name):
-        return(Source.select_by_name(session, source_name))
+        return(Source.select_unique(session, source_name))
 
     #--------------#
     # Upserts      #
     #--------------#
+
+    def upsert_accessibility(self, session, accessibility):
+
+        if DNAAccessibility.is_unique(session, accessibility.regionID, accessibility.sampleID, accessibility.experimentID, accessibility.sourceID):
+            session.add(accessibility)
+            session.flush()
 
     def upsert_conservation(self, session, conservation):
 
@@ -332,6 +340,12 @@ class ParseUtililities:
 
         if Gene.is_unique(session, gene.regionID, gene.sourceID, gene.name):
             session.add(gene)
+            session.flush()
+
+    def upsert_histone(self, session, histone):
+
+        if HistoneModification.is_unique(session, histone.regionID, histone.sampleID, histone.experimentID, histone.sourceID, histone.histone_type):
+            session.add(histone)
             session.flush()
 
     def upsert_mask(self, session, mask):

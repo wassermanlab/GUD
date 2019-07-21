@@ -4,7 +4,6 @@ import argparse
 from binning import assign_bin
 import getpass
 from multiprocessing import cpu_count
-from multiprocessing import current_process
 import os
 import re
 from sqlalchemy_utils import database_exists
