@@ -488,14 +488,14 @@ def _group_metadata(metadata):
 def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False):
 
     # Initialize
-    experiment_target = None
     dummy_files = []
 
     # Get label
     metadata_object = next(iter(metadata_objects))
-    m = re.search("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$", metadata_object.experiment_target)
-    if m: experiment_target = m.group(2)
-    label = "%s.%s" % (experiment_target, metadata_object.experiment_type)
+    label = metadata_object.experiment_type
+    if Feature.__tablename__ == "histone" or Feature.__tablename__ == "tf":
+        m = re.search("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$", metadata_object.experiment_target)
+        label += ".%s" % m.group(2)
 
     # Skip if BED file exists
     bed_file = os.path.join(dummy_dir, "%s.bed" % label)
