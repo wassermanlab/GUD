@@ -44,8 +44,12 @@ BJ	cell line	BJ	Yes	No	Yes	No
 EL	cell line	BJ-EL	Yes	No	Yes	No	
 ELR	cell line	BJ-ELR	Yes	No	Yes	No	
 arm bone	tissue	bone (arm)	Yes	No	No	No	
+left arm bone	tissue	bone (arm; left)	Yes	No	No	No	
+right arm bone	tissue	bone (arm; right)	Yes	No	No	No	
 femur	tissue	bone (femur)	Yes	No	No	No	
 leg bone	tissue	bone (leg)	Yes	No	No	No	
+left leg bone	tissue	bone (leg; left)	Yes	No	No	No	
+right leg bone	tissue	bone (leg; right)	Yes	No	No	No	
 brain	tissue	brain	Yes	No	No	No	
 middle frontal area 46	tissue	Brodmann area 46 (middle; frontal)	Yes	No	No	No	
 C803	cell line	C1 100 08 0003	Yes	No	Yes	No	
