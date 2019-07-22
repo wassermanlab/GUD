@@ -266,7 +266,7 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
     grouped_metadata = _group_metadata(_filter_metadata())
 
     # For each experiment target/type...
-    for experiment_target, experiment_type in sorted(grouped_metadata):
+    for experiment_target, experiment_type in grouped_metadata:
 
         # Beware, for this is not possible!
         if experiment_target is not None:
@@ -495,7 +495,7 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, threads=1
     # Get label
     metadata_object = next(iter(metadata_objects))
     label = metadata_object.experiment_type
-    if Feature.__tablename__ == "histone" or Feature.__tablename__ == "tf":
+    if Feature.__tablename__ == "histone" or Feature.__tablename__ == "tf_binding":
         m = re.search("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$", metadata_object.experiment_target)
         label += ".%s" % m.group(2)
 
@@ -512,7 +512,7 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, threads=1
             for download_file in pool.imap(partial(_download_ENCODE_bed_file, dummy_dir=dummy_dir), metadata_objects):
 
                 # Initialize
-                m = re.search("^%s\/?(\w+).(bam|bed.gz)$" % dummy_dir, download_file)
+                m = re.search("\/(\w+).(bam|bed.gz)$", download_file)
                 accession = m.group(1)
 
                 # Concatenate
