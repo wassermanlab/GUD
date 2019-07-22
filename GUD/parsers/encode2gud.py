@@ -512,7 +512,7 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, threads=1
             for download_file in pool.imap(partial(_download_ENCODE_bed_file, dummy_dir=dummy_dir), metadata_objects):
 
                 # Initialize
-                m = re.search("^%s\/?(\w+).bed.gz$" % dummy_dir, download_file)
+                m = re.search("^%s\/?(\w+).(bam|bed.gz)$" % dummy_dir, download_file)
                 accession = m.group(1)
 
                 # Concatenate
