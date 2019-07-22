@@ -2,12 +2,14 @@
 
 import argparse
 from binning import assign_bin
+from functools import partial
 import getpass
-from multiprocessing import cpu_count
+from multiprocessing import Pool, cpu_count
 from numpy import isnan
 import os
 from pybedtools import BedTool, cleanup, set_tempdir
 import re
+import shutil
 from sqlalchemy_utils import database_exists
 import subprocess
 import sys
@@ -285,7 +287,9 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
         engine.dispose()
 
         # Prepare data
-        data_file = _preprocess_data(grouped_metadata[(experiment_target, experiment_type)], dummy_dir, merge)
+        data_file = _preprocess_data(grouped_metadata[(experiment_target, experiment_type)], dummy_dir, merge, threads)
+
+        exit(0)
 
         # Parallelize inserts to the database
         ParseUtils.process_data_in_chunks(data_file, _insert_data_in_chunks, test, threads)
@@ -485,7 +489,7 @@ def _group_metadata(metadata):
 
     return(grouped_metadata)
 
-def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False):
+def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, threads=1):
 
     # Initialize
     dummy_files = []
@@ -505,48 +509,22 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False):
         dummy_file = os.path.join(dummy_dir, "dummy.bed")
         if not os.path.exists(dummy_file):
 
-            # For each metadata object...
-            for metadata_object in metadata_objects:
+            # Get ENCODE BED files
+            pool = Pool(processes=threads)
+            for download_file in pool.imap(partial(_download_ENCODE_bed_file, dummy_dir=dummy_dir), metadata_objects):
 
-                # Download file
-                download_file = os.path.join(dummy_dir, metadata_object.accession)
-                if metadata_object.output_format == "bam":
-                    download_file += ".bam"
-                else:
-                    download_file += ".bed.gz"
-                if not os.path.exists(download_file):
-                    urlretrieve(metadata_object.download_url, download_file)
-
-                # Preprocess BAM data
-                if metadata_object.output_format == "bam":
-
-                    # Skip if peaks file already exists
-                    peaks_file = os.path.join(dummy_dir, "%s_peaks.narrowPeak" % metadata_object.accession)
-                    if not os.path.exists(peaks_file):
-
-                        # From "An atlas of chromatin accessibility in the adult human brain" (Fullard et al. 2018):
-                        # Peaks for OCRs were called using the model-based Analysis of ChIP-seq (MACS) (Zhang et al. 2008)
-                        # v2.1 (https://github.com/taoliu/MACS/). It models the shift size of tags and models local biases
-                        # in sequencability and mapability through a dynamic Poisson background model. We used the following
-                        # parameters (Kaufman et al. 2016): "--keep-dup all", "--shift -100", "--extsize 200", "--nomodel".
-                        cmd = "macs2 callpeak -t %s --keep-dup all --shift -100 --extsize 200 --nomodel --outdir %s -n %s" % (download_file, dummy_dir, metadata_object.accession)
-                        process = subprocess.Popen([cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                        stdout, stderr = process.communicate()
-
-                        # Remove files
-                        os.remove(download_file)
-                        os.remove(os.path.join(dummy_dir, "%s_peaks.xls" % metadata_object.accession))
-                        os.remove(os.path.join(dummy_dir, "%s_summits.bed" % metadata_object.accession))
-
-                        # Set peaks file as download file
-                        download_file = peaks_file
+                # Initialize
+                m = re.search("^%s\/?(\w+).bed.gz$" % dummy_dir, download_file)
+                accession = m.group(1)
 
                 # Concatenate
-                cmd = "zless %s | awk '{print $1\"\t\"$2\"\t\"$3\"\t%s\"}' >> %s" % (download_file, metadata_object.accession, dummy_file)
+                cmd = "zless %s | awk '{print $1\"\t\"$2\"\t\"$3\"\t%s\"}' >> %s" % (download_file, accession, dummy_file)
                 subprocess.call(cmd, shell=True)
 
                 # Remove downloaded file
                 os.remove(download_file)
+
+            pool.close()
 
         # Add dummy file
         dummy_files.append(dummy_file)
@@ -589,6 +567,42 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False):
             os.remove(dummy_file)
 
     return(bed_file)
+
+def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/"):
+
+    # Download file
+    download_file = os.path.join(dummy_dir, metadata_object.accession)
+    if metadata_object.output_format == "bam":
+        download_file += ".bam"
+    else:
+        download_file += ".bed.gz"
+    if not os.path.exists(download_file):
+        urlretrieve(metadata_object.download_url, download_file)
+
+    # Preprocess BAM data
+    if metadata_object.output_format == "bam":
+
+        # Skip if peaks file already exists
+        peaks_file = os.path.join(dummy_dir, "%s_peaks.narrowPeak" % metadata_object.accession)
+        if not os.path.exists(peaks_file):
+
+            # From "An atlas of chromatin accessibility in the adult human brain" (Fullard et al. 2018):
+            # Peaks for OCRs were called using the model-based Analysis of ChIP-seq (MACS) (Zhang et al. 2008)
+            # v2.1 (https://github.com/taoliu/MACS/). It models the shift size of tags and models local biases
+            # in sequencability and mapability through a dynamic Poisson background model. We used the following
+            # parameters (Kaufman et al. 2016): "--keep-dup all", "--shift -100", "--extsize 200", "--nomodel".
+            cmd = "macs2 callpeak -t %s --keep-dup all --shift -100 --extsize 200 --nomodel --outdir %s -n %s" % (download_file, dummy_dir, metadata_object.accession)
+            process = subprocess.Popen([cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            stdout, stderr = process.communicate()
+
+            # Remove files
+            os.remove(os.path.join(dummy_dir, "%s_peaks.xls" % metadata_object.accession))
+            os.remove(os.path.join(dummy_dir, "%s_summits.bed" % metadata_object.accession))
+
+            # Set peaks file as download file
+            shutil.move(peaks_file, download_file)
+
+    return(download_file)
 
 def _insert_data_in_chunks(chunk):
 
