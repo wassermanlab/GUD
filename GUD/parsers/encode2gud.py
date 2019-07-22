@@ -266,11 +266,6 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
     # For each experiment target/type...
     for experiment_target, experiment_type in sorted(grouped_metadata):
 
-        allowed_histones = set([u'H2AK5ac-human', u'H2AK9ac-human'])
-
-        if experiment_target not in allowed_histones:
-            continue
-
         # Beware, for this is not possible!
         if experiment_target is not None:
             if feat_type != "histone" and feat_type != "tf":
