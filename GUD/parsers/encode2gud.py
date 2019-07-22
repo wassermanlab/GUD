@@ -289,8 +289,6 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
         # Prepare data
         data_file = _preprocess_data(grouped_metadata[(experiment_target, experiment_type)], dummy_dir, merge, threads)
 
-        exit(0)
-
         # Parallelize inserts to the database
         ParseUtils.process_data_in_chunks(data_file, _insert_data_in_chunks, test, threads)
 
