@@ -290,7 +290,7 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
         data_file = _preprocess_data(grouped_metadata[(experiment_target, experiment_type)], dummy_dir, merge, threads)
 
         # Parallelize inserts to the database
-        ParseUtils.process_data_in_chunks(data_file, _insert_data_in_chunks, test, threads)
+        ParseUtils.insert_data_in_parallel(data_file, partial(_insert_data_file, test=test), chroms, threads)
 
         # Remove data file
         if os.path.exists(data_file) and not test:
@@ -568,6 +568,12 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, threads=1
 
 def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/"):
 
+    # Testing
+    try:
+        print(current_process().name)
+    except:
+        pass
+
     # Download file
     download_file = os.path.join(dummy_dir, metadata_object.accession)
     if metadata_object.output_format == "bam":
@@ -602,23 +608,18 @@ def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/"):
 
     return(download_file)
 
-def _insert_data_in_chunks(chunk):
+def _insert_data_file(data_file, test=False):
 
     # Initialize
     session = Session()
 
     # Testing
-    try:
+    if test:
+        lines = 0
         print(current_process().name)
-    except:
-        pass
 
     # For each line...
-    for line in chunk:
-
-        # Skip empty lines
-        if not line:
-            continue
+    for line in ParseUtils.parse_tsv_file(data_file):
 
         # Get region
         region = Region()
@@ -665,6 +666,12 @@ def _insert_data_in_chunks(chunk):
             else:
                 feature.tf = experiment_target
                 ParseUtils.upsert_tf(session, feature)
+
+        # Testing
+        if test:
+            lines += 1
+            if lines > 1000:
+                break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()

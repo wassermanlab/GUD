@@ -385,53 +385,77 @@ class ParseUtililities:
     # Multiprocess #
     #--------------#
 
-    def process_data_in_chunks(self, data_file, insert_function, limit=False, threads=1):
+    def insert_data_in_parallel(self, data_file, insert_function, chromosomes, threads=1):
 
-        from itertools import islice
+        # from itertools import islice
         from multiprocessing import Pool
+        import subprocess
 
         # Initialize
-        pool = Pool()
+        split_files = []
 
-        # Get iterable
-        iterable = self.parse_tsv_file(data_file)
+        # For each chromosome...
+        for chrom in chromosomes:
 
-        # Get chunks
-        chunks = self._grouper(iterable)
+            # Skip if file already split
+            split_file = "%s.%s" % (data_file, chrom)
+            if not os.path.exists(split_file):
 
-        while True:
+                # Parallel split
+                cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (threads, chrom, data_file, split_file)
+                subprocess.call(cmd, shell=True)
 
-            # Groups chunks for multiprocessing
-            grouped_chunks = [list(chunk) for chunk in islice(chunks, threads)]
+            # Append split file
+            split_files.append(split_file)
 
-            if grouped_chunks:
-                pool.map(insert_function, grouped_chunks)
-
-            else:
-                break
-
-            if limit:
-                break
-
-        if limit:
-            for chunk in islice(chunks, threads):
-                continue
-
-        # Close pool
+        # Parallelize
+        pool = Pool(processes=threads)
+        pool.map(insert_function, split_files)
         pool.close()
 
-    def _grouper(self, iterable, n=5000, fillvalue=None):
+        # Remove splot file
+        for split_file in split_files:
+            os.remove(split_file)
 
-        import sys
-        # Python 3+
-        if sys.version_info > (3, 0):
-            from itertools import zip_longest
-        # Python 2.7
-        else:
-            from itertools import izip_longest as zip_longest
+    #     # Get iterable
+    #     iterable = self.parse_tsv_file(data_file)
 
-        args = [iter(iterable)] * n
+    #     # Get chunks
+    #     chunks = self._grouper(iterable)
 
-        return(zip_longest(*args, fillvalue=fillvalue))
+    #     while True:
+
+    #         # Groups chunks for multiprocessing
+    #         grouped_chunks = [list(chunk) for chunk in islice(chunks, threads)]
+
+    #         if grouped_chunks:
+    #             pool.map(insert_function, grouped_chunks)
+
+    #         else:
+    #             break
+
+    #         if test:
+    #             break
+
+    #     if test:
+    #         for chunk in islice(chunks, threads):
+    #             continue
+
+    #     # Close pool
+    #     pool.close()
+
+    # def _grouper(self, iterable, n=5000, fillvalue=None):
+
+    #     import sys
+    #     # Python 3+
+    #     if sys.version_info > (3, 0):
+    #         from itertools import zip_longest
+    #     # Python 2.7
+    #     else:
+    #         from itertools import izip_longest as zip_longest
+
+    #     args = [iter(iterable)] * n
+
+    #     return(zip_longest(*args, fillvalue=fillvalue))
 
 ParseUtils = ParseUtililities()
