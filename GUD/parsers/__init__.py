@@ -420,7 +420,7 @@ class ParseUtililities:
         # Close pool
         pool.close()
 
-    def _grouper(self, iterable, n=1000, fillvalue=None):
+    def _grouper(self, iterable, n=5000, fillvalue=None):
 
         import sys
         # Python 3+
