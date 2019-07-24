@@ -1,4 +1,4 @@
-sample_name	sample_type	cell_or_tissue	add	treatment	cell_line	cancer	comments
+ENCODE sample_name	sample_type	cell_or_tissue	add	treatment	cell_line	cancer	comments
 iPS-11a	cell line	11a	Yes	No	Yes	No	
 iPS-15b	cell line	15b	Yes	No	Yes	No	
 iPS-18a	cell line	18a	Yes	No	Yes	No	
@@ -27,7 +27,6 @@ AG10803	cell line	AG10803	Yes	No	Yes	No
 AG20443	cell line	AG20443	Yes	No	Yes	No	
 Ammon's horn	tissue	Ammon's horn	Yes	No	No	No	
 amnion	tissue	amniotic membrane	Yes	No	No	No	
-amniotic stem cell	primary cell	amniotic stem cell	Yes	No	No	No	
 angular gyrus	tissue	angular gyrus	Yes	No	No	No	
 aorta	tissue	aorta	Yes	No	No	No	
 ascending aorta	tissue	aorta (ascending)	Yes	No	No	No	
@@ -45,18 +44,24 @@ BJ	cell line	BJ	Yes	No	Yes	No
 EL	cell line	BJ-EL	Yes	No	Yes	No	
 ELR	cell line	BJ-ELR	Yes	No	Yes	No	
 arm bone	tissue	bone (arm)	Yes	No	No	No	
+left arm bone	tissue	bone (arm; left)	Yes	No	No	No	
+right arm bone	tissue	bone (arm; right)	Yes	No	No	No	
+femur	tissue	bone (femur)	Yes	No	No	No	
 leg bone	tissue	bone (leg)	Yes	No	No	No	
+left leg bone	tissue	bone (leg; left)	Yes	No	No	No	
+right leg bone	tissue	bone (leg; right)	Yes	No	No	No	
 brain	tissue	brain	Yes	No	No	No	
 middle frontal area 46	tissue	Brodmann area 46 (middle; frontal)	Yes	No	No	No	
+C803	cell line	C1 100 08 0003	Yes	No	Yes	No	
 C4-2B	cell line	C4-2B	Yes	No	Yes	Yes	
 Caco-2	cell line	Caco-2	Yes	No	Yes	Yes	
 Caki2	cell line	Caki-2	Yes	No	Yes	Yes	
+cardiovascular progenitor cell	in vitro differentiated cells	cardiovascular progenitor cell	Yes	No	No	No	
 caudate nucleus	tissue	caudate nucleus	Yes	No	No	No	
 cerebellar cortex	tissue	cerebellar cortex	Yes	No	No	No	
 cerebellum	tissue	cerebellum	Yes	No	No	No	
-chorionic villus	tissue	chorionic membrane	Yes	No	No	No	
-chorion	tissue	chorionic villus	Yes	No	No	No	
-non-pigmented ciliary epithelial cell	primary cell	non-pigmented ciliary epithelial cell	Yes	No	No	No	
+chorion	tissue	chorionic membrane	Yes	No	No	No	
+chorionic villus	tissue	chorionic villus	Yes	No	No	No	
 cingulate gyrus	tissue	cingulate gyrus	Yes	No	No	No	
 CMK	cell line	CMK	Yes	No	Yes	Yes	
 COLO829	cell line	COLO 829	Yes	No	Yes	Yes	
@@ -86,8 +91,8 @@ pulmonary artery endothelial cell	primary cell	endothelial cell (pulmonary arter
 kidney capillary endothelial cell	primary cell	endothelial cell (renal capilar)	Yes	No	No	No	
 endothelial cell of umbilical vein	primary cell	endothelial cell (umbilical vein)	Yes	No	No	No	
 amniotic epithelial cell	primary cell	epithelial cell (amniotic membrane)	Yes	No	No	No	
-mammary epithelial cell	primary cell	epithelial cell (breast)	Yes	No	No	No	
 breast epithelium	tissue	epithelial cell (breast)	Yes	No	No	No	
+mammary epithelial cell	primary cell	epithelial cell (breast)	Yes	No	No	No	
 bronchial epithelial cell	primary cell	epithelial cell (bronchi)	Yes	No	No	No	
 choroid plexus epithelial cell	primary cell	epithelial cell (choroid plexus)	Yes	No	No	No	
 epithelial cell of esophagus	primary cell	epithelial cell (esophagus)	Yes	No	No	No	
@@ -102,7 +107,6 @@ glomerular visceral epithelial cell	primary cell	epithelial cell (visceral glome
 erythroblast	primary cell	erythroblast	Yes	No	No	No	
 esophagus	tissue	esophagus	Yes	No	No	No	
 eye	tissue	eye	Yes	No	No	No	
-femur	tissue	bone (femur)	Yes	No	No	No	
 fibroblast of skin of abdomen	primary cell	fibroblast (abdominal skin)	Yes	No	No	No	
 fibroblast of the aortic adventitia	primary cell	fibroblast (aortic adventitia)	Yes	No	No	No	
 fibroblast of breast	primary cell	fibroblast (breast)	Yes	No	No	No	
@@ -116,6 +120,13 @@ fibroblast of mammary gland	primary cell	fibroblast (mammary gland)	Yes	No	No	No
 fibroblast of villous mesenchyme	primary cell	fibroblast (mesenchymal villi)	Yes	No	No	No	
 fibroblast of peridontal ligament	primary cell	fibroblast (periodontal ligament)	Yes	No	No	No	
 fibroblast of pulmonary artery	primary cell	fibroblast (pulmonary artery)	Yes	No	No	No	
+fibroblast of skin of upper back	tissue	fibroblast (skin; back; upper)	Yes	No	No	No	
+fibroblast of skin of back	tissue	fibroblast (skin; back)	Yes	No	No	No	
+fibroblast of skin of left biceps	tissue	fibroblast (skin; biceps; left)	Yes	No	No	No	
+fibroblast of skin of right biceps	tissue	fibroblast (skin; biceps; right)	Yes	No	No	No	
+fibroblast of skin of left quadriceps	tissue	fibroblast (skin; quadriceps; left)	Yes	No	No	No	
+fibroblast of skin of right quadriceps	tissue	fibroblast (skin; quadriceps; right)	Yes	No	No	No	
+fibroblast of skin of scalp	tissue	fibroblast (skin; scalp)	Yes	No	No	No	
 skin fibroblast	primary cell	fibroblast (skin)	Yes	No	No	No	
 frontal cortex	tissue	frontal cortex	Yes	No	No	No	
 G401	cell line	G-401	Yes	No	Yes	Yes	
@@ -171,9 +182,6 @@ heart	tissue	heart	Yes	No	No	No
 HEK293	cell line	HEK293	Yes	No	Yes	No	
 HEK293T	cell line	HEK293T	Yes	No	Yes	No	
 HeLa-S3	cell line	HeLa S3	Yes	No	Yes	Yes	
-T-helper 1 cell	primary cell	T helper cell (1)	Yes	No	No	No	
-T-helper 17 cell	primary cell	T helper cell (17)	Yes	No	No	No	
-T-helper 2 cell	primary cell	T helper cell (2)	Yes	No	No	No	
 hematopoietic multipotent progenitor cell	in vitro differentiated cells	hematopoietic multipotent progenitor cell	Yes	No	No	No	
 HepG2	cell line	Hep-G2	Yes	No	Yes	Yes	
 hepatic stellate cell	primary cell	hepatic stellate cell	Yes	No	No	No	
@@ -261,6 +269,7 @@ esophagus muscularis mucosa	tissue	mucosa (esophagus)	Yes	No	No	No
 mucosa of rectum	tissue	mucosa (rectum)	Yes	No	No	No	
 mucosa of stomach	tissue	mucosa (stomach)	Yes	No	No	No	
 common myeloid progenitor, CD34-positive	primary cell	myeloid progenitor cell (CD34-positive)	Yes	No	No	No	
+cardiac myoblast	in vitro differentiated cells	myoblast (heart)	Yes	No	No	No	
 skeletal muscle myoblast	primary cell	myoblast (skeletal muscle)	Yes	No	No	No	
 myocyte	in vitro differentiated cells	myocyte	Yes	No	No	No	
 cardiac muscle cell	in vitro differentiated cells	myocyte (heart)	Yes	No	No	No	
@@ -282,6 +291,7 @@ neural stem progenitor cell	in vitro differentiated cells	neural stem progenitor
 neuroepithelial stem cell	in vitro differentiated cells	neuroepithelial stem cell	Yes	No	No	No	
 neuron	in vitro differentiated cells	neuron	Yes	No	No	No	
 neutrophil	primary cell	neutrophil	Yes	No	No	No	
+non-pigmented ciliary epithelial cell	primary cell	non-pigmented ciliary epithelial cell	Yes	No	No	No	
 NT2/D1	cell line	NT2-D1	Yes	No	Yes	Yes	
 occipital lobe	tissue	occipital lobe	Yes	No	No	No	
 OCI-LY1	cell line	OCI-Ly1	Yes	No	Yes	Yes	
@@ -295,9 +305,10 @@ Panc1	cell line	PANC-1	Yes	No	Yes	Yes
 pancreas	tissue	pancreas	Yes	No	No	No	
 body of pancreas	tissue	pancreas (body)	Yes	No	No	No	
 endocrine pancreas	tissue	pancreas (endocrine)	Yes	No	No	No	
-islet precursor cell	in vitro differentiated cells	pancreatic islet precursor cell	Yes	No	No	No	
 islet of Langerhans	tissue	pancreatic islet	Yes	No	No	No	
+islet precursor cell	in vitro differentiated cells	pancreatic islet precursor cell	Yes	No	No	No	
 Parathyroid adenoma	tissue	parathyroid adenoma	Yes	No	No	Yes	
+parathyroid adenoma	tissue	parathyroid adenoma	Yes	No	No	Yes	
 inferior parietal cortex	tissue	parietal cortex (inferior)	Yes	No	No	No	
 8988T	cell line	PaTu 8988t	Yes	No	Yes	Yes	
 PC-3	cell line	PC-3	Yes	No	Yes	Yes	
@@ -308,11 +319,13 @@ PFSK-1	cell line	PFSK-1	Yes	No	Yes	Yes
 placenta	tissue	placenta	Yes	No	No	No	
 placental basal plate	tissue	placenta (basal plate)	Yes	No	No	No	
 pons	tissue	pons	Yes	No	No	No	
+posterior cingulate cortex	tissue	posterior cingulate cortex	Yes	No	No	No	
 prostate gland	tissue	prostate	Yes	No	No	No	
 putamen	tissue	putamen	Yes	No	No	No	
 radial glial cell	in vitro differentiated cells	radial glial cell	Yes	No	No	No	
 mid-neurogenesis radial glial cells	in vitro differentiated cells	radial glial cell (mid-neurogenesis)	Yes	No	No	No	
 Raji	cell line	Raji	Yes	No	Yes	Yes	
+RCC	cell line	RCC	Yes	No	Yes	Yes	
 renal cell carcinoma	cell line	renal carcinoma cell	Yes	No	Yes	Yes	
 renal pelvis	tissue	renal pelvis	Yes	No	No	No	
 left renal pelvis	tissue	renal pelvis (left)	Yes	No	No	No	
@@ -325,6 +338,7 @@ right atrium auricular region	tissue	right atrium (auricle)	Yes	No	No	No
 heart right ventricle	tissue	right ventricle	Yes	No	No	No	
 RKO	cell line	RKO	Yes	No	Yes	Yes	
 RPMI-7951	cell line	RPMI-7951	Yes	No	Yes	Yes	
+RPMI7951	cell line	RPMI-7951	Yes	No	Yes	Yes	
 RPMI8226	cell line	RPMI-8226	Yes	No	Yes	Yes	
 RWPE1	cell line	RWPE-1	Yes	No	Yes	No	
 RWPE2	cell line	RWPE-2	Yes	No	Yes	No	
@@ -357,6 +371,7 @@ smooth muscle cell	in vitro differentiated cells	smooth muscle cell	Yes	No	No	No
 smooth muscle cell of the brain vasculature	primary cell	smooth muscle cell (brain vasculature)	Yes	No	No	No	
 spinal cord	tissue	spinal cord	Yes	No	No	No	
 spleen	tissue	spleen	Yes	No	No	No	
+amniotic stem cell	primary cell	stem cell (amniotic membrane)	Yes	No	No	No	
 mammary stem cell	primary cell	stem cell (breast)	Yes	No	No	No	
 stomach	tissue	stomach	Yes	No	No	No	
 stromal cell of bone marrow	primary cell	stromal cell (bone marrow)	Yes	No	No	No	
@@ -373,15 +388,18 @@ CD4-positive, CD25-positive, alpha-beta regulatory T cell	primary cell	T cell (C
 CD8-positive, alpha-beta memory T cell	primary cell	T cell (CD8-positive alpha/beta memory)	Yes	No	No	No	
 CD8-positive, alpha-beta T cell	primary cell	T cell (CD8-positive alpha/beta)	Yes	No	No	No	
 regulatory T cell	primary cell	T cell (regulatory)	Yes	No	No	No	
+T-helper 1 cell	primary cell	T helper cell (1)	Yes	No	No	No	
+T-helper 17 cell	primary cell	T helper cell (17)	Yes	No	No	No	
+T-helper 2 cell	primary cell	T helper cell (2)	Yes	No	No	No	
 T47D	cell line	T-47D	Yes	No	Yes	Yes	
 temporal lobe	tissue	temporal lobe	Yes	No	No	No	
 testis	tissue	testis	Yes	No	No	No	
 thymus	tissue	thymus	Yes	No	No	No	
 thyroid gland	tissue	thyroid gland	Yes	No	No	No	
 tongue	tissue	tongue	Yes	No	No	No	
+trophoblast	tissue	trophoblast	Yes	No	No	No	
 trophoblast cell	in vitro differentiated cells	trophoblast	Yes	No	No	No	
 trophoblast cell	primary cell	trophoblast	Yes	No	No	No	
-trophoblast	tissue	trophoblast	Yes	No	No	No	
 TTC549	cell line	TTC-549	Yes	No	Yes	Yes	
 kidney tubule cell	primary cell	tubule cell (kidney)	Yes	No	No	No	
 UCSF-4	cell line	UCSF4	Yes	No	Yes	No	
@@ -392,7 +410,9 @@ uterus	tissue	uterus	Yes	No	No	No
 vagina	tissue	vagina	Yes	No	No	No	
 VCaP	cell line	VCaP	Yes	No	Yes	Yes	
 H1-hESC	cell line	WA01	Yes	No	Yes	No	
+H1	cell line	WA01	Yes	No	Yes	No	
 H7-hESC	cell line	WA07	Yes	No	Yes	No	
+H7	cell line	WA07	Yes	No	Yes	No	
 H9	cell line	WA09	Yes	No	Yes	No	
 WERI-Rb-1	cell line	WERI-Rb-1	Yes	No	Yes	Yes	
 WI38	cell line	WI-38	Yes	No	Yes	No	

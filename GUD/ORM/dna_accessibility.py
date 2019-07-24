@@ -10,7 +10,6 @@ from .genomic_feature import GenomicFeature
 from .genomicFeatureMixin2 import GFMixin2
 from sqlalchemy.ext.declarative import declared_attr
 
-
 class DNAAccessibility(GFMixin2, Base):
 
     __tablename__ = "dna_accessibility"

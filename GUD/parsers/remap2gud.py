@@ -4,7 +4,6 @@ import argparse
 from binning import assign_bin
 import getpass
 from multiprocessing import cpu_count
-from multiprocessing import current_process
 import os
 from pybedtools import BedTool, cleanup, set_tempdir
 import re
@@ -19,13 +18,13 @@ else:
     from urllib import urlretrieve
 
 # Import from GUD module
-from GUD import GUDglobals
+from GUD import GUDUtils
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-from . import _get_chroms, _get_db_name, _get_experiment, _get_region, _get_sample, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_experiment, _upsert_region, _upsert_sample, _upsert_source, _upsert_tf
+from . import ParseUtils
 
 usage_msg = """
 usage: %s --genome STR --samples FILE [-h] [options]
@@ -42,8 +41,9 @@ optional arguments:
   --dummy-dir DIR     dummy directory (default = "/tmp/")
   -m, --merge         merge genomic regions using bedtools
                       (default = False)
-  -t, --threads       number of additional threads to use
-                      (default = %s)
+  -t, --test          limit the total of inserts to ~1K per
+                      thread for testing (default = False)
+  --threads INT       number of threads to use (default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
@@ -51,7 +51,7 @@ mysql arguments:
   -p STR, --pwd STR   password (default = ignore this option)
   -P STR, --port STR  port number (default = %s)
   -u STR, --user STR  user name (default = current user)
-""" % (usage_msg, (cpu_count() - 1), GUDglobals.db_name, GUDglobals.db_port)
+""" % (usage_msg, (cpu_count() - 1), GUDUtils.db, GUDUtils.port)
 
 #-------------#
 # Functions   #
@@ -73,14 +73,15 @@ def parse_args():
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
     optional_group.add_argument("-m", "--merge", action="store_true")
-    optional_group.add_argument("-t", "--threads", default=(cpu_count() - 1))
+    optional_group.add_argument("-t", "--test", action="store_true")
+    optional_group.add_argument("--threads", default=(cpu_count() - 1))
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=GUDglobals.db_name)
+    mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
     mysql_group.add_argument("-H", "--host", default="localhost")
     mysql_group.add_argument("-p", "--pwd")
-    mysql_group.add_argument("-P", "--port", default=GUDglobals.db_port)
+    mysql_group.add_argument("-P", "--port", default=GUDUtils.port)
     mysql_group.add_argument("-u", "--user", default=getpass.getuser())
 
     args = parser.parse_args()
@@ -122,53 +123,68 @@ def main():
     # Parse arguments
     args = parse_args()
 
+    # Set MySQL options
+    GUDUtils.user = args.user
+    GUDUtils.pwd = args.pwd
+    GUDUtils.host = args.host
+    GUDUtils.port = args.port
+    GUDUtils.db = args.db
+
     # Insert ReMap data
-    remap_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.samples, args.merge, args.dummy_dir, args.threads)
+    remap_to_gud(args.genome, args.samples, args.dummy_dir, args.merge, args.test, args.threads)
 
-def remap_to_gud(user, pwd, host, port, db, genome, samples_file, merge=False, dummy_dir="/tmp/", threads=1):
+def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=False, threads=1):
     """
-    python -m GUD.parsers.remap2gud --genome hg19 --samples ./samples/ReMap.tsv --dummy-dir ./tmp/ --merge
+    e.g. python -m GUD.parsers.remap2gud --genome hg38 --samples ./samples/ReMap.tsv --dummy-dir ./tmp/ --merge --test -P 3306
     """
 
-    # Globals
+    # Initialize
     global chroms
     global engine
     global experiment
     global Session
     global samples
     global source
-
-    # Initialize
     experiment_type = "ChIP-seq"
     source_name = "ReMap"
     set_tempdir(dummy_dir) # i.e. for pyBedTools
+
+    # Testing
+    if test:
+        global current_process
+        from multiprocessing import current_process
 
     # Download data
     dummy_file = _download_data(genome, dummy_dir)
 
     # Get database name
-    db_name = _get_db_name(user, pwd, host, port, db)
-
-    # If database does not exist...
-    if not database_exists(db_name):
-        _initialize_gud_db(user, pwd, host, port, db, genome)
+    db_name = GUDUtils._get_db_name()
 
     # Get engine/session
-    engine, Session = _initialize_engine_session(db_name)
-    session = Session()
+    engine, Session = GUDUtils._get_engine_session(db_name)
+
+    # Initialize parser utilities
+    ParseUtils.genome = genome
+    ParseUtils.dbname = db_name
+    ParseUtils.engine = engine
+
+    # If database does not exist...
+    ParseUtils.initialize_gud_db()
 
     # Create table
-    if not engine.has_table(TFBinding.__tablename__):
-        TFBinding.__table__.create(bind=engine)
+    ParseUtils.create_table(TFBinding)
+
+    # Start a new session
+    session = Session()
 
     # Get valid chromosomes
-    chroms = _get_chroms(session)
+    chroms = ParseUtils.get_chroms(session)
 
     # Get experiment
     experiment = Experiment()
     experiment.name = experiment_type
-    _upsert_experiment(session, experiment)
-    experiment = _get_experiment(session, experiment_type)    
+    ParseUtils.upsert_experiment(session, experiment)
+    experiment = ParseUtils.get_experiment(session, experiment_type)    
 
     # Get samples
     samples = _get_samples(session, samples_file)
@@ -176,8 +192,8 @@ def remap_to_gud(user, pwd, host, port, db, genome, samples_file, merge=False, d
     # Get source
     source = Source()
     source.name = source_name
-    _upsert_source(session, source)
-    source = _get_source(session, source_name)
+    ParseUtils.upsert_source(session, source)
+    source = ParseUtils.get_source(session, source_name)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
@@ -190,18 +206,18 @@ def remap_to_gud(user, pwd, host, port, db, genome, samples_file, merge=False, d
         data_file = _preprocess_data(bed_file, dummy_dir, merge)
 
         # Parallelize inserts to the database
-        _process_data_in_chunks(data_file, _insert_data_in_chunks, threads)
+        ParseUtils.process_data_in_chunks(data_file, _insert_data_in_chunks, test, threads)
 
         # Remove data file
-        if os.path.exists(data_file):
+        if os.path.exists(data_file) and not test:
             os.remove(data_file)
 
     # Dispose session
     Session.remove()
 
-    # # Remove downloaded file
-    # if os.path.exists(dummy_file):
-    #     os.remove(dummy_file)
+    # Remove downloaded file
+    if os.path.exists(dummy_file) and not test:
+        os.remove(dummy_file)
 
 def _get_samples(session, file_name):
 
@@ -212,7 +228,7 @@ def _get_samples(session, file_name):
     }
 
     # For each line...
-    for line in GUDglobals.parse_tsv_file(file_name):
+    for line in ParseUtils.parse_tsv_file(file_name):
 
         # If add...
         if line[7] == "Yes":
@@ -231,18 +247,16 @@ def _get_samples(session, file_name):
                 sample.cancer = True
 
             # Upsert sample
-            _upsert_sample(session, sample)
+            ParseUtils.upsert_sample(session, sample)
 
             # Get sample ID
-            sample = _get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
+            sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
 
             # Add sample
             samples.setdefault(line[0], sample.uid)
 
-    # For each sample...
+    # For each bugged sample...
     for sample in bugged_samples:
-
-        # Fix sample
         samples[sample] = samples[bugged_samples[sample]]
 
     return(samples)
@@ -289,16 +303,16 @@ def _preprocess_data(file_name, dummy_dir="/tmp/", merge=False):
 
         # Sort BED
         a = BedTool(file_name)
-        a = a.sort()
+        a = a.sort(stream=True)
 
         # Merge BED
         if merge:
-            b = a.merge()
+            b = a.merge(stream=True)
         else:
             b = a
 
         # Intersect
-        a.intersect(b, wa=True, wb=True).saveas(bed_file)
+        a.intersect(b, wa=True, wb=True, stream=True).saveas(bed_file)
 
         # Clean PyBedTools files
         cleanup(remove_all=True)
@@ -307,10 +321,14 @@ def _preprocess_data(file_name, dummy_dir="/tmp/", merge=False):
 
 def _insert_data_in_chunks(chunk):
 
-    print(current_process().name)
-
     # Initialize
     session = Session()
+
+    # Testing
+    try:
+        print(current_process().name)
+    except:
+        pass
 
     # For each line...
     for line in chunk:
@@ -321,9 +339,9 @@ def _insert_data_in_chunks(chunk):
 
         # Get region
         region = Region()
-        region.chrom = line[9]
-        region.start = int(line[10])
-        region.end = int(line[11])
+        region.chrom = line[-3]
+        region.start = int(line[-2])
+        region.end = int(line[-1])
         region.bin = assign_bin(region.start, region.end)
 
         # Ignore non-standard chroms, scaffolds, etc.
@@ -342,10 +360,10 @@ def _insert_data_in_chunks(chunk):
             continue
 
         # Upsert region
-        _upsert_region(session, region)
+        ParseUtils.upsert_region(session, region)
 
         # Get region ID
-        region = _get_region(session, region.chrom, region.start, region.end, region.strand)
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end, region.strand)
 
         # Get TF
         tf = TFBinding()
@@ -356,7 +374,7 @@ def _insert_data_in_chunks(chunk):
         tf.tf = tf_name
 
         # Upsert tf
-        _upsert_tf(session, tf)
+        ParseUtils.upsert_tf(session, tf)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
