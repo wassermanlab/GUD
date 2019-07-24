@@ -120,7 +120,7 @@ class GUDUtilities:
         db_name = self._get_db_name()
 
         try:
-            engine, Session = _initialize_engine_session(db_name)
+            engine, Session = self._get_engine_session(db_name)
         except:
             raise ValueError("Could not connect to GUD: %s" % db_name)
 

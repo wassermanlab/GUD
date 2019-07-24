@@ -12,17 +12,9 @@ class Chrom(Base):
 
     __tablename__ = "chroms"
 
-    chrom = Column(
-        "chrom",
-        String(5),
-        nullable=False
-    )
+    chrom = Column("chrom", String(5), nullable=False)
 
-    size = Column(
-        "size",
-        mysql.INTEGER(unsigned=True),
-        nullable=False
-    )
+    size = Column("size", mysql.INTEGER(unsigned=True), nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(chrom),
@@ -34,15 +26,13 @@ class Chrom(Base):
     )
 
     @classmethod
-    def select_by_chrom(cls, session, chrom):
+    def select_all_chroms(cls, session):
         """
-        Query objects by chromosome name.
+        Select all chromosomes
         """
+        q = session.query(cls)
 
-        q = session.query(cls)\
-            .filter(cls.chrom == chrom)
-
-        return q.first()
+        return q
 
     @classmethod
     def select_by_chroms(cls, session, chroms=[]):
@@ -51,7 +41,6 @@ class Chrom(Base):
         If no names are provided, return all
         objects.
         """
-
         q = session.query(cls)
 
         if chroms:
@@ -60,24 +49,12 @@ class Chrom(Base):
         return q.all()
 
     @classmethod
-    def chrom_size(cls, session, chrom):
-        """
-        Return the size of the given chrom.
-        """
-        
-        q = cls.select_by_chroms(session, chrom)
-
-        for c in q:
-            return int(c.size)
-
-    @classmethod
     def chrom_sizes(cls, session, chroms=[]): 
         """
         Return the size of the given chroms as a
         dict. If no chroms are provided, return
         the size of all chroms.
         """
-
         sizes = {}
 
         q = cls.select_by_chroms(session, chroms)
@@ -95,3 +72,9 @@ class Chrom(Base):
                 "chrom={}".format(self.chrom),
                 "size={}".format(self.size)
             )
+
+    def serialize(self):
+        return {
+            'chrom': self.chrom,
+            'size': self.size,
+            }

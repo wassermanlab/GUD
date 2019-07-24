@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/docs.js')}}"></script>
+{% endblock head %}
+
+{% block content %}
+{% include "nav.html" %}
+<div class="container navbar-fix">
+    <!-- Title Block -->
+    <div class="row">
+        <div class="col-sm">
+            <h1>GUD REST API</h1>
+            <p>This API provides programmatic access to the entire GUD database
+                through standard REST API requests.
+            </p>
+        </div>
+    </div>
+    <!-- Filter -->
+    <div class="spacing">
+        <label for="filterDocs">Filter Docs</label>
+        <select class="form-control" id="filterDocs">
+            <option>All</option>
+            {% for title in titles %}
+            <option>{{title}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <!-- STUFF Block -->
+    <!-- docs , titles-->
+    {% for title in titles %}
+    <div class="row resourceRow {{title}}">
+        <div class="col-sm">
+            <h2>{{title}}</h2>
+            <hr>
+            {% for route in titles[title] %}
+            <p>
+                <!-- [METHOD] [URL] -->
+                <span class="badge badge-primary"> {{docs[route]["METHOD"]}}
+                </span> <code> {{route}} </code>
+                <br>
+                <!-- description -->
+                {{docs[route]["DESCRIPTION"]}} <br>
+                <!-- params -->
+                <!-- key , descriptions , required -->
+                {% if docs[route]["PARAMS"] != {} %}
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th class="docsKeys" scope="col">Key</th>
+                            <th class="docsDescription" scope="col">Description</th>
+                            <th class="docsRequired" scope="col">Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for param in docs[route]["PARAMS"] %}
+                        <tr>
+                            <td>{{param}}</td>
+                            <td>{{docs[route]["PARAMS"][param]["DESCRIPTION"]}}</td>
+                            <td> {% if
+                                docs[route]["PARAMS"][param]["REQUIRED"]%}
+                                Yes
+                                {% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% include "footer.html" %}
+{% endblock content%}

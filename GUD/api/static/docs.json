@@ -1,0 +1,311 @@
+{
+    "/api/v1/genes": {
+        "DESCRIPTION": "get list of genes based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "chrom": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+            },
+            "start": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based start coordinate for data"
+            },
+            "end": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based end coordinate for data"
+            },
+            "location": {
+                "REQUIRED": true,
+                "DESCRIPTION": "location = within | overlapping | exact , where within"
+            },
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by (,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by (,)"
+            },
+            "names": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of gene symbols/names separated by (,)"
+            }
+        }
+    },
+    "/api/v1/genes/symbols": {
+        "DESCRIPTION": "get list of all gene symbols",
+        "METHOD": "GET",
+        "PARAMS": {
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"
+            }
+        }
+    },
+    "/api/v1/short_tandem_repeats/pathogenic": {
+        "DESCRIPTION": "get a list of all pathogenic short tandem repeats",
+        "METHOD": "GET",
+        "PARAMS": {}
+    },
+    "/api/v1/enhancers": {
+        "DESCRIPTION": "get list of enhancers based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "chrom": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+            },
+            "start": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based start coordinate for data"
+            },
+            "end": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based end coordinate for data"
+            },
+            "location": {
+                "REQUIRED": true,
+                "DESCRIPTION": "location = within | overlapping | exact , where within"
+            },
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by (,)"
+            },
+            "experiments": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of experiments separated by (,)"
+            },
+            "samples": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of samples separated by (,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by (,)"
+            }
+        }
+    },
+    "/api/v1/dna_accessibility": {
+        "DESCRIPTION": "get list of dna accessibility based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "chrom": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+            },
+            "start": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based start coordinate for data"
+            },
+            "end": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based end coordinate for data"
+            },
+            "location": {
+                "REQUIRED": true,
+                "DESCRIPTION": "location = within | overlapping | exact , where within"
+            },
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by (,)"
+            },
+            "experiments": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of experiments separated by (,)"
+            },
+            "samples": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of samples separated by (,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by (,)"
+            }
+        }
+    },
+    "/api/v1/histone_modifications": {
+        "DESCRIPTION": "get list of histone modifications based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "chrom": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+            },
+            "start": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based start coordinate for data"
+            },
+            "end": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based end coordinate for data"
+            },
+            "location": {
+                "REQUIRED": true,
+                "DESCRIPTION": "location = within | overlapping | exact , where within"
+            },
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"
+            },
+            "histone_types": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of histone types separated by (,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by (,)"
+            },
+            "experiments": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of experiments separated by (,)"
+            },
+            "samples": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of samples separated by (,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by (,)"
+            }
+        }
+    },
+    "/api/v1/tads": {
+        "DESCRIPTION": "get list of tads based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "chrom": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+            },
+            "start": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based start coordinate for data"
+            },
+            "end": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based end coordinate for data"
+            },
+            "location": {
+                "REQUIRED": true,
+                "DESCRIPTION": "location = within | overlapping | exact , where within"
+            },
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"
+            },
+            "restriction_enzymes": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of restriction enzymes separated by (,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by (,)"
+            },
+            "experiments": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of experiments separated by (,)"
+            },
+            "samples": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of samples separated by (,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by (,)"
+            }
+        }
+    },
+    "/api/v1/tss": {
+        "DESCRIPTION": "get list of tf binding sites based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "chrom": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+            },
+            "start": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based start coordinate for data"
+            },
+            "end": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based end coordinate for data"
+            },
+            "location": {
+                "REQUIRED": true,
+                "DESCRIPTION": "location = within | overlapping | exact , where within"
+            },
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"
+            },
+            "genes": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of genes separated by (,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by (,)"
+            },
+            "experiments": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of experiments separated by (,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by (,)"
+            }
+        }
+    },
+    "/api/v1/chroms": {
+        "DESCRIPTION": "get list of chrom",
+        "METHOD": "GET",
+        "PARAMS": {}
+    },
+    "/api/v1/sources": {
+        "DESCRIPTION": "get list of sources",
+        "METHOD": "GET",
+        "PARAMS": {}
+    },
+    "/api/v1/samples": {
+        "DESCRIPTION": "get list of samples",
+        "METHOD": "GET",
+        "PARAMS": {}
+    },
+    "/api/v1/experiments": {
+        "DESCRIPTION": "get list of experiments",
+        "METHOD": "GET",
+        "PARAMS": {}
+    },
+    "/api/v1/expression": {
+        "DESCRIPTION": "gets list of expression data",
+        "METHOD": "GET",
+        "PARAMS": {
+            "samples": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of clinvar ids separated by (,)"
+            },
+            "max_tpm": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by (,)"
+            },
+            "min_tpm": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by (,)"
+            }
+        }
+    }
+}

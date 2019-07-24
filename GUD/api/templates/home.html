@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+{% endblock head %}
+
+{% block content %}
+{% include "nav.html" %}
+<div class="jumbotron jumbotron-fluid">
+    <div class="container vertical-align">
+            <h1 class="display-4">GUD</h1>
+            <p>GENOMIC UNIFICATION DATABASE</p>
+            <a class="fixed-width btn btn-outline-secondary btn-sm" href="{{ url_for('live_api')}}" role="button">Live API</a>
+            <a class="fixed-width btn btn-outline-secondary btn-sm" href="{{ url_for('docs')}}" role="button">Documentation</a>        
+    </div>
+</div>
+
+
+{% endblock content%}

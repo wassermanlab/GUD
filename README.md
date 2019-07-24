@@ -25,3 +25,15 @@ GUD requires the following dependencies:
 conda create -n gud -c bioconda python=3.7 pybedtools biopython pymysql
 pip install interval-binning SQLAlchemy-FullText-Search sqlalchemy-utils
 ```ma
+
+## SETUP
+```
+conda env create -f environment.yml
+```
+## START UP SERVER
+```
+conda activate GUD
+export FLASK_APP=GUD/api
+export FLASK_ENV=development
+
+```
