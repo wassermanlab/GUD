@@ -201,6 +201,31 @@ class ParseUtililities:
 
         handle.close()
 
+    # def parse_file_in_chunks(self, file_name=None, chunk_size=1024):
+    #     """
+    #     Parses a file and yields lines in chunks.
+
+    #     @input:
+    #     file_name {str}
+    #     chunk_size {int}
+
+    #     @yield: {str}
+    #     """
+
+    #     # Get file handle
+    #     handle = self._get_file_handle(file_name)
+
+    #     while True:
+
+    #         data = handle.read(chunk_size)
+
+    #         if not data:
+    #             break
+
+    #         yield(data)
+
+    #     handle.close()
+
     def write(self, file_name=None, content=None):
         """
         Writes content to a file or, if no file is provided, to STDOUT.
@@ -385,37 +410,15 @@ class ParseUtililities:
     # Multiprocess #
     #--------------#
 
-    def insert_data_in_parallel(self, data_file, insert_function, chromosomes, threads=1):
+    def insert_data_files_in_parallel(self, data_files, insert_function, threads=1):
 
         # from itertools import islice
         from multiprocessing import Pool
-        import subprocess
-
-        # Initialize
-        split_files = []
-
-        # For each chromosome...
-        for chrom in chromosomes:
-
-            # Skip if file already split
-            split_file = "%s.%s" % (data_file, chrom)
-            if not os.path.exists(split_file):
-
-                # Parallel split
-                cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (threads, chrom, data_file, split_file)
-                subprocess.call(cmd, shell=True)
-
-            # Append split file
-            split_files.append(split_file)
 
         # Parallelize
         pool = Pool(processes=threads)
-        pool.map(insert_function, split_files)
+        pool.map(insert_function, data_files)
         pool.close()
-
-        # Remove splot file
-        for split_file in split_files:
-            os.remove(split_file)
 
     #     # Get iterable
     #     iterable = self.parse_tsv_file(data_file)

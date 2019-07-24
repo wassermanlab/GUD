@@ -287,14 +287,18 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
         engine.dispose()
 
         # Prepare data
-        data_file = _preprocess_data(grouped_metadata[(experiment_target, experiment_type)], dummy_dir, merge, threads)
+        data_file = _preprocess_data(grouped_metadata[(experiment_target, experiment_type)], dummy_dir, merge, test, threads)
+
+        # Split data
+        data_files = _split_data(data_file, threads)
 
         # Parallelize inserts to the database
-        ParseUtils.insert_data_in_parallel(data_file, partial(_insert_data_file, test=test), chroms, threads)
+        ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data_file, test=test), threads)
 
         # Remove data file
         if os.path.exists(data_file) and not test:
             os.remove(data_file)
+        exit(0)
 
     # Dispose session
     Session.remove()
@@ -487,7 +491,7 @@ def _group_metadata(metadata):
 
     return(grouped_metadata)
 
-def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, threads=1):
+def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, test=False, threads=1):
 
     # Initialize
     dummy_files = []
@@ -509,7 +513,7 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, threads=1
 
             # Get ENCODE BED files
             pool = Pool(processes=threads)
-            for download_file in pool.imap(partial(_download_ENCODE_bed_file, dummy_dir=dummy_dir), metadata_objects):
+            for download_file in pool.imap(partial(_download_ENCODE_bed_file, dummy_dir=dummy_dir, test=test), metadata_objects):
 
                 # Initialize
                 m = re.search("\/(\w+).(bam|bed.gz)$", download_file)
@@ -566,13 +570,56 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, threads=1
 
     return(bed_file)
 
-def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/"):
+def _split_data(data_file, threads=1):
+
+    # import math
+
+    # Initialize
+    split_files = []
+    # data_file_dir = os.path.dirname(os.path.realpath(data_file))
+
+    # For each chromosome...
+    for chrom in chroms:
+
+        # Skip if file already split
+        split_file = "%s.%s" % (data_file, chrom)
+        if not os.path.exists(split_file):
+
+            # Parallel split
+            cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (threads, chrom, data_file, split_file)
+            subprocess.call(cmd, shell=True)
+
+        # Append split file
+        statinfo = os.stat(split_file)
+        if statinfo.st_size:
+            split_files.append(split_file)
+        else:
+            os.remove(split_file)
+
+    # # Get number of lines
+    # process = subprocess.check_output(["wc -l %s" % data_file], shell=True)
+    # m = re.search("(\d+)", str(process))
+    # l = math.ceil(int(m.group(1))/(threads*10))
+
+    # # Split
+    # cmd = "split -l %s %s %s." % (l, data_file, data_file)
+    # subprocess.call(cmd, shell=True)
+
+    # # For each split file...
+    # for split_file in os.listdir(data_file_dir):
+
+    #     # Append split file
+    #     split_file = os.path.join(data_file_dir, split_file)
+    #     if os.path.abspath(data_file) in split_file:
+    #         split_files.append(split_file)
+
+    return(split_files)
+
+def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/", test=False):
 
     # Testing
-    try:
+    if test:
         print(current_process().name)
-    except:
-        pass
 
     # Download file
     download_file = os.path.join(dummy_dir, metadata_object.accession)
