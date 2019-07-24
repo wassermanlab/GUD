@@ -141,9 +141,27 @@ $(function () {
     $("#sendButton").click(function () {
         url = $("#url").val();
         url = "http://127.0.0.1:5000" + url;
-        $.getJSON(url, function (json) {
-            $(".responseCode").html(JSON.stringify(json, null, 2))
-        });
+        $(".responseCode").html("Loading ...")
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            success: function( data ) {
+                $(".responseCode").html(JSON.stringify(data, null, 2));
+            },
+            error: function( data ) {
+                error = data['responseText'].match(/>(.*?)<\//g);
+                json = {status: error[0].substr(1, error[0].length-3),
+                     statusText: error[1].substr(1, error[1].length-3),
+                     error: error[2].substr(1, error[2].length-3)}
+                $(".responseCode").html(JSON.stringify(json, null, 2));
+            }
+          });
+
+
+
+        // $.getJSON(url, function (json) {
+        //     $(".responseCode").html(JSON.stringify(json, null, 2))
+        // });
     });
 });
 

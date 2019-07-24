@@ -121,8 +121,7 @@ def get_mixin1_keys(request):
         raise BadRequest("start and end should be formatted as integers")
 
     if re.fullmatch('^chr(X|Y|[1-9]|1[0-9]|2[0-2])$', keys['chrom']) == None:
-        raise BadRequest("chromosome should be formatted as chrZ where z \
-            is X, Y, or 1-22")
+        raise BadRequest("chromosome should be formatted as chrZ where z is X, Y, or 1-22")
 
     if (keys['end'] - keys['start']) > 4000000:
         raise BadRequest("start and end must be less than 4000000bp apart")

@@ -17,6 +17,9 @@ from GUD.ORM.chrom import Chrom
 from GUD.ORM.conservation import Conservation
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.gene import Gene
+from GUD.ORM.copy_number_variant import CNV
+from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
+from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.mask import Mask
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample

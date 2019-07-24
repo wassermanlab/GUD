@@ -127,7 +127,7 @@ class GUDUtilities:
         return(Session)
 
     def _get_db_name(self):
-        return("mysql+pymysql://{}:{}@{}:{}/{}".format(self.user, self.pwd, self.host, self.port, self.db))
+        return("mysql://{}:{}@{}:{}/{}".format(self.user, self.pwd, self.host, self.port, self.db))
 
     def _get_engine_session(self, db_name):
 
