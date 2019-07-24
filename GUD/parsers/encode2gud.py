@@ -298,7 +298,6 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
         # Remove data file
         if os.path.exists(data_file) and not test:
             os.remove(data_file)
-        exit(0)
 
     # Dispose session
     Session.remove()
