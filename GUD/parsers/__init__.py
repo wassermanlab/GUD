@@ -15,11 +15,13 @@ from zipfile import ZipFile
 
 from GUD.ORM.chrom import Chrom
 from GUD.ORM.conservation import Conservation
+from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.gene import Gene
 from GUD.ORM.copy_number_variant import CNV
 from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD.ORM.clinvar import ClinVar
+from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.mask import Mask
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
@@ -202,6 +204,31 @@ class ParseUtililities:
 
         handle.close()
 
+    # def parse_file_in_chunks(self, file_name=None, chunk_size=1024):
+    #     """
+    #     Parses a file and yields lines in chunks.
+
+    #     @input:
+    #     file_name {str}
+    #     chunk_size {int}
+
+    #     @yield: {str}
+    #     """
+
+    #     # Get file handle
+    #     handle = self._get_file_handle(file_name)
+
+    #     while True:
+
+    #         data = handle.read(chunk_size)
+
+    #         if not data:
+    #             break
+
+    #         yield(data)
+
+    #     handle.close()
+
     def write(self, file_name=None, content=None):
         """
         Writes content to a file or, if no file is provided, to STDOUT.
@@ -300,7 +327,7 @@ class ParseUtililities:
         return(Chrom.chrom_sizes(session))
 
     def get_experiment(self, session, experiment_type):
-        return(Experiment.select_by_name(session, experiment_type))
+        return(Experiment.select_unique(session, experiment_type))
 
     def get_region(self, session, chrom, start, end, strand=None):
         return(Region.select_unique(session, chrom, start, end, strand))
@@ -313,11 +340,17 @@ class ParseUtililities:
         return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
 
     def get_source(self, session, source_name):
-        return(Source.select_by_name(session, source_name))
+        return(Source.select_unique(session, source_name))
 
     #--------------#
     # Upserts      #
     #--------------#
+
+    def upsert_accessibility(self, session, accessibility):
+
+        if DNAAccessibility.is_unique(session, accessibility.regionID, accessibility.sampleID, accessibility.experimentID, accessibility.sourceID):
+            session.add(accessibility)
+            session.flush()
 
     def upsert_conservation(self, session, conservation):
 
@@ -335,6 +368,12 @@ class ParseUtililities:
 
         if Gene.is_unique(session, gene.regionID, gene.sourceID, gene.name):
             session.add(gene)
+            session.flush()
+
+    def upsert_histone(self, session, histone):
+
+        if HistoneModification.is_unique(session, histone.regionID, histone.sampleID, histone.experimentID, histone.sourceID, histone.histone_type):
+            session.add(histone)
             session.flush()
 
     def upsert_mask(self, session, mask):
@@ -374,53 +413,55 @@ class ParseUtililities:
     # Multiprocess #
     #--------------#
 
-    def process_data_in_chunks(self, data_file, insert_function, threads=1, test=True):
+    def insert_data_files_in_parallel(self, data_files, insert_function, threads=1):
 
-        from itertools import islice
+        # from itertools import islice
         from multiprocessing import Pool
 
-        # Initialize
-        pool = Pool()
-
-        # Get iterable
-        iterable = self.parse_tsv_file(data_file)
-
-        # Get chunks
-        chunks = self._grouper(iterable)
-
-        while True:
-
-            # Groups chunks for multiprocessing
-            grouped_chunks = [list(chunk) for chunk in islice(chunks, threads)]
-
-            if grouped_chunks:
-                pool.map(insert_function, grouped_chunks)
-
-            else:
-                break
-
-            if test:
-                break
-
-        if test:
-            for chunk in islice(chunks, threads):
-                continue
-
-        # Close pool
+        # Parallelize
+        pool = Pool(processes=threads)
+        pool.map(insert_function, data_files)
         pool.close()
 
-    def _grouper(self, iterable, n=1000, fillvalue=None):
+    #     # Get iterable
+    #     iterable = self.parse_tsv_file(data_file)
 
-        import sys
-        # Python 3+
-        if sys.version_info > (3, 0):
-            from itertools import zip_longest
-        # Python 2.7
-        else:
-            from itertools import izip_longest as zip_longest
+    #     # Get chunks
+    #     chunks = self._grouper(iterable)
 
-        args = [iter(iterable)] * n
+    #     while True:
 
-        return(zip_longest(*args, fillvalue=fillvalue))
+    #         # Groups chunks for multiprocessing
+    #         grouped_chunks = [list(chunk) for chunk in islice(chunks, threads)]
+
+    #         if grouped_chunks:
+    #             pool.map(insert_function, grouped_chunks)
+
+    #         else:
+    #             break
+
+    #         if test:
+    #             break
+
+    #     if test:
+    #         for chunk in islice(chunks, threads):
+    #             continue
+
+    #     # Close pool
+    #     pool.close()
+
+    # def _grouper(self, iterable, n=5000, fillvalue=None):
+
+    #     import sys
+    #     # Python 3+
+    #     if sys.version_info > (3, 0):
+    #         from itertools import zip_longest
+    #     # Python 2.7
+    #     else:
+    #         from itertools import izip_longest as zip_longest
+
+    #     args = [iter(iterable)] * n
+
+    #     return(zip_longest(*args, fillvalue=fillvalue))
 
 ParseUtils = ParseUtililities()

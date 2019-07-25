@@ -41,16 +41,14 @@ class Experiment(Base):
     @classmethod
     def is_unique(cls, session, name):
 
-        q = session.query(cls)\
-            .filter(cls.name == name)
+        q = session.query(cls).filter(cls.name == name)
 
         return len(q.all()) == 0
 
     @classmethod
     def select_unique(cls, session, name):
 
-        q = session.query(cls)\
-            .filter(cls.name == name)
+        q = session.query(cls).filter(cls.name == name)
 
         return q.first()
 
