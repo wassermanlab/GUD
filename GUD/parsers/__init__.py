@@ -159,7 +159,7 @@ class ParseUtililities:
         handle = self._get_file_handle(file_name)
 
         # Read in chunks
-        for chunk in pandas.read_csv(handle, header=None, encoding="utf8", sep=delimiter, chunksize=1024):
+        for chunk in pandas.read_csv(handle, header=None, encoding="utf8", sep=delimiter, chunksize=1024, comment="#"):
             for index, row in chunk.iterrows():
                 yield(row.tolist())
 
@@ -407,6 +407,11 @@ class ParseUtililities:
 
         if TFBinding.is_unique(session, tf.regionID, tf.sampleID, tf.experimentID, tf.sourceID, tf.tf):
             session.add(tf)
+            session.flush()
+    
+    def upsert_str(self, session, STR):
+        if ShortTandemRepeat.is_unique(session, STR.regionID, STR.sourceID , STR.pathogenicity):
+            session.add(STR)
             session.flush()
 
     #--------------#

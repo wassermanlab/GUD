@@ -1,18 +1,22 @@
 #!/usr/bin/env python
 
 from . import ParseUtils
+from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD.ORM.source import Source
 from GUD.ORM.region import Region
-from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD import GUDUtils
-import argparse
 from binning import assign_bin
+from functools import partial
 import getpass
-from multiprocessing import cpu_count
-from multiprocessing import current_process
+from multiprocessing import Pool, cpu_count
+from numpy import isnan
 import os
-import re
 import sys
+import re
+import subprocess
+import warnings
+import argparse
+from sqlalchemy_utils import database_exists
 # Python 3+
 if sys.version_info > (3, 0):
     from urllib.request import urlretrieve
@@ -21,24 +25,28 @@ else:
     from urllib import urlretrieve
 
 # Import from GUD module
-
+# python -m GUD.parsers.str2gud --genome hg38 --source_name GangSTR --str_file /home/tavshalom/Desktop/Genomic_STR.GUDformatted.tsv --based 1 -d -d hg38 -u tavshalom 
 usage_msg = """
 usage: %s --genome STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
-inserts short tandem repeats from curated lists to GUD.
+inserts short tandem repeats into GUD from curated sources
+into GUD.
 
-  --genome STR      genome assembly
-  --str_file FILE        short tandem repeat file   
-  --based INT       1 or 0 based  
-  --source STR      source name
+  --genome STR        genome assembly
+  --str_file FILE     Short Tandem Repeat file with columns #chrom\tstart\tend\tmotif\tpathogenicity
+  --based INT         0 or 1 based
+  --source_name STR   source name      
 
 optional arguments:
   -h, --help          show this help message and exit
-  --dummy-dir DIR     dummy directory (default = "/tmp/")
-  --threads INT       number of additional threads to use
-                      (default = %s)
+  --dummy-dir DIR     dummy directory (default = "/tmp/")                      ## TODO remove
+  -m, --merge         merge genomic regions using bedtools                     ## TODO remove 
+                      (default = False)
+  -t, --test          limit the total of inserts to ~1K per
+                      thread for testing (default = False)
+  --threads INT       number of threads to use (default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
@@ -64,10 +72,14 @@ def parse_args():
     parser.add_argument("--genome")
     parser.add_argument("--str_file")
     parser.add_argument("--based")
+    parser.add_argument("--source_name")
 
     # Optional args
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
+    # optional_group.add_argument("--dummy-dir", default="/tmp/")               TODO remove
+    # optional_group.add_argument("-m", "--merge", action="store_true")
+    optional_group.add_argument("-t", "--test", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
 
     # MySQL args
@@ -94,33 +106,31 @@ def check_args(args):
     if args.help:
         print(help_msg)
         exit(0)
-
     # Check mandatory arguments
-    if not args.genome or not args.str_file or not args.based or not args.source:
-        error = ["%s\n%s" % (usage_msg, os.path.basename(
-            __file__)), "error", "argument \"--genome\" \"--str\" \"--based\" \"--source\" is required\n"]
-        print(": ".join(error))
-        exit(0)
-
-    # Check based is 0 or 1 
-    try:
-        args.based = int(args.based)
-    except: 
+    if not args.genome or not args.str_file or not args.based or not args.source_name:
         error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
-                 "argument \"-t\" \"--based\"", "invalid int value", "\"%s\"\n" % args.based]
-        print(": ".join(error))
-        exit(0)
-
-    if int(args.based) not in [0,1]:
-        error = ["%s\n%s" % (usage_msg, os.path.basename(
-            __file__)), "error", "argument \"--based\" must be 0 or 1\n"]
+                 "argument \"--genome\" \"--str_file\" \"--based\" \"--source_name\"  are required\n"]
         print(": ".join(error))
         exit(0)
 
     # Check file exists
-    if os.path.isfile(args.str_file) :
+    if not os.path.isfile(args.str_file):
         error = ["%s\n%s" % (usage_msg, os.path.basename(
-            __file__)), "error", "argument \"--str\" must be a valid file\n"]
+            __file__)), "error", "argument \"--str_file\" must be a valid existing file\n"]
+        print(": ".join(error))
+        exit(0)
+
+    # Check based
+    try:
+        args.based = int(args.based)
+        if args.based not in [0, 1]:
+            error = ["%s\n%s" % (usage_msg, os.path.basename(
+                __file__)), "error", "argument \"--based\" must be 0 or 1\n"]
+            print(": ".join(error))
+            exit(0)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(
+            __file__)), "error", "argument \"--based\" must be 0 or 1\n"]
         print(": ".join(error))
         exit(0)
 
@@ -146,6 +156,8 @@ def check_args(args):
         print(": ".join(error))
         exit(0)
 
+# str_file, based, source_name
+
 
 def main():
 
@@ -159,20 +171,28 @@ def main():
     GUDUtils.port = args.port
     GUDUtils.db = args.db
 
-    # Insert RefGene data
-    str_to_gud(args.genome, args.str_file, args.based, args.source, args.threads)
+    # Insert ENCODE data
+    encode_to_gud(args.genome, args.source_name, args.str_file,
+                  args.based, args.test, args.threads)
 
 
-def str_to_gud(genome, str_file, based, sourceName, threads=1):
+# TODO removed m and dummy_dir
+def encode_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     """
-    python -m GUD.parsers.strgene2gud --genome hg19 --str_file <file> --based 0 --source <source>
+    python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --str_file <FILE> --based <0|1>
     """
 
-    # Globals
+    # Initialize
     global chroms
     global engine
     global Session
     global source
+    # set_tempdir(dummy_dir) # i.e. for pyBedTools                              TODO remove
+
+    # Testing
+    if test:
+        global current_process
+        from multiprocessing import current_process
 
     # Get database name
     db_name = GUDUtils._get_db_name()
@@ -189,7 +209,8 @@ def str_to_gud(genome, str_file, based, sourceName, threads=1):
     ParseUtils.initialize_gud_db()
 
     # Create table
-    ParseUtils.create_table(ShortTandemRepeat)
+    table = ShortTandemRepeat
+    ParseUtils.create_table(table)
 
     # Start a new session
     session = Session()
@@ -199,44 +220,84 @@ def str_to_gud(genome, str_file, based, sourceName, threads=1):
 
     # Get source
     source = Source()
-    source.name = sourceName
+    source.name = source_name
     ParseUtils.upsert_source(session, source)
-    source = ParseUtils.get_source(session, sourceName)
+    source = ParseUtils.get_source(session, source_name)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
 
-    # Parallelize inserts to the database
-    ParseUtils.process_data_in_chunks(
-        str_file, _insert_data_in_chunks, threads)
+    # Prepare data
+    data_file = str_file
 
-    # Remove session
+    # Split data
+    data_files = _split_data(data_file, threads)
+
+    # Parallelize inserts to the database
+    ParseUtils.insert_data_files_in_parallel(
+        data_files, partial(_insert_data_file, based, test=test), threads)
+
+    # Remove data file
+    for df in data_files:
+        if os.path.exists(df):
+            os.remove(data_file)
+
+    # Dispose session
     Session.remove()
 
 
-## pick up here 
-def _insert_data_in_chunks(chunk):
+def _split_data(data_file, threads=1):
 
-    print(current_process().name)
+    # import math
 
-    # Start a new session
+    # Initialize
+    split_files = []
+
+    # For each chromosome...
+    for chrom in chroms:
+
+        # Skip if file already split
+        split_file = "%s.%s" % (data_file, chrom)
+        if not os.path.exists(split_file):
+
+            # Parallel split
+            cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (
+                threads, chrom, data_file, split_file)
+            subprocess.call(cmd, shell=True)
+
+        # Append split file
+        statinfo = os.stat(split_file)
+        if statinfo.st_size:
+            split_files.append(split_file)
+        else:
+            os.remove(split_file)
+
+    return(split_files)
+
+
+def _insert_data_file(data_file, based,  test=False):
+
+    # Initialize
     session = Session()
 
-    # For each line...
-    for line in chunk:
+    # Testing
+    if test:
+        lines = 0
+        print(current_process().name)
 
-        # Skip empty lines
-        if not line:
-            continue
+    # For each line...
+    for line in ParseUtils.parse_tsv_file(data_file):
 
         # Get region
         region = Region()
-        region.chrom = line[2]
-        region.start = int(line[4])
-        region.end = int(line[5])
+        region.chrom = line[0]
+        if based is 1:
+            region.start = int(line[1]) - 1
+        else:
+            region.start = int(line[1])
+        region.end = int(line[2])
         region.bin = assign_bin(region.start, region.end)
-        region.strand = line[3]
 
         # Ignore non-standard chroms, scaffolds, etc.
         if region.chrom not in chroms:
@@ -249,19 +310,20 @@ def _insert_data_in_chunks(chunk):
         region = ParseUtils.get_region(
             session, region.chrom, region.start, region.end, region.strand)
 
-        # Get gene
-        gene = Gene()
-        gene.regionID = region.uid
-        gene.name = line[1]
-        gene.name2 = line[12]
-        gene.cdsStart = int(line[6])
-        gene.cdsEnd = int(line[7])
-        gene.exonStarts = line[9].encode("utf-8")
-        gene.exonEnds = line[10].encode("utf-8")
-        gene.sourceID = source.uid
+        # Get feature
+        STR = ShortTandemRepeat()
+        STR.regionID = region.uid
+        STR.sourceID = source.uid
+        STR.motif = line[3]
+        STR.pathogenicity = int(line[4])
 
-        # Upsert gene
-        ParseUtils.upsert_gene(session, gene)
+        ParseUtils.upsert_str(session, STR)
+
+        # Testing
+        if test:
+            lines += 1
+            if lines > 1000:
+                break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
