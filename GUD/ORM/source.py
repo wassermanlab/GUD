@@ -39,7 +39,7 @@ class Source(Base):
     @classmethod 
     def select_unique(cls, session, name):
 
-        return cls.select_by_name(session, name)
+        return cls.select_by_names(session, [name])
 
     @classmethod
     def select_by_names(cls, session, names=[]):

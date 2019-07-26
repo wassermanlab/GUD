@@ -2,18 +2,14 @@
 
 import argparse
 from binning import assign_bin
+from functools import partial
 import getpass
 from multiprocessing import cpu_count
 import os
 import re
-from sqlalchemy_utils import database_exists
+import subprocess
 import sys
-# Python 3+
-if sys.version_info > (3, 0):
-    from urllib.request import urlopen, urlretrieve
-# Python 2.7
-else:
-    from urllib import urlopen, urlretrieve
+import warnings
 
 # Import from GUD module
 from GUD import GUDUtils
@@ -149,7 +145,7 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
         from multiprocessing import current_process
 
     # Download data
-    dummy_file = _download_data(genome, dummy_dir)
+    data_file = _download_data(genome, dummy_dir)
 
     # Get database name
     db_name = GUDUtils._get_db_name()
@@ -176,27 +172,43 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
 
     # Get source
     source = Source()
-    m = re.search("^%s/*(.+).txt.gz$" % dummy_dir, dummy_file) 
+    m = re.search("^%s/*(.+).txt.gz$" % dummy_dir, data_file) 
     source_name = m.group(1)
     source.name = source_name
     ParseUtils.upsert_source(session, source)
-    source = ParseUtils.get_source(session, source_name)
+    sources = ParseUtils.get_source(session, source_name)
+    source = next(iter(sources))
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
 
+    # Split data
+    data_files = _split_data(data_file, threads)
+
+    # Remove data file
+    if not test and os.path.exists(data_file):
+        os.remove(data_file)
+
     # Parallelize inserts to the database
-    ParseUtils.process_data_in_chunks(dummy_file, _insert_data_in_chunks, test, threads)
+    ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
+
+    # Remove data files
+    for data_file in data_files:
+        if not test and os.path.exists(data_file):
+            os.remove(data_file)
 
     # Dispose session
     Session.remove()
 
-    # Remove downloaded file
-    if os.path.exists(dummy_file) and not test:
-        os.remove(dummy_file)
-
 def _download_data(genome, dummy_dir="/tmp/"):
+
+    # Python 3+
+    if sys.version_info > (3, 0):
+        from urllib.request import urlopen, urlretrieve
+    # Python 2.7
+    else:
+        from urllib import urlopen, urlretrieve
 
     # Initialize
     ftp_files = []
@@ -215,25 +227,49 @@ def _download_data(genome, dummy_dir="/tmp/"):
     ftp_files.sort(key=lambda x: x[0], reverse=True)
 
     # Download data
-    dummy_file = os.path.join(dummy_dir, ftp_files[0][1])
-    if not os.path.exists(dummy_file):
-        f = urlretrieve(os.path.join(url, ftp_files[0][1]), dummy_file)
+    data_file = os.path.join(dummy_dir, ftp_files[0][1])
+    if not os.path.exists(data_file):
+        f = urlretrieve(os.path.join(url, ftp_files[0][1]), data_file)
 
-    return(dummy_file)
+    return(data_file)
 
-def _insert_data_in_chunks(chunk):
+def _split_data(data_file, threads=1):
+
+    # Initialize
+    split_files = []
+
+    # For each chromosome...
+    for chrom in chroms:
+
+        # Skip if file already split
+        split_file = "%s.%s" % (data_file, chrom)
+        if not os.path.exists(split_file):
+
+            # Parallel split
+            cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "[[:space:]]%s[[:space:]]" > %s' % (data_file, threads, chrom, split_file)
+            subprocess.call(cmd, shell=True)
+
+        # Append split file
+        statinfo = os.stat(split_file)
+        if statinfo.st_size:
+            split_files.append(split_file)
+        else:
+            os.remove(split_file)
+
+    return(split_files)
+
+def _insert_data(data_file, test=False):
 
     # Initialize
     session = Session()
 
     # Testing
-    try:
+    if test:
+        lines = 0
         print(current_process().name)
-    except:
-        pass
 
     # For each line...
-    for line in chunk:
+    for line in ParseUtils.parse_tsv_file(data_file):
 
         # Skip empty lines
         if not line:
@@ -258,8 +294,8 @@ def _insert_data_in_chunks(chunk):
 
         # Get conservation
         conservation = Conservation()
-        conservation.regionID = region.uid
-        conservation.sourceID = source.uid
+        conservation.region_id = region.uid
+        conservation.source_id = source.uid
         conservation.score = float(line[-1])
 
         # Upsert conservation
