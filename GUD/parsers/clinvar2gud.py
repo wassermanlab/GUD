@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from . import ParseUtils
-from GUD.ORM.copy_number_variant import CNV
+from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.source import Source
 from GUD.ORM.region import Region
 from GUD import GUDUtils
@@ -17,11 +17,6 @@ import subprocess
 import warnings
 import argparse
 
-# Import from GUD module
-# python -m GUD.parsers.cnv2gud --test \
-# --genome hg38 --source_name dbVar \
-# --cnv_file /space/home/tavshalom/GUD_TABLES/Transfer_GRCh38_190723/GRCh38.nr_deletions.GUDformatted.tsv \
-# -d test -u gud_w 
 usage_msg = """
 usage: %s --genome STR [-h] [options]
 """ % os.path.basename(__file__)
@@ -30,7 +25,7 @@ help_msg = """%s
 inserts copy number variants from curated sourcesq.
 
   --genome STR        genome assembly
-  --cnv_file FILE     Short Tandem Repeat file with columns #chrom\tstart\tend\tmotif\tpathogenicity
+  --clinvar_file FILE Clinvar file with columns #CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tN
   --source_name STR   source name      
 
 optional arguments:
@@ -61,7 +56,7 @@ def parse_args():
 
     # Mandatory args
     parser.add_argument("--genome")
-    parser.add_argument("--cnv_file")
+    parser.add_argument("--clinvar_file")
     parser.add_argument("--source_name")
 
     # Optional args
@@ -95,16 +90,16 @@ def check_args(args):
         print(help_msg)
         exit(0)
     # Check mandatory arguments
-    if not args.genome or not args.cnv_file or not args.source_name:
+    if not args.genome or not args.clinvar_file or not args.source_name:
         error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
-                 "argument \"--genome\" \"--cnv_file\" \"--source_name\"  are required\n"]
+                 "argument \"--genome\" \"--clinvar_file\" \"--source_name\"  are required\n"]
         print(": ".join(error))
         exit(0)
 
     # Check file exists
-    if not os.path.isfile(args.cnv_file):
+    if not os.path.isfile(args.clinvar_file):
         error = ["%s\n%s" % (usage_msg, os.path.basename(
-            __file__)), "error", "argument \"--cnv_file\" must be a valid existing file\n"]
+            __file__)), "error", "argument \"--clinvar_file\" must be a valid existing file\n"]
         print(": ".join(error))
         exit(0)
 
@@ -146,12 +141,11 @@ def main():
     GUDUtils.db = args.db
 
     # Insert ENCODE data
-    cnv_to_gud(args.genome, args.source_name, args.cnv_file,
+    clinvar_to_gud(args.genome, args.source_name, args.clinvar_file,
                   args.test, args.threads)
 
 
-# TODO removed m and dummy_dir
-def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
+def clinvar_to_gud(genome, source_name, clinvar_file, test=False, threads=1):
     """
     python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --snv_file <FILE> 
     """
@@ -181,7 +175,7 @@ def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
     ParseUtils.initialize_gud_db()
 
     # Create table
-    ParseUtils.create_table(CNV)
+    ParseUtils.create_table(ClinVar)
 
     # Start a new session
     session = Session()
@@ -201,7 +195,7 @@ def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
     engine.dispose()
 
     # Prepare data
-    data_file = cnv_file
+    data_file = clinvar_file
 
     # Split data
     data_files = _split_data(data_file, threads)
@@ -263,8 +257,8 @@ def _insert_data(data_file, test=False):
         # Get region
         region = Region()
         region.chrom = line[0]
-        region.start = int(line[1])
-        region.end = int(line[2])
+        region.start = int(line[1]) -1
+        region.end = region.start + len(line[3])
         region.bin = assign_bin(region.start, region.end)
 
         # Ignore non-standard chroms, scaffolds, etc.
@@ -279,16 +273,61 @@ def _insert_data(data_file, test=False):
             session, region.chrom, region.start, region.end, region.strand)
 
         # Get feature
-        cnv = CNV()
-        cnv.region_id = region.uid
-        cnv.source_id = source.uid
-        cnv.copy_number_change = int(line[3])
-        cnv.clinical_assertion = line[4].replace(";", ",").encode(encoding='UTF-8')
-        cnv.clinvar_accession = line[5].replace(";", ",").encode(encoding='UTF-8')
-        cnv.dbVar_accession = line[6].replace(";", ",").encode(encoding='UTF-8')
+        clinvar = ClinVar()
+        clinvar.region_id = region.uid
+        clinvar.source_id = source.uid
+        clinvar.ref = line[3].encode(encoding='UTF-8')
+        clinvar.alt = line[4].encode(encoding='UTF-8')
+        clinvar.clinvar_variation_ID = line[2]
+        ## get info 
+        info = line[7].split(";")
+        infoDict = {}
+        for t in info: 
+            if "=" in t:
+                infoDict[t.split("=")[0]] = t.split("=")[1]
+        try:
+            ANN = infoDict["ANN"].split("|")
+            clinvar.ANN_Annotation = ANN[1].encode(encoding='UTF-8')
+            clinvar.ANN_Annotation_Impact = ANN[2].encode(encoding='UTF-8')
+            clinvar.ANN_Gene_Name = ANN[3].encode(encoding='UTF-8')
+            clinvar.ANN_Gene_ID = ANN[4].encode(encoding='UTF-8')
+            clinvar.ANN_Feature_Type = ANN[5].encode(encoding='UTF-8')
+            clinvar.ANN_Feature_ID = ANN[6].encode(encoding='UTF-8')
+        except:
+            clinvar.ANN_Annotation = None
+            clinvar.ANN_Annotation_Impact = None
+            clinvar.ANN_Gene_Name = None
+            clinvar.ANN_Gene_ID = None
+            clinvar.ANN_Feature_Type = None
+            clinvar.ANN_Feature_ID = None
+        try: 
+            clinvar.CADD = float(infoDict["CADD"])
+        except:  
+            clinvar.CADD = None
+        try:
+            clinvar.CLNDISDB = infoDict["CLNDISDB"].encode(encoding='UTF-8')
+        except:  
+            clinvar.CLNDN = None
+        try:
+            clinvar.CLNDN = infoDict["CLNDN"].encode(encoding='UTF-8')
+        except:  
+            clinvar.CLNDN = None
+        try:
+            clinvar.CLNSIG = infoDict["CLNSIG"].encode(encoding='UTF-8')
+        except:  
+            clinvar.CLNSIG = None
+        if ParseUtils.genome is "hg19":
+            clinvar.gnomad_exome_af_global      = float(infoDict["gnomad_exome_af_global"])
+            clinvar.gnomad_exome_hom_global     = float(infoDict["gnomad_exome_hom_global"])
+            clinvar.gnomad_genome_af_global     = float(infoDict["gnomad_genome_af_global"])
+            clinvar.gnomad_genome_hom_global    = float(infoDict["gnomad_genome_hom_global"])
+        else:
+            clinvar.gnomad_exome_af_global      = None
+            clinvar.gnomad_exome_hom_global     = None
+            clinvar.gnomad_genome_af_global     = None
+            clinvar.gnomad_genome_hom_global    = None
 
-        ParseUtils.upsert_cnv(session, cnv)
-
+        ParseUtils.upsert_clinvar(session, clinvar)
         # Testing
         if test:
             lines += 1

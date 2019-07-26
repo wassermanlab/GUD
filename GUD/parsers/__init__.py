@@ -419,6 +419,11 @@ class ParseUtililities:
             session.add(cnv)
             session.flush()
 
+    def upsert_clinvar(self, session, clinvar):
+        if clinvar.is_unique(session, clinvar.clinvar_variation_ID):
+            session.add(clinvar)
+            session.flush()
+
     #--------------#
     # Multiprocess #
     #--------------#

@@ -20,18 +20,18 @@ class ClinVar(GFMixin1, Base):
     __tablename__ = "clinvar"
 
     ##fields
-    ref = Column("ref", mysql.VARCHAR(5000), nullable=False) ## check these
-    alt = Column("alt", mysql.VARCHAR(5000), nullable=False) ## check these
-    clinvarID = Column("clinvarID", mysql.VARCHAR(7), nullable=False)
+    ref = Column("ref", mysql.VARCHAR(5000), nullable=False) 
+    alt = Column("alt", mysql.VARCHAR(5000), nullable=False) 
+    clinvar_variation_ID = Column("clinvar_variation_ID", mysql.INTEGER(unsigned=True), nullable=False)
     ##info
     ANN_Annotation = Column("ANN_Annotation", mysql.VARCHAR(250))
     ANN_Annotation_Impact = Column("ANN_Annotation_Impact", mysql.VARCHAR(50))
     ANN_Gene_Name = Column("ANN_Gene_Name", mysql.VARCHAR(50))
-    ANN_Gene_ID = Column("ANN_Gene_ID", mysql.VARCHAR(50))
+    ANN_Gene_ID = Column("ANN_Gene_ID", mysql.VARCHAR(100))
     ANN_Feature_Type = Column("ANN_Feature_Type", mysql.VARCHAR(500))
     ANN_Feature_ID = Column("ANN_Feature_ID", mysql.VARCHAR(50))
     CADD = Column("CADD", Float)
-    CLNDISDB = Column("CLNDISDB", mysql.VARCHAR(3000)) ## check 
+    CLNDISDB = Column("CLNDISDB", mysql.VARCHAR(3000))  
     CLNDN = Column("CLNDN", mysql.VARCHAR(3000))
     CLNSIG = Column("CLNSIG", mysql.VARCHAR(500))
     gnomad_exome_af_global = Column("gnomad_exome_af_global", Float)
@@ -42,11 +42,11 @@ class ClinVar(GFMixin1, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-        UniqueConstraint(cls.clinvarID),
+        UniqueConstraint(cls.clinvar_variation_ID),
 
         Index("ix_source_id", cls.source_id),
         Index("ix_clinvar", cls.region_id),
-        Index("ix_clinvar_id", cls.clinvarID),
+        Index("ix_clinvar_id", cls.clinvar_variation_ID),
 
         {  
             "mysql_engine": "MyISAM",
@@ -60,14 +60,14 @@ class ClinVar(GFMixin1, Base):
         filter query by location
         """
 
-        q = query.filter(cls.clinvarID.in_(clinvarIDs))
+        q = query.filter(cls.clinvar_variation_ID.in_(clinvarIDs))
 
         return q
 
     # not included in REST
     @classmethod
     def is_unique(cls, session, clinvarID):
-        q = session.query(cls).filter(cls.clinvarID == clinvarID)
+        q = session.query(cls).filter(cls.clinvar_variation_ID == clinvarID)
         return len(q.all()) == 0
 
     @classmethod
@@ -78,7 +78,7 @@ class ClinVar(GFMixin1, Base):
             "source": feat.Source.name,
             "ref": feat.ClinVar.ref,
             "alt": feat.ClinVar.alt,
-            "clinvarID": feat.ClinVar.clinvarID,
+            "clinvarID": feat.ClinVar.clinvar_variation_ID,
             "ANN_Annotation": feat.ClinVar.ANN_Annotation,
             "ANN_Annotation_Impact": feat.ClinVar.ANN_Annotation_Impact,
             "ANN_Gene_Name": feat.ClinVar.ANN_Gene_Name,

@@ -30,7 +30,7 @@ help_msg = """%s
 inserts copy number variants from curated sourcesq.
 
   --genome STR        genome assembly
-  --cnv_file FILE     Short Tandem Repeat file with columns #chrom\tstart\tend\tmotif\tpathogenicity
+  --cnv_file FILE     Copy number variant file with columns #chrom\tstart\tend\tcopy_number_change\tclinical_assertion\tclinvar_accession\tdbVar_accession
   --source_name STR   source name      
 
 optional arguments:
