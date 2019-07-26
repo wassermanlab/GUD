@@ -25,7 +25,10 @@ else:
     from urllib import urlretrieve
 
 # Import from GUD module
-# python -m GUD.parsers.str2gud --genome hg38 --source_name GangSTR --str_file /home/tavshalom/Desktop/Genomic_STR.GUDformatted.tsv --based 1 -d -d hg38 -u tavshalom 
+# python -m GUD.parsers.str2gud --test \
+# --genome hg38 --source_name GangSTR \
+# --str_file /space/home/tavshalom/GUD_TABLES/Transfer_GRCh38_190723/Genomic_STR.GUDformatted.tsv \
+# --based 1 -d hg38 -u gud_w 
 usage_msg = """
 usage: %s --genome STR [-h] [options]
 """ % os.path.basename(__file__)
@@ -172,16 +175,15 @@ def main():
     GUDUtils.db = args.db
 
     # Insert ENCODE data
-    encode_to_gud(args.genome, args.source_name, args.str_file,
+    str_to_gud(args.genome, args.source_name, args.str_file,
                   args.based, args.test, args.threads)
 
 
 # TODO removed m and dummy_dir
-def encode_to_gud(genome, source_name, str_file, based, test=False, threads=1):
+def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     """
     python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --str_file <FILE> --based <0|1>
     """
-
     # Initialize
     global chroms
     global engine
@@ -236,7 +238,7 @@ def encode_to_gud(genome, source_name, str_file, based, test=False, threads=1):
 
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(
-        data_files, partial(_insert_data_file, based, test=test), threads)
+        data_files, partial(_insert_data_file, based=based, test=test), threads)
 
     # Remove data file
     for df in data_files:
@@ -276,11 +278,9 @@ def _split_data(data_file, threads=1):
     return(split_files)
 
 
-def _insert_data_file(data_file, based,  test=False):
-
+def _insert_data_file(data_file, based, test=False):
     # Initialize
     session = Session()
-
     # Testing
     if test:
         lines = 0
