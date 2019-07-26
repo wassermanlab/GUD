@@ -18,6 +18,9 @@ from GUD.ORM.conservation import Conservation
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.gene import Gene
+from GUD.ORM.copy_number_variant import CNV
+from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
+from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.mask import Mask
 from GUD.ORM.region import Region
@@ -156,7 +159,7 @@ class ParseUtililities:
         handle = self._get_file_handle(file_name)
 
         # Read in chunks
-        for chunk in pandas.read_csv(handle, header=None, encoding="utf8", sep=delimiter, chunksize=1024):
+        for chunk in pandas.read_csv(handle, header=None, encoding="utf8", sep=delimiter, chunksize=1024, comment="#"):
             for index, row in chunk.iterrows():
                 yield(row.tolist())
 
@@ -345,13 +348,13 @@ class ParseUtililities:
 
     def upsert_accessibility(self, session, accessibility):
 
-        if DNAAccessibility.is_unique(session, accessibility.region_id, accessibility.sample_id, accessibility.experiment_id, accessibility.source_id):
+        if DNAAccessibility.is_unique(session, accessibility.regionID, accessibility.sampleID, accessibility.experimentID, accessibility.sourceID):
             session.add(accessibility)
             session.flush()
 
     def upsert_conservation(self, session, conservation):
 
-        if Conservation.is_unique(session, conservation.region_id, conservation.source_id):
+        if Conservation.is_unique(session, conservation.regionID, conservation.sourceID):
             session.add(conservation)
             session.flush()
 
@@ -363,19 +366,19 @@ class ParseUtililities:
 
     def upsert_gene(self, session, gene):
 
-        if Gene.is_unique(session, gene.region_id, gene.name, gene.source_id):
+        if Gene.is_unique(session, gene.regionID, gene.sourceID, gene.name):
             session.add(gene)
             session.flush()
 
     def upsert_histone(self, session, histone):
 
-        if HistoneModification.is_unique(session, histone.region_id, histone.sample_id, histone.experiment_id, histone.source_id, histone.histone_type):
+        if HistoneModification.is_unique(session, histone.regionID, histone.sampleID, histone.experimentID, histone.sourceID, histone.histone_type):
             session.add(histone)
             session.flush()
 
     def upsert_mask(self, session, mask):
 
-        if Mask.is_unique(session, mask.region_id, mask.source_id):
+        if Mask.is_unique(session, mask.regionID, mask.sourceID):
             session.add(mask)
             session.flush()
 
@@ -402,8 +405,13 @@ class ParseUtililities:
 
     def upsert_tf(self, session, tf):
 
-        if TFBinding.is_unique(session, tf.region_id, tf.sample_id, tf.experiment_id, tf.source_id, tf.tf):
+        if TFBinding.is_unique(session, tf.regionID, tf.sampleID, tf.experimentID, tf.sourceID, tf.tf):
             session.add(tf)
+            session.flush()
+    
+    def upsert_str(self, session, STR):
+        if ShortTandemRepeat.is_unique(session, STR.regionID, STR.sourceID , STR.pathogenicity):
+            session.add(STR)
             session.flush()
 
     #--------------#
