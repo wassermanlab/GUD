@@ -585,7 +585,7 @@ def _split_data(data_file, threads=1):
         if not os.path.exists(split_file):
 
             # Parallel split
-            cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (threads, chrom, data_file, split_file)
+            cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" > %s' % (data_file, threads, chrom, split_file)
             subprocess.call(cmd, shell=True)
 
         # Append split file

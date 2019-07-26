@@ -16,13 +16,6 @@ import re
 import subprocess
 import warnings
 import argparse
-from sqlalchemy_utils import database_exists
-# Python 3+
-if sys.version_info > (3, 0):
-    from urllib.request import urlretrieve
-# Python 2.7
-else:
-    from urllib import urlretrieve
 
 # Import from GUD module
 # python -m GUD.parsers.str2gud --test \
@@ -211,14 +204,14 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     ParseUtils.initialize_gud_db()
 
     # Create table
-    table = ShortTandemRepeat
-    ParseUtils.create_table(table)
+    ParseUtils.create_table(ShortTandemRepeat)
 
     # Start a new session
     session = Session()
 
     # Get valid chromosomes
     chroms = ParseUtils.get_chroms(session)
+
 
     # Get source
     source = Source()
@@ -238,16 +231,15 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
 
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(
-        data_files, partial(_insert_data_file, based=based, test=test), threads)
+        data_files, partial(_insert_data, based=based, test=test), threads)
 
     # Remove data file
     for df in data_files:
         if os.path.exists(df):
             os.remove(data_file)
 
-    # Dispose session
+    # Remove session
     Session.remove()
-
 
 def _split_data(data_file, threads=1):
 
@@ -278,9 +270,11 @@ def _split_data(data_file, threads=1):
     return(split_files)
 
 
-def _insert_data_file(data_file, based, test=False):
+def _insert_data(data_file, based=1, test=False):
+
     # Initialize
     session = Session()
+
     # Testing
     if test:
         lines = 0
@@ -292,10 +286,9 @@ def _insert_data_file(data_file, based, test=False):
         # Get region
         region = Region()
         region.chrom = line[0]
-        if based is 1:
-            region.start = int(line[1]) - 1
-        else:
-            region.start = int(line[1])
+        region.start = int(line[1])
+        if based:
+            region.start -= 1
         region.end = int(line[2])
         region.bin = assign_bin(region.start, region.end)
 
@@ -312,8 +305,8 @@ def _insert_data_file(data_file, based, test=False):
 
         # Get feature
         STR = ShortTandemRepeat()
-        STR.regionID = region.uid
-        STR.sourceID = source.uid
+        STR.region_id = region.uid
+        STR.source_id = source.uid
         STR.motif = line[3]
         STR.pathogenicity = int(line[4])
 
@@ -334,5 +327,4 @@ def _insert_data_file(data_file, based, test=False):
 #-------------#
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()
