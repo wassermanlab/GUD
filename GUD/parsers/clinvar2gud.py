@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from . import ParseUtils
-from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
+from GUD.ORM.copy_number_variant import CNV
 from GUD.ORM.source import Source
 from GUD.ORM.region import Region
 from GUD import GUDUtils
@@ -18,21 +18,19 @@ import warnings
 import argparse
 
 # Import from GUD module
-# python -m GUD.parsers.str2gud --test \
-# --genome hg38 --source_name GangSTR \
-# --str_file /space/home/tavshalom/GUD_TABLES/Transfer_GRCh38_190723/Genomic_STR.GUDformatted.tsv \
-# --based 1 -d hg38 -u gud_w 
+# python -m GUD.parsers.cnv2gud --test \
+# --genome hg38 --source_name dbVar \
+# --cnv_file /space/home/tavshalom/GUD_TABLES/Transfer_GRCh38_190723/GRCh38.nr_deletions.GUDformatted.tsv \
+# -d test -u gud_w 
 usage_msg = """
 usage: %s --genome STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
-inserts short tandem repeats into GUD from curated sources
-into GUD.
+inserts copy number variants from curated sourcesq.
 
   --genome STR        genome assembly
-  --str_file FILE     Short Tandem Repeat file with columns #chrom\tstart\tend\tmotif\tpathogenicity
-  --based INT         0 or 1 based
+  --cnv_file FILE     Short Tandem Repeat file with columns #chrom\tstart\tend\tmotif\tpathogenicity
   --source_name STR   source name      
 
 optional arguments:
@@ -63,8 +61,7 @@ def parse_args():
 
     # Mandatory args
     parser.add_argument("--genome")
-    parser.add_argument("--str_file")
-    parser.add_argument("--based")
+    parser.add_argument("--cnv_file")
     parser.add_argument("--source_name")
 
     # Optional args
@@ -98,30 +95,16 @@ def check_args(args):
         print(help_msg)
         exit(0)
     # Check mandatory arguments
-    if not args.genome or not args.str_file or not args.based or not args.source_name:
+    if not args.genome or not args.cnv_file or not args.source_name:
         error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
-                 "argument \"--genome\" \"--str_file\" \"--based\" \"--source_name\"  are required\n"]
+                 "argument \"--genome\" \"--cnv_file\" \"--source_name\"  are required\n"]
         print(": ".join(error))
         exit(0)
 
     # Check file exists
-    if not os.path.isfile(args.str_file):
+    if not os.path.isfile(args.cnv_file):
         error = ["%s\n%s" % (usage_msg, os.path.basename(
-            __file__)), "error", "argument \"--str_file\" must be a valid existing file\n"]
-        print(": ".join(error))
-        exit(0)
-
-    # Check based
-    try:
-        args.based = int(args.based)
-        if args.based not in [0, 1]:
-            error = ["%s\n%s" % (usage_msg, os.path.basename(
-                __file__)), "error", "argument \"--based\" must be 0 or 1\n"]
-            print(": ".join(error))
-            exit(0)
-    except:
-        error = ["%s\n%s" % (usage_msg, os.path.basename(
-            __file__)), "error", "argument \"--based\" must be 0 or 1\n"]
+            __file__)), "error", "argument \"--cnv_file\" must be a valid existing file\n"]
         print(": ".join(error))
         exit(0)
 
@@ -163,14 +146,14 @@ def main():
     GUDUtils.db = args.db
 
     # Insert ENCODE data
-    str_to_gud(args.genome, args.source_name, args.str_file,
-                  args.based, args.test, args.threads)
+    cnv_to_gud(args.genome, args.source_name, args.cnv_file,
+                  args.test, args.threads)
 
 
 # TODO removed m and dummy_dir
-def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
+def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
     """
-    python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --str_file <FILE> --based <0|1>
+    python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --snv_file <FILE> 
     """
     # Initialize
     global chroms
@@ -198,7 +181,7 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     ParseUtils.initialize_gud_db()
 
     # Create table
-    ParseUtils.create_table(ShortTandemRepeat)
+    ParseUtils.create_table(CNV)
 
     # Start a new session
     session = Session()
@@ -218,14 +201,14 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     engine.dispose()
 
     # Prepare data
-    data_file = str_file
+    data_file = cnv_file
 
     # Split data
     data_files = _split_data(data_file, threads)
 
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(
-        data_files, partial(_insert_data, based=based, test=test), threads)
+        data_files, partial(_insert_data, test=test), threads)
 
     # Remove data file
     for df in data_files:
@@ -264,7 +247,7 @@ def _split_data(data_file, threads=1):
     return(split_files)
 
 
-def _insert_data(data_file, based=1, test=False):
+def _insert_data(data_file, test=False):
 
     # Initialize
     session = Session()
@@ -281,8 +264,6 @@ def _insert_data(data_file, based=1, test=False):
         region = Region()
         region.chrom = line[0]
         region.start = int(line[1])
-        if based:
-            region.start -= 1
         region.end = int(line[2])
         region.bin = assign_bin(region.start, region.end)
 
@@ -298,13 +279,15 @@ def _insert_data(data_file, based=1, test=False):
             session, region.chrom, region.start, region.end, region.strand)
 
         # Get feature
-        STR = ShortTandemRepeat()
-        STR.region_id = region.uid
-        STR.source_id = source.uid
-        STR.motif = line[3]
-        STR.pathogenicity = int(line[4])
+        cnv = CNV()
+        cnv.region_id = region.uid
+        cnv.source_id = source.uid
+        cnv.copy_number_change = int(line[3])
+        cnv.clinical_assertion = line[4].replace(";", ",").encode(encoding='UTF-8')
+        cnv.clinvar_accession = line[5].replace(";", ",").encode(encoding='UTF-8')
+        cnv.dbVar_accession = line[6].replace(";", ",").encode(encoding='UTF-8')
 
-        ParseUtils.upsert_str(session, STR)
+        ParseUtils.upsert_cnv(session, cnv)
 
         # Testing
         if test:

@@ -19,18 +19,17 @@ from sqlalchemy.ext.declarative import declared_attr
 class CNV(GFMixin1, Base):
     __tablename__ = "copy_number_variants"
 
-    variant_type = Column("variant_type", String(50), nullable=False)
-    copy_number = Column("copy_number", Integer, nullable=False)
-    clinical_interpretation = Column("clinical_interpretation", String(50), nullable=False)
-
-
+    copy_number_change  = Column("copy_number_change", Integer, nullable=False)
+    clinical_assertion  = Column("clinical_assertion", mysql.LONGBLOB, nullable=False)
+    clinvar_accession   = Column("clinvar_accession", mysql.LONGBLOB, nullable=False)
+    dbVar_accession     = Column("dbVar_accession", mysql.LONGBLOB, nullable=False)
+    
     @declared_attr
     def __table_args__(cls):
         return (
         Index("ix_source_id", cls.source_id),
-        Index("ix_cnv", cls.region_id),
+        Index("ix_cnv_region_id", cls.region_id),
         Index("ix_cnv_uid", cls.uid),
-        Index("ix_cnv_clinical_interpretation", cls.clinical_interpretation),
 
         {
             "mysql_engine": "MyISAM",
@@ -40,8 +39,10 @@ class CNV(GFMixin1, Base):
 
     #not included in REST API
     @classmethod
-    def is_unique(cls, session, name):
-        q = session.query(cls).filter(cls.uid == name)
+    def is_unique(cls, session, regionID, sourceID, copy_number_change):
+        q = session.query(cls).filter(cls.region_id == regionID,
+                                      cls.source_id == sourceID, 
+                                      cls.copy_number_change == copy_number_change)
         q = q.all()
         return len(q) == 0
 

@@ -405,13 +405,18 @@ class ParseUtililities:
 
     def upsert_tf(self, session, tf):
 
-        if TFBinding.is_unique(session, tf.regionID, tf.sampleID, tf.experimentID, tf.sourceID, tf.tf):
+        if TFBinding.is_unique(session, tf.region_id, tf.sample_id, tf.experiment_id, tf.source_id, tf.tf):
             session.add(tf)
             session.flush()
     
     def upsert_str(self, session, STR):
-        if ShortTandemRepeat.is_unique(session, STR.regionID, STR.sourceID , STR.pathogenicity):
+        if ShortTandemRepeat.is_unique(session, STR.region_id, STR.source_id, STR.pathogenicity):
             session.add(STR)
+            session.flush()
+    
+    def upsert_cnv(self, session, cnv):
+        if CNV.is_unique(session, cnv.region_id, cnv.source_id, cnv.copy_number_change):
+            session.add(cnv)
             session.flush()
 
     #--------------#
