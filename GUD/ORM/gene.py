@@ -37,7 +37,7 @@ class Gene(GFMixin1, Base):
             ),
             # query by bin range
             Index("ix_source_id", cls.source_id),
-            Index("ix_regionID", cls.region_id),
+            Index("ix_region_id", cls.region_id),
             Index("ix_name", cls.name),
             Index("ix_name2", cls.name2),
             {
