@@ -363,7 +363,7 @@ class ParseUtililities:
 
     def upsert_gene(self, session, gene):
 
-        if Gene.is_unique(session, gene.region_id, gene.name, gene.source_id):
+        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name):
             session.add(gene)
             session.flush()
 
