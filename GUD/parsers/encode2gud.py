@@ -504,7 +504,7 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, test=Fals
     # Get label
     metadata_object = next(iter(metadata_objects))
     label = metadata_object.experiment_type
-    if Feature.__tablename__ == "histone" or Feature.__tablename__ == "tf_binding":
+    if Feature.__tablename__ == "histone_modifications" or Feature.__tablename__ == "tf_binding":
         m = re.search("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$", metadata_object.experiment_target)
         label += ".%s" % m.group(2)
 
