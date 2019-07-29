@@ -303,7 +303,6 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
             for data_file in data_files:
                 if os.path.exists(data_file):
                     os.remove(data_file)
-        break
 
     # Remove downloaded file
     if os.path.exists(metadata_file) and not test:
