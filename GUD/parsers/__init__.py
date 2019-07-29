@@ -345,10 +345,6 @@ class ParseUtililities:
         return(Region.select_unique(session, chrom, start, end, strand))
 
     def get_sample(self, session, name, X, Y, treatment, cell_line, cancer):
-        """
-        @classmethod
-        def select_unique(cls, session, name, treatment, cell_line, cancer):
-        """
         return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
 
     def get_source(self, session, source_name):
@@ -401,10 +397,7 @@ class ParseUtililities:
             session.flush()
 
     def upsert_sample(self, session, sample):
-        """
-        @classmethod
-        def is_unique(cls, session, name, X, Y, treatment, cell_line, cancer):
-        """
+
         if Sample.is_unique(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer):
             session.add(sample)
             session.flush()

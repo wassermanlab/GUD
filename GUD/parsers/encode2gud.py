@@ -269,9 +269,6 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
     # For each experiment target/type...
     for experiment_target, experiment_type in grouped_metadata:
 
-        experiment_target = "SPI1-human"
-        experiment_type = "ChIP-seq"
-
         # Beware, for this is not possible!
         if experiment_target is not None:
             if feat_type != "histone" and feat_type != "tf":
