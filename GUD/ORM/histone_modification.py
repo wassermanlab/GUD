@@ -42,6 +42,7 @@ class HistoneModification(GFMixin2, Base):
             ),
             Index("ix_regionID", cls.region_id),  # query by bin range
             Index("ix_sampleID", cls.sample_id),
+            Index("ix_histone_type", cls.histone_type),
             {
                 "mysql_engine": "MyISAM",
                 "mysql_charset": "utf8"
@@ -63,8 +64,8 @@ class HistoneModification(GFMixin2, Base):
                   histone_type):
 
         q = session.query(cls).\
-            filter(cls.regionID == regionID, cls.sampleID == sampleID,
-                   cls.experimentID == experimentID, cls.sourceID == sourceID,
+            filter(cls.region_id == regionID, cls.sample_id == sampleID,
+                   cls.experiment_id == experimentID, cls.source_id == sourceID,
                    cls.histone_type == histone_type)
 
         return len(q.all()) == 0
@@ -74,8 +75,8 @@ class HistoneModification(GFMixin2, Base):
                       histone_type):
 
         q = session.query(cls).\
-            filter(cls.regionID == regionID, cls.sampleID == sampleID,
-                   cls.experimentID == experimentID, cls.sourceID == sourceID,
+            filter(cls.region_id == regionID, cls.sample_id == sampleID,
+                   cls.experiment_id == experimentID, cls.source_id == sourceID,
                    cls.histone_type == histone_type)
 
         return q.first()

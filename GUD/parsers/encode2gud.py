@@ -252,7 +252,8 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
     source = Source()
     source.name = source_name
     ParseUtils.upsert_source(session, source)
-    source = ParseUtils.get_source(session, source_name)
+    sources = ParseUtils.get_source(session, source_name)
+    source = next(iter(sources))
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
@@ -267,6 +268,9 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
 
     # For each experiment target/type...
     for experiment_target, experiment_type in grouped_metadata:
+
+        experiment_target = "SPI1-human"
+        experiment_type = "ChIP-seq"
 
         # Beware, for this is not possible!
         if experiment_target is not None:
@@ -299,16 +303,17 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
         if not test:
             if os.path.exists(data_file):
                 os.remove(data_file)
-            for data file in data_files:
+            for data_file in data_files:
                 if os.path.exists(data_file):
                     os.remove(data_file)
-
-    # Dispose session
-    Session.remove()
+        break
 
     # Remove downloaded file
     if os.path.exists(metadata_file) and not test:
         os.remove(metadata_file)
+
+    # Dispose session
+    Session.remove()
 
 def _download_metadata(genome, feat_type, dummy_dir="/tmp/"):
 
@@ -697,10 +702,10 @@ def _insert_data_file(data_file, test=False):
 
         # Get feature
         feature = Feature()
-        feature.regionID = region.uid
-        feature.sampleID = samples[sample_name]
-        feature.experimentID = experiment.uid
-        feature.sourceID = source.uid
+        feature.region_id = region.uid
+        feature.sample_id = samples[sample_name]
+        feature.experiment_id = experiment.uid
+        feature.source_id = source.uid
         # Upsert accessibility
         if Feature.__tablename__ == "dna_accessibility":
             ParseUtils.upsert_accessibility(session, feature)
