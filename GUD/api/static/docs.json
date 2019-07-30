@@ -1,4 +1,88 @@
 {
+    "/api/v1/clinvar": {
+        "DESCRIPTION": "gets all clinvar variants that match specified filtering parameters.",
+        "METHOD": "GET",
+        "PARAMS": {
+            "chrom": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+            },
+            "start": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based start coordinate for data"
+            },
+            "end": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based end coordinate for data"
+            },
+            "location": {
+                "REQUIRED": true,
+                "DESCRIPTION": "location = within | overlapping | exact , where within"
+            },
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"
+            },
+            "clinvar_ids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of clinvar ids separated by (,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by (,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by (,)"
+            }
+        }
+    },
+    "/api/v1/copy_number_variants": {
+        "DESCRIPTION": "gets all copy number variants that match specified filtering parameters.",
+        "METHOD": "GET",
+        "PARAMS": {
+            "chrom": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+            },
+            "start": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based start coordinate for data"
+            },
+            "end": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based end coordinate for data"
+            },
+            "location": {
+                "REQUIRED": true,
+                "DESCRIPTION": "location = within | overlapping | exact , where within"
+            },
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by (,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by (,)"
+            },
+            "clinical_assertion": {
+                "REQUIRED": false,
+                "DESCRIPTION": "string matching clinical assertion to filter by"
+            },
+            "clinvar_accession": {
+                "REQUIRED": false,
+                "DESCRIPTION": "string matching clinvar accession code to filter by"
+            },
+            "dbVar_accession": {
+                "REQUIRED": false,
+                "DESCRIPTION": "string matching dbVar accession code to filter by"
+            }
+        }
+    },
     "/api/v1/genes": {
         "DESCRIPTION": "get list of genes based off filtering parameters",
         "METHOD": "GET",
@@ -44,6 +128,48 @@
             "page": {
                 "REQUIRED": false,
                 "DESCRIPTION": "page number"
+            }
+        }
+    },
+    "/api/v1/short_tandem_repeats": {
+        "DESCRIPTION": "get list of short tandem repeats based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "chrom": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+            },
+            "start": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based start coordinate for data"
+            },
+            "end": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based end coordinate for data"
+            },
+            "location": {
+                "REQUIRED": true,
+                "DESCRIPTION": "location = within | overlapping | exact , where within"
+            },
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by (,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by (,)"
+            },
+            "motif": {
+                "REQUIRED": false,
+                "DESCRIPTION": "a motif of bases to be queried"
+            },
+            "rotations": {
+                "REQUIRED": false,
+                "DESCRIPTION": "boolean true or false to whether to check all rotations of specified motif"
             }
         }
     },

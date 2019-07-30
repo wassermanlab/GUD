@@ -30,7 +30,7 @@
     <!-- STUFF Block -->
     <!-- docs , titles-->
     {% for title in titles %}
-    <div class="row resourceRow {{title}}">
+    <div class="row resourceRow {{title.replace(' ', '')}}">
         <div class="col-sm">
             <h2>{{title}}</h2>
             <hr>
