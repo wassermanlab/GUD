@@ -27,9 +27,11 @@ pip install interval-binning SQLAlchemy-FullText-Search sqlalchemy-utils
 ```ma
 
 ## SETUP
+
 ```
 conda env create -f environment.yml
 ```
+
 ## START UP SERVER
 ```
 conda activate GUD

@@ -37,6 +37,36 @@ class CNV(GFMixin1, Base):
         }
     )
 
+    @classmethod
+    def select_by_clinical_assertion(cls, session, query, clinical_assertion):
+        """
+        filter query by location
+        """
+
+        q = query.filter(cls.clinical_assertion.in_(clinical_assertion))
+
+        return q
+
+    @classmethod
+    def select_by_clinvar_accession(cls, session, query, clinvar_accession):
+        """
+        filter query by clinvar accession
+        """
+
+        q = query.filter(cls.clinvar_accession.in_(clinvar_accession))
+
+        return q
+
+    @classmethod
+    def select_by_dbvar_accession(cls, session, query, dbVar_accession):
+        """
+        filter query by dbVar_accession
+        """
+
+        q = query.filter(cls.dbVar_accession.like(dbVar_accession))
+
+        return q
+
     #not included in REST API
     @classmethod
     def is_unique(cls, session, regionID, sourceID, copy_number_change):
@@ -52,9 +82,10 @@ class CNV(GFMixin1, Base):
         qualifiers = {   
             "uid": feat.CNV.uid, 
             "source": feat.Source.name, 
-            "copy_number": feat.CNV.copy_number, 
-            "clinical_interpretation": feat.CNV.clinical_interpretation, 
-            "variant_type": feat.CNV.variant_type    
+            "copy_number_change": feat.CNV.copy_number_change, 
+            "clinical_assertion": feat.CNV.clinical_assertion, 
+            "clinvar_accession": feat.CNV.clinvar_accession,
+            "dbVar_accession": feat.CNV.dbVar_accession     
         }
         return GenomicFeature(
             feat.Region.chrom,
