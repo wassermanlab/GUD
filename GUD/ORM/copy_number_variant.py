@@ -42,8 +42,7 @@ class CNV(GFMixin1, Base):
         """
         filter query by location
         """
-
-        q = query.filter(cls.clinical_assertion.in_(clinical_assertion))
+        q = query.filter(cls.clinical_assertion == clinical_assertion.encode(encoding='UTF-8'))
 
         return q
 
@@ -52,8 +51,8 @@ class CNV(GFMixin1, Base):
         """
         filter query by clinvar accession
         """
-
-        q = query.filter(cls.clinvar_accession.in_(clinvar_accession))
+        accession = ("%" + clinvar_accession + "%").encode(encoding='UTF-8')   
+        q = query.filter(cls.clinvar_accession.like(accession))
 
         return q
 
@@ -61,11 +60,13 @@ class CNV(GFMixin1, Base):
     def select_by_dbvar_accession(cls, session, query, dbVar_accession):
         """
         filter query by dbVar_accession
-        """
-
-        q = query.filter(cls.dbVar_accession.like(dbVar_accession))
-
+        """        
+        accession = ("%" + dbVar_accession + "%").encode(encoding='UTF-8')
+        q = query.filter(cls.dbVar_accession.like(accession))
+        print(accession)
+        print(q)
         return q
+
 
     #not included in REST API
     @classmethod
