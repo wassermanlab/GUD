@@ -27,7 +27,7 @@ class Conservation(GFMixin1, Base):
     def __table_args__(cls):
         return (
             UniqueConstraint(cls.region_id, cls.source_id),
-            Index("ix_regionID", cls.region_id),  # query by bin range
+            Index("ix_region_id", cls.region_id),  # query by bin range
             {
                 "mysql_engine": "MyISAM",
                 "mysql_charset": "utf8"
