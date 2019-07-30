@@ -316,15 +316,21 @@ def _insert_data(data_file, test=False):
             clinvar.CLNSIG = infoDict["CLNSIG"].encode(encoding='UTF-8')
         except:  
             clinvar.CLNSIG = None
-        if ParseUtils.genome is "hg19":
+        try:
             clinvar.gnomad_exome_af_global      = float(infoDict["gnomad_exome_af_global"])
-            clinvar.gnomad_exome_hom_global     = float(infoDict["gnomad_exome_hom_global"])
-            clinvar.gnomad_genome_af_global     = float(infoDict["gnomad_genome_af_global"])
-            clinvar.gnomad_genome_hom_global    = float(infoDict["gnomad_genome_hom_global"])
-        else:
+        except:
             clinvar.gnomad_exome_af_global      = None
+        try:
+            clinvar.gnomad_exome_hom_global     = float(infoDict["gnomad_exome_hom_global"])
+        except:
             clinvar.gnomad_exome_hom_global     = None
+        try:
+            clinvar.gnomad_genome_af_global     = float(infoDict["gnomad_genome_af_global"])
+        except:
             clinvar.gnomad_genome_af_global     = None
+        try:
+            clinvar.gnomad_genome_hom_global    = float(infoDict["gnomad_genome_hom_global"])
+        except:
             clinvar.gnomad_genome_hom_global    = None
 
         ParseUtils.upsert_clinvar(session, clinvar)
