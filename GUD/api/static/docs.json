@@ -1,8 +1,12 @@
 {
-    "/api/v1/clinvar": {
+    "/api/v1/{genome}/clinvar": {
         "DESCRIPTION": "gets all clinvar variants that match specified filtering parameters.",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "chrom": {
                 "REQUIRED": true,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
@@ -37,10 +41,14 @@
             }
         }
     },
-    "/api/v1/copy_number_variants": {
+    "/api/v1/{genome}/copy_number_variants": {
         "DESCRIPTION": "gets all copy number variants that match specified filtering parameters.",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "chrom": {
                 "REQUIRED": true,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
@@ -83,10 +91,14 @@
             }
         }
     },
-    "/api/v1/genes": {
+    "/api/v1/{genome}/genes": {
         "DESCRIPTION": "get list of genes based off filtering parameters",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "chrom": {
                 "REQUIRED": true,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
@@ -121,20 +133,28 @@
             }
         }
     },
-    "/api/v1/genes/symbols": {
+    "/api/v1/{genome}/genes/symbols": {
         "DESCRIPTION": "get list of all gene symbols",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "page": {
                 "REQUIRED": false,
                 "DESCRIPTION": "page number"
             }
         }
     },
-    "/api/v1/short_tandem_repeats": {
+    "/api/v1/{genome}/short_tandem_repeats": {
         "DESCRIPTION": "get list of short tandem repeats based off filtering parameters",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "chrom": {
                 "REQUIRED": true,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
@@ -173,15 +193,24 @@
             }
         }
     },
-    "/api/v1/short_tandem_repeats/pathogenic": {
+    "/api/v1/{genome}/short_tandem_repeats/pathogenic": {
         "DESCRIPTION": "get a list of all pathogenic short tandem repeats",
         "METHOD": "GET",
-        "PARAMS": {}
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            }
+        }
     },
-    "/api/v1/enhancers": {
+    "/api/v1/{genome}/enhancers": {
         "DESCRIPTION": "get list of enhancers based off filtering parameters",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "chrom": {
                 "REQUIRED": true,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
@@ -220,10 +249,14 @@
             }
         }
     },
-    "/api/v1/dna_accessibility": {
+    "/api/v1/{genome}/dna_accessibility": {
         "DESCRIPTION": "get list of dna accessibility based off filtering parameters",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "chrom": {
                 "REQUIRED": true,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
@@ -262,10 +295,14 @@
             }
         }
     },
-    "/api/v1/histone_modifications": {
+    "/api/v1/{genome}/histone_modifications": {
         "DESCRIPTION": "get list of histone modifications based off filtering parameters",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "chrom": {
                 "REQUIRED": true,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
@@ -308,10 +345,14 @@
             }
         }
     },
-    "/api/v1/tads": {
+    "/api/v1/{genome}/tads": {
         "DESCRIPTION": "get list of tads based off filtering parameters",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "chrom": {
                 "REQUIRED": true,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
@@ -354,10 +395,14 @@
             }
         }
     },
-    "/api/v1/tss": {
+    "/api/v1/{genome}/tss": {
         "DESCRIPTION": "get list of tf binding sites based off filtering parameters",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "chrom": {
                 "REQUIRED": true,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
@@ -396,30 +441,54 @@
             }
         }
     },
-    "/api/v1/chroms": {
+    "/api/v1/{genome}/chroms": {
         "DESCRIPTION": "get list of chrom",
         "METHOD": "GET",
-        "PARAMS": {}
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            }
+        }
     },
-    "/api/v1/sources": {
+    "/api/v1/{genome}/sources": {
         "DESCRIPTION": "get list of sources",
         "METHOD": "GET",
-        "PARAMS": {}
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            }
+        }
     },
-    "/api/v1/samples": {
+    "/api/v1/{genome}/samples": {
         "DESCRIPTION": "get list of samples",
         "METHOD": "GET",
-        "PARAMS": {}
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            }
+        }
     },
-    "/api/v1/experiments": {
+    "/api/v1/{genome}/experiments": {
         "DESCRIPTION": "get list of experiments",
         "METHOD": "GET",
-        "PARAMS": {}
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            }
+        }
     },
-    "/api/v1/expression": {
+    "/api/v1/{genome}/expression": {
         "DESCRIPTION": "gets list of expression data",
         "METHOD": "GET",
         "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
             "samples": {
                 "REQUIRED": false,
                 "DESCRIPTION": "list of clinvar ids separated by (,)"
