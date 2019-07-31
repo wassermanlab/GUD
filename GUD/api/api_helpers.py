@@ -1,4 +1,5 @@
 from flask import request
+from GUD import GUDUtils
 from werkzeug.exceptions import NotFound, BadRequest
 import math
 import re
@@ -6,6 +7,14 @@ page_size = 20
 # print(names, file=sys.stdout)
 
 ## HELPER FUNCTIONS ##
+
+def get_db(db):
+    if db == "hg19":
+        GUDUtils.db = "hg19"
+    elif db == "hg38":
+        GUDUtils.db = "hg38"
+    else: 
+        raise BadRequest('database must be hg19 or hg38')
 
 def get_genomic_feature_results(resource, query, page) -> tuple:
     offset = (page-1)*page_size

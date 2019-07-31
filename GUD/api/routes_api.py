@@ -10,8 +10,11 @@ from GUD.api.api_helpers import *
 page_size = 20
 # print(names, file=sys.stdout)
 
-@app.route('/api/v1/clinvar')
-def clinvar():
+@app.route('/api/v1/<db>/clinvar')
+def clinvar(db):
+
+    get_db(db)
+
     page = check_page(request)
     session = GUDUtils.get_session()
     resource = ClinVar()
@@ -26,9 +29,10 @@ def clinvar():
     result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
-
-@app.route('/api/v1/copy_number_variants')
-def copy_number_variants():
+@app.route('/api/v1/<db>/copy_number_variants')
+def copy_number_variants(db):
+    get_db(db)
+    
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -50,8 +54,10 @@ def copy_number_variants():
     return jsonify(result)
 
 
-@app.route('/api/v1/genes')
-def genes():
+@app.route('/api/v1/<db>/genes')
+def genes(db):
+    get_db(db)
+    
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -67,8 +73,10 @@ def genes():
     return jsonify(result)
 
 
-@app.route('/api/v1/genes/symbols')
-def gene_symbols():
+@app.route('/api/v1/<db>/genes/symbols')
+def gene_symbols(db):
+    get_db(db)
+    
     url = request.url
     
     session = GUDUtils.get_session()
@@ -84,8 +92,9 @@ def gene_symbols():
     return jsonify(result)
 
 
-@app.route('/api/v1/short_tandem_repeats')
-def strs():
+@app.route('/api/v1/<db>/short_tandem_repeats')
+def strs(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -106,8 +115,9 @@ def strs():
     return jsonify(result)
 
 
-@app.route('/api/v1/short_tandem_repeats/pathogenic')
-def pathogenic_strs():
+@app.route('/api/v1/<db>/short_tandem_repeats/pathogenic')
+def pathogenic_strs(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -119,15 +129,16 @@ def pathogenic_strs():
     session.close()
     return jsonify(result)
 
-@app.route('/api/v1/enhancers')
-@app.route('/api/v1/dna_accessibility')
-def mixin2():
+@app.route('/api/v1/<db>/enhancers')
+@app.route('/api/v1/<db>/dna_accessibility')
+def mixin2(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
-    if (request.path == '/api/v1/dna_accessibility'):
+    if ('dna_accessibility' in request.path):
         resource = DNAAccessibility()
-    elif (request.path == '/api/v1/enhancers'):
+    elif ('enhancers' in request.path):
         resource = Enhancer()
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
@@ -137,8 +148,9 @@ def mixin2():
     result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
-@app.route('/api/v1/histone_modifications')
-def histone_modifications():
+@app.route('/api/v1/<db>/histone_modifications')
+def histone_modifications(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -154,8 +166,9 @@ def histone_modifications():
     result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
-@app.route('/api/v1/tads')
-def tads():
+@app.route('/api/v1/<db>/tads')
+def tads(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -171,8 +184,9 @@ def tads():
     result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
-@app.route('/api/v1/tf_binding')
-def tf_binding():
+@app.route('/api/v1/<db>/tf_binding')
+def tf_binding(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -188,8 +202,9 @@ def tf_binding():
     result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
-@app.route('/api/v1/tss')
-def tss():
+@app.route('/api/v1/<db>/tss')
+def tss(db):
+    get_db(db)
     samples = request.args.get('samples', default=None, type=str)
     if samples is not None:
         return BadRequest('Cannot query TSS table by sample')
@@ -208,8 +223,9 @@ def tss():
     result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
-@app.route('/api/v1/tss/genic')
-def genic_tss():
+@app.route('/api/v1/<db>/tss/genic')
+def genic_tss(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -219,8 +235,9 @@ def genic_tss():
     result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
-@app.route('/api/v1/chroms')
-def chroms():
+@app.route('/api/v1/<db>/chroms')
+def chroms(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -235,8 +252,9 @@ def chroms():
     session.close()
     return jsonify(result)
 
-@app.route('/api/v1/sources')
-def sources():
+@app.route('/api/v1/<db>/sources')
+def sources(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -251,8 +269,9 @@ def sources():
     session.close()
     return jsonify(result)
 
-@app.route('/api/v1/samples')
-def samples():
+@app.route('/api/v1/<db>/samples')
+def samples(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -267,8 +286,9 @@ def samples():
     session.close()
     return jsonify(result)
 
-@app.route('/api/v1/experiments')
-def experiments():
+@app.route('/api/v1/<db>/experiments')
+def experiments(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -283,8 +303,9 @@ def experiments():
     session.close()
     return jsonify(result)
 
-@app.route('/api/v1/expression')
-def expression():
+@app.route('/api/v1/<db>/expression')
+def expression(db):
+    get_db(db)
     page = check_page(request)
     
     session = GUDUtils.get_session()
