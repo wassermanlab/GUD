@@ -9,7 +9,7 @@ $(function () {
         } else {
             // hide all except that selected
             $( ".resourceRow" ).hide();
-            $( "." + resource ).show();
+            $( "." + resource.replace(/\s/g, "") ).show();
         }
     });
 })

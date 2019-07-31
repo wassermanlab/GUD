@@ -1,4 +1,5 @@
 from flask import request
+from GUD import GUDUtils
 from werkzeug.exceptions import NotFound, BadRequest
 import math
 import re
@@ -6,6 +7,14 @@ page_size = 20
 # print(names, file=sys.stdout)
 
 ## HELPER FUNCTIONS ##
+
+def get_db(db):
+    if db == "hg19":
+        GUDUtils.db = "hg19"
+    elif db == "hg38":
+        GUDUtils.db = "hg38"
+    else: 
+        raise BadRequest('database must be hg19 or hg38')
 
 def get_genomic_feature_results(resource, query, page) -> tuple:
     offset = (page-1)*page_size
@@ -121,8 +130,7 @@ def get_mixin1_keys(request):
         raise BadRequest("start and end should be formatted as integers")
 
     if re.fullmatch('^chr(X|Y|[1-9]|1[0-9]|2[0-2])$', keys['chrom']) == None:
-        raise BadRequest("chromosome should be formatted as chrZ where z \
-            is X, Y, or 1-22")
+        raise BadRequest("chromosome should be formatted as chrZ where z is X, Y, or 1-22")
 
     if (keys['end'] - keys['start']) > 4000000:
         raise BadRequest("start and end must be less than 4000000bp apart")

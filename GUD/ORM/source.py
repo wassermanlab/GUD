@@ -42,6 +42,18 @@ class Source(Base):
         return cls.select_by_names(session, [name])
 
     @classmethod
+    def select_by_name(cls, session, name):
+        """
+        Query objects by multiple source names.
+        If no names are provided, return all
+        objects.
+        """
+
+        q = session.query(cls).filter(cls.name == name)
+        
+        return q.first()
+
+    @classmethod
     def select_by_names(cls, session, names=[]):
         """
         Query objects by multiple source names.
@@ -53,7 +65,7 @@ class Source(Base):
 
         if names:
             q = q.filter(cls.name.in_(names))
-
+        
         return q.all()
 
     @classmethod

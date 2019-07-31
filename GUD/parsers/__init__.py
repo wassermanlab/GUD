@@ -18,6 +18,9 @@ from GUD.ORM.conservation import Conservation
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.gene import Gene
+from GUD.ORM.copy_number_variant import CNV
+from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
+from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.mask import Mask
 from GUD.ORM.region import Region
@@ -156,7 +159,7 @@ class ParseUtililities:
         handle = self._get_file_handle(file_name)
 
         # Read in chunks
-        for chunk in pandas.read_csv(handle, header=None, encoding="utf8", sep=delimiter, chunksize=1024):
+        for chunk in pandas.read_csv(handle, header=None, encoding="utf8", sep=delimiter, chunksize=1024, comment="#"):
             for index, row in chunk.iterrows():
                 yield(row.tolist())
 
@@ -404,6 +407,21 @@ class ParseUtililities:
 
         if TFBinding.is_unique(session, tf.region_id, tf.sample_id, tf.experiment_id, tf.source_id, tf.tf):
             session.add(tf)
+            session.flush()
+    
+    def upsert_str(self, session, STR):
+        if ShortTandemRepeat.is_unique(session, STR.region_id, STR.source_id, STR.pathogenicity):
+            session.add(STR)
+            session.flush()
+    
+    def upsert_cnv(self, session, cnv):
+        if CNV.is_unique(session, cnv.region_id, cnv.source_id, cnv.copy_number_change):
+            session.add(cnv)
+            session.flush()
+
+    def upsert_clinvar(self, session, clinvar):
+        if clinvar.is_unique(session, clinvar.clinvar_variation_ID):
+            session.add(clinvar)
             session.flush()
 
     #--------------#

@@ -1,175 +1,352 @@
 #!/usr/bin/env python
-# mysql -u ontarget_w --database tamar_test
 
-import re
+from . import ParseUtils
+from GUD.ORM.clinvar import ClinVar
+from GUD.ORM.source import Source
+from GUD.ORM.region import Region
+from GUD import GUDUtils
+from binning import assign_bin
+from functools import partial
+import getpass
+from multiprocessing import Pool, cpu_count
+from numpy import isnan
 import os
 import sys
 import re
-import argparse
-from binning import assign_bin
-import getpass
-from sqlalchemy import create_engine
-from sqlalchemy.orm import mapper, scoped_session, sessionmaker
-from sqlalchemy_utils import database_exists
+import subprocess
 import warnings
-from datetime import date
+import argparse
 
-# Import from GUD module
-from GUD import GUDglobals
-from GUD.ORM.clinvar import ClinVar
-from GUD.ORM.region import Region
-from GUD.ORM.source import Source
+usage_msg = """
+usage: %s --genome STR [-h] [options]
+""" % os.path.basename(__file__)
+
+help_msg = """%s
+inserts copy number variants from curated sourcesq.
+
+  --genome STR        genome assembly
+  --clinvar_file FILE Clinvar file with columns #CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tN
+  --source_name STR   source name      
+
+optional arguments:
+  -h, --help          show this help message and exit
+  -t, --test          limit the total of inserts to ~1K per
+                      thread for testing (default = False)
+  --threads INT       number of threads to use (default = %s)
+
+mysql arguments:
+  -d STR, --db STR    database name (default = "%s")
+  -H STR, --host STR  host name (default = "localhost")
+  -p STR, --pwd STR   password (default = ignore this option)
+  -P INT, --port INT  port number (default = %s)
+  -u STR, --user STR  user name (default = current user)
+""" % (usage_msg, (cpu_count() - 1), GUDUtils.db, GUDUtils.port)
 
 #-------------#
 # Functions   #
 #-------------#
+
+
 def parse_args():
     """
-    This function parses arguments provided via the command
-    line using argparse.
+    This function parses arguments provided via the command line and returns an {argparse} object.
     """
 
-    parser = argparse.ArgumentParser(
-        description="this script inserts clinvar information")
+    parser = argparse.ArgumentParser(add_help=False)
 
-    parser.add_argument("vcf_file", help="annotated clinvar")
+    # Mandatory args
+    parser.add_argument("--genome")
+    parser.add_argument("--clinvar_file")
+    parser.add_argument("--source_name")
+
+    # Optional args
+    optional_group = parser.add_argument_group("optional arguments")
+    optional_group.add_argument("-h", "--help", action="store_true")
+    optional_group.add_argument("-t", "--test", action="store_true")
+    optional_group.add_argument("--threads", default=(cpu_count() - 1))
 
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db",
-                             help="Database name (default = input genome assembly)")
-    mysql_group.add_argument("-H", "--host", default="localhost",
-                             help="Host name (default = localhost)")
-    mysql_group.add_argument("-P", "--port", default=5506, type=int,
-                             help="Port number (default = 5506)")
-    mysql_group.add_argument("-u", "--user", default=getpass.getuser(),
-                             help="User name (default = current user)")
+    mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
+    mysql_group.add_argument("-H", "--host", default="localhost")
+    mysql_group.add_argument("-p", "--pwd")
+    mysql_group.add_argument("-P", "--port", default=GUDUtils.port)
+    mysql_group.add_argument("-u", "--user", default=getpass.getuser())
 
     args = parser.parse_args()
 
-    # Set default
-    if not args.db:
-        args.db = args.genome
+    check_args(args)
 
-    return args
+    return(args)
 
 
-def insert_clinvar_to_gud_db(user, host, port, db, vcf_file):
-    # Initialize
-    metadata = {}
-    db_name = "mysql://{}:@{}:{}/{}".format(
-        user, host, port, db)
-    if not database_exists(db_name):
-        raise ValueError("GUD db does not exist: %s" % db_name)
-    session = scoped_session(sessionmaker())
-    engine = create_engine(db_name, echo=False)
-    session.remove()
-    session.configure(bind=engine, autoflush=True,
-                      expire_on_commit=False)
+def check_args(args):
+    """
+    This function checks an {argparse} object.
+    """
 
-    # Initialize table
-    table = ClinVar()
-    table.metadata.bind = engine
+    # Print help
+    if args.help:
+        print(help_msg)
+        exit(0)
+    # Check mandatory arguments
+    if not args.genome or not args.clinvar_file or not args.source_name:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
+                 "argument \"--genome\" \"--clinvar_file\" \"--source_name\"  are required\n"]
+        print(": ".join(error))
+        exit(0)
+
+    # Check file exists
+    if not os.path.isfile(args.clinvar_file):
+        error = ["%s\n%s" % (usage_msg, os.path.basename(
+            __file__)), "error", "argument \"--clinvar_file\" must be a valid existing file\n"]
+        print(": ".join(error))
+        exit(0)
+
+    # Check "-t" argument
     try:
-        table.metadata.create_all(engine)
-        # table.__table__.create(bind=engine)
+        args.threads = int(args.threads)
     except:
-        raise ValueError("Cannot create \"ClinVar\" table!")
-    
-    # add source  
-    day = str(date.today())
-    with open(vcf_file) as f:
-        for line in f : 
-          if line.startswith("##fileDate="):
-              day = line.split("=")[1].rstrip()
-    source_name = "ClinVar_" + str(day)
-    source = Source()
-    sou = source.select_by_name(session, source_name)
-    if not sou: 
-        source.name = source_name
-        session.merge(source)
-        session.commit()
-        sou = source.select_by_name(session, source_name)
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
+                 "argument \"-t\" \"--threads\"", "invalid int value", "\"%s\"\n" % args.threads]
+        print(": ".join(error))
+        exit(0)
 
-    #parse table 
-    annotation_list = ["ANN_Allele", "ANN_Annotation", 
-    "ANN_Annotation_Impact", "ANN_Gene_Name", "ANN_Gene_ID", 
-    "ANN_Feature_Type", "ANN_Feature_ID"]
-    info_list = ["CADD","CLNDISDB","CLNDN","CLNSIG",
-    "gnomad_exome_af_global","gnomad_exome_hom_global",
-    "gnomad_genome_af_global","gnomad_genome_hom_global"]
-    columns = annotation_list + info_list 
-    with open(vcf_file) as f:
-      for line in f:
-        if not line.startswith("#"):
-          line_list = [None]*len(columns)
-          fields = line.split("\t")
-          info = fields[-1].rstrip()
-          info = info.split(";")
-          info[-1] = info[-1].rstrip()
-          
-          # make region
-          chrom = "chr" + str(fields[0]) 
-          start = int(fields[1]) - 1
-          end = start + len(fields[3]) ##finish this 
-          region = Region()
-          reg = region.select_unique(session, chrom, start, end, strand="+")
-          if not reg: 
-              region.bin = assign_bin(start, end)
-              region.chrom = chrom
-              region.start = start
-              region.end = end 
-              region.strand = "+"
-              session.merge(region)
-              session.commit()
-              reg = region.select_unique(session, chrom, start, end, strand="+")
-          ## add info fields
-          for i in info:
-            i_split = i.split("=")
-            if len(i_split) == 2:
-              if i_split[0] in info_list:
-                index = columns.index(i_split[0])
-                line_list[index] = i_split[1].rstrip()
-              if i_split[0] == "ANN": ## further split the annotation column
-                ann = i_split[1].split(",")[0].split("|")
-                for idx, val in enumerate(annotation_list):
-                  index = columns.index(val)
-                  line_list[index] = ann[idx]
-          ## make clinvar 
-          clinvarID = fields[2]
-          clinvar = ClinVar()
-          cln = clinvar.is_unique(session, clinvarID)
-          if cln: 
-            clinvar.regionID = reg.uid
-            clinvar.sourceID = sou.uid
-            clinvar.ref = fields[3]
-            clinvar.alt = fields[4]
-            clinvar.clinvarID = fields[2]
-            clinvar.ANN_Annotation = line_list[1]
-            clinvar.ANN_Annotation_Impact = line_list[2]
-            clinvar.ANN_Gene_Name = line_list[3]
-            clinvar.ANN_Gene_ID = line_list[4]
-            clinvar.ANN_Feature_Type = line_list[5]
-            clinvar.ANN_Feature_ID = line_list[6]
-            clinvar.CADD = None if line_list[7] is None else float(line_list[7])
-            clinvar.CLNDISDB = line_list[8]
-            clinvar.CLNDN = line_list[9]
-            clinvar.CLNSIG = line_list[10]
-            clinvar.gnomad_exome_af_global = None if line_list[11] is None else float(line_list[11])
-            clinvar.gnomad_exome_hom_global = None if line_list[12] is None else float(line_list[12])
-            clinvar.gnomad_genome_af_global = None if line_list[13] is None else float(line_list[13])
-            clinvar.gnomad_genome_hom_global = None if line_list[14] is None else float(line_list[14])
-            session.merge(clinvar)
-            session.commit()
+    # Check MySQL password
+    if not args.pwd:
+        args.pwd = ""
+
+    # Check MySQL port
+    try:
+        args.port = int(args.port)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
+                 "argument \"-P\" \"--port\"", "invalid int value", "\"%s\"\n" % args.port]
+        print(": ".join(error))
+        exit(0)
+
+# str_file, based, source_name
+
+
+def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # Set MySQL options
+    GUDUtils.user = args.user
+    GUDUtils.pwd = args.pwd
+    GUDUtils.host = args.host
+    GUDUtils.port = args.port
+    GUDUtils.db = args.db
+
+    # Insert ENCODE data
+    clinvar_to_gud(args.genome, args.source_name, args.clinvar_file,
+                  args.test, args.threads)
+
+
+def clinvar_to_gud(genome, source_name, clinvar_file, test=False, threads=1):
+    """
+    python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --snv_file <FILE> 
+    """
+    # Initialize
+    global chroms
+    global engine
+    global Session
+    global source
+
+    # Testing
+    if test:
+        global current_process
+        from multiprocessing import current_process
+
+    # Get database name
+    db_name = GUDUtils._get_db_name()
+
+    # Get engine/session
+    engine, Session = GUDUtils._get_engine_session(db_name)
+
+    # Initialize parser utilities
+    ParseUtils.genome = genome
+    ParseUtils.dbname = db_name
+    ParseUtils.engine = engine
+
+    # If database does not exist...
+    ParseUtils.initialize_gud_db()
+
+    # Create table
+    ParseUtils.create_table(ClinVar)
+
+    # Start a new session
+    session = Session()
+
+    # Get valid chromosomes
+    chroms = ParseUtils.get_chroms(session)
+
+
+    # Get source
+    source = Source()
+    source.name = source_name
+    ParseUtils.upsert_source(session, source)
+    source = ParseUtils.get_source(session, source_name)
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
+
+    # Prepare data
+    data_file = clinvar_file
+
+    # Split data
+    data_files = _split_data(data_file, threads)
+
+    # Parallelize inserts to the database
+    ParseUtils.insert_data_files_in_parallel(
+        data_files, partial(_insert_data, test=test), threads)
+
+    # Remove data file
+    for df in data_files:
+        if os.path.exists(df):
+            os.remove(df)
+
+    # Remove session
+    Session.remove()
+
+def _split_data(data_file, threads=1):
+
+    # import math
+
+    # Initialize
+    split_files = []
+
+    # For each chromosome...
+    for chrom in chroms:
+
+        # Skip if file already split
+        split_file = "%s.%s" % (data_file, chrom)
+        if not os.path.exists(split_file):
+
+            # Parallel split
+            cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (
+                threads, chrom, data_file, split_file)
+            subprocess.call(cmd, shell=True)
+
+        # Append split file
+        statinfo = os.stat(split_file)
+        if statinfo.st_size:
+            split_files.append(split_file)
+        else:
+            os.remove(split_file)
+
+    return(split_files)
+
+
+def _insert_data(data_file, test=False):
+
+    # Initialize
+    session = Session()
+
+    # Testing
+    if test:
+        lines = 0
+        print(current_process().name)
+
+    # For each line...
+    for line in ParseUtils.parse_tsv_file(data_file):
+
+        # Get region
+        region = Region()
+        region.chrom = line[0]
+        region.start = int(line[1]) -1
+        region.end = region.start + len(line[3])
+        region.bin = assign_bin(region.start, region.end)
+
+        # Ignore non-standard chroms, scaffolds, etc.
+        if region.chrom not in chroms:
+            continue
+
+        # Upsert region
+        ParseUtils.upsert_region(session, region)
+
+        # Get region ID
+        region = ParseUtils.get_region(
+            session, region.chrom, region.start, region.end, region.strand)
+
+        # Get feature
+        clinvar = ClinVar()
+        clinvar.region_id = region.uid
+        clinvar.source_id = source.uid
+        clinvar.ref = line[3].encode(encoding='UTF-8')
+        clinvar.alt = line[4].encode(encoding='UTF-8')
+        clinvar.clinvar_variation_ID = line[2]
+        ## get info 
+        info = line[7].split(";")
+        infoDict = {}
+        for t in info: 
+            if "=" in t:
+                infoDict[t.split("=")[0]] = t.split("=")[1]
+        try:
+            ANN = infoDict["ANN"].split("|")
+            clinvar.ANN_Annotation = ANN[1].encode(encoding='UTF-8')
+            clinvar.ANN_Annotation_Impact = ANN[2].encode(encoding='UTF-8')
+            clinvar.ANN_Gene_Name = ANN[3].encode(encoding='UTF-8')
+            clinvar.ANN_Gene_ID = ANN[4].encode(encoding='UTF-8')
+            clinvar.ANN_Feature_Type = ANN[5].encode(encoding='UTF-8')
+            clinvar.ANN_Feature_ID = ANN[6].encode(encoding='UTF-8')
+        except:
+            clinvar.ANN_Annotation = None
+            clinvar.ANN_Annotation_Impact = None
+            clinvar.ANN_Gene_Name = None
+            clinvar.ANN_Gene_ID = None
+            clinvar.ANN_Feature_Type = None
+            clinvar.ANN_Feature_ID = None
+        try: 
+            clinvar.CADD = float(infoDict["CADD"])
+        except:  
+            clinvar.CADD = None
+        try:
+            clinvar.CLNDISDB = infoDict["CLNDISDB"].encode(encoding='UTF-8')
+        except:  
+            clinvar.CLNDN = None
+        try:
+            clinvar.CLNDN = infoDict["CLNDN"].encode(encoding='UTF-8')
+        except:  
+            clinvar.CLNDN = None
+        try:
+            clinvar.CLNSIG = infoDict["CLNSIG"].encode(encoding='UTF-8')
+        except:  
+            clinvar.CLNSIG = None
+        try:
+            clinvar.gnomad_exome_af_global      = float(infoDict["gnomad_exome_af_global"])
+        except:
+            clinvar.gnomad_exome_af_global      = None
+        try:
+            clinvar.gnomad_exome_hom_global     = float(infoDict["gnomad_exome_hom_global"])
+        except:
+            clinvar.gnomad_exome_hom_global     = None
+        try:
+            clinvar.gnomad_genome_af_global     = float(infoDict["gnomad_genome_af_global"])
+        except:
+            clinvar.gnomad_genome_af_global     = None
+        try:
+            clinvar.gnomad_genome_hom_global    = float(infoDict["gnomad_genome_hom_global"])
+        except:
+            clinvar.gnomad_genome_hom_global    = None
+
+        ParseUtils.upsert_clinvar(session, clinvar)
+        # Testing
+        if test:
+            lines += 1
+            if lines > 1000:
+                break
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
+
 #-------------#
 # Main        #
 #-------------#
 
 
-if __name__ == "__main__":
-
-    # Parse arguments
-    args = parse_args()
-    # Insert ENCODE data to GUD database
-    insert_clinvar_to_gud_db(args.user, args.host, args.port, args.db,
-                         args.vcf_file)
+if __name__ == "__main__": main()

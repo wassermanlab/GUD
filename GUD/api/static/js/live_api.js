@@ -11,7 +11,7 @@ function create_row(param, params) {
     var newRow = document.createElement("tr");
     newRow.id = param;
     $("#paramRows").append(newRow);
-    // create cjeclnpx  box
+    // create check  box
     var check = document.createElement("td");
     check.id = param + "Check";
     var form_div = document.createElement("div");
@@ -62,6 +62,10 @@ $(function () {
     $("#resourceSelect").change(function () {
         $("#paramRows").empty();
         var resource = $("#resourceSelect").val()
+        if (resource === "select"){
+            build_url()
+            return
+        }
         var params = resources[resource]['PARAMS']
         var keys = Object.keys(params)
         if (keys.includes("chrom")) {
@@ -76,9 +80,12 @@ $(function () {
         if (keys.includes("location")) {
             create_row("location", params)
         }
+        if (keys.includes("genome")) {
+            create_row("genome", params)
+        }
 
         for (param in params) {
-            if (!["chrom", "start", "end", "location"].includes(param)) {
+            if (!["chrom", "start", "end", "location", "genome"].includes(param)) {
                 create_row(param, params)
             }
         }
@@ -110,9 +117,13 @@ function build_url() {
             parameters[key] = val;
         }
     });
+    
+    // get genome only and remove from rest of parameters 
+    genome = parameters["genome"]
+    delete parameters.genome
+    
     // combine and set get request row
     url = resource
-
     parameters = Object.entries(parameters);
     if (parameters.length != 0) {
         url = url + "?" + parameters[0][0] + "=" + parameters[0][1];
@@ -120,6 +131,9 @@ function build_url() {
             url = url + "&" + parameters[i][0] + "=" + parameters[i][1];
         }
     }
+
+    url = url.replace("{genome}", genome)
+
     $("#url").val(url);
 }
 
@@ -141,9 +155,27 @@ $(function () {
     $("#sendButton").click(function () {
         url = $("#url").val();
         url = "http://127.0.0.1:5000" + url;
-        $.getJSON(url, function (json) {
-            $(".responseCode").html(JSON.stringify(json, null, 2))
-        });
+        $(".responseCode").html("Loading ...")
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            success: function( data ) {
+                $(".responseCode").html(JSON.stringify(data, null, 2));
+            },
+            error: function( data ) {
+                error = data['responseText'].match(/>(.*?)<\//g);
+                json = {status: error[0].substr(1, error[0].length-3),
+                     statusText: error[1].substr(1, error[1].length-3),
+                     error: error[2].substr(1, error[2].length-3)}
+                $(".responseCode").html(JSON.stringify(json, null, 2));
+            }
+          });
+
+
+
+        // $.getJSON(url, function (json) {
+        //     $(".responseCode").html(JSON.stringify(json, null, 2))
+        // });
     });
 });
 
