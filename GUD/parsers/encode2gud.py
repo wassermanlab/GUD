@@ -621,18 +621,12 @@ def _split_data(data_file, threads=1):
 
 def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/", test=False):
 
+    # Initialize
+    download_file = os.path.join(dummy_dir, metadata_object.accession)
+
     # Testing
     if test:
         print(current_process().name)
-
-    # Download file
-    download_file = os.path.join(dummy_dir, metadata_object.accession)
-    if metadata_object.output_format == "bam":
-        download_file += ".bam"
-    else:
-        download_file += ".bed.gz"
-    if not os.path.exists(download_file):
-        urlretrieve(metadata_object.download_url, download_file)
 
     # Preprocess BAM data
     if metadata_object.output_format == "bam":
@@ -640,6 +634,11 @@ def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/", test=False):
         # Skip if peaks file already exists
         peaks_file = os.path.join(dummy_dir, "%s_peaks.narrowPeak" % metadata_object.accession)
         if not os.path.exists(peaks_file):
+
+            # Download BAM file
+            download_file += ".bam"
+            if not os.path.exists(download_file):
+               urlretrieve(metadata_object.download_url, download_file)        
 
             # From "An atlas of chromatin accessibility in the adult human brain" (Fullard et al. 2018):
             # Peaks for OCRs were called using the model-based Analysis of ChIP-seq (MACS) (Zhang et al. 2008)
@@ -656,6 +655,13 @@ def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/", test=False):
 
             # Set peaks file as download file
             shutil.move(peaks_file, download_file)
+
+    else:
+
+        # Download BED file
+        download_file += ".bed.gz"
+        if not os.path.exists(download_file):
+            urlretrieve(metadata_object.download_url, download_file)
 
     return(download_file)
 
