@@ -25,7 +25,7 @@ def clinvar(db):
         q = resource.select_by_clinvarID(session, q, clinvarIDs)
     
     session.close()
-    result_tuple = get_genomic_feature_results(resource, q, page)
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, request.url)
     return jsonify(result)
 
@@ -49,10 +49,9 @@ def copy_number_variants(db):
     if dbVar_accession is not None:
         q = resource.select_by_dbvar_accession(session, q, dbVar_accession)
     session.close()
-    result_tuple = get_genomic_feature_results(resource, q, page)
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, request.url)
-    return jsonify(result)
-
+    return jsonify(result)\
 
 @app.route('/api/v1/<db>/genes')
 def genes(db):
@@ -68,8 +67,10 @@ def genes(db):
         q = resource.select_by_names(session, q, names)
     
     session.close()
-    result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, page, request.url)
+    if (q is None):
+        raise BadRequest('Query not specified correctly')
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
+    result = create_page(result_tuple, page,page_size, request.url)
     return jsonify(result)
 
 
@@ -84,11 +85,13 @@ def gene_symbols(db):
     q = Gene().get_all_gene_symbols(session)
     
     session.close()
+    page_size = 1000 ## set custom page size 
     offset = (page-1)*page_size
     result = q.offset(offset).limit(page_size)
     result =  [g[0] for g in result]
     result_tuple = (q.count(), result)
-    result = create_page(result_tuple, page, request.url)                                 
+    result = create_page(result_tuple, page, page_size, request.url)                                 
+    page_size = 20  ## reset page size
     return jsonify(result)
 
 
@@ -108,8 +111,8 @@ def strs(db):
             'rotation must be set to True or False if motif is given')
     if motif is not None:
         q = resource.select_by_motif(session, motif, q, rotation)
-    result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
+    result = create_page(result_tuple, page, page_size, request.url)
     
     session.close()
     return jsonify(result)
@@ -123,8 +126,8 @@ def pathogenic_strs(db):
     session = GUDUtils.get_session()
     resource = ShortTandemRepeat()
     q = resource.select_by_pathogenicity(session)
-    result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
+    result = create_page(result_tuple, page, page_size, request.url)
     
     session.close()
     return jsonify(result)
@@ -144,8 +147,8 @@ def mixin2(db):
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     
     session.close()
-    result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
+    result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/<db>/histone_modifications')
@@ -162,8 +165,8 @@ def histone_modifications(db):
         q = resource.select_by_histone_type(q, histone_types)
     
     session.close()
-    result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
+    result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/<db>/tads')
@@ -180,8 +183,8 @@ def tads(db):
         q = resource.select_by_restriction_enzymes(q, restriction_enzymes)
     
     session.close()
-    result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
+    result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/<db>/tf_binding')
@@ -198,8 +201,8 @@ def tf_binding(db):
         q = resource.select_by_tf(q, tfs)
     
     session.close()
-    result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
+    result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/<db>/tss')
@@ -219,8 +222,8 @@ def tss(db):
         q = resource.select_by_genes(q, genes)
     
     session.close()
-    result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
+    result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/<db>/tss/genic')
@@ -231,8 +234,8 @@ def genic_tss(db):
     session = GUDUtils.get_session()
     resource = TSS()
     q = resource.select_all_genic_tss(session)
-    result_tuple = get_genomic_feature_results(resource, q, page)
-    result = create_page(result_tuple, page, request.url)
+    result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
+    result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/<db>/chroms')
@@ -247,7 +250,7 @@ def chroms(db):
     results = q.offset(offset).limit(page_size)
     results = [e.serialize() for e in results]
     result_tuple = (q.count(), results)
-    result = create_page(result_tuple, page, request.url)
+    result = create_page(result_tuple, page, page_size, request.url)
     
     session.close()
     return jsonify(result)
@@ -264,7 +267,7 @@ def sources(db):
     results = q.offset(offset).limit(page_size)
     results = [e.serialize() for e in results]
     result_tuple = (q.count(), results)
-    result = create_page(result_tuple, page, request.url)
+    result = create_page(result_tuple, page, page_size, request.url)
     
     session.close()
     return jsonify(result)
@@ -281,7 +284,7 @@ def samples(db):
     results = q.offset(offset).limit(page_size)
     results = [e.serialize() for e in results]
     result_tuple = (q.count(), results)
-    result = create_page(result_tuple, page, request.url)
+    result = create_page(result_tuple, page, page_size, request.url)
     
     session.close()
     return jsonify(result)
@@ -298,7 +301,7 @@ def experiments(db):
     results = q.offset(offset).limit(page_size)
     results = [e.serialize() for e in results]
     result_tuple = (q.count(), results)
-    result = create_page(result_tuple, page, request.url)
+    result = create_page(result_tuple, page, page_size, request.url)
     
     session.close()
     return jsonify(result)
@@ -328,7 +331,7 @@ def expression(db):
     results = q.offset(offset).limit(page_size)
     results = [resource.serialize(e) for e in results]
     result_tuple = (q.count(), results)
-    result = create_page(result_tuple, page, request.url)
+    result = create_page(result_tuple, page, page_size, request.url)
     
     session.close()
     return jsonify(result)

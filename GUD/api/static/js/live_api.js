@@ -68,6 +68,9 @@ $(function () {
         }
         var params = resources[resource]['PARAMS']
         var keys = Object.keys(params)
+        if (keys.includes("genome")) {
+            create_row("genome", params)
+        }
         if (keys.includes("chrom")) {
             create_row("chrom", params)
         }
@@ -79,9 +82,6 @@ $(function () {
         }
         if (keys.includes("location")) {
             create_row("location", params)
-        }
-        if (keys.includes("genome")) {
-            create_row("genome", params)
         }
 
         for (param in params) {

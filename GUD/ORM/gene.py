@@ -53,8 +53,11 @@ class Gene(GFMixin1, Base):
         If no genes are provided, return all
         objects.
         """
-        q = query.filter(cls.name2.in_(names))
-
+        if (query is None):
+            q = cls.make_query(session)
+        else: 
+            q = query 
+        q = q.filter(cls.name2.in_(names))
         return q
 
     @classmethod
