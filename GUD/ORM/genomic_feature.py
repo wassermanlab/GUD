@@ -163,6 +163,7 @@ class GenomicFeature(SeqFeature):
             'end': self.end,
             'id': self.id,
             'score': self.score,
+            'strand': self.strand,
             'qualifiers': self.qualifiers,
         }
 

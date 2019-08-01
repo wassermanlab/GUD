@@ -119,7 +119,7 @@ class Gene(GFMixin1, Base):
             "exonEnds": feat.Gene.exonEnds,
             "source": feat.Source.name,
         }
-
+        print(feat.Region.strand)
         return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),
