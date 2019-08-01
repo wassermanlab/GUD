@@ -13,8 +13,10 @@ def get_db(db):
         GUDUtils.db = "hg19"
     elif db == "hg38":
         GUDUtils.db = "hg38"
+    elif db == "test":
+        GUDUtils.db = "test"
     else: 
-        raise BadRequest('database must be hg19 or hg38')
+        raise BadRequest('database must be hg19 or hg38 or test')
 
 def get_genomic_feature_results(resource, query, page) -> tuple:
     offset = (page-1)*page_size
