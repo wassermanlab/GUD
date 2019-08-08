@@ -3,10 +3,10 @@ from GUD import GUDUtils
 from werkzeug.exceptions import NotFound, BadRequest
 import math
 import re
-page_size = 20
 # print(names, file=sys.stdout)
 
 ## HELPER FUNCTIONS ##
+
 
 def get_db(db):
     if db == "hg19":
@@ -15,17 +15,19 @@ def get_db(db):
         GUDUtils.db = "hg38"
     elif db == "test":
         GUDUtils.db = "test"
-    else: 
+    else:
         raise BadRequest('database must be hg19 or hg38 or test')
 
-def get_genomic_feature_results(resource, query, page) -> tuple:
+
+def get_genomic_feature_results(resource, query, page_size, page) -> tuple:
     offset = (page-1)*page_size
     results = query.offset(offset).limit(page_size)
     results = [resource.as_genomic_feature(e) for e in results]
     results = [e.serialize() for e in results]
     return (query.count(), results)
 
-def create_page(result_tuple, page, url) -> dict:
+
+def create_page(result_tuple, page, page_size, url) -> dict:
     """
     returns 404 error or a page
     """
@@ -59,9 +61,12 @@ def genomic_feature_mixin1_queries(session, resource, request):
     keys = get_mixin1_keys(request)
 
     # location query
-
-    q = resource.select_by_location(
-        session, keys['chrom'], keys['start'], keys['end'], keys['location'])
+    if (keys['start'] is not None and keys['end'] is not None and keys['location']
+            is not None and keys['chrom'] is not None): 
+        q = resource.select_by_location(
+            session, keys['chrom'], keys['start'], keys['end'], keys['location'])
+    else: 
+        q = None
     # uid query
     if keys['uids'] is not None:
         q = resource.select_by_uids(session, q, keys['uids'])
@@ -125,21 +130,25 @@ def get_mixin1_keys(request):
             if keys['uids'][i].isdigit():
                 keys['uids'][i] = int(keys['uids'][i])
 
-    try:
-        keys['start'] = int(keys['start']) - 1
-        keys['end'] = int(keys['end'])
-    except:
-        raise BadRequest("start and end should be formatted as integers")
+    if (keys['start'] is not None and keys['end'] is not None and keys['location']
+            is not None and keys['chrom'] is not None):
+        try:
+            keys['start'] = int(keys['start']) - 1
+            keys['end'] = int(keys['end'])
+        except:
+            raise BadRequest("start and end should be formatted as integers")
 
-    if re.fullmatch('^chr(X|Y|[1-9]|1[0-9]|2[0-2])$', keys['chrom']) == None:
-        raise BadRequest("chromosome should be formatted as chrZ where z is X, Y, or 1-22")
+        if re.fullmatch('^chr(X|Y|[1-9]|1[0-9]|2[0-2])$', keys['chrom']) == None:
+            raise BadRequest(
+                "chromosome should be formatted as chrZ where z is X, Y, or 1-22")
 
-    if (keys['end'] - keys['start']) > 4000000:
-        raise BadRequest("start and end must be less than 4000000bp apart")
+        if (keys['end'] - keys['start']) > 4000000:
+            raise BadRequest("start and end must be less than 4000000bp apart")
 
-    if keys['location'] not in ['within', 'overlapping', 'exact']:
-        raise BadRequest(
-            "location must be specified as withing, overlapping, or exact")
+        if keys['location'] not in ['within', 'overlapping', 'exact']:
+            raise BadRequest(
+                "location must be specified as withing, overlapping, or exact")
+
     return keys
 
 

@@ -32,16 +32,21 @@ class GFMixin1(object):
                       nullable=False)
 
     @classmethod
+    def make_query(cls, session):
+        q = session.query(cls, Region, Source)\
+            .join()\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)
+        return q 
+
+    @classmethod
     def select_by_overlapping_location(cls, session, chrom, start, end):
         """
         Query objects by genomic location.
         """
         bins = Region._compute_bins(start, end)
 
-        q = session.query(cls, Region, Source)\
-            .join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
-            .filter(Region.chrom == chrom,
+        q = cls.make_query(session)
+        q = q.filter(Region.chrom == chrom,
                     Region.start < end,
                     Region.end > start)\
             .filter(Region.bin.in_(bins))
@@ -55,10 +60,8 @@ class GFMixin1(object):
         """
         bins = Region._compute_bins(start, end)
 
-        q = session.query(cls, Region, Source)\
-            .join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
-            .filter(Region.chrom == chrom,
+        q = cls.make_query(session)
+        q = q.filter(Region.chrom == chrom,
                     Region.start > start,
                     Region.end < end)\
             .filter(Region.bin.in_(bins))
@@ -72,10 +75,8 @@ class GFMixin1(object):
         """
         bins = Region._compute_bins(start, end)
 
-        q = session.query(cls, Region, Source)\
-            .join()\
-            .filter(Region.bin.in_(bins))\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
+        q = cls.make_query(session)
+        q = q.filter(Region.bin.in_(bins))\
             .filter(Region.chrom == chrom,
                     Region.start == start,
                     Region.end == end)
@@ -104,8 +105,11 @@ class GFMixin1(object):
         """
         filter query by uids.
         """
-        q = query.filter(cls.uid.in_(uids))
-
+        if (query is None):
+            q = cls.make_query(session)
+        else: 
+            q = query 
+        q = q.filter(cls.uid.in_(uids))
         return q
 
     @classmethod
@@ -113,7 +117,8 @@ class GFMixin1(object):
         """
        filter query by sources.
         """
-
+        if(query is None):
+            q = cls.make_query(session)
         q = query.filter(Source.name.in_(sources))
 
         return q

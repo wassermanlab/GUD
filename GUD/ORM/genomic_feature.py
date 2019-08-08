@@ -149,7 +149,7 @@ class GenomicFeature(SeqFeature):
             (
                 self.type,
                 "chrom={}".format(self.chrom),
-                "start={}".format(self.start_1_based),
+                "start={}".format(self.start),
                 "end={}".format(self.end),
                 "id={}".format(self.id),
                 "score={}".format(self.score),
@@ -159,10 +159,11 @@ class GenomicFeature(SeqFeature):
     def serialize(self):
         return {
             'chrom': self.chrom,
-            'start': self.start_1_based,
+            'start': self.start,
             'end': self.end,
             'id': self.id,
             'score': self.score,
+            'strand': self.strand,
             'qualifiers': self.qualifiers,
         }
 
