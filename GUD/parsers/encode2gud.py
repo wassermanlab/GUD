@@ -10,7 +10,6 @@ import os
 from pybedtools import BedTool, cleanup, set_tempdir
 import re
 import shutil
-from sqlalchemy_utils import database_exists
 import subprocess
 import sys
 import warnings
@@ -33,7 +32,7 @@ from GUD.ORM.tf_binding import TFBinding
 from . import ParseUtils
 
 usage_msg = """
-usage: %s --genome STR [-h] [options]
+usage: %s --genome STR --samples FILE --feature STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
