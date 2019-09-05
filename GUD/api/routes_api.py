@@ -24,7 +24,7 @@ def clinvar(db):
     if clinvarIDs is not None:
         q = resource.select_by_clinvarID(session, q, clinvarIDs)
     
-    session.close()
+    session.remove()
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
@@ -48,7 +48,7 @@ def copy_number_variants(db):
         q = resource.select_by_clinvar_accession(session, q, clinvar_accession)
     if dbVar_accession is not None:
         q = resource.select_by_dbvar_accession(session, q, dbVar_accession)
-    session.close()
+    session.remove()
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     response = jsonify(result)
@@ -68,7 +68,7 @@ def genes(db):
     if names is not None:
         q = resource.select_by_names(session, q, names)
     
-    session.close()
+    session.remove()
     if (q is None):
         raise BadRequest('Query not specified correctly')
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
@@ -88,7 +88,7 @@ def gene_symbols(db):
     page = int(request.args.get('page', default=1))
     q = Gene().get_all_gene_symbols(session)
     
-    session.close()
+    session.remove()
     page_size = 1000 ## set custom page size 
     offset = (page-1)*page_size
     result = q.offset(offset).limit(page_size)
@@ -121,7 +121,7 @@ def strs(db):
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     
-    session.close()
+    session.remove()
     return jsonify(result)
 
 
@@ -136,7 +136,7 @@ def pathogenic_strs(db):
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     
-    session.close()
+    session.remove()
     return jsonify(result)
 
 @app.route('/api/v1/<db>/enhancers')
@@ -153,7 +153,7 @@ def mixin2(db):
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     
-    session.close()
+    session.remove()
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
@@ -171,7 +171,7 @@ def histone_modifications(db):
     if histone_types is not None: 
         q = resource.select_by_histone_type(q, histone_types)
     
-    session.close()
+    session.remove()
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
@@ -189,7 +189,7 @@ def tads(db):
     if restriction_enzymes is not None:
         q = resource.select_by_restriction_enzymes(q, restriction_enzymes)
     
-    session.close()
+    session.remove()
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
@@ -207,7 +207,7 @@ def tf_binding(db):
     if tfs is not None:
         q = resource.select_by_tf(q, tfs)
     
-    session.close()
+    session.remove()
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
@@ -228,7 +228,7 @@ def tss(db):
     if genes is not None: 
         q = resource.select_by_genes(q, genes)
     
-    session.close()
+    session.remove()
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
@@ -259,7 +259,7 @@ def chroms(db):
     result_tuple = (q.count(), results)
     result = create_page(result_tuple, page, page_size, request.url)
     
-    session.close()
+    session.remove()
     return jsonify(result)
 
 @app.route('/api/v1/<db>/sources')
@@ -276,7 +276,7 @@ def sources(db):
     result_tuple = (q.count(), results)
     result = create_page(result_tuple, page, page_size, request.url)
     
-    session.close()
+    session.remove()
     return jsonify(result)
 
 @app.route('/api/v1/<db>/samples')
@@ -293,7 +293,7 @@ def samples(db):
     result_tuple = (q.count(), results)
     result = create_page(result_tuple, page, page_size, request.url)
     
-    session.close()
+    session.remove()
     return jsonify(result)
 
 @app.route('/api/v1/<db>/experiments')
@@ -310,7 +310,7 @@ def experiments(db):
     result_tuple = (q.count(), results)
     result = create_page(result_tuple, page, page_size, request.url)
     
-    session.close()
+    session.remove()
     return jsonify(result)
 
 @app.route('/api/v1/<db>/expression')
@@ -340,5 +340,5 @@ def expression(db):
     result_tuple = (q.count(), results)
     result = create_page(result_tuple, page, page_size, request.url)
     
-    session.close()
+    session.remove()
     return jsonify(result)
