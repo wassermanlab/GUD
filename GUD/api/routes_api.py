@@ -26,7 +26,7 @@ def clinvar(db):
     
     session.close()
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
-    result = create_page(result_tuple, page, request.url)
+    result = create_page(result_tuple, page, page_size, request.url)
     return jsonify(result)
 
 @app.route('/api/v1/<db>/copy_number_variants')
@@ -50,8 +50,10 @@ def copy_number_variants(db):
         q = resource.select_by_dbvar_accession(session, q, dbVar_accession)
     session.close()
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
-    result = create_page(result_tuple, page, request.url)
-    return jsonify(result)\
+    result = create_page(result_tuple, page, page_size, request.url)
+    response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route('/api/v1/<db>/genes')
 def genes(db):
@@ -71,7 +73,9 @@ def genes(db):
         raise BadRequest('Query not specified correctly')
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page,page_size, request.url)
-    return jsonify(result)
+    response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 @app.route('/api/v1/<db>/genes/symbols')
@@ -92,7 +96,9 @@ def gene_symbols(db):
     result_tuple = (q.count(), result)
     result = create_page(result_tuple, page, page_size, request.url)                                 
     page_size = 20  ## reset page size
-    return jsonify(result)
+    response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 @app.route('/api/v1/<db>/short_tandem_repeats')
@@ -111,6 +117,7 @@ def strs(db):
             'rotation must be set to True or False if motif is given')
     if motif is not None:
         q = resource.select_by_motif(session, motif, q, rotation)
+    print(q)
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     
