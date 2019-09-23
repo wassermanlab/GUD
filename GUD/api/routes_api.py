@@ -4,9 +4,9 @@ from flask import request, jsonify
 from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation,
                      DNAAccessibility, Enhancer, HistoneModification, TAD, 
                      TFBinding, TSS, Chrom, Sample, Experiment, Source, Expression)
+from GUD.api.api_helpers import *
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest
 import sys
-from GUD.api.api_helpers import *
 page_size = 20
 # print(names, file=sys.stdout)
 
@@ -14,7 +14,7 @@ page_size = 20
 def clinvar(db):
 
     get_db(db)
-
+    table_exists('clinvar')
     page = check_page(request)
     session = GUDUtils.get_session()
     resource = ClinVar()
@@ -33,7 +33,7 @@ def clinvar(db):
 @app.route('/api/v1/<db>/copy_number_variants')
 def copy_number_variants(db):
     get_db(db)
-    
+    table_exists('copy_number_variants')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -58,7 +58,7 @@ def copy_number_variants(db):
 @app.route('/api/v1/<db>/genes')
 def genes(db):
     get_db(db)
-    
+    table_exists('genes')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -76,10 +76,10 @@ def genes(db):
     response = jsonify(result)
     return response
 
-
 @app.route('/api/v1/<db>/genes/symbols')
 def gene_symbols(db):
     get_db(db)
+    table_exists('genes')
     
     url = request.url
     
@@ -98,10 +98,10 @@ def gene_symbols(db):
     response = jsonify(result)
     return response
 
-
 @app.route('/api/v1/<db>/short_tandem_repeats')
 def strs(db):
     get_db(db)
+    table_exists('short_tandem_repeats')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -123,10 +123,10 @@ def strs(db):
     response = jsonify(result)
     return response
 
-
 @app.route('/api/v1/<db>/short_tandem_repeats/pathogenic')
 def pathogenic_strs(db):
     get_db(db)
+    table_exists('short_tandem_repeats')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -146,8 +146,10 @@ def mixin2(db):
     
     session = GUDUtils.get_session()
     if ('dna_accessibility' in request.path):
+        table_exists('dna_accessibility')
         resource = DNAAccessibility()
     elif ('enhancers' in request.path):
+        table_exists('enhancers')
         resource = Enhancer()
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
@@ -160,6 +162,7 @@ def mixin2(db):
 @app.route('/api/v1/<db>/histone_modifications')
 def histone_modifications(db):
     get_db(db)
+    table_exists('histone_modifications')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -178,6 +181,7 @@ def histone_modifications(db):
 @app.route('/api/v1/<db>/tads')
 def tads(db):
     get_db(db)
+    table_exists('tads')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -196,6 +200,7 @@ def tads(db):
 @app.route('/api/v1/<db>/tf_binding')
 def tf_binding(db):
     get_db(db)
+    table_exists('tf_binding')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -214,6 +219,7 @@ def tf_binding(db):
 @app.route('/api/v1/<db>/tss')
 def tss(db):
     get_db(db)
+    table_exists('transcription_start_sites')
     samples = request.args.get('samples', default=None, type=str)
     if samples is not None:
         return BadRequest('Cannot query TSS table by sample')
@@ -235,6 +241,7 @@ def tss(db):
 @app.route('/api/v1/<db>/tss/genic')
 def genic_tss(db):
     get_db(db)
+    table_exists('transcription_start_sites')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -247,6 +254,7 @@ def genic_tss(db):
 @app.route('/api/v1/<db>/chroms')
 def chroms(db):
     get_db(db)
+    table_exists('chroms')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -264,6 +272,7 @@ def chroms(db):
 @app.route('/api/v1/<db>/sources')
 def sources(db):
     get_db(db)
+    table_exists('sources')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -281,6 +290,7 @@ def sources(db):
 @app.route('/api/v1/<db>/samples')
 def samples(db):
     get_db(db)
+    table_exists('samples')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -298,6 +308,7 @@ def samples(db):
 @app.route('/api/v1/<db>/experiments')
 def experiments(db):
     get_db(db)
+    table_exists('experiments')
     page = check_page(request)
     
     session = GUDUtils.get_session()
@@ -315,14 +326,16 @@ def experiments(db):
 @app.route('/api/v1/<db>/expression')
 def expression(db):
     get_db(db)
+    table_exists('expression')
     page = check_page(request)
-    
+
     session = GUDUtils.get_session()
     resource = Expression()
-    q = None
     max_tpm = request.args.get('max_tpm', default=None)    
     min_tpm = request.args.get('min_tpm', default=None)  
     samples = check_split(request.args.get('samples', default=None))  
+    q = resource.select_all(session)
+
     if max_tpm is not None and min_tpm is not None: 
         try:
             max_tpm = float(max_tpm)
@@ -332,12 +345,12 @@ def expression(db):
             raise BadRequest('max and min tpm must be floats')
     if samples is not None:
         q = resource.select_by_samples(session, samples, q)
-
+    
     offset = (page-1)*page_size
     results = q.offset(offset).limit(page_size)
     results = [resource.serialize(e) for e in results]
     result_tuple = (q.count(), results)
     result = create_page(result_tuple, page, page_size, request.url)
-    
+
     session.remove()
     return jsonify(result)

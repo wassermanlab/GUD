@@ -74,6 +74,16 @@ class Expression(Base):
         return q.first()
 
     @classmethod
+    def select_all(cls, session, query=None):
+        """
+        """
+        if query is None:
+            q = session.query(cls, Sample)\
+                .join()
+
+        return q
+
+    @classmethod
     def select_by_samples(cls, session, samples, query = None):
         """
         Query objects with a min. expression in 

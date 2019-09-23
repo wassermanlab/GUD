@@ -111,6 +111,21 @@ class GUDUtilities:
     # SQLalchemy   #
     #--------------#
 
+    def get_engine(self):
+        """
+        Create an SQLAlchemy {Engine} and bind it to a {Session} factory:
+        @rtype = {Session}
+        """
+
+        db_name = self._get_db_name()
+
+        try:
+            engine, Session = self._get_engine_session(db_name)
+        except:
+            raise ValueError("Could not connect to GUD: %s" % db_name)
+
+        return(engine)
+
     def get_session(self):
         """
         Create an SQLAlchemy {Engine} and bind it to a {Session} factory:

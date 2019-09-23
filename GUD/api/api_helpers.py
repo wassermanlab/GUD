@@ -8,6 +8,11 @@ import re
 ## HELPER FUNCTIONS ##
 
 
+def table_exists(table_name):
+    engine = GUDUtils.get_engine()
+    if not engine.dialect.has_table(engine, table_name): 
+        raise BadRequest(table_name + ' table does not exist')
+
 def get_db(db):
     if db == "hg19":
         GUDUtils.db = "hg19"
