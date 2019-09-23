@@ -27,7 +27,8 @@ def clinvar(db):
     session.remove()
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
-    return jsonify(result)
+    response = jsonify(result)
+    return response
 
 @app.route('/api/v1/<db>/copy_number_variants')
 def copy_number_variants(db):
@@ -52,7 +53,6 @@ def copy_number_variants(db):
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page, page_size, request.url)
     response = jsonify(result)
-    response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
 @app.route('/api/v1/<db>/genes')
@@ -74,7 +74,6 @@ def genes(db):
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
     result = create_page(result_tuple, page,page_size, request.url)
     response = jsonify(result)
-    response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
 
@@ -97,7 +96,6 @@ def gene_symbols(db):
     result = create_page(result_tuple, page, page_size, request.url)                                 
     page_size = 20  ## reset page size
     response = jsonify(result)
-    response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
 
@@ -122,7 +120,8 @@ def strs(db):
     result = create_page(result_tuple, page, page_size, request.url)
     
     session.remove()
-    return jsonify(result)
+    response = jsonify(result)
+    return response
 
 
 @app.route('/api/v1/<db>/short_tandem_repeats/pathogenic')

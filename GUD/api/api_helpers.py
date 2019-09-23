@@ -39,7 +39,7 @@ def create_page(result_tuple, page, page_size, url) -> dict:
         raise NotFound('No results from this query')
     if offset > result_size:
         raise BadRequest('Page range is invalid, valid range for this query is between 1 and ' +
-                         str(math.ceil(result_size/page_size)-1))
+                         str(math.ceil(result_size/page_size)))
 
     json = {'size': result_size,
             'results': results}
