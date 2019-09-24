@@ -45,7 +45,7 @@ class Sample(Base):
         Index("ix_sex", X, Y),
         Index("ix_treatment_cell_line_cancer", treatment, cell_line, cancer),
         {
-            "mysql_engine": "InnoDB",
+            "mysql_engine": "MyISAM",
             "mysql_charset": "utf8"
         }
     )
