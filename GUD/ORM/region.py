@@ -16,65 +16,30 @@ from sqlalchemy.dialects import mysql
 
 from .base import Base
 
+
 class Region(Base):
 
     __tablename__ = "regions"
-
-    uid = Column(
-        "uid",
-        mysql.INTEGER(unsigned=True)
-    )
-
-    bin = Column(
-        "bin",
-        mysql.SMALLINT(unsigned=True),
-        nullable=False
-    )
-
-    chrom = Column(
-        "chrom",
-        String(5),
-        ForeignKey("chroms.chrom"),
-        nullable=False
-    )
-
-    start = Column(
-        "start",
-        mysql.INTEGER(unsigned=True),
-        nullable=False
-    )
-
-    end = Column(
-        "end",
-        mysql.INTEGER(unsigned=True),
-        nullable=False
-    )
-
-    strand = Column(
-        "strand",
-        mysql.CHAR(1)
-    )
+    uid = Column("uid", mysql.INTEGER(unsigned=True))
+    bin = Column("bin", mysql.SMALLINT(unsigned=True), nullable=False)
+    chrom = Column("chrom", String(5), ForeignKey(
+        "chroms.chrom"), nullable=False)
+    start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
+    end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
+    strand = Column("strand", mysql.CHAR(1))
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(
-            chrom,
-            start,
-            end,
-            strand
-        ),
+        UniqueConstraint(chrom, start, end, strand),
         CheckConstraint("end > start"),
         Index("ix_bin_chrom", bin, chrom),
         Index("ix_uid", uid),
-        {
-            "mysql_engine": "InnoDB",
-            "mysql_charset": "utf8"
-        }
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
     @classmethod
     def is_unique(cls, session, chrom, start, end,
-        strand=None):
+                  strand=None):
 
         q = session.query(cls)\
             .filter(
@@ -82,7 +47,7 @@ class Region(Base):
                 cls.start == int(start),
                 cls.end == int(end),
                 cls.strand == strand
-            )
+        )
 
         return len(q.all()) == 0
 
@@ -95,13 +60,13 @@ class Region(Base):
                 cls.start == int(start),
                 cls.end == int(end),
                 cls.strand == strand,
-            )
+        )
 
         return(q.first())
 
     @classmethod
     def select_by_bin_range(cls, session, chrom,
-        start, end, bins=[], compute_bins=False):
+                            start, end, bins=[], compute_bins=False):
         """
         Query objects using the bin system to speed
         up range searches. If no bins are provided
@@ -118,7 +83,7 @@ class Region(Base):
                 cls.chrom == chrom,
                 cls.end > start,
                 cls.start < end
-            )
+        )
 
         if bins:
             q = q.filter(cls.bin.in_(bins))
@@ -129,26 +94,10 @@ class Region(Base):
     def _compute_bins(cls, start, end):
 
         return list(set(
-                containing_bins(start, end) +\
-                contained_bins(start, end)
-            )
+            containing_bins(start, end) +
+            contained_bins(start, end)
         )
-
-#    @classmethod
-#    def select_by_exact_location(cls, session, chrom,
-#        start, end):
-#
-#        bin = assign_bin(start, end)
-#
-#        q = session.query(cls).\
-#            filter(
-#                cls.bin == bin,
-#                cls.chrom == chrom,
-#                cls.start == start,
-#                cls.end == end
-#            )
-#
-#        return q.first()
+        )
 
     def __repr__(self):
 

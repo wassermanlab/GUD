@@ -22,10 +22,7 @@ class Source(Base):
         UniqueConstraint(name),
         Index("ix_uid", uid),
         Index("ix_name", name),
-        {
-            "mysql_engine": "InnoDB",
-            "mysql_charset": "utf8"
-        }
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
     @classmethod

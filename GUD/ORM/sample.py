@@ -22,20 +22,13 @@ class Sample(Base):
     __tablename__ = "samples"
 
     uid = Column("uid",mysql.INTEGER(unsigned=True),nullable=False)
-
     name = Column("name",String(250),nullable=False)
-
     X = Column("X_chroms", mysql.SMALLINT(unsigned=True))
-
     Y = Column("Y_chroms", mysql.SMALLINT(unsigned=True))
-
     treatment = Column("treatment", Boolean, nullable=False)
-
     cell_line = Column("cell_line",Boolean,nullable=False)
-
     cancer = Column("cancer",Boolean,nullable=False)
 
-    
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(name, X, Y, treatment, cell_line, cancer),
@@ -44,10 +37,7 @@ class Sample(Base):
         Index("ix_name_fulltext", name, mysql_prefix="FULLTEXT"),
         Index("ix_sex", X, Y),
         Index("ix_treatment_cell_line_cancer", treatment, cell_line, cancer),
-        {
-            "mysql_engine": "InnoDB",
-            "mysql_charset": "utf8"
-        }
+        {"mysql_engine": "MyISAM", "mysql_charset": "utf8"}
     )
 
     @classmethod
