@@ -27,24 +27,13 @@ class Gene(GFMixin1, Base):
     exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
     exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
 
-    @declared_attr
-    def __table_args__(cls):
-        return (
-            UniqueConstraint(
-                cls.region_id,
-                cls.name,
-                cls.source_id
-            ),
-            # query by bin range
-            Index("ix_source_id", cls.source_id),
-            Index("ix_region_id", cls.region_id),
-            Index("ix_name", cls.name),
-            Index("ix_name2", cls.name2),
-            {
-                "mysql_engine": "InnoDB",
-                "mysql_charset": "utf8",
-            }
-        )
+    __table_args__ = (
+        UniqueConstraint(region_id, name, source_id),
+        Index("ix_join", region_id, source_id),
+        Index("ix_name", name),
+        Index("ix_name2", name2),
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8", }
+    )
 
     @classmethod
     def select_by_names(cls, session, query, names=[]):
@@ -55,8 +44,8 @@ class Gene(GFMixin1, Base):
         """
         if (query is None):
             q = cls.make_query(session)
-        else: 
-            q = query 
+        else:
+            q = query
         q = q.filter(cls.name2.in_(names))
         return q
 

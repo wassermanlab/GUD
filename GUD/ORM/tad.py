@@ -30,23 +30,11 @@ class TAD(GFMixin2, Base):
     restriction_enzyme = Column(
         "restriction_enzyme", String(25), nullable=False)
 
-    @declared_attr
-    def __table_args__(cls):
-        return (
-            UniqueConstraint(
-                cls.region_id,
-                cls.sample_id,
-                cls.experiment_id,
-                cls.sample_id,
-                cls.restriction_enzyme
-
-            ),
-            Index("ix_regionID", cls.region_id),  # query by bin range
-            Index("ix_sampleID", cls.sample_id),
-            {
-                "mysql_engine": "InnoDB",
-                "mysql_charset": "utf8"
-            }
+    __table_args__ = (
+            UniqueConstraint(region_id, sample_id, experiment_id, 
+            sample_id, restriction_enzyme),
+            Index("ix_join", region_id, sample_id, experiment_id, source_id),
+            {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
         )
 
     @classmethod
@@ -65,8 +53,8 @@ class TAD(GFMixin2, Base):
                   restriction_enzyme):
 
         q = session.query(cls).\
-            filter(cls.regionID == regionID, cls.sampleID == sampleID,
-                   cls.experimentID == experimentID, cls.sourceID == sourceID,
+            filter(cls.region_id == regionID, cls.sample_id == sampleID,
+                   cls.experiment_id == experimentID, cls.source_id == sourceID,
                    cls.restriction_enzyme == restriction_enzyme)
 
         return len(q.all()) == 0
@@ -76,8 +64,8 @@ class TAD(GFMixin2, Base):
                       restriction_enzyme):
 
         q = session.query(cls).\
-            filter(cls.regionID == regionID, cls.sampleID == sampleID,
-                   cls.experimentID == experimentID, cls.sourceID == sourceID,
+            filter(cls.region_id == regionID, cls.sample_id == sampleID,
+                   cls.experiment_id == experimentID, cls.source_id == sourceID,
                    cls.restriction_enzyme == restriction_enzyme)
 
         return q.first()

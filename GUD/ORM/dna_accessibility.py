@@ -10,28 +10,16 @@ from .genomic_feature import GenomicFeature
 from .genomicFeatureMixin2 import GFMixin2
 from sqlalchemy.ext.declarative import declared_attr
 
+
 class DNAAccessibility(GFMixin2, Base):
 
     __tablename__ = "dna_accessibility"
 
-    @declared_attr
-    def __table_args__(cls):
-        return (
-            UniqueConstraint(
-                cls.region_id,
-                cls.sample_id,
-                cls.experiment_id,
-                cls.sample_id
-            ),
-            Index("ix_regionID", cls.region_id),  # query by bin range
-            Index("ix_sourceID", cls.sample_id),
-            Index("ix_experimentID", cls.experiment_id),
-            Index("ix_sampleID", cls.sample_id),
-            {
-                "mysql_engine": "InnoDB",
-                "mysql_charset": "utf8"
-            }
-        )
+    __table_args__ = (
+        UniqueConstraint(region_id, sample_id, experiment_id, source_id),
+        Index("ix_join", region_id, sample_id, experiment_id, source_id),
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
+    )
 
     @classmethod
     def select_unique(cls, session, regionID,
@@ -39,10 +27,10 @@ class DNAAccessibility(GFMixin2, Base):
 
         q = session.query(cls).\
             filter(
-                cls.regionID == regionID,
-                cls.sampleID == sampleID,
-                cls.experimentID == experimentID,
-                cls.sourceID == sourceID
+                cls.region_id == regionID,
+                cls.sample_id == sampleID,
+                cls.experiment_id == experimentID,
+                cls.source_id == sourceID
         )
 
         return q.first()

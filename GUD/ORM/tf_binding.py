@@ -23,26 +23,13 @@ from sqlalchemy.ext.declarative import declared_attr
 class TFBinding(GFMixin2, Base):
 
     __tablename__ = "tf_binding"
-
     tf = Column("tf", String(25), nullable=False)
-
-    @declared_attr
-    def __table_args__(cls):
-        return (
-            UniqueConstraint(
-                cls.region_id,
-                cls.sample_id,
-                cls.experiment_id,
-                cls.sample_id,
-                cls.tf
-            ),
-            Index("ix_regionID", cls.region_id),  # query by bin range
-            Index("ix_sampleID", cls.sample_id),
-            {
-                "mysql_engine": "InnoDB",
-                "mysql_charset": "utf8"
-            }
-        )
+    __table_args__ = (
+        UniqueConstraint(region_id, sample_id,
+                         experiment_id, source_id, tf),
+        Index("ix_join", region_id, sample_id, experiment_id, source_id),
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
+    )
 
     @classmethod
     def select_by_tf(cls, query, tf):
@@ -59,8 +46,8 @@ class TFBinding(GFMixin2, Base):
                   tf):
 
         q = session.query(cls).\
-            filter(cls.regionID == regionID, cls.sampleID == sampleID,
-                   cls.experimentID == experimentID, cls.sourceID == sourceID,
+            filter(cls.region_id == regionID, cls.sample_id == sampleID,
+                   cls.experiment_id == experimentID, cls.source_id == sourceID,
                    cls.tf == tf)
 
         return len(q.all()) == 0
@@ -71,8 +58,8 @@ class TFBinding(GFMixin2, Base):
                       tf):
 
         q = session.query(cls).\
-            filter(cls.regionID == regionID, cls.sampleID == sampleID,
-                   cls.experimentID == experimentID, cls.sourceID == sourceID,
+            filter(cls.region_id == regionID, cls.sample_id == sampleID,
+                   cls.experiment_id == experimentID, cls.source_id == sourceID,
                    cls.tf == tf)
 
         return q.first()

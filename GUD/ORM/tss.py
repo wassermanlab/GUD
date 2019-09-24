@@ -23,7 +23,6 @@ class TSS(GFMixin2, Base):
     __tablename__ = "transcription_start_sites"
 
     gene = Column("gene", String(75), ForeignKey("genes.name2"))
-
     tss = Column("tss", mysql.INTEGER(unsigned=True))
 
     @declared_attr
@@ -33,24 +32,11 @@ class TSS(GFMixin2, Base):
     avg_expression_levels = Column("avg_expression_levels", mysql.LONGBLOB,
                                    nullable=False)
 
-    @declared_attr
-    def __table_args__(cls):
-        return (
-            # multiple TSSs might overlap:
-            # e.g. p16@IGF2,p1@INS-IGF2,p1@INS
-            UniqueConstraint(
-                cls.region_id,
-                cls.sample_id,
-                cls.experiment_id,
-                cls.gene,
-                cls.tss
-            ),
-            Index("ix_regionID", cls.region_id),  # query by bin range
+    __table_args__ = (
+            UniqueConstraint( region_id, sample_id, experiment_id, gene, tss),
+            Index("ix_join", region_id, experiment_id, source_id),
             Index("ix_gene_tss", cls.gene, cls.tss),
-            {
-                "mysql_engine": "InnoDB",
-                "mysql_charset": "utf8"
-            }
+            {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
         )
 
     @classmethod
@@ -58,8 +44,8 @@ class TSS(GFMixin2, Base):
                   experimentID, gene, tss):
 
         q = session.query(cls)\
-            .filter(cls.regionID == regionID, cls.sourceID == sourceID,
-                    cls.experimentID == experimentID, cls.gene == gene, cls.tss == tss)
+            .filter(cls.region_id == regionID, cls.source_id == sourceID,
+                    cls.experiment_id == experimentID, cls.gene == gene, cls.tss == tss)
 
         return len(q.all()) == 0
 
@@ -67,8 +53,8 @@ class TSS(GFMixin2, Base):
     def select_unique(cls, session, regionID, sourceID, experimentID, gene, tss):
 
         q = session.query(cls)\
-            .filter(cls.regionID == regionID, cls.sourceID == sourceID,
-                    cls.experimentID == experimentID, cls.gene == gene,
+            .filter(cls.region_id == regionID, cls.source_id == sourceID,
+                    cls.experiment_id == experimentID, cls.gene == gene,
                     cls.tss == tss)
 
         return q.first()
