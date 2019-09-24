@@ -55,8 +55,8 @@ class Gene(GFMixin1, Base):
         """
         if (query is None):
             q = cls.make_query(session)
-        else: 
-            q = query 
+        else:
+            q = query
         q = q.filter(cls.name2.in_(names))
         return q
 
