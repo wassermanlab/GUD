@@ -21,12 +21,12 @@ class GFMixin2(GFMixin1):
 
     @declared_attr
     def sample_id(cls):
-        return Column("sampleID", Integer, ForeignKey("samples.uid"),
+        return Column("sampleID", mysql.INTEGER(unsigned=True), ForeignKey("samples.uid"),
                       nullable=False)
 
     @declared_attr
     def experiment_id(cls):
-        return Column("experimentID", Integer, ForeignKey("experiments.uid"),
+        return Column("experimentID", mysql.INTEGER(unsigned=True), ForeignKey("experiments.uid"),
                       nullable=False)
 
     @classmethod
