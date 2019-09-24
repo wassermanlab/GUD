@@ -24,7 +24,6 @@ def get_db(db):
     else:
         raise BadRequest('database must be hg19 or hg38 or test')
 
-
 def get_genomic_feature_results(resource, query, page_size, page) -> tuple:
     offset = (page-1)*page_size
     results = query.offset(offset).limit(page_size)
