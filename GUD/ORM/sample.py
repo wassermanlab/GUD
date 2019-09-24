@@ -37,7 +37,7 @@ class Sample(Base):
         Index("ix_name_fulltext", name, mysql_prefix="FULLTEXT"),
         Index("ix_sex", X, Y),
         Index("ix_treatment_cell_line_cancer", treatment, cell_line, cancer),
-        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
+        {"mysql_engine": "MyISAM", "mysql_charset": "utf8"}
     )
 
     @classmethod
