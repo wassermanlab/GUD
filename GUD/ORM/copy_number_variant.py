@@ -26,7 +26,6 @@ class CNV(GFMixin1, Base):
     
     __table_args__ = (
         Index("ix_join", GFMixin1.source_id, GFMixin1.region_id),
-        Index("ix_cnv_uid", uid),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
