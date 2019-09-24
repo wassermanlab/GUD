@@ -32,7 +32,7 @@ class RepeatMask(GFMixin1, Base):
         Index("ix_rmsk", cls.region_id),
 
         {
-            "mysql_engine": "MyISAM",
+            "mysql_engine": "InnoDB",
             "mysql_charset": "utf8"
         }
     )

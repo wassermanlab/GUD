@@ -29,7 +29,7 @@ class Conservation(GFMixin1, Base):
             UniqueConstraint(cls.region_id, cls.source_id),
             Index("ix_region_id", cls.region_id),  # query by bin range
             {
-                "mysql_engine": "MyISAM",
+                "mysql_engine": "InnoDB",
                 "mysql_charset": "utf8"
             }
         )

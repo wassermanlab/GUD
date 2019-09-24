@@ -41,7 +41,7 @@ class Gene(GFMixin1, Base):
             Index("ix_name", cls.name),
             Index("ix_name2", cls.name2),
             {
-                "mysql_engine": "MyISAM",
+                "mysql_engine": "InnoDB",
                 "mysql_charset": "utf8",
             }
         )

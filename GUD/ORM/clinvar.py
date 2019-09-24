@@ -49,7 +49,7 @@ class ClinVar(GFMixin1, Base):
         Index("ix_clinvar_id", cls.clinvar_variation_ID),
 
         {  
-            "mysql_engine": "MyISAM",
+            "mysql_engine": "InnoDB",
             "mysql_charset": "utf8"
         }
     )

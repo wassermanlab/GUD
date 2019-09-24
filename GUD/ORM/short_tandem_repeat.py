@@ -31,12 +31,12 @@ class ShortTandemRepeat(GFMixin1, Base):
         return(
             UniqueConstraint(cls.region_id, cls.source_id, cls.pathogenicity),
             Index("ix_source_id", cls.source_id),
-            Index("ix_str", cls.region_id),
+            Index("ix_region_id", cls.region_id),
             Index("ix_str_pathogenic", cls.pathogenicity),
             Index("ix_str_motif", cls.motif),
 
             {
-                "mysql_engine": "MyISAM",
+                "mysql_engine": "InnoDB",
                 "mysql_charset": "utf8"
             }
         )

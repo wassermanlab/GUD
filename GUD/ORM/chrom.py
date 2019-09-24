@@ -20,7 +20,7 @@ class Chrom(Base):
         PrimaryKeyConstraint(chrom),
         Index("ix_chrom", chrom),
         {
-            "mysql_engine": "MyISAM",
+            "mysql_engine": "InnoDB",
             "mysql_charset": "utf8"
         }
     )

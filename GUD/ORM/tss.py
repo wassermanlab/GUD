@@ -48,7 +48,7 @@ class TSS(GFMixin2, Base):
             Index("ix_regionID", cls.region_id),  # query by bin range
             Index("ix_gene_tss", cls.gene, cls.tss),
             {
-                "mysql_engine": "MyISAM",
+                "mysql_engine": "InnoDB",
                 "mysql_charset": "utf8"
             }
         )

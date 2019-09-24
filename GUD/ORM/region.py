@@ -65,9 +65,9 @@ class Region(Base):
         ),
         CheckConstraint("end > start"),
         Index("ix_bin_chrom", bin, chrom),
-         Index("ix_uid", uid),
+        Index("ix_uid", uid),
         {
-            "mysql_engine": "MyISAM",
+            "mysql_engine": "InnoDB",
             "mysql_charset": "utf8"
         }
     )

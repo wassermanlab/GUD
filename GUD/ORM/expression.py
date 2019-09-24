@@ -37,7 +37,7 @@ class Expression(Base):
         Index("ix_tssID", tssID),
         Index("ix_sampleID", sampleID),
         {
-            "mysql_engine": "MyISAM",
+            "mysql_engine": "InnoDB",
             "mysql_charset": "utf8"
         }
     )

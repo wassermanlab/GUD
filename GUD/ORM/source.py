@@ -23,7 +23,7 @@ class Source(Base):
         Index("ix_uid", uid),
         Index("ix_name", name),
         {
-            "mysql_engine": "MyISAM",
+            "mysql_engine": "InnoDB",
             "mysql_charset": "utf8"
         }
     )

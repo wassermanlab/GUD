@@ -32,7 +32,7 @@ class CNV(GFMixin1, Base):
         Index("ix_cnv_uid", cls.uid),
 
         {
-            "mysql_engine": "MyISAM",
+            "mysql_engine": "InnoDB",
             "mysql_charset": "utf8"
         }
     )

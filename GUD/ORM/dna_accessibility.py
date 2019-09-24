@@ -28,7 +28,7 @@ class DNAAccessibility(GFMixin2, Base):
             Index("ix_experimentID", cls.experiment_id),
             Index("ix_sampleID", cls.sample_id),
             {
-                "mysql_engine": "MyISAM",
+                "mysql_engine": "InnoDB",
                 "mysql_charset": "utf8"
             }
         )

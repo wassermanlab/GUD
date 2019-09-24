@@ -39,7 +39,7 @@ class TFBinding(GFMixin2, Base):
             Index("ix_regionID", cls.region_id),  # query by bin range
             Index("ix_sampleID", cls.sample_id),
             {
-                "mysql_engine": "MyISAM",
+                "mysql_engine": "InnoDB",
                 "mysql_charset": "utf8"
             }
         )

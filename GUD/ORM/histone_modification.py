@@ -29,8 +29,9 @@ class HistoneModification(GFMixin2, Base):
 
     histone_type = Column("histone_type", String(25), nullable=False)
 
-    @declared_attr
-    def __table_args__(cls):
+    
+    
+    __table_args__(cls):
         return (
             UniqueConstraint(
                 cls.region_id,
@@ -43,7 +44,7 @@ class HistoneModification(GFMixin2, Base):
             Index("ix_regionID", cls.region_id),  # query by bin range
             Index("ix_sampleID", cls.sample_id),
             {
-                "mysql_engine": "MyISAM",
+                "mysql_engine": "InnoDB",
                 "mysql_charset": "utf8"
             }
         )
@@ -94,7 +95,7 @@ class HistoneModification(GFMixin2, Base):
             feat.Region.chrom,
             int(feat.Region.start),
             int(feat.Region.end),
-            strand=feat.Region.strand,
-            feat_id="%s_%s" % (self.__tablename__,
-                               feat.HistoneModification.uid),
-            qualifiers=qualifiers)
+            strand = feat.Region.strand,
+            feat_id = "%s_%s"%(self.__tablename__, feat.HistoneModification.uid),
+            qualifiers = qualifiers)
+

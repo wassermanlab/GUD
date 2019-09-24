@@ -115,10 +115,8 @@ def strs(db):
             'rotation must be set to True or False if motif is given')
     if motif is not None:
         q = resource.select_by_motif(session, motif, q, rotation)
-    print(q)
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
-    result = create_page(result_tuple, page, page_size, request.url)
-    
+    result = create_page(result_tuple, page, page_size, request.url) 
     session.remove()
     response = jsonify(result)
     return response
@@ -164,19 +162,22 @@ def histone_modifications(db):
     get_db(db)
     table_exists('histone_modifications')
     page = check_page(request)
-    
     session = GUDUtils.get_session()
     resource = HistoneModification()
     histone_types = check_split(request.args.get('histone_types', default=None))
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
+
     if histone_types is not None: 
         q = resource.select_by_histone_type(q, histone_types)
-    
     session.remove()
+    print("1")
     result_tuple = get_genomic_feature_results(resource, q, page_size,  page)
-    result = create_page(result_tuple, page, page_size, request.url)
-    return jsonify(result)
+    print("2")
+    result = create_page(result_tuple, page,page_size, request.url)
+    print("3")
+    response = jsonify(result)
+    return response
 
 @app.route('/api/v1/<db>/tads')
 def tads(db):
