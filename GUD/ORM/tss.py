@@ -35,7 +35,7 @@ class TSS(GFMixin2, Base):
     __table_args__ = (
             UniqueConstraint(GFMixin2.region_id, GFMixin2.sample_id, GFMixin2.experiment_id, gene, tss),
             Index("ix_join", GFMixin2.region_id, GFMixin2.experiment_id, GFMixin2.source_id),
-            Index("ix_gene_tss", cls.gene, cls.tss),
+            Index("ix_gene_tss", gene, tss),
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
         )
 

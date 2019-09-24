@@ -28,7 +28,7 @@ class Gene(GFMixin1, Base):
     exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
 
     __table_args__ = (
-        UniqueConstraint(region_id, name, GFMixin1.source_id),
+        UniqueConstraint(GFMixin1.region_id, name, GFMixin1.source_id),
         Index("ix_join", GFMixin1.region_id, GFMixin1.source_id),
         Index("ix_name", name),
         Index("ix_name2", name2),
