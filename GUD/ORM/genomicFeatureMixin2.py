@@ -18,12 +18,12 @@ import sys
 
 
 class GFMixin2(GFMixin1):
-
+    __mapper_args__= {'always_refresh': True}
+    
     @declared_attr
     def sample_id(cls):
         return Column("sampleID", mysql.INTEGER(unsigned=True), ForeignKey("samples.uid"),
                       nullable=False)
-
     @declared_attr
     def experiment_id(cls):
         return Column("experimentID", mysql.INTEGER(unsigned=True), ForeignKey("experiments.uid"),

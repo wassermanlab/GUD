@@ -20,7 +20,8 @@ class GFMixin1(object):
         return cls.__name__.lower()
 
     uid = Column("uid", mysql.INTEGER(unsigned=True), primary_key=True)
-
+    __mapper_args__= {'always_refresh': True}
+    
     @declared_attr
     def region_id(cls):
         return Column("regionID", mysql.INTEGER(unsigned=True), ForeignKey("regions.uid"),

@@ -27,7 +27,7 @@ class Gene(GFMixin1, Base):
     exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
     exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
 
-     @declared_attr
+    @declared_attr
     def __table_args__(cls):
         return (
         UniqueConstraint(cls.region_id, cls.name, cls.source_id),
