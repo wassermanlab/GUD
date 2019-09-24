@@ -17,12 +17,13 @@ from sqlalchemy.ext.declarative import declared_attr
 
 class Gene(GFMixin1, Base):
 
-   __tablename__ = "genes"
+    __tablename__ = "genes"
 
     # inherits uid, regionID, sourceID
     name = Column("name", String(75), nullable=False)
     name2 = Column("name2", String(75), nullable=False)
-    cdsStart = Column("cdsStart", mysql.INTEGER(unsigned=True), nullable=False)
+    cdsStart = Column("cdsStart", mysql.INTEGER(
+        unsigned=True), nullable=False)
     cdsEnd = Column("cdsEnd", mysql.INTEGER(unsigned=True), nullable=False)
     exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
     exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
@@ -30,7 +31,7 @@ class Gene(GFMixin1, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-            UniqueConstraint(cls.region_id,cls.name,cls.source_id),
+            UniqueConstraint(cls.region_id, cls.name, cls.source_id),
             # query by bin range
             Index("ix_source_id", cls.source_id),
             Index("ix_region_id", cls.region_id),

@@ -18,7 +18,6 @@ import sys
 
 
 class GFMixin2(GFMixin1):
-    __mapper_args__= {'always_refresh': True}
     
     @declared_attr
     def sample_id(cls):

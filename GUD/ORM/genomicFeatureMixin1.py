@@ -20,8 +20,7 @@ class GFMixin1(object):
         return cls.__name__.lower()
 
     uid = Column("uid", mysql.INTEGER(unsigned=True), primary_key=True)
-    __mapper_args__= {'always_refresh': True}
-    
+
     @declared_attr
     def region_id(cls):
         return Column("regionID", mysql.INTEGER(unsigned=True), ForeignKey("regions.uid"),
@@ -37,7 +36,7 @@ class GFMixin1(object):
         q = session.query(cls, Region, Source)\
             .join()\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)
-        return q 
+        return q
 
     @classmethod
     def select_by_overlapping_location(cls, session, chrom, start, end):
@@ -48,8 +47,8 @@ class GFMixin1(object):
 
         q = cls.make_query(session)
         q = q.filter(Region.chrom == chrom,
-                    Region.start < end,
-                    Region.end > start)\
+                     Region.start < end,
+                     Region.end > start)\
             .filter(Region.bin.in_(bins))
 
         return q
@@ -63,8 +62,8 @@ class GFMixin1(object):
 
         q = cls.make_query(session)
         q = q.filter(Region.chrom == chrom,
-                    Region.start > start,
-                    Region.end < end)\
+                     Region.start > start,
+                     Region.end < end)\
             .filter(Region.bin.in_(bins))
 
         return q
@@ -108,8 +107,8 @@ class GFMixin1(object):
         """
         if (query is None):
             q = cls.make_query(session)
-        else: 
-            q = query 
+        else:
+            q = query
         q = q.filter(cls.uid.in_(uids))
         return q
 
