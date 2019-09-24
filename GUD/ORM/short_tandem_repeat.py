@@ -27,8 +27,8 @@ class ShortTandemRepeat(GFMixin1, Base):
         unsigned=True), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint(region_id, source_id, pathogenicity),
-        Index("ix_join", region_id, source_id),
+        UniqueConstraint(GFMixin1.region_id, GFMixin1.source_id, pathogenicity),
+        Index("ix_join", GFMixin1.region_id, GFMixin1.source_id),
         Index("ix_str_pathogenic", pathogenicity),
         Index("ix_str_motif", motif),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}

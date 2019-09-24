@@ -16,8 +16,10 @@ class DNAAccessibility(GFMixin2, Base):
     __tablename__ = "dna_accessibility"
 
     __table_args__ = (
-        UniqueConstraint(region_id, sample_id, experiment_id, source_id),
-        Index("ix_join", region_id, sample_id, experiment_id, source_id),
+        UniqueConstraint(GFMixin2.region_id, GFMixin2.sample_id,
+                         GFMixin2.experiment_id, GFMixin2.source_id),
+        Index("ix_join", GFMixin2.region_id, GFMixin2.sample_id,
+              GFMixin2.experiment_id, GFMixin2.source_id),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 

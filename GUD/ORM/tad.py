@@ -31,11 +31,12 @@ class TAD(GFMixin2, Base):
         "restriction_enzyme", String(25), nullable=False)
 
     __table_args__ = (
-            UniqueConstraint(region_id, sample_id, experiment_id, 
-            sample_id, restriction_enzyme),
-            Index("ix_join", region_id, sample_id, experiment_id, source_id),
-            {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
-        )
+        UniqueConstraint(GFMixin2.region_id, GFMixin2.sample_id,
+                         GFMixin2.experiment_id, GFMixin2.sample_id, restriction_enzyme),
+        Index("ix_join", GFMixin2.region_id, GFMixin2.sample_id,
+              GFMixin2.experiment_id, GFMixin2.source_id),
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
+    )
 
     @classmethod
     def select_by_restriction_enzymes(cls, query, restriction_enzymes):

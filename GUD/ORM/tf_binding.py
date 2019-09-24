@@ -25,9 +25,9 @@ class TFBinding(GFMixin2, Base):
     __tablename__ = "tf_binding"
     tf = Column("tf", String(25), nullable=False)
     __table_args__ = (
-        UniqueConstraint(region_id, sample_id,
-                         experiment_id, source_id, tf),
-        Index("ix_join", region_id, sample_id, experiment_id, source_id),
+        UniqueConstraint(GFMixin2.region_id, GFMixin2.sample_id,
+                         GFMixin2.experiment_id, GFMixin2.source_id, tf),
+        Index("ix_join", GFMixin2.region_id, GFMixin2.sample_id, GFMixin2.experiment_id, GFMixin2.source_id),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 

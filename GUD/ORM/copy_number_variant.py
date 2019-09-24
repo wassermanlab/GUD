@@ -25,7 +25,7 @@ class CNV(GFMixin1, Base):
     dbVar_accession     = Column("dbVar_accession", mysql.LONGBLOB, nullable=False)
     
     __table_args__ = (
-        Index("ix_join", source_id, region_id),
+        Index("ix_join", GFMixin1.source_id, GFMixin1.region_id),
         Index("ix_cnv_uid", uid),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )

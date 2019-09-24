@@ -25,8 +25,8 @@ class RepeatMask(GFMixin1, Base):
     repClass = Column("repClass", String(75), nullable=False)
     repFamily = Column("repFamily", String(75), nullable=False)
     __table_args__ = (
-        UniqueConstraint(cls.region_id, cls.source_id),
-        Index("ix_join", region_id, source_id),
+        UniqueConstraint(GFMixin1.region_id, GFMixin1.source_id),
+        Index("ix_join", GFMixin1.region_id, GFMixin1.source_id),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 

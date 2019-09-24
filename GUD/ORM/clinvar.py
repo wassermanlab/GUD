@@ -41,7 +41,7 @@ class ClinVar(GFMixin1, Base):
 
     __table_args__ = (
         UniqueConstraint(clinvar_variation_ID),
-        Index("ix_join", source_id, region_id),
+        Index("ix_join", GFMixin1.source_id, GFMixin1.region_id),
         Index("ix_clinvar_id", clinvar_variation_ID),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
