@@ -1,4 +1,4 @@
-# Genomic Universal Database
+# Genomic Unification Database
 
 > This is a database which centralizes and unifies genomic data in a universal manner for specific reference datasets.
 
