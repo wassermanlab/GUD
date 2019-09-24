@@ -8,21 +8,16 @@ from sqlalchemy.dialects import mysql
 
 from .base import Base
 
+
 class Chrom(Base):
 
     __tablename__ = "chroms"
-
     chrom = Column("chrom", String(5), nullable=False)
-
     size = Column("size", mysql.INTEGER(unsigned=True), nullable=False)
-
     __table_args__ = (
         PrimaryKeyConstraint(chrom),
         Index("ix_chrom", chrom),
-        {
-            "mysql_engine": "InnoDB",
-            "mysql_charset": "utf8"
-        }
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
     @classmethod
@@ -49,7 +44,7 @@ class Chrom(Base):
         return q.all()
 
     @classmethod
-    def chrom_sizes(cls, session, chroms=[]): 
+    def chrom_sizes(cls, session, chroms=[]):
         """
         Return the size of the given chroms as a
         dict. If no chroms are provided, return
@@ -58,7 +53,7 @@ class Chrom(Base):
         sizes = {}
 
         q = cls.select_by_chroms(session, chroms)
-        
+
         for c in q:
             sizes.setdefault(c.chrom, int(c.size))
 
@@ -77,4 +72,4 @@ class Chrom(Base):
         return {
             'chrom': self.chrom,
             'size': self.size,
-            }
+        }

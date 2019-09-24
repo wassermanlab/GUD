@@ -19,27 +19,19 @@ from .tss import TSS
 class Expression(Base):
 
     __tablename__ = "expression"
-
     uid = Column("uid", mysql.INTEGER(unsigned=True))
-
     tssID = Column("tssID", Integer, ForeignKey(
         "transcription_start_sites.uid"), nullable=False)
-
     sampleID = Column("sampleID", Integer, ForeignKey(
         "samples.uid"), nullable=False)
-
     avg_expression_level = Column(
         "avg_expression_level", Float, nullable=False)
-
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(tssID, sampleID),
         Index("ix_tssID", tssID),
         Index("ix_sampleID", sampleID),
-        {
-            "mysql_engine": "InnoDB",
-            "mysql_charset": "utf8"
-        }
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
     def serialize(self, feat):

@@ -7,7 +7,7 @@ from sqlalchemy import (
     Column, Index, PrimaryKeyConstraint, String, ForeignKey,
     UniqueConstraint, CheckConstraint, Integer
 )
-from sqlalchemy.dialects import mysql       
+from sqlalchemy.dialects import mysql
 
 from .base import Base
 from .region import Region
@@ -26,20 +26,13 @@ class ShortTandemRepeat(GFMixin1, Base):
     pathogenicity = Column("pathogenicity", mysql.INTEGER(
         unsigned=True), nullable=False)
 
-    @declared_attr
-    def __table_args__(cls):
-        return(
-            UniqueConstraint(cls.region_id, cls.source_id, cls.pathogenicity),
-            Index("ix_source_id", cls.source_id),
-            Index("ix_region_id", cls.region_id),
-            Index("ix_str_pathogenic", cls.pathogenicity),
-            Index("ix_str_motif", cls.motif),
-
-            {
-                "mysql_engine": "InnoDB",
-                "mysql_charset": "utf8"
-            }
-        )
+    __table_args__ = (
+        UniqueConstraint(GFMixin1.region_id, GFMixin1.source_id, pathogenicity),
+        Index("ix_join", GFMixin1.region_id, GFMixin1.source_id),
+        Index("ix_str_pathogenic", pathogenicity),
+        Index("ix_str_motif", motif),
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
+    )
 
     @classmethod
     def select_by_pathogenicity(cls, session):
