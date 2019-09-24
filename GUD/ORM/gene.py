@@ -17,7 +17,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 class Gene(GFMixin1, Base):
 
-    __tablename__ = "genes"
+   __tablename__ = "genes"
 
     # inherits uid, regionID, sourceID
     name = Column("name", String(75), nullable=False)
@@ -27,15 +27,20 @@ class Gene(GFMixin1, Base):
     exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
     exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
 
-     @declared_attr
+    @declared_attr
     def __table_args__(cls):
         return (
-        UniqueConstraint(cls.region_id, cls.name, cls.source_id),
-        Index("ix_join", cls.region_id, cls.source_id),
-        Index("ix_name", cls.name),
-        Index("ix_name2", cls.name2),
-        {"mysql_engine": "InnoDB", "mysql_charset": "utf8", }
-    )
+            UniqueConstraint(cls.region_id,cls.name,cls.source_id),
+            # query by bin range
+            Index("ix_source_id", cls.source_id),
+            Index("ix_region_id", cls.region_id),
+            Index("ix_name", cls.name),
+            Index("ix_name2", cls.name2),
+            {
+                "mysql_engine": "InnoDB",
+                "mysql_charset": "utf8",
+            }
+        )
 
     @classmethod
     def select_by_names(cls, session, query, names=[]):
