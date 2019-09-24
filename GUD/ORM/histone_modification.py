@@ -31,7 +31,8 @@ class HistoneModification(GFMixin2, Base):
 
     
     
-    __table_args__(cls):
+    @declared_attr
+    def __table_args__(cls):
         return (
             UniqueConstraint(
                 cls.region_id,
