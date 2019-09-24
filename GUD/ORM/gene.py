@@ -27,11 +27,13 @@ class Gene(GFMixin1, Base):
     exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
     exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
 
-    __table_args__ = (
-        UniqueConstraint(GFMixin1.region_id, name, GFMixin1.source_id),
-        Index("ix_join", GFMixin1.region_id, GFMixin1.source_id),
-        Index("ix_name", name),
-        Index("ix_name2", name2),
+     @declared_attr
+    def __table_args__(cls):
+        return (
+        UniqueConstraint(cls.region_id, cls.name, cls.source_id),
+        Index("ix_join", cls.region_id, cls.source_id),
+        Index("ix_name", cls.name),
+        Index("ix_name2", cls.name2),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8", }
     )
 
