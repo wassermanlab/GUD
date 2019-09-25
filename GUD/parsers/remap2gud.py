@@ -188,12 +188,6 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     ParseUtils.upsert_source(session, source)
     source = ParseUtils.get_source(session, source_name)
 
-    print(experiment)
-    print(experiment.uid)
-    print(source)
-    print(source.uid)
-    exit(0)
-
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
@@ -404,8 +398,6 @@ def _insert_data(data_file, test=False):
 
         # Get region ID
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end, region.strand)
-
-        print(experiment.uid, source.uid)
 
         # Get TF
         tf = TFBinding()
