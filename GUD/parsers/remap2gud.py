@@ -399,15 +399,12 @@ def _insert_data(data_file, test=False):
         # Get region ID
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end, region.strand)
 
-        print(region)
-        exit(0)
-
         # Get TF
         tf = TFBinding()
-        tf.regionID = region.uid
-        tf.sampleID = samples[sample_name]
-        tf.experimentID = experiment.uid
-        tf.sourceID = source.uid
+        tf.region_id = region.uid
+        tf.sample_id = samples[sample_name]
+        tf.experiment_id = experiment.uid
+        tf.source_id = source.uid
         tf.tf = tf_name
 
         # Upsert tf
