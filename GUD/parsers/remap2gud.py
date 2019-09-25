@@ -177,7 +177,10 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     experiment = Experiment()
     experiment.name = experiment_type
     ParseUtils.upsert_experiment(session, experiment)
-    experiment = ParseUtils.get_experiment(session, experiment_type)    
+    experiment = ParseUtils.get_experiment(session, experiment_type)
+    print(experiment)
+    print(dir(experiment))
+    exit(0)
 
     # Get samples
     samples = _get_samples(session, samples_file)
