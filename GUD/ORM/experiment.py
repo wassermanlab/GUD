@@ -46,9 +46,7 @@ class Experiment(Base):
     @classmethod
     def select_unique(cls, session, name):
 
-        q = session.query(cls).filter(cls.name == name)
-
-        return q.first()
+        return cls.select_by_names(session, [name])[0]
 
     @classmethod
     def select_by_names(cls, session, names=[]):

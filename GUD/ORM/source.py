@@ -36,19 +36,19 @@ class Source(Base):
     @classmethod 
     def select_unique(cls, session, name):
 
-        return cls.select_by_names(session, [name])
+        return cls.select_by_names(session, [name])[0]
 
-    @classmethod
-    def select_by_name(cls, session, name):
-        """
-        Query objects by multiple source names.
-        If no names are provided, return all
-        objects.
-        """
+    # @classmethod
+    # def select_by_name(cls, session, name):
+    #     """
+    #     Query objects by multiple source names.
+    #     If no names are provided, return all
+    #     objects.
+    #     """
 
-        q = session.query(cls).filter(cls.name == name)
+    #     q = session.query(cls).filter(cls.name == name)
         
-        return q.first()
+    #     return q.first()
 
     @classmethod
     def select_by_names(cls, session, names=[]):
