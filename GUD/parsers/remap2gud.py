@@ -188,6 +188,12 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     ParseUtils.upsert_source(session, source)
     source = ParseUtils.get_source(session, source_name)
 
+    print(experiment)
+    print(experiment.uid)
+    print(source)
+    print(source.uid)
+    exit(0)
+
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
