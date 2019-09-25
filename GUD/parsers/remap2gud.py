@@ -410,6 +410,12 @@ def _insert_data(data_file, test=False):
         # Upsert tf
         ParseUtils.upsert_tf(session, tf)
 
+        # Testing
+        if test:
+            lines += 1
+            if lines > 1000:
+                break
+
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
