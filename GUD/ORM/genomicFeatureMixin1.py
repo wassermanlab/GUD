@@ -23,12 +23,12 @@ class GFMixin1(object):
 
     @declared_attr
     def region_id(cls):
-        return Column("regionID", mysql.INTEGER(unsigned=True), ForeignKey("regions.uid"),
+        return Column("regionID", ForeignKey("regions.uid"),
                       nullable=False)
 
     @declared_attr
     def source_id(cls):
-        return Column("sourceID", mysql.INTEGER(unsigned=True), ForeignKey("sources.uid"),
+        return Column("sourceID", ForeignKey("sources.uid"),
                       nullable=False)
 
     @classmethod

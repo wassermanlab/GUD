@@ -22,8 +22,7 @@ class Gene(GFMixin1, Base):
     # inherits uid, regionID, sourceID
     name = Column("name", String(75), nullable=False)
     name2 = Column("name2", String(75), nullable=False)
-    cdsStart = Column("cdsStart", mysql.INTEGER(
-        unsigned=True), nullable=False)
+    cdsStart = Column("cdsStart", mysql.INTEGER(unsigned=True), nullable=False)
     cdsEnd = Column("cdsEnd", mysql.INTEGER(unsigned=True), nullable=False)
     exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
     exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
@@ -31,10 +30,13 @@ class Gene(GFMixin1, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-            UniqueConstraint(cls.region_id, cls.name, cls.source_id),
+            UniqueConstraint(
+                cls.region_id,
+                cls.name,
+                cls.source_id
+            ),
             # query by bin range
-            Index("ix_source_id", cls.source_id),
-            Index("ix_region_id", cls.region_id),
+            Index("ix_source_join", cls.source_id, cls.region_id),
             Index("ix_name", cls.name),
             Index("ix_name2", cls.name2),
             {
@@ -52,8 +54,8 @@ class Gene(GFMixin1, Base):
         """
         if (query is None):
             q = cls.make_query(session)
-        else:
-            q = query
+        else: 
+            q = query 
         q = q.filter(cls.name2.in_(names))
         return q
 

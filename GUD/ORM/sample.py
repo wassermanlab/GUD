@@ -34,10 +34,9 @@ class Sample(Base):
         UniqueConstraint(name, X, Y, treatment, cell_line, cancer),
         Index("ix_name", name),
         Index("ix_uid", uid),
-        Index("ix_name_fulltext", name, mysql_prefix="FULLTEXT"),
         Index("ix_sex", X, Y),
         Index("ix_treatment_cell_line_cancer", treatment, cell_line, cancer),
-        {"mysql_engine": "MyISAM", "mysql_charset": "utf8"}
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
     @classmethod
@@ -133,26 +132,26 @@ class Sample(Base):
 
         return q.all()
 
-    @classmethod
-    def select_by_fulltext(
-        cls, session, fulltext):
-        """
-        Query objects by fulltext. 
-        """
+    # @classmethod
+    # def select_by_fulltext(
+    #     cls, session, fulltext):
+    #     """
+    #     Query objects by fulltext. 
+    #     """
 
-        class SampleName(FullText, cls):        
-            __fulltext_columns__ = list(["name"])
+    #     class SampleName(FullText, cls):        
+    #         __fulltext_columns__ = list(["name"])
 
-        q = session.query(cls)\
-            .filter(
-                FullTextSearch(
-                    fulltext,
-                    SampleName,
-                    FullTextMode.NATURAL
-                )
-            )
+    #     q = session.query(cls)\
+    #         .filter(
+    #             FullTextSearch(
+    #                 fulltext,
+    #                 SampleName,
+    #                 FullTextMode.NATURAL
+    #             )
+    #         )
 
-        return q.all()
+    #     return q.all()
 
     @classmethod
     def select_by_exp_conditions(cls, session,

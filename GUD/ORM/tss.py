@@ -32,10 +32,12 @@ class TSS(GFMixin2, Base):
     avg_expression_levels = Column("avg_expression_levels", mysql.LONGBLOB,
                                    nullable=False)
 
-    __table_args__ = (
-            UniqueConstraint(GFMixin2.region_id, GFMixin2.sample_id, GFMixin2.experiment_id, gene, tss),
-            Index("ix_join", GFMixin2.region_id, GFMixin2.experiment_id, GFMixin2.source_id),
-            Index("ix_gene_tss", gene, tss),
+    @declared_attr
+    def __table_args__(cls):
+        return (
+            UniqueConstraint(cls.region_id, cls.sample_id, cls.experiment_id, cls.gene, cls.tss),
+            Index("ix_join", cls.region_id, cls.experiment_id, cls.source_id),
+            Index("ix_gene_tss", cls.gene, cls.tss),
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
         )
 

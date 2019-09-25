@@ -350,43 +350,43 @@ class ParseUtililities:
 
         if DNAAccessibility.is_unique(session, accessibility.region_id, accessibility.sample_id, accessibility.experiment_id, accessibility.source_id):
             session.add(accessibility)
-            session.flush()
+            session.commit()
 
     def upsert_conservation(self, session, conservation):
 
         if Conservation.is_unique(session, conservation.region_id, conservation.source_id):
             session.add(conservation)
-            session.flush()
+            session.commit()
 
     def upsert_experiment(self, session, experiment):
 
         if Experiment.is_unique(session, experiment.name):
             session.add(experiment)
-            session.flush()
+            session.commit()
 
     def upsert_gene(self, session, gene):
 
         if Gene.is_unique(session, gene.region_id, gene.name, gene.source_id):
             session.add(gene)
-            session.flush()
+            session.commit()
 
     def upsert_histone(self, session, histone):
 
         if HistoneModification.is_unique(session, histone.region_id, histone.sample_id, histone.experiment_id, histone.source_id, histone.histone_type):
             session.add(histone)
-            session.flush()
+            session.commit()
 
     def upsert_mask(self, session, mask):
 
         if Mask.is_unique(session, mask.region_id, mask.source_id):
             session.add(mask)
-            session.flush()
+            session.commit()
 
     def upsert_region(self, session, region):
 
         if Region.is_unique(session, region.chrom, region.start, region.end, region.strand):
             session.add(region)
-            session.flush()
+            session.commit()
 
     def upsert_sample(self, session, sample):
         """
@@ -395,34 +395,34 @@ class ParseUtililities:
         """
         if Sample.is_unique(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer):
             session.add(sample)
-            session.flush()
+            session.commit()
 
     def upsert_source(self, session, source):
 
         if Source.is_unique(session, source.name):
             session.add(source)
-            session.flush()
+            session.commit()
 
     def upsert_tf(self, session, tf):
 
         if TFBinding.is_unique(session, tf.region_id, tf.sample_id, tf.experiment_id, tf.source_id, tf.tf):
             session.add(tf)
-            session.flush()
+            session.commit()
     
     def upsert_str(self, session, STR):
         if ShortTandemRepeat.is_unique(session, STR.region_id, STR.source_id, STR.pathogenicity):
             session.add(STR)
-            session.flush()
+            session.commit()
     
     def upsert_cnv(self, session, cnv):
         if CNV.is_unique(session, cnv.region_id, cnv.source_id, cnv.copy_number_change):
             session.add(cnv)
-            session.flush()
+            session.commit()
 
     def upsert_clinvar(self, session, clinvar):
         if clinvar.is_unique(session, clinvar.clinvar_variation_ID):
             session.add(clinvar)
-            session.flush()
+            session.commit()
 
     #--------------#
     # Multiprocess #

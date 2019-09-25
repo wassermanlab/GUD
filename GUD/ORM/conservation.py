@@ -21,9 +21,12 @@ class Conservation(GFMixin1, Base):
 
     __tablename__ = "conservation"
     score = Column("score", Float)
-    __table_args__ = (
-        UniqueConstraint(GFMixin1.region_id, GFMixin1.source_id),
-        Index("ix_join", GFMixin1.source_id, GFMixin1.region_id),  # query by bin range
+    
+    @declared_attr
+    def __table_args__(cls):
+        return (
+        UniqueConstraint(cls.region_id, cls.source_id),
+        Index("ix_join", cls.source_id, cls.region_id),  # query by bin range
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 

@@ -26,11 +26,13 @@ class ShortTandemRepeat(GFMixin1, Base):
     pathogenicity = Column("pathogenicity", mysql.INTEGER(
         unsigned=True), nullable=False)
 
-    __table_args__ = (
-        UniqueConstraint(GFMixin1.region_id, GFMixin1.source_id, pathogenicity),
-        Index("ix_join", GFMixin1.region_id, GFMixin1.source_id),
-        Index("ix_str_pathogenic", pathogenicity),
-        Index("ix_str_motif", motif),
+    @declared_attr
+    def __table_args__(cls):
+        return (
+        UniqueConstraint(cls.region_id, cls.source_id, cls.pathogenicity),
+        Index("ix_join", cls.region_id, cls.source_id),
+        Index("ix_str_pathogenic", cls.pathogenicity),
+        Index("ix_str_motif", cls.motif),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 

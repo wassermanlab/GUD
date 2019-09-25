@@ -39,10 +39,12 @@ class ClinVar(GFMixin1, Base):
     gnomad_genome_af_global = Column("gnomad_genome_af_global", Float)
     gnomad_genome_hom_global = Column("gnomad_genome_hom_global", Float) 
 
-    __table_args__ = (
-        UniqueConstraint(clinvar_variation_ID),
-        Index("ix_join", GFMixin1.source_id, GFMixin1.region_id),
-        Index("ix_clinvar_id", clinvar_variation_ID),
+    @declared_attr
+    def __table_args__(cls):
+        return (
+        UniqueConstraint(cls.clinvar_variation_ID),
+        Index("ix_join", cls.source_id, cls.region_id),
+        Index("ix_clinvar_id", cls.clinvar_variation_ID),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
    

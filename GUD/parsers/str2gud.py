@@ -300,7 +300,7 @@ def _insert_data(data_file, based=1, test=False):
         # Get feature
         STR = ShortTandemRepeat()
         STR.region_id = region.uid
-        STR.source_id = source.uid
+        STR.source_id = source[0].uid
         STR.motif = line[3]
         STR.pathogenicity = int(line[4])
 
