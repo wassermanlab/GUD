@@ -36,8 +36,8 @@ class Gene(GFMixin1, Base):
                 cls.source_id
             ),
             # query by bin range
-            Index("ix_source_id", cls.source_id),
-            Index("ix_region_id", cls.region_id),
+            Index("ix_regionID", cls.region_id),
+            Index("ix_sourceID", cls.source_id),
             Index("ix_name", cls.name),
             Index("ix_name2", cls.name2),
             {
@@ -68,7 +68,7 @@ class Gene(GFMixin1, Base):
 
     # for insertion only not in REST
     @classmethod
-    def is_unique(cls, session, regionID, name, sourceID):
+    def is_unique(cls, session, regionID, sourceID, name):
 
         q = session.query(cls)\
             .filter(cls.region_id == regionID,
@@ -79,8 +79,8 @@ class Gene(GFMixin1, Base):
 
     # for insertion only not in REST
     @classmethod
-    def select_unique(cls, session, regionID,
-                      name, sourceID):
+    def select_unique(cls, session, regionID, sourceID,
+                      name):
 
         q = session.query(cls)\
             .filter(cls.region_id == regionID,

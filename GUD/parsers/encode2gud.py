@@ -10,7 +10,6 @@ import os
 from pybedtools import BedTool, cleanup, set_tempdir
 import re
 import shutil
-from sqlalchemy_utils import database_exists
 import subprocess
 import sys
 import warnings
@@ -33,7 +32,7 @@ from GUD.ORM.tf_binding import TFBinding
 from . import ParseUtils
 
 usage_msg = """
-usage: %s --genome STR [-h] [options]
+usage: %s --genome STR --samples FILE --feature STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
@@ -252,7 +251,8 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
     source = Source()
     source.name = source_name
     ParseUtils.upsert_source(session, source)
-    source = ParseUtils.get_source(session, source_name)
+    sources = ParseUtils.get_source(session, source_name)
+    source = next(iter(sources))
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
@@ -299,16 +299,16 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
         if not test:
             if os.path.exists(data_file):
                 os.remove(data_file)
-            for data file in data_files:
+            for data_file in data_files:
                 if os.path.exists(data_file):
                     os.remove(data_file)
-
-    # Dispose session
-    Session.remove()
 
     # Remove downloaded file
     if os.path.exists(metadata_file) and not test:
         os.remove(metadata_file)
+
+    # Dispose session
+    Session.remove()
 
 def _download_metadata(genome, feat_type, dummy_dir="/tmp/"):
 
@@ -502,7 +502,7 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, test=Fals
     # Get label
     metadata_object = next(iter(metadata_objects))
     label = metadata_object.experiment_type
-    if Feature.__tablename__ == "histone" or Feature.__tablename__ == "tf_binding":
+    if Feature.__tablename__ == "histone_modifications" or Feature.__tablename__ == "tf_binding":
         m = re.search("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$", metadata_object.experiment_target)
         label += ".%s" % m.group(2)
 
@@ -620,18 +620,12 @@ def _split_data(data_file, threads=1):
 
 def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/", test=False):
 
+    # Initialize
+    download_file = os.path.join(dummy_dir, metadata_object.accession)
+
     # Testing
     if test:
         print(current_process().name)
-
-    # Download file
-    download_file = os.path.join(dummy_dir, metadata_object.accession)
-    if metadata_object.output_format == "bam":
-        download_file += ".bam"
-    else:
-        download_file += ".bed.gz"
-    if not os.path.exists(download_file):
-        urlretrieve(metadata_object.download_url, download_file)
 
     # Preprocess BAM data
     if metadata_object.output_format == "bam":
@@ -639,6 +633,11 @@ def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/", test=False):
         # Skip if peaks file already exists
         peaks_file = os.path.join(dummy_dir, "%s_peaks.narrowPeak" % metadata_object.accession)
         if not os.path.exists(peaks_file):
+
+            # Download BAM file
+            download_file += ".bam"
+            if not os.path.exists(download_file):
+               urlretrieve(metadata_object.download_url, download_file)        
 
             # From "An atlas of chromatin accessibility in the adult human brain" (Fullard et al. 2018):
             # Peaks for OCRs were called using the model-based Analysis of ChIP-seq (MACS) (Zhang et al. 2008)
@@ -655,6 +654,13 @@ def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/", test=False):
 
             # Set peaks file as download file
             shutil.move(peaks_file, download_file)
+
+    else:
+
+        # Download BED file
+        download_file += ".bed.gz"
+        if not os.path.exists(download_file):
+            urlretrieve(metadata_object.download_url, download_file)
 
     return(download_file)
 
@@ -697,10 +703,10 @@ def _insert_data_file(data_file, test=False):
 
         # Get feature
         feature = Feature()
-        feature.regionID = region.uid
-        feature.sampleID = samples[sample_name]
-        feature.experimentID = experiment.uid
-        feature.sourceID = source.uid
+        feature.region_id = region.uid
+        feature.sample_id = samples[sample_name]
+        feature.experiment_id = experiment.uid
+        feature.source_id = source.uid
         # Upsert accessibility
         if Feature.__tablename__ == "dna_accessibility":
             ParseUtils.upsert_accessibility(session, feature)

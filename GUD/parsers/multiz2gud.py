@@ -9,7 +9,6 @@ import os
 import re
 import subprocess
 import sys
-import warnings
 
 # Import from GUD module
 from GUD import GUDUtils

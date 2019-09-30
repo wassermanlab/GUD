@@ -28,6 +28,21 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
 
+# Citation for parallel
+# @article{Tange2011a,
+#   title = {GNU Parallel - The Command-Line Power Tool},
+#   author = {O. Tange},
+#   address = {Frederiksberg, Denmark},
+#   journal = {;login: The USENIX Magazine},
+#   month = {Feb},
+#   number = {1},
+#   volume = {36},
+#   url = {http://www.gnu.org/s/parallel},
+#   year = {2011},
+#   pages = {42-47},
+#   doi = {10.5281/zenodo.16303}
+# }
+
 class ParseUtililities:
     """
     Contains functions designed to work with the parsers.
@@ -333,10 +348,6 @@ class ParseUtililities:
         return(Region.select_unique(session, chrom, start, end, strand))
 
     def get_sample(self, session, name, X, Y, treatment, cell_line, cancer):
-        """
-        @classmethod
-        def select_unique(cls, session, name, treatment, cell_line, cancer):
-        """
         return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
 
     def get_source(self, session, source_name):
@@ -366,7 +377,7 @@ class ParseUtililities:
 
     def upsert_gene(self, session, gene):
 
-        if Gene.is_unique(session, gene.region_id, gene.name, gene.source_id):
+        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name):
             session.add(gene)
             session.flush()
 
@@ -389,10 +400,7 @@ class ParseUtililities:
             session.flush()
 
     def upsert_sample(self, session, sample):
-        """
-        @classmethod
-        def is_unique(cls, session, name, X, Y, treatment, cell_line, cancer):
-        """
+
         if Sample.is_unique(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer):
             session.add(sample)
             session.flush()
