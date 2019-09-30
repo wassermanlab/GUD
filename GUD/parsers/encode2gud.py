@@ -183,7 +183,7 @@ def main():
 
     # Set MySQL options
     GUDUtils.user = args.user
-    GUDUtils.pwd  = args.pwd
+    GUDUtils.pwd = args.pwd
     GUDUtils.host = args.host
     GUDUtils.port = args.port
     GUDUtils.db = args.db

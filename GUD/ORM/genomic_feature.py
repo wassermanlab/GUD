@@ -1,28 +1,18 @@
 from array import array
-from Bio.SeqFeature import (
-    FeatureLocation,
-    SeqFeature
-)
-
+from Bio.SeqFeature import FeatureLocation, SeqFeature
 
 class GenomicFeature(SeqFeature):
     """
-    Implements a Genomic Feature object based
-    on the Biopython's Sequence Feature object.
+    Implements a Genomic Feature object based on the Biopython's Sequence
+    Feature object.
 
     Attributes:
-    chrom {str} chromosome of the feature
-    location {FeatureLocation} location of the
-    feature on the genome
-    type {str} the specified type of feature
-    (e.g. gene, TSS, repeat...)
-    strand {int} on the DNA sequence. \"1\"
-    indicates the plus strand; \"-1\" the minus
-    strand; \"0\" for unknown or not applicable
-    strand
-    id {str} identifier for the feature
-    qualifiers {dict} qualifiers of the feature
-    profile {array} of scores per nucleotide
+    chrom {str} chromosome of the feature location {FeatureLocation} location
+    of the feature on the genome type {str} the specified type of feature (e.g.
+    gene, TSS, repeat...) strand {int} on the DNA sequence. \"1\" indicates the
+    plus strand; \"-1\" the minus strand; \"0\" for unknown or not applicable
+    strand id {str} identifier for the feature qualifiers {dict} qualifiers of
+    the feature profile {array} of scores per nucleotide.
     """
 
     def __init__(

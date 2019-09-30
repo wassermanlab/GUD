@@ -1,3 +1,5 @@
+from fuzzywuzzy import fuzz
+from numpy import sqrt
 from sqlalchemy import (
     Boolean,
     Column,
@@ -12,8 +14,8 @@ from sqlalchemy_fulltext import (
     FullText,
     FullTextSearch
 )
-import sqlalchemy_fulltext.modes \
-    as FullTextMode
+# import sqlalchemy_fulltext.modes \
+#     as FullTextMode
 
 from .base import Base
 
@@ -131,6 +133,24 @@ class Sample(Base):
             q = q.filter(cls.name.in_(names))
 
         return q.all()
+
+    @classmethod
+    def select_by_fuzzy_string_matching(cls, session, string, threshold=60):
+        """
+        Returns {Sample}s, and their relevance to the given string, over a
+        given threshold.
+        """
+
+        samples = []
+
+        for sample in cls.select_all_samples(session).all():
+            ratio = fuzz.ratio(string, sample.name)
+            partial_ratio = fuzz.partial_ratio(string, sample.name)
+            samples.append([sample, sqrt(ratio * partial_ratio)])
+
+        samples.sort(key=lambda x: x[-1], reverse=True)
+
+        return([samples[i] for i in range(len(samples)) if samples[i][1] > threshold])
 
     # @classmethod
     # def select_by_fulltext(
