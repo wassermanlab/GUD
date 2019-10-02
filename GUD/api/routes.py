@@ -3,7 +3,7 @@ from flask import request, jsonify, render_template, url_for
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest
 from GUD.api.routes_api import * 
 import json
-import sys, os
+import sys, os, html
 
 @app.route('/')
 def home():
@@ -16,7 +16,9 @@ def live_api():
     with open(filename) as json_file:
         data = json.load(json_file)
     routes = data.keys()
-    return render_template('live_api.html', routes = routes)
+    with open(filename) as json_file:
+        data = json.load(json_file)
+    return render_template('live_api.html', routes = routes, resources = data)
 
 @app.route('/docs')
 def docs():
@@ -33,11 +35,3 @@ def docs():
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
-
-@app.route('/json_docs')
-def json_docs():
-    filename = os.path.join(app.static_folder, 'docs.json')
-    data = None
-    with open(filename) as json_file:
-        data = json.load(json_file)
-    return jsonify(data)

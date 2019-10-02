@@ -1,11 +1,3 @@
-
-var resources;
-$(function () {
-    $.getJSON("http://127.0.0.1:5000/json_docs", function (json) {
-        resources = json;
-    });
-})
-
 // create table row 
 function create_row(param, params) {
     var newRow = document.createElement("tr");
@@ -66,7 +58,8 @@ $(function () {
             build_url()
             return
         }
-        var params = resources[resource]['PARAMS']
+        var r = JSON.parse(resources)
+        var params = r[resource]['PARAMS']
         var keys = Object.keys(params)
         if (keys.includes("genome")) {
             create_row("genome", params)
