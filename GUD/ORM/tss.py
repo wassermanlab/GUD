@@ -113,11 +113,17 @@ class TSS(GFMixin2, Base):
         return q
 
     @classmethod
-    def select_by_uids(cls, session, query, uids):
+    def select_by_uids(cls, session, query=None, uids=[]):
         """
         Query objects by uids.
         """
-        q = query.filter(cls.uid.in_(uids))
+
+        if query is None:
+            q = cls.make_query(session)
+        else:
+            q = query
+
+        q = q.filter(cls.uid.in_(uids))
 
         return q
 
@@ -191,13 +197,17 @@ class TSS(GFMixin2, Base):
                 avg_expression_levels.append(float(i))
 
         # Define qualifiers
+        try:
+            experiment_name = feat.Experiment.name
+        except:
+            experiment_name = "CAGE"
         qualifiers = {
             "uid": feat.TSS.uid,
             "gene": feat.TSS.gene,
             "tss": feat.TSS.tss,
             "sampleIDs": feat.TSS.sample_id,
             "avg_expression_levels": feat.TSS.avg_expression_levels,
-            "experiment": feat.Experiment.name,
+            "experiment": experiment_name,
             "source": feat.Source.name,
         }
 

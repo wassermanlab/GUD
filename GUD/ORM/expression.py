@@ -97,20 +97,25 @@ class Expression(Base):
         return q
 
     @classmethod
-    def select_by_expression(cls, session, min_tpm, max_tpm, query = None):
+    def select_by_expression(cls, session, min_tpm, max_tpm = None, query = None):
         """
         Query objects by expression level
         """
         if query is not None:
-            q = query.filter(max_tpm >= cls.avg_expression_level >= min_tpm)
+            q = query.filter(cls.avg_expression_level >= min_tpm)
+            if max_tpm is not None:
+                q = q.filter(max_tpm >= cls.avg_expression_level)
         else:
             q = session.query(cls, Sample)\
                 .join()\
                 .filter(
                     Sample.uid == cls.sampleID
-            )\
-                .filter(cls.avg_expression_level >= min_tpm)\
-                .filter(max_tpm >= cls.avg_expression_level)
+                )\
+                .filter(
+                    cls.avg_expression_level >= min_tpm
+                )
+            if max_tpm is not None:
+                q = q.filter(max_tpm >= cls.avg_expression_level)
 
         return q
 

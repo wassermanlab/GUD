@@ -4,9 +4,10 @@ import argparse
 import os
 import shutil
 
-# Import from GUD
-from GUD import GUDglobals
+# Import from GUD module
+from GUD import GUDUtils
 from GUD.ORM.sample import Sample
+from GUD.parsers import ParseUtils
 
 usage_msg = """
 usage: name2sample.py --name STR [-h] [--dummy-dir DIR] [-o FILE]
@@ -32,10 +33,10 @@ mysql arguments:
 """ % \
 (
     usage_msg,
-    GUDglobals.db_name,
-    GUDglobals.db_host,
-    GUDglobals.db_port,
-    GUDglobals.db_user
+    GUDUtils.db,
+    GUDUtils.host,
+    GUDUtils.port,
+    GUDUtils.user
 )
 
 #-------------#
@@ -44,53 +45,28 @@ mysql arguments:
 
 def parse_args():
     """
-    This function parses arguments provided via
-    the command line and returns an {argparse}
-    object.
+    This function parses arguments provided via the command line and returns
+    an {argparse} object.
     """
 
-    parser = argparse.ArgumentParser(
-        add_help=False,
-    )
+    parser = argparse.ArgumentParser(add_help=False)
 
     # Mandatory arguments
     parser.add_argument("--name")
 
     # Optional args
-    optional_group = parser.add_argument_group(
-        "optional arguments"
-    )
-    optional_group.add_argument(
-        "-h", "--help",
-        action="store_true"
-    )
-    optional_group.add_argument(
-        "--dummy-dir",
-        default="/tmp/"
-    )
+    optional_group = parser.add_argument_group("optional arguments")
+    optional_group.add_argument("-h", "--help", action="store_true")
+    optional_group.add_argument("--dummy-dir", default="/tmp/")
     optional_group.add_argument("-o")
 
     # MySQL args
-    mysql_group = parser.add_argument_group(
-        "mysql arguments"
-    )
-    mysql_group.add_argument(
-        "-d", "--db",
-        default=GUDglobals.db_name,
-    )
-    mysql_group.add_argument(
-        "-H", "--host",
-        default=GUDglobals.db_host
-    )
+    mysql_group = parser.add_argument_group("mysql arguments")
+    mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
+    mysql_group.add_argument("-H", "--host", default=GUDUtils.host)
     mysql_group.add_argument("-p", "--pwd")
-    mysql_group.add_argument(
-        "-P", "--port",
-        default=GUDglobals.db_port
-    )
-    mysql_group.add_argument(
-        "-u", "--user",
-        default=GUDglobals.db_user
-    )
+    mysql_group.add_argument("-P", "--port", default=GUDUtils.port)
+    mysql_group.add_argument("-u", "--user", default=GUDUtils.user)
 
     args = parser.parse_args()
 
@@ -127,67 +103,60 @@ def main():
     args = parse_args()
 
     # Initialize
+    samples = set()
     dummy_file = os.path.join(
         os.path.abspath(args.dummy_dir),
-        "%s.%s.txt" % (os.path.basename(__file__),
-        os.getpid()))
-
-    # Establish SQLalchemy session with GUD
-    session = GUDglobals.establish_GUD_session(
-        args.user,
-        args.pwd,
-        args.host,
-        args.port,
-        args.db
+        "%s.%s.txt" % (os.path.basename(__file__), os.getpid())
     )
 
-    # Get samples
-    samples = Sample.select_by_fulltext(
-        session,
-        args.name
-    )
+    # Set MySQL options
+    GUDUtils.user = args.user
+    GUDUtils.pwd = args.pwd
+    GUDUtils.host = args.host
+    GUDUtils.port = args.port
+    GUDUtils.db = args.db
+
+    # Get database name
+    db_name = GUDUtils._get_db_name()
+
+    # Get engine/session
+    engine, Session = GUDUtils._get_engine_session(db_name)
+
+    # Start a new session
+    session = Session()
+
+    # For each sample...
+    for sample, score in Sample.select_by_fuzzy_string_matching(session, args.name):
+
+        # If sample not in samples...
+        if sample not in samples:
+
+            # Write
+            ParseUtils.write(dummy_file, "%s\t%s" % (sample.name, score))
+
+        # Add sample
+        samples.add(sample)
 
     if samples:
 
-        # Initialize
-        done = set()
-
-        # For each sample...
-        for sample in samples:
-            # Skip sample
-            if sample.name in done:
-                continue
-            # Write
-            GUDglobals.write(
-                dummy_file,
-                sample.name
-            )
-            # Done sample
-            done.add(sample.name)
-
         # If output file...
         if args.o:
-            shutil.copy(
-                dummy_file,
-                os.path.abspath(args.o)
-            )
+            shutil.copy(dummy_file, os.path.abspath(args.o))
         # ... Else, print on stdout...
         else:
-            for line in GUDglobals.parse_file(
-                dummy_file
-            ):
-                GUDglobals.write(None, line)
+            for line in ParseUtils.parse_file(dummy_file):
+                ParseUtils.write(None, line)
 
         # Delete dummy file
         os.remove(dummy_file)
 
     else:
-        raise ValueError(
-            "No samples found!!!"
-        )
+        raise ValueError("No samples found!!!")
 
 #-------------#
 # Main        #
 #-------------#
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+
+    main()

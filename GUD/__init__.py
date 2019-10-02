@@ -69,7 +69,8 @@ class GUDUtilities:
 
     @pwd.setter
     def pwd(self, value):
-        self._pwd = str(value)
+        if value is not None:
+            self._pwd = str(value)
 
     @property
     def host(self):

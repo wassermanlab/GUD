@@ -177,7 +177,7 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     experiment = Experiment()
     experiment.name = experiment_type
     ParseUtils.upsert_experiment(session, experiment)
-    experiment = ParseUtils.get_experiment(session, experiment_type)    
+    experiment = ParseUtils.get_experiment(session, experiment_type)
 
     # Get samples
     samples = _get_samples(session, samples_file)
@@ -401,14 +401,20 @@ def _insert_data(data_file, test=False):
 
         # Get TF
         tf = TFBinding()
-        tf.regionID = region.uid
-        tf.sampleID = samples[sample_name]
-        tf.experimentID = experiment.uid
-        tf.sourceID = source.uid
+        tf.region_id = region.uid
+        tf.sample_id = samples[sample_name]
+        tf.experiment_id = experiment.uid
+        tf.source_id = source.uid
         tf.tf = tf_name
 
         # Upsert tf
         ParseUtils.upsert_tf(session, tf)
+
+        # Testing
+        if test:
+            lines += 1
+            if lines > 1000:
+                break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
