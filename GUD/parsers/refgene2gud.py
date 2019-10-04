@@ -177,8 +177,6 @@ def refgene_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     source.name = source_name
     ParseUtils.upsert_source(session, source)
     source = ParseUtils.get_source(session, source_name)
-    print(source)
-    exit(0)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
