@@ -29,10 +29,10 @@ class Enhancer(GFMixin2, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-        UniqueConstraint(GFMixin2.region_id, GFMixin2.sample_id,
-                         GFMixin2.experiment_id, GFMixin2.source_id),
-        Index("ix_join", GFMixin2.region_id, GFMixin2.sample_id,
-              GFMixin2.experiment_id, GFMixin2.source_id),
+        UniqueConstraint(cls.region_id, cls.sample_id,
+                         cls.experiment_id, cls.source_id),
+        Index("ix_join", cls.region_id, cls.sample_id,
+              cls.experiment_id, cls.source_id),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
