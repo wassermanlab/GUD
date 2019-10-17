@@ -2,6 +2,7 @@
 
 {% block head %}
 {{ super() }}
+<script>var resources = '{{resources|tojson|safe}}'; </script>
 <script src="{{ url_for('static', filename='js/live_api.js')}}"></script>
 {% endblock head %}
 

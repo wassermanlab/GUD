@@ -23,7 +23,6 @@ class TSS(GFMixin2, Base):
     __tablename__ = "transcription_start_sites"
 
     gene = Column("gene", String(75), ForeignKey("genes.name2"))
-
     tss = Column("tss", mysql.INTEGER(unsigned=True))
 
     @declared_attr
@@ -36,21 +35,10 @@ class TSS(GFMixin2, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-            # multiple TSSs might overlap:
-            # e.g. p16@IGF2,p1@INS-IGF2,p1@INS
-            UniqueConstraint(
-                cls.region_id,
-                cls.sample_id,
-                cls.experiment_id,
-                cls.gene,
-                cls.tss
-            ),
-            Index("ix_regionID", cls.region_id),  # query by bin range
+            UniqueConstraint(cls.region_id, cls.sample_id, cls.experiment_id, cls.gene, cls.tss),
+            Index("ix_join", cls.region_id, cls.experiment_id, cls.source_id),
             Index("ix_gene_tss", cls.gene, cls.tss),
-            {
-                "mysql_engine": "MyISAM",
-                "mysql_charset": "utf8"
-            }
+            {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
         )
 
     @classmethod
@@ -58,8 +46,8 @@ class TSS(GFMixin2, Base):
                   experimentID, gene, tss):
 
         q = session.query(cls)\
-            .filter(cls.regionID == regionID, cls.sourceID == sourceID,
-                    cls.experimentID == experimentID, cls.gene == gene, cls.tss == tss)
+            .filter(cls.region_id == regionID, cls.source_id == sourceID,
+                    cls.experiment_id == experimentID, cls.gene == gene, cls.tss == tss)
 
         return len(q.all()) == 0
 
@@ -67,8 +55,8 @@ class TSS(GFMixin2, Base):
     def select_unique(cls, session, regionID, sourceID, experimentID, gene, tss):
 
         q = session.query(cls)\
-            .filter(cls.regionID == regionID, cls.sourceID == sourceID,
-                    cls.experimentID == experimentID, cls.gene == gene,
+            .filter(cls.region_id == regionID, cls.source_id == sourceID,
+                    cls.experiment_id == experimentID, cls.gene == gene,
                     cls.tss == tss)
 
         return q.first()
@@ -125,11 +113,17 @@ class TSS(GFMixin2, Base):
         return q
 
     @classmethod
-    def select_by_uids(cls, session, query, uids):
+    def select_by_uids(cls, session, query=None, uids=[]):
         """
         Query objects by uids.
         """
-        q = query.filter(cls.uid.in_(uids))
+
+        if query is None:
+            q = cls.make_query(session)
+        else:
+            q = query
+
+        q = q.filter(cls.uid.in_(uids))
 
         return q
 
@@ -203,13 +197,17 @@ class TSS(GFMixin2, Base):
                 avg_expression_levels.append(float(i))
 
         # Define qualifiers
+        try:
+            experiment_name = feat.Experiment.name
+        except:
+            experiment_name = "CAGE"
         qualifiers = {
             "uid": feat.TSS.uid,
             "gene": feat.TSS.gene,
             "tss": feat.TSS.tss,
             "sampleIDs": feat.TSS.sample_id,
             "avg_expression_levels": feat.TSS.avg_expression_levels,
-            "experiment": feat.Experiment.name,
+            "experiment": experiment_name,
             "source": feat.Source.name,
         }
 

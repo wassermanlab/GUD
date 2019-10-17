@@ -22,10 +22,7 @@ class Source(Base):
         UniqueConstraint(name),
         Index("ix_uid", uid),
         Index("ix_name", name),
-        {
-            "mysql_engine": "MyISAM",
-            "mysql_charset": "utf8"
-        }
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
     @classmethod
@@ -39,19 +36,19 @@ class Source(Base):
     @classmethod 
     def select_unique(cls, session, name):
 
-        return cls.select_by_names(session, [name])
+        return cls.select_by_names(session, [name])[0]
 
-    @classmethod
-    def select_by_name(cls, session, name):
-        """
-        Query objects by multiple source names.
-        If no names are provided, return all
-        objects.
-        """
+    # @classmethod
+    # def select_by_name(cls, session, name):
+    #     """
+    #     Query objects by multiple source names.
+    #     If no names are provided, return all
+    #     objects.
+    #     """
 
-        q = session.query(cls).filter(cls.name == name)
+    #     q = session.query(cls).filter(cls.name == name)
         
-        return q.first()
+    #     return q.first()
 
     @classmethod
     def select_by_names(cls, session, names=[]):

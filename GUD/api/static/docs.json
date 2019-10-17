@@ -100,19 +100,19 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
             },
             "start": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based start coordinate for data"
             },
             "end": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based end coordinate for data"
             },
             "location": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact , where within"
             },
             "page": {
@@ -500,7 +500,10 @@
             "min_tpm": {
                 "REQUIRED": false,
                 "DESCRIPTION": "list of uids separated by (,)"
-            }
+            },
+            "page": {
+                "REQUIRED": false,
+                "DESCRIPTION": "page number"}
         }
     }
 }

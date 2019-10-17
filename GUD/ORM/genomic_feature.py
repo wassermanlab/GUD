@@ -1,28 +1,18 @@
 from array import array
-from Bio.SeqFeature import (
-    FeatureLocation,
-    SeqFeature
-)
-
+from Bio.SeqFeature import FeatureLocation, SeqFeature
 
 class GenomicFeature(SeqFeature):
     """
-    Implements a Genomic Feature object based
-    on the Biopython's Sequence Feature object.
+    Implements a Genomic Feature object based on the Biopython's Sequence
+    Feature object.
 
     Attributes:
-    chrom {str} chromosome of the feature
-    location {FeatureLocation} location of the
-    feature on the genome
-    type {str} the specified type of feature
-    (e.g. gene, TSS, repeat...)
-    strand {int} on the DNA sequence. \"1\"
-    indicates the plus strand; \"-1\" the minus
-    strand; \"0\" for unknown or not applicable
-    strand
-    id {str} identifier for the feature
-    qualifiers {dict} qualifiers of the feature
-    profile {array} of scores per nucleotide
+    chrom {str} chromosome of the feature location {FeatureLocation} location
+    of the feature on the genome type {str} the specified type of feature (e.g.
+    gene, TSS, repeat...) strand {int} on the DNA sequence. \"1\" indicates the
+    plus strand; \"-1\" the minus strand; \"0\" for unknown or not applicable
+    strand id {str} identifier for the feature qualifiers {dict} qualifiers of
+    the feature profile {array} of scores per nucleotide.
     """
 
     def __init__(
@@ -149,7 +139,7 @@ class GenomicFeature(SeqFeature):
             (
                 self.type,
                 "chrom={}".format(self.chrom),
-                "start={}".format(self.start_1_based),
+                "start={}".format(self.start),
                 "end={}".format(self.end),
                 "id={}".format(self.id),
                 "score={}".format(self.score),
@@ -159,10 +149,11 @@ class GenomicFeature(SeqFeature):
     def serialize(self):
         return {
             'chrom': self.chrom,
-            'start': self.start_1_based,
+            'start': self.start,
             'end': self.end,
             'id': self.id,
             'score': self.score,
+            'strand': self.strand,
             'qualifiers': self.qualifiers,
         }
 

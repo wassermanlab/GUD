@@ -36,12 +36,11 @@ class Gene(GFMixin1, Base):
                 cls.source_id
             ),
             # query by bin range
-            Index("ix_regionID", cls.region_id),
-            Index("ix_sourceID", cls.source_id),
+            Index("ix_source_join", cls.source_id, cls.region_id),
             Index("ix_name", cls.name),
             Index("ix_name2", cls.name2),
             {
-                "mysql_engine": "MyISAM",
+                "mysql_engine": "InnoDB",
                 "mysql_charset": "utf8",
             }
         )
@@ -53,8 +52,11 @@ class Gene(GFMixin1, Base):
         If no genes are provided, return all
         objects.
         """
-        q = query.filter(cls.name2.in_(names))
-
+        if (query is None):
+            q = cls.make_query(session)
+        else: 
+            q = query 
+        q = q.filter(cls.name2.in_(names))
         return q
 
     @classmethod
@@ -116,7 +118,7 @@ class Gene(GFMixin1, Base):
             "exonEnds": feat.Gene.exonEnds,
             "source": feat.Source.name,
         }
-
+        print(feat.Region.strand)
         return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),

@@ -26,28 +26,17 @@ from sqlalchemy.ext.declarative import declared_attr
 class HistoneModification(GFMixin2, Base):
 
     __tablename__ = "histone_modifications"
-
     histone_type = Column("histone_type", String(25), nullable=False)
 
     @declared_attr
     def __table_args__(cls):
         return (
-            UniqueConstraint(
-                cls.region_id,
-                cls.sample_id,
-                cls.experiment_id,
-                cls.sample_id,
-                cls.histone_type
-
-            ),
-            Index("ix_regionID", cls.region_id),  # query by bin range
-            Index("ix_sampleID", cls.sample_id),
-            Index("ix_histone_type", cls.histone_type),
-            {
-                "mysql_engine": "MyISAM",
-                "mysql_charset": "utf8"
-            }
-        )
+        UniqueConstraint(cls.region_id, cls.sample_id,
+                         cls.experiment_id, cls.sample_id, cls.histone_type),
+        Index("ix_join", cls.region_id, cls.sample_id,
+              cls.experiment_id, cls.source_id),
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
+    )
 
     @classmethod
     def select_by_histone_type(cls, query, histone_type):

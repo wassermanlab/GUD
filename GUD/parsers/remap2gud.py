@@ -102,7 +102,7 @@ def check_args(args):
         print(": ".join(error))
         exit(0)
 
-    # Check "-t" argument
+    # Check "--threads" argument
     try:
         args.threads = int(args.threads)
     except:
@@ -177,7 +177,7 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     experiment = Experiment()
     experiment.name = experiment_type
     ParseUtils.upsert_experiment(session, experiment)
-    experiment = ParseUtils.get_experiment(session, experiment_type)    
+    experiment = ParseUtils.get_experiment(session, experiment_type)
 
     # Get samples
     samples = _get_samples(session, samples_file)

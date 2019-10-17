@@ -9,25 +9,23 @@ from sqlalchemy.dialects import mysql
 
 from .base import Base
 
+
 class Experiment(Base):
 
     __tablename__ = "experiments"
-
-    uid = Column( "uid", mysql.INTEGER(unsigned=True), nullable=False )
-
-    name = Column( "name", String(250), nullable=False )
-
+    uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
+    name = Column("name", String(250), nullable=False)
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(name),
-        Index("ix_uid", uid), 
+        Index("ix_uid", uid),
         Index("ix_name", name),
         {
-            "mysql_engine": "MyISAM",
+            "mysql_engine": "InnoDB",
             "mysql_charset": "utf8"
         }
     )
-    
+
     @classmethod
     def select_all_experiments(cls, session):
         """
@@ -48,9 +46,7 @@ class Experiment(Base):
     @classmethod
     def select_unique(cls, session, name):
 
-        q = session.query(cls).filter(cls.name == name)
-
-        return q.first()
+        return cls.select_by_names(session, [name])[0]
 
     @classmethod
     def select_by_names(cls, session, names=[]):
@@ -61,7 +57,7 @@ class Experiment(Base):
         """
 
         q = session.query(cls)
-        
+
         if names:
             q = q.filter(cls.name.in_(names))
 
@@ -74,9 +70,9 @@ class Experiment(Base):
                 "uid={}".format(self.uid),
                 "name={}".format(self.name)
             )
-    
+
     def serialize(self):
         return {
             'uid': self.uid,
             'name': self.name,
-            }
+        }

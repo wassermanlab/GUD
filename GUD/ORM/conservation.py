@@ -20,19 +20,15 @@ from sqlalchemy.ext.declarative import declared_attr
 class Conservation(GFMixin1, Base):
 
     __tablename__ = "conservation"
-
     score = Column("score", Float)
-
+    
     @declared_attr
     def __table_args__(cls):
         return (
-            UniqueConstraint(cls.region_id, cls.source_id),
-            Index("ix_regionID", cls.region_id),  # query by bin range
-            {
-                "mysql_engine": "MyISAM",
-                "mysql_charset": "utf8"
-            }
-        )
+        UniqueConstraint(cls.region_id, cls.source_id),
+        Index("ix_join", cls.source_id, cls.region_id),  # query by bin range
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
+    )
 
     @classmethod
     def is_unique(cls, session, regionID, sourceID):

@@ -18,15 +18,14 @@ import sys
 
 
 class GFMixin2(GFMixin1):
-
+    
     @declared_attr
     def sample_id(cls):
-        return Column("sampleID", Integer, ForeignKey("samples.uid"),
+        return Column("sampleID", ForeignKey("samples.uid"),
                       nullable=False)
-
     @declared_attr
     def experiment_id(cls):
-        return Column("experimentID", Integer, ForeignKey("experiments.uid"),
+        return Column("experimentID", ForeignKey("experiments.uid"),
                       nullable=False)
 
     @classmethod

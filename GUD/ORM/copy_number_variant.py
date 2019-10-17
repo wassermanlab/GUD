@@ -27,14 +27,8 @@ class CNV(GFMixin1, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-        Index("ix_source_id", cls.source_id),
-        Index("ix_cnv_region_id", cls.region_id),
-        Index("ix_cnv_uid", cls.uid),
-
-        {
-            "mysql_engine": "MyISAM",
-            "mysql_charset": "utf8"
-        }
+        Index("ix_join", cls.source_id, cls.region_id),
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
     @classmethod
@@ -63,8 +57,6 @@ class CNV(GFMixin1, Base):
         """        
         accession = ("%" + dbVar_accession + "%").encode(encoding='UTF-8')
         q = query.filter(cls.dbVar_accession.like(accession))
-        print(accession)
-        print(q)
         return q
 
 

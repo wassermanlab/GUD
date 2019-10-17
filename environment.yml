@@ -28,6 +28,7 @@ dependencies:
     - cython==0.29.10
     - datetime==4.3
     - flask==1.0.3
+    - fuzzywuzzy==0.17.0
     - importlib-metadata==0.18
     - interval-binning==1.0.0
     - isort==4.3.20
@@ -43,6 +44,7 @@ dependencies:
     - pylint==2.3.1
     - pyparsing==2.4.0
     - pytest==5.0.0
+    - python-Levenshtein==0.12.0
     - simplejson==3.16.0
     - sqlalchemy-fulltext-search==0.2.5
     - sqlalchemy-utils==0.34.0

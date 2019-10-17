@@ -155,7 +155,7 @@ def check_args(args):
         print(": ".join(error))
         exit(0)
 
-    # Check "-t" argument
+    # Check "--threads" argument
     try:
         args.threads = int(args.threads)
     except:
@@ -182,7 +182,7 @@ def main():
 
     # Set MySQL options
     GUDUtils.user = args.user
-    GUDUtils.pwd  = args.pwd
+    GUDUtils.pwd = args.pwd
     GUDUtils.host = args.host
     GUDUtils.port = args.port
     GUDUtils.db = args.db
@@ -291,6 +291,8 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
 
         # Split data
         data_files = _split_data(data_file, threads)
+        print(data_files)
+        exit(0)
 
         # Parallelize inserts to the database
         ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data_file, test=test), threads)

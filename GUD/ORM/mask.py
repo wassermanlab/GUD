@@ -21,7 +21,7 @@ class Mask(Base):
         UniqueConstraint(regionID, sourceID),
         Index("ix_regionID", regionID), # query by bin range
         {
-            "mysql_engine": "MyISAM",
+            "mysql_engine": "InnoDB",
             "mysql_charset": "utf8"
         }
     )

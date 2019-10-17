@@ -43,15 +43,9 @@ class ClinVar(GFMixin1, Base):
     def __table_args__(cls):
         return (
         UniqueConstraint(cls.clinvar_variation_ID),
-
-        Index("ix_source_id", cls.source_id),
-        Index("ix_clinvar", cls.region_id),
+        Index("ix_join", cls.source_id, cls.region_id),
         Index("ix_clinvar_id", cls.clinvar_variation_ID),
-
-        {  
-            "mysql_engine": "MyISAM",
-            "mysql_charset": "utf8"
-        }
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
    
     @classmethod

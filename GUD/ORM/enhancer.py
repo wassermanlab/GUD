@@ -29,19 +29,12 @@ class Enhancer(GFMixin2, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-            UniqueConstraint(
-                cls.region_id,
-                cls.sample_id,
-                cls.experiment_id,
-                cls.source_id
-            ),
-            Index("ix_regionID", cls.region_id),  # query by bin range
-            Index("ix_sampleID", cls.sample_id),
-            {
-                "mysql_engine": "MyISAM",
-                "mysql_charset": "utf8"
-            }
-        )
+        UniqueConstraint(GFMixin2.region_id, GFMixin2.sample_id,
+                         GFMixin2.experiment_id, GFMixin2.source_id),
+        Index("ix_join", GFMixin2.region_id, GFMixin2.sample_id,
+              GFMixin2.experiment_id, GFMixin2.source_id),
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
+    )
 
     def as_genomic_feature(self, feat):
         qualifiers = {
