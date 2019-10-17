@@ -186,7 +186,8 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     source = Source()
     source.name = source_name
     ParseUtils.upsert_source(session, source)
-    source = ParseUtils.get_source(session, source_name)
+    sources = ParseUtils.get_source(session, source_name)
+    source = next(iter(sources))
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
@@ -304,6 +305,7 @@ def _unwind_bed_files(file_name, dummy_dir="/tmp/"):
 def _preprocess_data(file_name, dummy_dir="/tmp/", merge=False):
 
     # Initialize
+    dummy_files = []
     m = re.search("remap2018_(.+)_all_macs2", file_name)
     tf = m.group(1)
 
@@ -312,20 +314,41 @@ def _preprocess_data(file_name, dummy_dir="/tmp/", merge=False):
     if not os.path.exists(bed_file):
 
         # Sort BED
-        a = BedTool(file_name)
-        a = a.sort(stream=True)
+        dummy_file = os.path.join(dummy_dir, "dummy.sorted.bed")
+        if not os.path.exists(dummy_file):
+
+            # UNIX sort is more efficient than bedtools
+            cmd = "zless %s | cut -f 1-4 | sort -T %s -k1,1 -k2,2n > %s" % (file_name, dummy_dir, dummy_file)
+            subprocess.call(cmd, shell=True)
+
+        # Add dummy file
+        dummy_files.append(dummy_file)
 
         # Merge BED
         if merge:
-            b = a.merge(stream=True)
-        else:
-            b = copy(a)
+
+            # Initialize
+            a = BedTool(dummy_file)
+
+            # Skip if already merged
+            dummy_file = os.path.join(dummy_dir, "dummy.merged.bed")
+            if not os.path.exists(dummy_file):
+                a.merge(stream=True).saveas(dummy_file)
+
+            # Add dummy file
+            dummy_files.append(dummy_file)
 
         # Intersect
+        a = BedTool(dummy_files[0])
+        b = BedTool(dummy_files[-1])
         a.intersect(b, wa=True, wb=True, stream=True).saveas(bed_file)
 
         # Clean PyBedTools files
         cleanup(remove_all=True)
+
+        # Remove ALL dummy files
+        for dummy_file in dummy_files:
+            os.remove(dummy_file)
 
     return(bed_file)
 

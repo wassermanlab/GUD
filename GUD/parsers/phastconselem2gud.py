@@ -9,7 +9,6 @@ import os
 import re
 import subprocess
 import sys
-import warnings
 
 # Import from GUD module
 from GUD import GUDUtils
@@ -301,6 +300,12 @@ def _insert_data(data_file, test=False):
 
         # Upsert conservation
         ParseUtils.upsert_conservation(session, conservation)
+
+        # Testing
+        if test:
+            lines += 1
+            if lines > 1000:
+                break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()

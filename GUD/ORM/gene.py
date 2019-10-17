@@ -70,7 +70,7 @@ class Gene(GFMixin1, Base):
 
     # for insertion only not in REST
     @classmethod
-    def is_unique(cls, session, regionID, name, sourceID):
+    def is_unique(cls, session, regionID, sourceID, name):
 
         q = session.query(cls)\
             .filter(cls.region_id == regionID,
@@ -81,8 +81,8 @@ class Gene(GFMixin1, Base):
 
     # for insertion only not in REST
     @classmethod
-    def select_unique(cls, session, regionID,
-                      name, sourceID):
+    def select_unique(cls, session, regionID, sourceID,
+                      name):
 
         q = session.query(cls)\
             .filter(cls.region_id == regionID,
