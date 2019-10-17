@@ -1,4 +1,6 @@
 ## extra 
+wsgi.py
+gud.ini
 *.vcf
 GUD/ORM/test.py
 .vscode/*
