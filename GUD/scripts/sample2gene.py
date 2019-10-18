@@ -243,7 +243,7 @@ def main():
     db_name = GUDUtils._get_db_name()
 
     # Get engine/session
-    engine, Session = GUDUtils._get_engine_session(db_name)
+    engine, Session = GUDUtils.get_engine_session(db_name)
 
     # Start a new session
     session = Session()

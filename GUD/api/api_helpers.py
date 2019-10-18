@@ -9,12 +9,11 @@ from sqlalchemy import func
 ## HELPER FUNCTIONS ##
 
 
-def table_exists(table_name):
-    engine = GUDUtils.get_engine()
+def table_exists(table_name, engine):
     if not engine.dialect.has_table(engine, table_name): 
         raise BadRequest(table_name + ' table does not exist')
 
-def get_db(db):
+def set_db(db):
     if db == "hg19":
         GUDUtils.db = "hg19"
     elif db == "hg38":
