@@ -8,7 +8,7 @@ from sqlalchemy import (
     UniqueConstraint
 )
 from sqlalchemy.dialects import mysql
-
+from GUD import GUDUtils
 from .base import Base
 from .region import Region
 from .source import Source
@@ -69,3 +69,4 @@ class Conservation(GFMixin1, Base):
             feat_id="%s_%s" % (self.__tablename__, feat.Conservation.uid),
             qualifiers=qualifiers
         )
+

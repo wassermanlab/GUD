@@ -175,8 +175,7 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     source_name = m.group(1)
     source.name = source_name
     ParseUtils.upsert_source(session, source)
-    sources = ParseUtils.get_source(session, source_name)
-    source = next(iter(sources))
+    source = ParseUtils.get_source(session, source_name)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()

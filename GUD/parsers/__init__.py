@@ -8,7 +8,6 @@ from ftplib import FTP
 import gzip
 import os
 import pandas
-import re
 from sqlalchemy_utils import create_database, database_exists
 import sys
 from zipfile import ZipFile
@@ -273,7 +272,10 @@ class ParseUtililities:
 
             # Initialize
             chroms = []
-            valid_chroms = set(list(map(str, range(1, 23))) + ["X", "Y", "M"])
+
+            # Get valid chromosomes
+            chrom_ids = list(map(str, range(1, 23))) + ["X", "Y", "M"]
+            valid_chroms = set(["".join(z) for z in zip(["chr"] * len(chrom_ids), chrom_ids)])
 
             # Create database
             create_database(self.dbname)
@@ -289,8 +291,7 @@ class ParseUtililities:
                 line = line.split("\t")
 
                 # Ignore non-standard chroms, scaffolds, etc.
-                m = re.search("^chr(.+)$", line[0])
-                if not m.group(1) in valid_chroms:
+                if not line[0] in valid_chroms:
                     continue
 
                 # Append chromosome
