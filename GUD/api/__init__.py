@@ -22,23 +22,13 @@ engine_hg38, Session_hg38 = GUDUtils.get_engine_session(GUDUtils._get_db_name())
 set_db("test")
 engine_test, Session_test = GUDUtils.get_engine_session(GUDUtils._get_db_name())
 
-def get_session(db): 
+def get_engine_session(db): 
     if db == "hg19":
-        return Session_hg19()
+        return engine_hg19, Session_hg19()
     elif db == "hg38":
-        return Session_hg38()
+        return engine_hg38, Session_hg38()
     elif db == "test":
-        return Session_test()
-    else:
-        raise BadRequest('database must be hg19 or hg38 or test')
-
-def get_engine(db): 
-    if db == "hg19":
-        return engine_hg19
-    elif db == "hg38":
-        return engine_hg38
-    elif db == "test":
-        return engine_test
+        return engine_test, Session_test()
     else:
         raise BadRequest('database must be hg19 or hg38 or test')
 
