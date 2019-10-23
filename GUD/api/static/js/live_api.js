@@ -3,16 +3,9 @@ function create_row(param, params) {
     var newRow = document.createElement("tr");
     newRow.id = param;
     $("#paramRows").append(newRow);
-    // create check  box
-    var check = document.createElement("td");
-    check.id = param + "Check";
     var form_div = document.createElement("div");
     form_div.id = param + "DivCheck";
     form_div.classList.add("form-check");
-    var check_input = document.createElement("input");
-    check_input.classList.add("form-check-input");
-    check_input.id = param + "RowCheck";
-    check_input.setAttribute("type", "checkbox");
     // create key box
     var key = document.createElement("td");
     key.id = param + "Key";
@@ -20,10 +13,17 @@ function create_row(param, params) {
     // create value box
     var value = document.createElement("td");
     value.id = param + "Val";
-    var input = document.createElement("input");
-    input.type = "text";
-    input.classList.add("form-control");
-    input.id = param + "Input";
+    if (param === "genome" || param === "chrom") {
+        var input = document.createElement("select")
+        input.classList.add("form-control");
+        input.id = param + "Input";
+    } else {
+        var input = document.createElement("input");
+        input.type = "text";
+        input.classList.add("form-control");
+        input.id = param + "Input";
+    }
+    
     // create description box
     var desc = document.createElement("td");
     desc.id = param + "Desc";
@@ -33,13 +33,6 @@ function create_row(param, params) {
     req.innerHTML = params[param]['REQUIRED'];
     req.id = param + "Req";
     // add elements to dom
-    $("#" + newRow.id).append(check);
-    $("#" + check.id).append(form_div);
-    $("#" + form_div.id).append(check_input);
-    if (params[param]['REQUIRED']) {
-        $("#" + check_input.id).prop("checked", true);
-        $("#" + check_input.id).prop("disabled", true);
-    }
     $("#" + newRow.id).append(key);
     $("#" + newRow.id).append(value);
     $("#" + value.id).append(input);
@@ -63,9 +56,19 @@ $(function () {
         var keys = Object.keys(params)
         if (keys.includes("genome")) {
             create_row("genome", params)
+            $('#genomeInput').append($('<option>', {value: "hg38",text: 'hg38'}));
+            $('#genomeInput').append($('<option>', {value: "hg19",text: 'hg19'}));
         }
         if (keys.includes("chrom")) {
             create_row("chrom", params)
+            let val;
+            for (let i=1; i<23 ; i++) {
+                val = "chr" + i
+                $('#chromInput').append($('<option>', {value: val, text: val}));
+            }
+            $('#chromInput').append($('<option>', {value: "chrX",text: 'chrX'}));
+            $('#chromInput').append($('<option>', {value: "chrY",text: 'chrY'}));
+            $('#chromInput').append($('<option>', {value: "chrM",text: 'chrM'}));
         }
         if (keys.includes("start")) {
             create_row("start", params)
@@ -98,15 +101,13 @@ function build_url() {
     // for each selected row get key value pair
     var parameters = {};
     var params;
-    var check;
     var key;
     var val;
     $("#paramRows").children().each(function (index) {
         params = this.id;
-        check = $("#" + params + "RowCheck").prop("checked")
         key = $("#" + params + "Key").text()
         val = $("#" + params + "Input").val()
-        if (check) {
+        if (val != "") {
             parameters[key] = val;
         }
     });
@@ -129,13 +130,6 @@ function build_url() {
 
     $("#url").val(url);
 }
-
-// on selection/deselction of parameter 
-// build url
-
-$(document).on('change', '.form-check-input', function () {
-    build_url()
-});
 
 // on change of parameter value
 // build url
