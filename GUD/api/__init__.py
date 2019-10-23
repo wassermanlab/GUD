@@ -3,11 +3,11 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from GUD import GUDUtils
 from GUD.api.api_helpers import set_db
+from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
-app.config.from_mapping(
-    SECRET_KEY='dev',
-)
+# app.config.from_mapping(SECRET_KEY='dev',)
+app.config.from_pyfile('config.py')
 limiter = Limiter(
     app,
     key_func=get_remote_address,

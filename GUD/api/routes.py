@@ -18,7 +18,7 @@ def live_api():
     routes = data.keys()
     with open(filename) as json_file:
         data = json.load(json_file)
-    return render_template('live_api.html', routes = routes, resources = data)
+    return render_template('live_api.html', routes = routes, resources = data, address_base = app.config["ADDRESS_BASE"])
 
 @app.route('/docs')
 def docs():

@@ -142,7 +142,7 @@ $(document).on('change', '.form-control', function () {
 $(function () {
     $("#sendButton").click(function () {
         url = $("#url").val();
-        url = "http://127.0.0.1:5000" + url;
+        url = address_base + url;
         $(".responseCode").html("Loading ...")
         $.ajax({
             url: url,

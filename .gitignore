@@ -4,6 +4,7 @@ gud.ini
 *.vcf
 GUD/ORM/test.py
 .vscode/*
+*config.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
