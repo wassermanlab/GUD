@@ -62,6 +62,7 @@ $(function () {
         if (keys.includes("chrom")) {
             create_row("chrom", params)
             let val;
+            $('#chromInput').append($('<option>', {value: "",text: ''}));
             for (let i=1; i<23 ; i++) {
                 val = "chr" + i
                 $('#chromInput').append($('<option>', {value: val, text: val}));
