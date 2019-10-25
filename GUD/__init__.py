@@ -148,7 +148,7 @@ class GUDUtilities:
     def get_engine_session(self, db_name):
 
         # Initialize
-        engine = create_engine(db_name, pool_pre_ping=True, pool_size=20, max_overflow=0)
+        engine = create_engine(db_name, pool_pre_ping=True, pool_size=100, max_overflow=0, pool_recycle=360)
         session_factory = sessionmaker(bind=engine)
         Session = scoped_session(session_factory)
 

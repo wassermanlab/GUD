@@ -8,20 +8,20 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
+                "REQUIRED": false,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "page": {
                 "REQUIRED": false,
@@ -29,15 +29,15 @@
             },
             "clinvar_ids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of clinvar ids separated by (,)"
+                "DESCRIPTION": "list of clinvar ids separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             }
         }
     },
@@ -50,20 +50,20 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
+                "REQUIRED": false,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "page": {
                 "REQUIRED": false,
@@ -71,11 +71,11 @@
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             },
             "clinical_assertion": {
                 "REQUIRED": false,
@@ -101,19 +101,19 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
                 "REQUIRED": false,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "page": {
                 "REQUIRED": false,
@@ -121,15 +121,15 @@
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             },
             "names": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of gene symbols/names separated by (,)"
+                "DESCRIPTION": "list of gene symbols/names separated by comma(,)"
             }
         }
     },
@@ -156,20 +156,20 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
+                "REQUIRED": false,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "page": {
                 "REQUIRED": false,
@@ -177,11 +177,11 @@
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "motif": {
                 "REQUIRED": false,
@@ -213,19 +213,19 @@
             },
             "chrom": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
                 "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "page": {
                 "REQUIRED": false,
@@ -233,19 +233,19 @@
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "experiments": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of experiments separated by (,)"
+                "DESCRIPTION": "list of experiments separated by comma(,)"
             },
             "samples": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of samples separated by (,)"
+                "DESCRIPTION": "list of samples separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             }
         }
     },
@@ -259,19 +259,19 @@
             },
             "chrom": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
                 "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "page": {
                 "REQUIRED": false,
@@ -279,19 +279,19 @@
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "experiments": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of experiments separated by (,)"
+                "DESCRIPTION": "list of experiments separated by comma(,)"
             },
             "samples": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of samples separated by (,)"
+                "DESCRIPTION": "list of samples separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             }
         }
     },
@@ -305,19 +305,19 @@
             },
             "chrom": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
                 "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "page": {
                 "REQUIRED": false,
@@ -325,23 +325,23 @@
             },
             "histone_types": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of histone types separated by (,)"
+                "DESCRIPTION": "list of histone types separated by comma(,)"
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "experiments": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of experiments separated by (,)"
+                "DESCRIPTION": "list of experiments separated by comma(,)"
             },
             "samples": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of samples separated by (,)"
+                "DESCRIPTION": "list of samples separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             }
         }
     },
@@ -355,19 +355,19 @@
             },
             "chrom": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
                 "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "page": {
                 "REQUIRED": false,
@@ -375,23 +375,23 @@
             },
             "restriction_enzymes": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of restriction enzymes separated by (,)"
+                "DESCRIPTION": "list of restriction enzymes separated by comma(,)"
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "experiments": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of experiments separated by (,)"
+                "DESCRIPTION": "list of experiments separated by comma(,)"
             },
             "samples": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of samples separated by (,)"
+                "DESCRIPTION": "list of samples separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             }
         }
     },
@@ -405,19 +405,19 @@
             },
             "chrom": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
                 "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
                 "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "page": {
                 "REQUIRED": false,
@@ -425,19 +425,19 @@
             },
             "genes": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of genes separated by (,)"
+                "DESCRIPTION": "list of genes separated by comma(,)"
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "experiments": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of experiments separated by (,)"
+                "DESCRIPTION": "list of experiments separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             }
         }
     },
@@ -491,15 +491,15 @@
             },
             "samples": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of clinvar ids separated by (,)"
+                "DESCRIPTION": "list of clinvar ids separated by comma(,)"
             },
             "max_tpm": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             },
             "min_tpm": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "page": {
                 "REQUIRED": false,

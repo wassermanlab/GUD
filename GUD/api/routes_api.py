@@ -193,7 +193,9 @@ def resource_query(db, resource):
     
     table_exists(resource, engine)      # check that table exists 
     page = check_page(request)          # check that page is valid 
-    response = func(request, Session, page)                                    
+    response = func(request, Session, page)      
+    Session.close()
+    engine.dispose()                              
     return response
 
 @app.route('/api/v1/<db>/genes/symbols')
@@ -203,6 +205,8 @@ def gene_symbols(db):
     url = request.url
     page = check_page(request)
     q = Gene().get_all_gene_symbols(Session)
+    Session.close()
+    engine.dispose()
     page_size = 1000
     offset = (page-1)*page_size
     result = q.offset(offset).limit(page_size)
@@ -218,6 +222,8 @@ def pathogenic_strs(db):
     page = check_page(request)
     resource = ShortTandemRepeat()
     q = resource.select_by_pathogenicity(Session)
+    Session.close()
+    engine.dispose()
     return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
 
 @app.route('/api/v1/<db>/tss/genic')
@@ -226,5 +232,7 @@ def genic_tss(db):
     table_exists('transcription_start_sites', engine)
     page = check_page(request)
     resource = TSS()
-    q = resource.select_all_genic_tss(Session)        
+    q = resource.select_all_genic_tss(Session)   
+    Session.close()
+    engine.dispose()    
     return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
