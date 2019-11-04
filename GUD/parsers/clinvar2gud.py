@@ -227,8 +227,10 @@ def _split_data(data_file, threads=1):
         if not os.path.exists(split_file):
 
             # Parallel split
+            # cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (
+            #     threads, chrom, data_file, split_file)
             cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (
-                threads, chrom, data_file, split_file)
+                threads, "chr%s" % chrom, data_file, split_file)
             subprocess.call(cmd, shell=True)
 
         # Append split file
@@ -256,7 +258,8 @@ def _insert_data(data_file, test=False):
 
         # Get region
         region = Region()
-        region.chrom = line[0]
+        # region.chrom = line[0]
+        region.chrom = line[0][3:]
         region.start = int(line[1]) -1
         region.end = region.start + len(line[3])
         region.bin = assign_bin(region.start, region.end)
