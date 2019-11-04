@@ -1,6 +1,7 @@
 name: GUD
 channels:
   - anaconda
+  - conda-forge
   - defaults
 dependencies:
   - biopython=1.73
