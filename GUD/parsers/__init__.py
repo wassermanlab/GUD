@@ -274,8 +274,9 @@ class ParseUtililities:
             chroms = []
 
             # Get valid chromosomes
-            chrom_ids = list(map(str, range(1, 23))) + ["X", "Y", "M"]
-            valid_chroms = set(["".join(z) for z in zip(["chr"] * len(chrom_ids), chrom_ids)])
+            # chrom_ids = list(map(str, range(1, 23))) + ["X", "Y", "M"]
+            # valid_chroms = set(["".join(z) for z in zip(["chr"] * len(chrom_ids), chrom_ids)])
+            valid_chroms = set(list(map(str, range(1, 23))) + ["X", "Y", "M"])
 
             # Create database
             create_database(self.dbname)
@@ -291,11 +292,13 @@ class ParseUtililities:
                 line = line.split("\t")
 
                 # Ignore non-standard chroms, scaffolds, etc.
-                if not line[0] in valid_chroms:
+                # if not line[0] in valid_chroms:
+                if not line[0][3:] in valid_chroms:
                     continue
 
                 # Append chromosome
-                chroms.append({"chrom": line[0], "size": line[1]})
+                # chroms.append({"chrom": line[0], "size": line[1]})
+                chroms.append({"chrom": line[0][3:], "size": line[1]})
 
             # Insert features
             self.engine.execute(Chrom().__table__.insert(), chroms)
