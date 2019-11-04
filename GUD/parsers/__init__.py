@@ -14,6 +14,7 @@ from zipfile import ZipFile
 
 from GUD.ORM.chrom import Chrom
 from GUD.ORM.conservation import Conservation
+from GUD.ORM.cpg_island import CpGIsland
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.gene import Gene
@@ -373,6 +374,12 @@ class ParseUtililities:
             session.add(conservation)
             session.commit()
 
+    def upsert_cpg_island(self, session, cpg_island):
+
+        if CpGIsland.is_unique(session, cpg_island.region_id, cpg_island.source_id):
+            session.add(cpg_island)
+            session.commit()
+
     def upsert_experiment(self, session, experiment):
 
         if Experiment.is_unique(session, experiment.name):
@@ -430,6 +437,8 @@ class ParseUtililities:
         if CNV.is_unique(session, cnv.region_id, cnv.source_id, cnv.copy_number_change):
             session.add(cnv)
             session.commit()
+        else:
+            print("here")
 
     def upsert_clinvar(self, session, clinvar):
         if clinvar.is_unique(session, clinvar.clinvar_variation_ID):

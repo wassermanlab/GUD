@@ -17,6 +17,7 @@ from .genomicFeatureMixin1 import GFMixin1
 from sqlalchemy.ext.declarative import declared_attr
 
 class CNV(GFMixin1, Base):
+
     __tablename__ = "copy_number_variants"
 
     copy_number_change  = Column("copy_number_change", Integer, nullable=False)

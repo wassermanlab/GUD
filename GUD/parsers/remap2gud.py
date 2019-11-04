@@ -275,8 +275,8 @@ def _download_data(genome, dummy_dir="/tmp/"):
         from urllib import urlretrieve
 
     # Initialize
-    url = "http://tagc.univ-mrs.fr/remap/download/remap2018/%s/MACS" % genome
-    ftp_file = "remap2018_TF_archive_all_macs2_%s_v1_2.tar.gz" % genome
+    url = "http://remap.univ-amu.fr/storage/remap2020/%s/MACS2" % genome
+    ftp_file = "remap2020_all_macs2_hg38_v1_0.bed.gz" % genome
 
     # Download data
     dummy_file = os.path.join(dummy_dir, ftp_file)
