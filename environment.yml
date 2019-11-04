@@ -11,8 +11,11 @@ dependencies:
   - numpy=1.16.4
   - numpy-base=1.16.4
   - openssl=1.1.1
+  - pandas=0.25.3
+  - parallel
   - pip=19.1.1
   - python=3.7.3
+  - pymysql=0.9.3
   - readline=7.0
   - setuptools=41.0.1
   - six=1.12.0

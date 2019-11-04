@@ -263,7 +263,8 @@ def _insert_data(data_file, test=False):
 
         # Get region
         region = Region()
-        region.chrom = line[2]
+        # region.chrom = line[2]
+        region.chrom = line[2][3:]
         region.start = int(line[4])
         region.end = int(line[5])
         region.bin = assign_bin(region.start, region.end)
