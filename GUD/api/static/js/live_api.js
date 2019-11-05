@@ -64,12 +64,12 @@ $(function () {
             let val;
             $('#chromInput').append($('<option>', {value: "",text: ''}));
             for (let i=1; i<23 ; i++) {
-                val = "chr" + i
+                val = i.toString()
                 $('#chromInput').append($('<option>', {value: val, text: val}));
             }
-            $('#chromInput').append($('<option>', {value: "chrX",text: 'chrX'}));
-            $('#chromInput').append($('<option>', {value: "chrY",text: 'chrY'}));
-            $('#chromInput').append($('<option>', {value: "chrM",text: 'chrM'}));
+            $('#chromInput').append($('<option>', {value: "X",text: "X"}));
+            $('#chromInput').append($('<option>', {value: "Y",text: "Y"}));
+            $('#chromInput').append($('<option>', {value: "M",text: "M"}));
         }
         if (keys.includes("start")) {
             create_row("start", params)

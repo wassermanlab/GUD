@@ -53,9 +53,11 @@ class ClinVar(GFMixin1, Base):
         """
         filter query by location
         """
-
-        q = query.filter(cls.clinvar_variation_ID.in_(clinvarIDs))
-
+        if (query is None):
+            q = cls.make_query(session)
+        else: 
+            q = query 
+        q = q.filter(cls.clinvar_variation_ID.in_(clinvarIDs))
         return q
 
     # not included in REST
