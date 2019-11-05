@@ -65,10 +65,14 @@ def genomic_feature_mixin1_queries(session, resource, request):
     keys = get_mixin1_keys(request)
 
     # location query
-    if (keys['start'] is not None and keys['end'] is not None and keys['location']
+    if (keys['start'] is not None or keys['end'] is not None or keys['location']
+            is not None or keys['chrom'] is not None): 
+        if (keys['start'] is not None and keys['end'] is not None and keys['location']
             is not None and keys['chrom'] is not None): 
-        q = resource.select_by_location(
-            session, keys['chrom'], keys['start'], keys['end'], keys['location'])
+            q = resource.select_by_location(
+                session, keys['chrom'], keys['start'], keys['end'], keys['location'])
+        else:
+            raise BadRequest("To filter by location you must specify location, chrom, start, and end.")
     else: 
         q = None
     # uid query
