@@ -1,11 +1,5 @@
-from sqlalchemy import (
-    Column,
-    Index,
-    PrimaryKeyConstraint,
-    String
-)
+from sqlalchemy import (Column, Index, PrimaryKeyConstraint, String)
 from sqlalchemy.dialects import mysql
-
 from .base import Base
 
 
@@ -17,8 +11,7 @@ class Chrom(Base):
     __table_args__ = (
         PrimaryKeyConstraint(chrom),
         Index("ix_chrom", chrom),
-        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
-    )
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"})
 
     @classmethod
     def select_all_chroms(cls, session):
@@ -26,7 +19,6 @@ class Chrom(Base):
         Select all chromosomes
         """
         q = session.query(cls)
-
         return q
 
     @classmethod
@@ -37,10 +29,8 @@ class Chrom(Base):
         objects.
         """
         q = session.query(cls)
-
         if chroms:
             q = q.filter(cls.chrom.in_(chroms))
-
         return q.all()
 
     @classmethod
@@ -51,25 +41,15 @@ class Chrom(Base):
         the size of all chroms.
         """
         sizes = {}
-
         q = cls.select_by_chroms(session, chroms)
-
         for c in q:
             sizes.setdefault(c.chrom, int(c.size))
-
         return sizes
 
     def __repr__(self):
-
         return "<%s(%s, %s)>" % \
-            (
-                self.__tablename__,
-                "chrom={}".format(self.chrom),
-                "size={}".format(self.size)
-            )
+            (self.__tablename__, "chrom={}".format(self.chrom),
+             "size={}".format(self.size))
 
     def serialize(self):
-        return {
-            'chrom': self.chrom,
-            'size': self.size,
-        }
+        return {'chrom': self.chrom, 'size': self.size, }

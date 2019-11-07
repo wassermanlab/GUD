@@ -32,7 +32,9 @@ class GFMixin1(object):
                       nullable=False)
 
     @classmethod
-    def make_query(cls, session):
+    def make_query(cls, session, query):
+        if (query is not None): 
+            return query
         q = session.query(cls, Region, Source)\
             .join()\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)
