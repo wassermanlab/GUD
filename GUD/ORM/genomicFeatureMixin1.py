@@ -117,9 +117,11 @@ class GFMixin1(object):
         """
        filter query by sources.
         """
-        if(query is None):
+        if (query is None):
             q = cls.make_query(session)
-        q = query.filter(Source.name.in_(sources))
+        else:
+            q = query
+        q = q.filter(Source.name.in_(sources))
 
         return q
 
