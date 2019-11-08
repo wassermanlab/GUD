@@ -49,7 +49,7 @@ class GFMixin1(object):
         return q
 
     @classmethod
-    def select_by_within_location(cls, session, query, chrom, start, end, query):
+    def select_by_within_location(cls, session, query, chrom, start, end):
         """
         Query objects by genomic location, 
         retrieve all objects that are within range.

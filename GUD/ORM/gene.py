@@ -62,7 +62,7 @@ class Gene(GFMixin1, Base):
 
     @classmethod
     def as_genomic_feature(self, feat):
-         """
+        """
         extend parent class by adding qualifiers
         """
         # parse the exon starts and ends
