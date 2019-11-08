@@ -1,23 +1,19 @@
 from sqlalchemy import (Column, Index, UniqueConstraint, Float)
 from sqlalchemy.dialects import mysql
 from .base import Base
-from .region import Region
 from .source import Source
-from .genomic_feature import GenomicFeature
 from .genomicFeatureMixin1 import GFMixin1
 from sqlalchemy.ext.declarative import declared_attr
 
 
 class ClinVar(GFMixin1, Base):
-
+    # table declarations
     __tablename__ = "clinvar"
 
-    # fields
     ref = Column("ref", mysql.VARCHAR(5000), nullable=False)
     alt = Column("alt", mysql.VARCHAR(5000), nullable=False)
     clinvar_variation_ID = Column(
         "clinvar_variation_ID", mysql.INTEGER(unsigned=True), nullable=False)
-    # info
     ANN_Annotation = Column("ANN_Annotation", mysql.VARCHAR(250))
     ANN_Annotation_Impact = Column("ANN_Annotation_Impact", mysql.VARCHAR(50))
     ANN_Gene_Name = Column("ANN_Gene_Name", mysql.VARCHAR(50))
@@ -42,6 +38,7 @@ class ClinVar(GFMixin1, Base):
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
         )
 
+    # class methods
     @classmethod
     def select_by_clinvarID(cls, session, query, clinvarIDs):
         """
@@ -54,7 +51,7 @@ class ClinVar(GFMixin1, Base):
     @classmethod
     def is_unique(cls, session, clinvarID):
         """
-        checks if unique
+        checks if unique, here the uniqueness is clinvar ID
         """
         q = session.query(cls).filter(cls.clinvar_variation_ID == clinvarID)
         return len(q.all()) == 0
@@ -62,7 +59,7 @@ class ClinVar(GFMixin1, Base):
     @classmethod
     def as_genomic_feature(self, feat):
         """
-        extend mixing as_genomic_feature by 
+        extend parent class by adding qualifiers
         """
         qualifiers = {
             "uid": feat.ClinVar.uid,

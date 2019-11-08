@@ -1,12 +1,5 @@
-from sqlalchemy import (
-    Column,
-    Index,
-    Integer,
-    String,
-    UniqueConstraint
-)
+from sqlalchemy import (Column, Index, String, UniqueConstraint)
 from sqlalchemy.dialects import mysql
-
 from .genomicFeatureMixin1 import GFMixin1
 from .genomic_feature import GenomicFeature
 from .base import Base
@@ -16,7 +9,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 
 class Gene(GFMixin1, Base):
-
+    # table declerations
     __tablename__ = "genes"
 
     # inherits uid, regionID, sourceID
@@ -30,21 +23,15 @@ class Gene(GFMixin1, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-            UniqueConstraint(
-                cls.region_id,
-                cls.name,
-                cls.source_id
-            ),
+            UniqueConstraint(cls.region_id, cls.name, cls.source_id),
             # query by bin range
             Index("ix_source_join", cls.source_id, cls.region_id),
             Index("ix_name", cls.name),
             Index("ix_name2", cls.name2),
-            {
-                "mysql_engine": "InnoDB",
-                "mysql_charset": "utf8",
-            }
+            {"mysql_engine": "InnoDB", "mysql_charset": "utf8", }
         )
 
+    # class methods
     @classmethod
     def select_by_names(cls, session, query, names=[]):
         """
@@ -52,10 +39,7 @@ class Gene(GFMixin1, Base):
         If no genes are provided, return all
         objects.
         """
-        if (query is None):
-            q = cls.make_query(session)
-        else: 
-            q = query 
+        q = cls.make_query(session, query)
         q = q.filter(cls.name2.in_(names))
         return q
 
@@ -65,35 +49,23 @@ class Gene(GFMixin1, Base):
         Return the gene symbol (name2 field) of all objects.
         """
         q = session.query(cls.name2).distinct()
-
         return q
 
-    # for insertion only not in REST
     @classmethod
     def is_unique(cls, session, regionID, sourceID, name):
-
-        q = session.query(cls)\
-            .filter(cls.region_id == regionID,
-                    cls.name == name,
-                    cls.source_id == sourceID)
-
+        """
+        Checks uniqueness by region source and name
+        """
+        q = session.query(cls).filter(cls.region_id == regionID,
+                                      cls.name == name, cls.source_id == sourceID)
         return len(q.all()) == 0
-
-    # for insertion only not in REST
-    @classmethod
-    def select_unique(cls, session, regionID, sourceID,
-                      name):
-
-        q = session.query(cls)\
-            .filter(cls.region_id == regionID,
-                    cls.name == name,
-                    cls.source_id == sourceID)
-
-        return q.first()
 
     @classmethod
     def as_genomic_feature(self, feat):
-        # Initialize
+         """
+        extend parent class by adding qualifiers
+        """
+        # parse the exon starts and ends
         exonStarts = []
         exonEnds = []
 
@@ -118,12 +90,6 @@ class Gene(GFMixin1, Base):
             "exonEnds": feat.Gene.exonEnds,
             "source": feat.Source.name,
         }
-        return GenomicFeature(
-            feat.Region.chrom,
-            int(feat.Region.start),
-            int(feat.Region.end),
-            strand=feat.Region.strand,
-            feat_type="Gene",
-            feat_id="%s_%s" % (self.__tablename__, feat.Gene.uid),
-            qualifiers=qualifiers
-        )
+        genomic_feature = super().as_genomic_feature(feat)
+        genomic_feature.qualifiers = qualifiers
+        return genomic_feature
