@@ -251,8 +251,7 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
     source = Source()
     source.name = source_name
     ParseUtils.upsert_source(session, source)
-    sources = ParseUtils.get_source(session, source_name)
-    source = next(iter(sources))
+    source = ParseUtils.get_source(session, source_name)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
@@ -291,8 +290,6 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
 
         # Split data
         data_files = _split_data(data_file, threads)
-        print(data_files)
-        exit(0)
 
         # Parallelize inserts to the database
         ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data_file, test=test), threads)

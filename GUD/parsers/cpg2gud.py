@@ -233,7 +233,6 @@ def _split_data(data_file, threads=1):
         if not os.path.exists(split_file):
 
             # Parallel split
-            # cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "[[:space:]]%s[[:space:]]" > %s' % (data_file, threads, chrom, split_file)
             cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "[[:space:]]%s[[:space:]]" > %s' % (data_file, threads, "chr%s" % chrom, split_file)
             subprocess.call(cmd, shell=True)
 
@@ -265,7 +264,6 @@ def _insert_data(data_file, test=False):
 
         # Get region
         region = Region()
-        # region.chrom = line[1]
         region.chrom = line[1][3:]
         region.start = int(line[2])
         region.end = int(line[3])
@@ -282,12 +280,17 @@ def _insert_data(data_file, test=False):
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end, region.strand)
 
         # Get gene
-        cpg = CpGIsland()
-        cpg.region_id = region.uid
-        cpg.source_id = source.uid
+        cpg_island = CpGIsland()
+        cpg_island.region_id = region.uid
+        cpg_island.source_id = source.uid
+        cpg_island.cpgNum = int(line[6])
+        cpg_island.gcNum = int(line[7])
+        cpg_island.perCpg = float(line[8])
+        cpg_island.perGc = float(line[9])
+        cpg_island.obsExp = float(line[10])
 
         # Upsert gene
-        ParseUtils.upsert_cpg_island(session, cpg)
+        ParseUtils.upsert_cpg_island(session, cpg_island)
 
         # Testing
         if test:

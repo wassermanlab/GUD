@@ -1,14 +1,10 @@
 from sqlalchemy import (
     Column,
-    Index,
     Float,
-    ForeignKey,
-    Integer,
-    PrimaryKeyConstraint,
+    Index,
     UniqueConstraint
 )
-from sqlalchemy.dialects import mysql
-from GUD import GUDUtils
+
 from .base import Base
 from .region import Region
 from .source import Source
@@ -16,12 +12,12 @@ from .genomic_feature import GenomicFeature
 from .genomicFeatureMixin1 import GFMixin1
 from sqlalchemy.ext.declarative import declared_attr
 
-
 class Conservation(GFMixin1, Base):
 
     __tablename__ = "conservation"
+
     score = Column("score", Float)
-    
+
     @declared_attr
     def __table_args__(cls):
         return (
@@ -69,4 +65,3 @@ class Conservation(GFMixin1, Base):
             feat_id="%s_%s" % (self.__tablename__, feat.Conservation.uid),
             qualifiers=qualifiers
         )
-

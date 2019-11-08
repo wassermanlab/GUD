@@ -1,6 +1,7 @@
 name: GUD
 channels:
   - anaconda
+  - bioconda
   - conda-forge
   - defaults
 dependencies:
@@ -16,6 +17,7 @@ dependencies:
   - parallel
   - pip=19.1.1
   - python=3.7.3
+  - pybedtools=0.8.0
   - pymysql=0.9.3
   - readline=7.0
   - setuptools=41.0.1

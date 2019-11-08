@@ -136,7 +136,7 @@ class GFMixin1(object):
         return 0
 
     @classmethod
-    def as_genomic_feature(self, feat):
+    def as_genomic_feature(self, feat, qualifiers=None):
         return GenomicFeature(
             feat.Region.chrom,
             int(feat.Region.start),

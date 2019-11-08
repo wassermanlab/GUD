@@ -1,6 +1,9 @@
 from sqlalchemy import (
     Column,
+    Float,
     Index,
+    Integer,
+    UniqueConstraint
 )
 
 from .base import Base
@@ -13,34 +16,61 @@ from sqlalchemy.ext.declarative import declared_attr
 class CpGIsland(GFMixin1, Base):
 
     __tablename__ = "cpg_islands"
-   
+
+    cpgNum = Column("cpgNum", Integer)
+    gcNum = Column("gcNum", Integer)
+    perCpg = Column("perCpg", Float)
+    perGc = Column("perGc", Float)
+    obsExp = Column("obsExp", Float)
+
     @declared_attr
     def __table_args__(cls):
         return (
-        Index("ix_join", cls.source_id, cls.region_id),
+        UniqueConstraint(cls.region_id, cls.source_id),
+        Index("ix_join", cls.source_id, cls.region_id), # query by bin range
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
-    #not included in REST API
     @classmethod
     def is_unique(cls, session, regionID, sourceID):
-        q = session.query(cls).filter(cls.region_id == regionID,
-                                      cls.source_id == sourceID)
-        q = q.all()
-        return len(q) == 0
+
+        q = session.query(cls)\
+            .filter(
+                cls.region_id == regionID,
+                cls.source_id == sourceID
+        )
+
+        return len(q.all()) == 0
+
+    @classmethod
+    def select_unique(cls, session, regionID, sourceID):
+
+        q = session.query(cls)\
+            .filter(
+                cls.region_id == regionID,
+                cls.source_id == sourceID
+        )
+
+        return q.first()
 
     @classmethod
     def as_genomic_feature(self, feat):
 
-        qualifiers = {   
+        qualifiers = {
             "uid": feat.CpGIsland.uid,
-            "source": feat.Source.name
+            "cpgNum": feat.CpGIsland.cpgNum,
+            "gcNum": feat.CpGIsland.gcNum,
+            "perCpg": feat.CpGIsland.perCpg,
+            "perGc": feat.CpGIsland.perGc,
+            "obsExp": feat.CpGIsland.obsExp,
+            "source": feat.Source.name,
         }
+
         return GenomicFeature(
             feat.Region.chrom,
-            int(feat.Region.start) ,
+            int(feat.Region.start),
             int(feat.Region.end),
-            strand = feat.Region.strand,
-            feat_type = "CpGIsland",
-            feat_id = "%s_%s"%(self.__tablename__, feat.CpGIsland.uid),
-            qualifiers = qualifiers)
+            feat_type="CpGIsland",
+            feat_id="%s_%s" % (self.__tablename__, feat.CpGIsland.uid),
+            qualifiers=qualifiers
+        )
