@@ -49,6 +49,7 @@ optional arguments:
   --dummy-dir DIR     dummy directory (default = "/tmp/")
   -m, --merge         merge genomic regions using bedtools
                       (default = False)
+  -r, --remove        remove downloaded files (default = False)
   -t, --test          limit the total of inserts to ~1K per
                       thread for testing (default = False)
   --threads INT       number of threads to use (default = %s)
@@ -115,6 +116,7 @@ def parse_args():
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
     optional_group.add_argument("-m", "--merge", action="store_true")
+    optional_group.add_argument("-r", "--remove", action="store_true")
     optional_group.add_argument("-t", "--test", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
     
@@ -188,9 +190,9 @@ def main():
     GUDUtils.db = args.db
 
     # Insert ENCODE data
-    encode_to_gud(args.genome, args.samples, args.feature, args.dummy_dir, args.merge, args.test, args.threads)
+    encode_to_gud(args.genome, args.samples, args.feature, args.dummy_dir, args.merge, args.remove, args.test, args.threads)
 
-def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=False, test=False, threads=1):
+def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=False, remove=False, test=False, threads=1):
     """
     python -m GUD.parsers.encode2gud --genome hg19 --samples --dummy-dir ./tmp/
     """
@@ -295,7 +297,7 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
         ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data_file, test=test), threads)
 
         # Remove data files
-        if not test:
+        if remove:
             if os.path.exists(data_file):
                 os.remove(data_file)
             for data_file in data_files:
@@ -303,8 +305,9 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
                     os.remove(data_file)
 
     # Remove downloaded file
-    if os.path.exists(metadata_file) and not test:
-        os.remove(metadata_file)
+    if remove:
+        if os.path.exists(metadata_file):
+            os.remove(metadata_file)
 
     # Dispose session
     Session.remove()
@@ -588,7 +591,7 @@ def _split_data(data_file, threads=1):
         if not os.path.exists(split_file):
 
             # Parallel split
-            cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" > %s' % (data_file, threads, chrom, split_file)
+            cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" > %s' % (data_file, threads, "chr%s" % chrom, split_file)
             subprocess.call(cmd, shell=True)
 
         # Append split file
@@ -678,7 +681,7 @@ def _insert_data_file(data_file, test=False):
 
         # Get region
         region = Region()
-        region.chrom = line[-3]
+        region.chrom = line[-3][3:]
         region.start = int(line[-2])
         region.end = int(line[-1])
         region.bin = assign_bin(region.start, region.end)
@@ -706,18 +709,23 @@ def _insert_data_file(data_file, test=False):
         feature.sample_id = samples[sample_name]
         feature.experiment_id = experiment.uid
         feature.source_id = source.uid
+
         # Upsert accessibility
         if Feature.__tablename__ == "dna_accessibility":
             ParseUtils.upsert_accessibility(session, feature)
+
         else:
+
             # Get experiment target
             m = re.search("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$", metadata[line[3]].experiment_target)
             experiment_target = m.group(2)
+
             # Upsert histone
             if Feature.__tablename__ == "histone_modifications":
                 feature.histone_type = experiment_target
                 ParseUtils.upsert_histone(session, feature)
-            # Upsert tf
+
+            # Upsert TF
             else:
                 feature.tf = experiment_target
                 ParseUtils.upsert_tf(session, feature)
