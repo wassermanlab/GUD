@@ -577,29 +577,54 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, test=Fals
 
 def _split_data(data_file, threads=1):
 
-    # import math
-
     # Initialize
     split_files = []
-    # data_file_dir = os.path.dirname(os.path.realpath(data_file))
 
-    # For each chromosome...
-    for chrom in chroms:
+    # Get number of lines
+    output = subprocess.check_output(["wc -l %s" % data_file], shell=True)
+    m = re.search("(\d+)", str(output))
+    l = float(m.group(1))
 
-        # Skip if file already split
-        split_file = "%s.%s" % (data_file, chrom)
-        if not os.path.exists(split_file):
+    # Split
+    prefix = "%s." % data_file
+    cmd = "split -d -l %s %s %s" % (int(l/threads) + 1, data_file, prefix)
+    subprocess.run(cmd, shell=True)
 
-            # Parallel split
-            cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" > %s' % (data_file, threads, "chr%s" % chrom, split_file)
-            subprocess.call(cmd, shell=True)
+    # For each split file...
+    split_dir = os.path.dirname(os.path.realpath(data_file))
+    for split_file in os.listdir(split_dir):
 
         # Append split file
-        statinfo = os.stat(split_file)
-        if statinfo.st_size:
+        split_file = os.path.join(split_dir, split_file)
+        if split_file != data_file and split_file.startswith(data_file):
             split_files.append(split_file)
-        else:
-            os.remove(split_file)
+
+    # # For each split file...
+    # for split_file in os.listdir(data_file_dir):
+
+    #     # Append split file
+    #     split_file = os.path.join(data_file_dir, split_file)
+    #     if os.path.abspath(data_file) in split_file:
+    #         split_files.append(split_file)
+    
+
+    # # For each chromosome...
+    # for chrom in chroms:
+
+    #     # Skip if file already split
+    #     split_file = "%s.%s" % (data_file, chrom)
+    #     if not os.path.exists(split_file):
+
+    #         # Parallel split
+    #         cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" > %s' % (data_file, threads, "chr%s" % chrom, split_file)
+    #         subprocess.call(cmd, shell=True)
+
+    #     # Append split file
+    #     statinfo = os.stat(split_file)
+    #     if statinfo.st_size:
+    #         split_files.append(split_file)
+    #     else:
+    #         os.remove(split_file)
 
     # # Get number of lines
     # process = subprocess.check_output(["wc -l %s" % data_file], shell=True)
