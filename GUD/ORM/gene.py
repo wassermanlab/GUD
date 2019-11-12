@@ -82,8 +82,8 @@ class Gene(GFMixin1, Base):
         # Define qualifiers
         qualifiers = {
             "uid": feat.Gene.uid,
-            "name": feat.Gene.name,
-            "name2": feat.Gene.name2,
+            "accession_number": feat.Gene.name,
+            "gene_symbol": feat.Gene.name2,
             "cdsStart": int(feat.Gene.cdsStart),
             "cdsEnd": int(feat.Gene.cdsEnd),
             "exonStarts": feat.Gene.exonStarts,
