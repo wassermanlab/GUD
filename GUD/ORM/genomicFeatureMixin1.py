@@ -35,6 +35,11 @@ class GFMixin1(object):
         return q
 
     @classmethod
+    def select_all(cls, session, query):
+        q = cls.make_query(session, query)
+        return q
+
+    @classmethod
     def select_by_overlapping_location(cls, session, query, chrom, start, end):
         """
         Query objects by genomic location, 
@@ -56,8 +61,8 @@ class GFMixin1(object):
         """
         bins = Region._compute_bins(start, end)
         q = query.filter(Region.chrom == chrom,
-                         Region.start > start,
-                         Region.end < end)\
+                         Region.start >= start,
+                         Region.end <= end)\
             .filter(Region.bin.in_(bins))
 
         return q
@@ -97,8 +102,7 @@ class GFMixin1(object):
         """
         filter query by uids.
         """
-        q = cls.make_query(session)
-        q = query
+        q = cls.make_query(session, query)
         q = q.filter(cls.uid.in_(uids))
         return q
 
@@ -107,10 +111,8 @@ class GFMixin1(object):
         """
         filter query by sources.
         """
-        q = cls.make_query(session)
-        q = query
+        q = cls.make_query(session, query)
         q = q.filter(Source.name.in_(sources))
-
         return q
 
     @classmethod
@@ -135,6 +137,6 @@ class GFMixin1(object):
             int(feat.Region.end),
             strand=feat.Region.strand,
             feat_type=self.__tablename__,
-            feat_id="%s_%s" % (self.__tablename__, self.uid),
+            feat_id="%s_%s" % (self.__tablename__, getattr(feat, self.__name__).uid),
             qualifiers=None
         )

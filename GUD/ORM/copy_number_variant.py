@@ -30,7 +30,7 @@ class CNV(GFMixin1, Base):
         add filter to query by clinical assertion 
         """
         q = cls.make_query(session, query)
-        q = query.filter(cls.clinical_assertion ==
+        q = q.filter(cls.clinical_assertion ==
                          clinical_assertion.encode(encoding='UTF-8'))
         return q
 
@@ -41,7 +41,7 @@ class CNV(GFMixin1, Base):
         """
         q = cls.make_query(session, query)
         accession = ("%" + clinvar_accession + "%").encode(encoding='UTF-8')
-        q = query.filter(cls.clinvar_accession.like(accession))
+        q = q.filter(cls.clinvar_accession.like(accession))
         return q
 
     @classmethod
@@ -51,7 +51,7 @@ class CNV(GFMixin1, Base):
         """
         q = cls.make_query(session, query)
         accession = ("%" + dbVar_accession + "%").encode(encoding='UTF-8')
-        q = query.filter(cls.dbVar_accession.like(accession))
+        q = q.filter(cls.dbVar_accession.like(accession))
         return q
 
     # not included in REST API
