@@ -52,7 +52,9 @@ class RegionTests(unittest.TestCase):
         self.assertEqual(data["size"], 2)
 
     def test_select_by_clinvarID(self):
-        pass
+        resp = self.app.get('/api/v1/test_hg38_chr22/clinvar?clinvar_ids=51')
+        data = json.loads(resp.data)
+        self.assertEqual(data["size"], 1)
 
 if __name__ == '__main__':
     unittest.main()
