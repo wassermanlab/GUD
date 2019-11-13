@@ -6,7 +6,7 @@ import pytest
 from GUD.api import app
 import flask
 from flask import request, jsonify, json
-
+ 
 # ============== gfmixin1 ============== #
 @pytest.mark.skip(reason="tamar_test")
 def test_clinvar():

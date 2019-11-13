@@ -1,46 +1,32 @@
-from GUD import GUDUtils
 from GUD.api import app, get_engine_session
 from flask import request, jsonify
 from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation,
                      DNAAccessibility, Enhancer, HistoneModification, TAD, 
                      TFBinding, TSS, Chrom, Sample, Experiment, Source, Expression)
 from GUD.api.api_helpers import *
-from werkzeug.exceptions import HTTPException, NotFound, BadRequest
-import sys
-# page_size = 20
-
-## move to api helpers 
-def get_result_tuple_simple(query, page, page_size=20):
-    offset = (page-1)*page_size
-    results = query.offset(offset).limit(page_size)
-    results = [e.serialize() for e in results]
-    return(query.count(), results)
-
-def get_result_from_query(query, page, page_size=20, result_tuple_type="simple", resource=None):
-    if result_tuple_type == "simple": 
-        result_tuple = get_result_tuple_simple(query, page)
-    elif result_tuple_type == "genomic_feature": 
-        result_tuple = get_genomic_feature_results(resource, query, page_size,  page)
-    result = create_page(result_tuple, page, page_size, request.url)           
-    return jsonify(result)
+from werkzeug.exceptions import BadRequest
 
 # simple resources
 def chroms(request, session, page):                                           
+    """retrieves all chromosomes"""
     resource = Chrom()
     q = resource.select_all_chroms(session)
     return get_result_from_query(q, page)
 
-def experiments(request, session, page):                                      
+def experiments(request, session, page): 
+    """retrieves all experiments"""                                     
     resource = Experiment()
     q = resource.select_all_experiments(session)
     return get_result_from_query(q, page)
 
-def samples(request, session, page):                                         
+def samples(request, session, page):    
+    """retrieves all samples"""                                     
     resource = Sample()
     q = resource.select_all_samples(session)
     return get_result_from_query(q, page)
 
-def sources(request, session, page):                                         
+def sources(request, session, page):     
+    """retrieves all sources"""                                    
     resource = Source()
     q = resource.select_all_sources(session)
     return get_result_from_query(q, page)
@@ -71,6 +57,7 @@ def expression(request, session, page):
 
 #GF1 queries 
 def clinvar(request, session, page): 
+    """retrieves clinvar variants"""
     resource = ClinVar()
     clinvarIDs = check_split(request.args.get('clinvar_ids', default=None), True)
     q = genomic_feature_mixin1_queries(session, resource, request)
@@ -78,7 +65,14 @@ def clinvar(request, session, page):
         q = resource.select_by_clinvarID(session, q, clinvarIDs)                                               
     return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
 
+def conservation(request, session, page): 
+    """retrieves conserved elements"""
+    resource = Conservation()
+    q = genomic_feature_mixin1_queries(session, resource, request)                                           
+    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+
 def copy_number_variants(request, session, page):                             
+    """retrieves copy number variants"""
     clinical_assertion  = request.args.get('clinical_assertion', default=None)
     clinvar_accession   = request.args.get('clinvar_accession', default=None)
     dbVar_accession     = request.args.get('dbVar_accession', default=None)
@@ -93,16 +87,16 @@ def copy_number_variants(request, session, page):
     return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
 
 def genes(request, session, page):                                           
+    """retrieves genes"""
     resource = Gene()
     q = genomic_feature_mixin1_queries(session, resource, request)
     names = check_split(request.args.get('names', default=None))
     if names is not None:
         q = resource.select_by_names(session, q, names)
-    if (q is None):
-        raise BadRequest('Query not specified correctly')
     return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
 
 def short_tandem_repeats(request, session, page):                            
+    """retrieves all STRs"""
     resource = ShortTandemRepeat()
     q = genomic_feature_mixin1_queries(session, resource, request)
     try:
@@ -169,10 +163,12 @@ def tss(request, session, page):
 
 @app.route('/api/v1/<db>/<resource>')
 def resource_query(db, resource): 
+    """ main control switch function for all valid resources"""
     switch = {
         "chroms": chroms,
         "clinvar": clinvar, 
         "copy_number_variants": copy_number_variants,
+        "conservation": conservation,
         "dna_accessibility": dna_accessibility,
         "enhancers": enhancers,
         "experiments": experiments,
@@ -198,8 +194,10 @@ def resource_query(db, resource):
     engine.dispose()                              
     return response
 
+## custom control routes
 @app.route('/api/v1/<db>/genes/symbols')
 def gene_symbols(db):
+    """custom control route getting all gene symbols"""
     engine, Session = get_engine_session(db)
     table_exists('genes', engine)
     url = request.url
@@ -217,17 +215,19 @@ def gene_symbols(db):
 
 @app.route('/api/v1/<db>/short_tandem_repeats/pathogenic')
 def pathogenic_strs(db):
+    """custom control route getting pathogenic STRs"""
     engine, Session = get_engine_session(db)
     table_exists('short_tandem_repeats', engine)
     page = check_page(request)
     resource = ShortTandemRepeat()
-    q = resource.select_by_pathogenicity(Session)
+    q = resource.select_by_pathogenicity(Session, None)
     Session.close()
     engine.dispose()
     return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
 
 @app.route('/api/v1/<db>/tss/genic')
 def genic_tss(db):
+    """custom control route getting all genic tss"""
     engine, Session = get_engine_session(db)
     table_exists('transcription_start_sites', engine)
     page = check_page(request)

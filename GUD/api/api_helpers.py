@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, jsonify
 from GUD import GUDUtils
 from werkzeug.exceptions import NotFound, BadRequest
 import math
@@ -7,6 +7,21 @@ from sqlalchemy import func
 
 ## HELPER FUNCTIONS ##
 
+def get_result_tuple_simple(query, page, page_size=20):
+    offset = (page-1)*page_size
+    results = query.offset(offset).limit(page_size)
+    results = [e.serialize() for e in results]
+    return(query.count(), results)
+
+def get_result_from_query(query, page, page_size=20, result_tuple_type="simple", resource=None):
+    if query is None:
+        raise BadRequest('query not specified correctly')
+    if result_tuple_type == "simple": 
+        result_tuple = get_result_tuple_simple(query, page)
+    elif result_tuple_type == "genomic_feature": 
+        result_tuple = get_genomic_feature_results(resource, query, page_size,  page)
+    result = create_page(result_tuple, page, page_size, request.url)           
+    return jsonify(result)
 
 def table_exists(table_name, engine):
     if not engine.dialect.has_table(engine, table_name): 
@@ -19,8 +34,10 @@ def set_db(db):
         GUDUtils.db = "hg38"
     elif db == "test":
         GUDUtils.db = "test"
+    elif db == "test_hg38_chr22":
+        GUDUtils.db = "test_hg38_chr22"
     else:
-        raise BadRequest('database must be hg19 or hg38 or test')
+        raise BadRequest('database must be hg19 or hg38 or test or test_hg38_chr22')
 
 def get_genomic_feature_results(resource, query, page_size, page) -> tuple:
     offset = (page-1)*page_size
@@ -28,7 +45,6 @@ def get_genomic_feature_results(resource, query, page_size, page) -> tuple:
     results = [resource.as_genomic_feature(e) for e in results]
     results = [e.serialize() for e in results]
     return (query.count(), results)
-
 
 def create_page(result_tuple, page, page_size, url) -> dict:
     """
@@ -59,21 +75,19 @@ def create_page(result_tuple, page, page_size, url) -> dict:
         json['prev'] = prev_page
     return json
 
-
 def genomic_feature_mixin1_queries(session, resource, request):
+    """make genomic feature 1 queries"""
     keys = get_mixin1_keys(request)
-
     # location query
+    q = resource.select_all(session, None)
     if (keys['start'] is not None or keys['end'] is not None or keys['location']
             is not None or keys['chrom'] is not None): 
         if (keys['start'] is not None and keys['end'] is not None and keys['location']
             is not None and keys['chrom'] is not None): 
             q = resource.select_by_location(
-                session, keys['chrom'], keys['start'], keys['end'], keys['location'])
+                session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
         else:
             raise BadRequest("To filter by location you must specify location, chrom, start, and end.")
-    else: 
-        q = None
     # uid query
     if keys['uids'] is not None:
         q = resource.select_by_uids(session, q, keys['uids'])
@@ -82,8 +96,8 @@ def genomic_feature_mixin1_queries(session, resource, request):
         q = resource.select_by_sources(session, q, keys['sources'])
     return q
 
-
 def genomic_feature_mixin2_queries(session, resource, request, query):
+    """make genomic feature 2 queries"""
     keys = get_mixin2_keys(request)
     q = query
     if keys['experiments'] is not None:
@@ -91,7 +105,6 @@ def genomic_feature_mixin2_queries(session, resource, request, query):
     if keys['samples'] is not None:
         q = resource.select_by_samples(session, q, keys['samples'])
     return q
-
 
 def check_page(request):
     try:
@@ -102,8 +115,8 @@ def check_page(request):
         raise BadRequest('pages must be positive integers')
     return page
 
-
 def check_split(str_list, integer=False):
+    """split string delimeted by ','"""
     if str_list == None:
         return None
     s = str_list.split(',')
@@ -117,7 +130,6 @@ def check_split(str_list, integer=False):
             raise BadRequest('list query parameter needs to be integer')
 
     return s
-
 
 def get_mixin1_keys(request):
     keys = {'chrom': '',
@@ -144,20 +156,13 @@ def get_mixin1_keys(request):
             keys['end'] = int(keys['end'])
         except:
             raise BadRequest("start and end should be formatted as integers")
-
         if re.fullmatch('^(X|Y|[1-9]|1[0-9]|2[0-2])$', keys['chrom']) == None:
             raise BadRequest(
                 "chromosome should be formatted as Z where Z is X, Y, or 1-22")
-
-        if (keys['end'] - keys['start']) > 4000000:
-            raise BadRequest("start and end must be less than 4000000bp apart")
-
         if keys['location'] not in ['within', 'overlapping', 'exact']:
             raise BadRequest(
                 "location must be specified as withing, overlapping, or exact")
-
     return keys
-
 
 def get_mixin2_keys(request):
     keys = {'experiments': [],

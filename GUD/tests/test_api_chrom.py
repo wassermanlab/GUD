@@ -1,7 +1,7 @@
 import unittest
 import os, sys
 from GUD.api import app
-import json
+from flask import json
 
 class ChromTests(unittest.TestCase):
     def setUp(self):
@@ -14,13 +14,11 @@ class ChromTests(unittest.TestCase):
         pass 
 
     def test_all_chroms(self):
-        pass
-
-    def test_select_chroms(self):
-        pass
-    
-    def test_select_sizes(self):
-        pass
+        resp = self.app.get('/api/v1/test_hg38_chr22/chroms')
+        data = json.loads(resp.data)
+        self.assertEqual(len(data["results"]), 20)
+        self.assertEqual(data["size"], 25)
+        self.assertEqual(data["results"][0]["chrom"], "1")
 
 if __name__ == '__main__':
     unittest.main()
