@@ -2,7 +2,7 @@ import unittest
 from GUD import GUDUtils
 from GUD.ORM import Chrom
 
-class RegionTests(unittest.TestCase):
+class ChromTests(unittest.TestCase):
     GUDUtils.db = "test_hg38_chr22"
     db_name = GUDUtils._get_db_name()
     engine, Session = GUDUtils.get_engine_session(db_name)

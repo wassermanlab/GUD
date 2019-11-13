@@ -3,7 +3,7 @@ from GUD import GUDUtils
 from GUD.ORM import Conservation
 
 
-class RegionTests(unittest.TestCase):
+class ConservationTests(unittest.TestCase):
     GUDUtils.db = "test_hg38_chr22"
     db_name = GUDUtils._get_db_name()
     engine, Session = GUDUtils.get_engine_session(db_name)
