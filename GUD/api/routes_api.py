@@ -1,10 +1,26 @@
+# instructions for adding more API Routes start with '# API_ADDITION(step):'
 from GUD.api import app, get_engine_session
 from flask import request, jsonify
+# API_ADDITION(1): import feature that you would like to add
 from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation,
                      DNAAccessibility, Enhancer, HistoneModification, TAD, 
-                     TFBinding, TSS, Chrom, Sample, Experiment, Source, Expression)
+                     TFBinding, TSS, Chrom, Sample, Experiment, Source, Expression) 
 from GUD.api.api_helpers import *
 from werkzeug.exceptions import BadRequest
+
+# templates 
+# API_ADDITION(3): add feature method implementation to query specific feature
+# if feature is extention of GF1/2 then follow these templates, else create custom query 
+def GF_feature_template(request, session, page):                           
+    """retrieves Genomic Feature 2"""
+    resource = Feature()                                                        # instansiate feature 
+    param1 = check_split(request.args.get('param1', default=None))              # get any additional parameters
+    q = genomic_feature_mixin1_queries(session, resource, request)              # build basic query for genomic_feature_mixin1
+    q = genomic_feature_mixin2_queries(session, resource, request, q)           # add to query for genomic_feature_mixin2
+    if param1 is not None:                                                      # for each additional query that is feature specific
+                                                                                # add to the query                
+        q = resource.select_by_param1(q, param1)
+    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)   # finally get the query 
 
 # simple resources
 def chroms(request, session, page):                                           
@@ -164,6 +180,7 @@ def tss(request, session, page):
 @app.route('/api/v1/<db>/<resource>')
 def resource_query(db, resource): 
     """ main control switch function for all valid resources"""
+    # API_ADDITION(2): add feature method to switch for querying feature 
     switch = {
         "chroms": chroms,
         "clinvar": clinvar, 
