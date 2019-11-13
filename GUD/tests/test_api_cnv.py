@@ -2,6 +2,7 @@ import unittest
 import os, sys
 from GUD.api import app
 from flask import json
+from time import sleep
 
 class CNVTests(unittest.TestCase):
     def setUp(self):
@@ -11,42 +12,58 @@ class CNVTests(unittest.TestCase):
         self.app.testing = True 
 
     def tearDown(self):
+        sleep(1)
         pass 
 
     def test_select_all(self):
-        resp = self.app.get('/api/v1/test_hg38_chr22/chroms')
+        resp = self.app.get('/api/v1/test_hg38_chr22/copy_number_variants')
         data = json.loads(resp.data)
-        self.assertEqual(len(data["results"]), 20)
-        self.assertEqual(data["size"], 25)
-        self.assertEqual(data["results"][0]["chrom"], "1")
+        self.assertEqual(data["size"], 603)
 
     def test_select_by_overlapping_location(self):
-        pass
+        resp = self.app.get('/api/v1/test_hg38_chr22/copy_number_variants?chrom=22&start=49199842&end=49787792&location=overlapping')
+        data = json.loads(resp.data)
+        self.assertEqual(data["size"], 89)
 
     def test_select_by_within_location(self):
-        pass
+        resp = self.app.get('/api/v1/test_hg38_chr22/copy_number_variants?chrom=22&start=49199842&end=49787792&location=within')
+        data = json.loads(resp.data)
+        self.assertEqual(data["size"], 1)
 
     def test_select_by_exact_location(self):
-        pass
+        resp = self.app.get('/api/v1/test_hg38_chr22/copy_number_variants?chrom=22&start=49199842&end=49787792&location=exact')
+        data = json.loads(resp.data)
+        self.assertEqual(data["size"], 1)
 
     def test_select_by_uids(self):
-        pass
+        resp = self.app.get('/api/v1/test_hg38_chr22/copy_number_variants?uids=11849,11843')
+        data = json.loads(resp.data)
+        self.assertEqual(data["size"], 2)
 
     def test_select_by_sources(self):
-        pass
+        resp = self.app.get('/api/v1/test_hg38_chr22/copy_number_variants?sources=dbVar')
+        data = json.loads(resp.data)
+        self.assertEqual(data["size"], 603)
 
     def test_compound_select(self):
-        pass
+        resp = self.app.get('/api/v1/test_hg38_chr22/copy_number_variants?chrom=22&start=49199841&end=49787792&location=overlapping&uids=11849,11837')
+        data = json.loads(resp.data)
+        self.assertEqual(data["size"], 2)
 
     def select_by_clinical_assertion(self):
-        pass
+        resp = self.app.get('/api/v1/test_hg38_chr22/copy_number_variants?clinical_assertion=Pathogenic')
+        data = json.loads(resp.data)
+        self.assertEqual(data["size"], 581)
 
     def test_select_by_clinvar_accession(self):
-        pass
+        resp = self.app.get('/api/v1/test_hg38_chr22/copy_number_variants?clinvar_accession=SCV000080129')
+        data = json.loads(resp.data)
+        self.assertEqual(data["size"], 1)
     
     def test_selec_by_dnvar_accession(self):
-        pass
-    
+        resp = self.app.get('/api/v1/test_hg38_chr22/copy_number_variants?dbVar_accession=nssv15120684')
+        data = json.loads(resp.data)
+        self.assertEqual(data["size"], 1)
 
 if __name__ == '__main__':
     unittest.main()
