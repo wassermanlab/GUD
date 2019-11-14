@@ -23,7 +23,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 
 class Enhancer(GFMixin2, Base):
-
+    
     __tablename__ = "enhancers"
 
     @declared_attr
@@ -36,24 +36,16 @@ class Enhancer(GFMixin2, Base):
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
+    # class methods
+    @classmethod
     def as_genomic_feature(self, feat):
+        # Define qualifiers
         qualifiers = {
-            "uid": feat.Enhancer.uid,
+            "uid": feat.DNAAccessibility.uid,
             "source": feat.Source.name,
             "sample": feat.Sample.name,
             "experiment": feat.Experiment.name,
         }
-
-        return GenomicFeature(
-            feat.Region.chrom,
-            int(feat.Region.start),
-            int(feat.Region.end),
-            strand=feat.Region.strand,
-            feat_type=self.__tablename__,
-            feat_id="%s_%s" %
-            (
-                self.__tablename__,
-                feat.Enhancer.uid
-            ),
-            qualifiers=qualifiers
-        )
+        genomic_feature = super().as_genomic_feature(feat)
+        genomic_feature.qualifiers = qualifiers
+        return genomic_feature

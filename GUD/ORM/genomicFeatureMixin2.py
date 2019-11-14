@@ -1,4 +1,4 @@
-from sqlalchemy import (Column,ForeignKey)
+from sqlalchemy import (Column, ForeignKey)
 from sqlalchemy.dialects import mysql
 from .region import Region
 from .source import Source
@@ -12,8 +12,8 @@ class GFMixin2(object):
     def __tablename__(cls):
         return cls.__name__.lower()
 
-    uid = Column("uid", mysql.INTEGER(unsigned=True), primary_key=True) 
-    
+    uid = Column("uid", mysql.INTEGER(unsigned=True), primary_key=True)
+
     @declared_attr
     def region_id(cls):
         return Column("regionID", ForeignKey("regions.uid"),
@@ -23,11 +23,12 @@ class GFMixin2(object):
     def source_id(cls):
         return Column("sourceID", ForeignKey("sources.uid"),
                       nullable=False)
-    
+
     @declared_attr
     def sample_id(cls):
         return Column("sampleID", ForeignKey("samples.uid"),
                       nullable=False)
+
     @declared_attr
     def experiment_id(cls):
         return Column("experimentID", ForeignKey("experiments.uid"),
@@ -165,6 +166,7 @@ class GFMixin2(object):
             int(feat.Region.end),
             strand=feat.Region.strand,
             feat_type=self.__tablename__,
-            feat_id="%s_%s" % (self.__tablename__, getattr(feat, self.__name__).uid),
+            feat_id="%s_%s" % (self.__tablename__,
+                               getattr(feat, self.__name__).uid),
             qualifiers=None
         )
