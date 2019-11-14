@@ -3,8 +3,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects import mysql
 from .base import Base
 
-
 class Experiment(Base):
+    # table declerations
     __tablename__ = "experiments"
     uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
     name = Column("name", String(250), nullable=False)
@@ -16,6 +16,7 @@ class Experiment(Base):
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
+    # class methods
     @classmethod
     def select_all_experiments(cls, session):
         """
@@ -56,4 +57,4 @@ class Experiment(Base):
             ("uid={}".format(self.uid), "name={}".format(self.name))
 
     def serialize(self):
-        return {'uid': self.uid, 'name': self.name,}
+        return {'uid': self.uid, 'name': self.name, }

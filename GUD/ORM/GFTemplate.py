@@ -1,6 +1,6 @@
 from sqlalchemy import (Column, Index, String, UniqueConstraint)
 from sqlalchemy.dialects import mysql
-from .genomicFeatureMixin1 import GFMixin1
+from .genomicFeatureMixin1 import GFMixin1 # replace with GFMixin2 if necissary 
 from .genomic_feature import GenomicFeature
 from .base import Base
 from .region import Region

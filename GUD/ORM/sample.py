@@ -20,7 +20,7 @@ from sqlalchemy_fulltext import (
 from .base import Base
 
 class Sample(Base):
-
+    # table declerations
     __tablename__ = "samples"
 
     uid = Column("uid",mysql.INTEGER(unsigned=True),nullable=False)
@@ -151,27 +151,6 @@ class Sample(Base):
         samples.sort(key=lambda x: x[-1], reverse=True)
 
         return([samples[i] for i in range(len(samples)) if samples[i][1] > threshold])
-
-    # @classmethod
-    # def select_by_fulltext(
-    #     cls, session, fulltext):
-    #     """
-    #     Query objects by fulltext. 
-    #     """
-
-    #     class SampleName(FullText, cls):        
-    #         __fulltext_columns__ = list(["name"])
-
-    #     q = session.query(cls)\
-    #         .filter(
-    #             FullTextSearch(
-    #                 fulltext,
-    #                 SampleName,
-    #                 FullTextMode.NATURAL
-    #             )
-    #         )
-
-    #     return q.all()
 
     @classmethod
     def select_by_exp_conditions(cls, session,

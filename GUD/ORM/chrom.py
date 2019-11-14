@@ -4,7 +4,7 @@ from .base import Base
 
 
 class Chrom(Base):
-
+    # table declerations
     __tablename__ = "chroms"
     chrom = Column("chrom", String(5), nullable=False)
     size = Column("size", mysql.INTEGER(unsigned=True), nullable=False)
@@ -13,6 +13,7 @@ class Chrom(Base):
         Index("ix_chrom", chrom),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"})
 
+    # class methods 
     @classmethod
     def select_all_chroms(cls, session):
         """
