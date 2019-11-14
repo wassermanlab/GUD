@@ -1,13 +1,5 @@
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    Integer,
-    PrimaryKeyConstraint
-)
-
+from sqlalchemy import (Column,ForeignKey)
 from sqlalchemy.dialects import mysql
-from .base import Base
-from .genomic_feature import GenomicFeature
 from .region import Region
 from .source import Source
 from .sample import Sample
@@ -41,128 +33,138 @@ class GFMixin2(object):
         return Column("experimentID", ForeignKey("experiments.uid"),
                       nullable=False)
 
+    # methods###################
     @classmethod
-    def select_by_overlapping_location(cls, session, chrom, start, end):
-        """
-        Query objects by genomic location.
-        """
-        bins = Region._compute_bins(start, end)
-
+    def make_query(cls, session, query):
+        if (query is not None):
+            return query
         q = session.query(cls, Region, Source, Sample, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(Region.chrom == chrom,
-                    Region.start < end,
-                    Region.end > start)\
-            .filter(Region.bin.in_(bins))
-
-        return q
-    
-    @classmethod
-    def select_by_within_location(cls, session, chrom, start, end):
-        """
-        Query objects by genomic location.
-        """
-        bins = Region._compute_bins(start, end)
-
-        q = session.query(cls, Region, Source, Sample, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(Region.chrom == chrom,
-                    Region.start > start,
-                    Region.end < end)\
-            .filter(Region.bin.in_(bins))
-        
+            .join()\
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id, Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)
         return q
 
     @classmethod
-    def select_by_exact_location(cls, session, chrom, start, end):
+    def select_all(cls, session, query):
+        q = cls.make_query(session, query)
+        return q
+
+    @classmethod
+    def select_by_overlapping_location(cls, session, query, chrom, start, end):
         """
-        Query objects by genomic location.
+        Query objects by genomic location, 
+        retrieve all objects that overlap with range.
         """
         bins = Region._compute_bins(start, end)
+        q = query.filter(Region.chrom == chrom,
+                         Region.start < end,
+                         Region.end > start)\
+            .filter(Region.bin.in_(bins))
+        return q
 
-        q = session.query(cls, Region, Source, Sample, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .filter(Region.bin.in_(bins))\
-            .filter(Region.uid == cls.region_id)\
+    @classmethod
+    def select_by_within_location(cls, session, query, chrom, start, end):
+        """
+        Query objects by genomic location, 
+        retrieve all objects that are within range.
+        """
+        bins = Region._compute_bins(start, end)
+        q = query.filter(Region.chrom == chrom,
+                         Region.start >= start,
+                         Region.end <= end)\
+            .filter(Region.bin.in_(bins))
+
+        return q
+
+    @classmethod
+    def select_by_exact_location(cls, session, query, chrom, start, end):
+        """
+        Query objects by exact genomic location.
+        """
+        bins = Region._compute_bins(start, end)
+        q = query.filter(Region.bin.in_(bins))\
             .filter(Region.chrom == chrom,
                     Region.start == start,
                     Region.end == end)
+
         return q
 
     @classmethod
-    def select_by_location(cls, session, chrom, start, end, location):
-        
+    def select_by_location(cls, session, query, chrom, start, end, location):
+        """
+        Query objects by genomic location.
+        """
+        q = cls.make_query(session, query)
         if location == 'exact':
-            q = cls.select_by_exact_location(session, chrom, start, end)
+            q = cls.select_by_exact_location(session, q,  chrom, start, end)
         elif location == 'within':
-            q = cls.select_by_within_location(session, chrom, start, end)
+            q = cls.select_by_within_location(session, q, chrom, start, end)
         elif location == 'overlapping':
-            q = cls.select_by_overlapping_location(session, chrom, start, end)
-        else: 
+            q = cls.select_by_overlapping_location(
+                session, q,  chrom, start, end)
+        else:
             return False
-        
         return q
 
     @classmethod
     def select_by_uids(cls, session, query, uids):
         """
-        Query objects by uids.
+        filter query by uids.
         """
-        q = query.filter(cls.uid.in_(uids))
-
+        q = cls.make_query(session, query)
+        q = q.filter(cls.uid.in_(uids))
         return q
 
     @classmethod
     def select_by_sources(cls, session, query, sources):
         """
-        Query objects by sources.
+        filter query by sources.
         """
-        s = [value for value, in session.query(Source.uid).filter(Source.name.in_(sources)).all()]
-        q = query.filter(Source.uid.in_(s))
-
+        q = cls.make_query(session, query)
+        q = q.filter(Source.name.in_(sources))
         return q
-            # .filter(Source.name.in_(sources))
-        # return (q.count(), q.offset(offset).limit(limit))
 
     @classmethod
     def select_by_samples(cls, session, query, samples):
         """
-        Query objects by sample name.
+        filter query by samples.
         """
-        s = [value for value, in session.query(Sample.uid).filter(Sample.name.in_(samples)).all()]
-        q = query.filter(Sample.uid.in_(s))
-
+        q = cls.make_query(session, query)
+        q = q.filter(Sample.name.in_(samples))
         return q
-       
+
     @classmethod
     def select_by_experiments(cls, session, query, experiments):
         """
-        Query objects by experiment name.
+        filter query by experiments.
         """
-        s = [value for value, in session.query(Experiment.uid).filter(Experiment.name.in_(experiments)).all()]
-        q = query.filter(Experiment.uid.in_(s))
-        
+        q = cls.make_query(session, query)
+        q = q.filter(Experiment.name.in_(experiments))
         return q
 
     @classmethod
-    def is_unique(cls, session, regionID,
-                  sampleID, experimentID, sourceID):
-
-        q = session.query(cls).\
-            filter(cls.region_id == regionID, cls.sample_id == sampleID,
-                   cls.experiment_id == experimentID, cls.source_id == sourceID)
-
-        return len(q.all()) == 0
+    def is_unique(cls, session, regionID, sourceID, sampleID, experimentID):
+        """
+        Check by unique condition. Minimum condition is is regionID and sourceID.
+        Additional conditions require overriding of method in child class.
+        """
+        q = session.query(cls).filter(cls.region_id == regionID,
+                                      cls.source_id == sourceID,
+                                      cls.sample_id == sampleID,
+                                      cls.experiment_id == experimentID)
+        q = q.all()
+        return len(q) == 0
 
     @classmethod
-    def select_unique(cls, session, regionID,
-                      sampleID, experimentID, sourceID):
-
-        q = session.query(cls).\
-            filter(cls.region_id == regionID, cls.sample_id == sampleID,
-                   cls.experiment_id == experimentID, cls.source_id == sourceID)
-
-        return q.first()
+    def as_genomic_feature(self, feat):
+        """
+        Return feature as GenomicFeature object. 
+        """
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            strand=feat.Region.strand,
+            feat_type=self.__tablename__,
+            feat_id="%s_%s" % (self.__tablename__, getattr(feat, self.__name__).uid),
+            qualifiers=None
+        )
