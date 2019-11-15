@@ -5,7 +5,7 @@ from .source import Source
 from .sample import Sample
 from .experiment import Experiment
 from sqlalchemy.ext.declarative import declared_attr
-
+from .genomic_feature import GenomicFeature
 
 class GFMixin2(object):
     @declared_attr

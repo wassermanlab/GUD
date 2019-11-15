@@ -1,6 +1,6 @@
 from sqlalchemy import (UniqueConstraint, Index)
 from sqlalchemy.dialects import mysql
-from .base import Bsase
+from .base import Base
 from .experiment import Experiment
 from .region import Region
 from .sample import Sample

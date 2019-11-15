@@ -6,7 +6,6 @@ from sqlalchemy import (
     UniqueConstraint
 )
 from sqlalchemy.dialects import mysql
-
 from .base import Base
 
 class Source(Base):

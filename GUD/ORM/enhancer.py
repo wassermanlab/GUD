@@ -1,17 +1,5 @@
-from binning import (
-    containing_bins,
-    contained_bins
-)
-from sqlalchemy import (
-    Column,
-    Index,
-    Integer,
-    PrimaryKeyConstraint,
-    ForeignKey,
-    UniqueConstraint
-)
+from sqlalchemy import (Index, UniqueConstraint)
 from sqlalchemy.dialects import mysql
-
 from .base import Base
 from .experiment import Experiment
 from .region import Region

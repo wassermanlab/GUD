@@ -5,18 +5,23 @@ from .genomicFeatureMixin1 import GFMixin1
 from .base import Base
 from .region import Region
 from .source import Source
+from sqlalchemy.ext.declarative import declared_attr
 
-class Mask(GFMixin1 Base):
+class Mask(GFMixin1, Base):
     # table declerations
     __tablename__ = "masks"
     
     name = Column("name", String(75))
     score = Column("score", Float)
 
-    __table_args__ = (
-        Index("ix_regionID", regionID), # query by bin range
-        {"mysql_engine": "InnoDB","mysql_charset": "utf8"}
-    )
+    @declared_attr
+    def __table_args__(cls):
+        return (
+            UniqueConstraint(cls.region_id, cls.source_id),
+            Index("ix_join", cls.source_id, cls.region_id),
+            Index("ix_clinvar_id", cls.name),
+            {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
+        )
 
     # class methods
     @classmethod
