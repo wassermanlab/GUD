@@ -11,7 +11,7 @@ from werkzeug.exceptions import BadRequest
 # templates 
 # API_ADDITION(3): add feature method implementation to query specific feature
 # if feature is extention of GF1/2 then follow these templates, else create custom query 
-def GF_feature_template(request, session, page):                           
+def GF_feature_template(request, session):                           
     """retrieves Genomic Feature 2"""
     resource = Feature()                                                        # instansiate feature 
     param1 = check_split(request.args.get('param1', default=None))              # get any additional parameters
@@ -20,74 +20,75 @@ def GF_feature_template(request, session, page):
     if param1 is not None:                                                      # for each additional query that is feature specific
                                                                                 # add to the query                
         q = resource.select_by_param1(q, param1)
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)   # finally get the query 
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature") #fetch the query 
 
 # simple resources
-def chroms(request, session, page):                                           
+def chroms(request, session):                                           
     """retrieves all chromosomes"""
     resource = Chrom()
     q = resource.select_all_chroms(session)
-    return get_result_from_query(q, page)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="simple")
 
-def experiments(request, session, page): 
+def experiments(request, session): 
     """retrieves all experiments"""                                     
     resource = Experiment()
     q = resource.select_all_experiments(session)
-    return get_result_from_query(q, page)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="simple")
 
-def samples(request, session, page):    
+def samples(request, session):    
     """retrieves all samples"""                                     
     resource = Sample()
     q = resource.select_all_samples(session)
-    return get_result_from_query(q, page)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="simple")
 
-def sources(request, session, page):     
+def sources(request, session):     
     """retrieves all sources"""                                    
     resource = Source()
     q = resource.select_all_sources(session)
-    return get_result_from_query(q, page)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="simple")
 
 #other resources
-def expression(request, session, page):                                       
-    resource = Expression()
-    max_tpm = request.args.get('max_tpm', default=None)    
-    min_tpm = request.args.get('min_tpm', default=None)  
-    samples = check_split(request.args.get('samples', default=None))  
-    q = resource.select_all(session)
-    if max_tpm is not None and min_tpm is not None: 
-        try:
-            max_tpm = float(max_tpm)
-            min_tpm = float(min_tpm)
-            q = resource.select_by_expression(Session, min_tpm, max_tpm, q)
-        except:
-            raise BadRequest('max and min tpm must be floats')
-    if samples is not None:
-        q = resource.select_by_samples(session, samples, q)
-    page_size = 20
-    offset = (page-1)*page_size
-    results = q.offset(offset).limit(page_size)
-    results = [resource.serialize(e) for e in results]
-    result_tuple = (q.count(), results)
-    result = create_page(result_tuple, page, page_size, request.url)           
-    return jsonify(result)
+# TODO: fix this one
+# def expression(request, session, page):                                       
+#     resource = Expression()
+#     max_tpm = request.args.get('max_tpm', default=None)    
+#     min_tpm = request.args.get('min_tpm', default=None)  
+#     samples = check_split(request.args.get('samples', default=None))  
+#     q = resource.select_all(session)
+#     if max_tpm is not None and min_tpm is not None: 
+#         try:
+#             max_tpm = float(max_tpm)
+#             min_tpm = float(min_tpm)
+#             q = resource.select_by_expression(Session, min_tpm, max_tpm, q)
+#         except:
+#             raise BadRequest('max and min tpm must be floats')
+#     if samples is not None:
+#         q = resource.select_by_samples(session, samples, q)
+#     page_size = 20
+#     offset = (page-1)*page_size
+#     results = q.offset(offset).limit(page_size)
+#     results = [resource.serialize(e) for e in results]
+#     result_tuple = (q.count(), results)
+#     result = create_page(result_tuple, page, page_size, request.url)           
+#     return jsonify(result)
 
 #GF1 queries 
-def clinvar(request, session, page): 
+def clinvar(request, session): 
     """retrieves clinvar variants"""
     resource = ClinVar()
     clinvarIDs = check_split(request.args.get('clinvar_ids', default=None), True)
     q = genomic_feature_mixin1_queries(session, resource, request)
     if clinvarIDs is not None:
         q = resource.select_by_clinvarID(session, q, clinvarIDs)                                               
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
-def conservation(request, session, page): 
+def conservation(request, session): 
     """retrieves conserved elements"""
     resource = Conservation()
     q = genomic_feature_mixin1_queries(session, resource, request)                                           
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
-def copy_number_variants(request, session, page):                             
+def copy_number_variants(request, session):                             
     """retrieves copy number variants"""
     clinical_assertion  = request.args.get('clinical_assertion', default=None)
     clinvar_accession   = request.args.get('clinvar_accession', default=None)
@@ -100,18 +101,18 @@ def copy_number_variants(request, session, page):
         q = resource.select_by_clinvar_accession(session, q, clinvar_accession)
     if dbVar_accession is not None:
         q = resource.select_by_dbvar_accession(session, q, dbVar_accession)
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
-def genes(request, session, page):                                           
+def genes(request, session):                                           
     """retrieves genes"""
     resource = Gene()
     q = genomic_feature_mixin1_queries(session, resource, request)
     names = check_split(request.args.get('names', default=None))
     if names is not None:
         q = resource.select_by_names(session, q, names)
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
-def short_tandem_repeats(request, session, page):                            
+def short_tandem_repeats(request, session):                            
     """retrieves all STRs"""
     resource = ShortTandemRepeat()
     q = genomic_feature_mixin1_queries(session, resource, request)
@@ -123,49 +124,49 @@ def short_tandem_repeats(request, session, page):
             'rotation must be set to True or False if motif is given')
     if motif is not None:
         q = resource.select_by_motif(session, motif, q, rotation)
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
 # GF2 queries 
-def dna_accessibility(request, session, page):                                
+def dna_accessibility(request, session):                                
     resource = DNAAccessibility()
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
-def enhancers(request, session, page):                                        
+def enhancers(request, session):                                        
     resource = Enhancer()
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
-def histone_modifications(request, session, page):                           
+def histone_modifications(request, session):                           
     resource = HistoneModification()
     histone_types = check_split(request.args.get('histone_types', default=None))
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     if histone_types is not None: 
         q = resource.select_by_histone_type(q, histone_types)
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
-def tads(request, session, page):                                           
+def tads(request, session):                                           
     resource = TAD()
     restriction_enzymes = check_split(request.args.get('restriction_enzymes', default=None))
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     if restriction_enzymes is not None:
         q = resource.select_by_restriction_enzymes(q, restriction_enzymes)
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
-def tf_binding(request, session, page):    
+def tf_binding(request, session):    
     resource = TFBinding()
     tfs = check_split(request.args.get('tfs', default=None))
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     if tfs is not None:
         q = resource.select_by_tf(q, tfs)                                
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
-def tss(request, session, page):
+def tss(request, session):
     resource = TSS()
     samples = request.args.get('samples', default=None, type=str)
     if samples is not None:
@@ -175,7 +176,7 @@ def tss(request, session, page):
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     if genes is not None: 
         q = resource.select_by_genes(q, genes)               
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
 @app.route('/api/v1/<db>/<resource>')
 def resource_query(db, resource): 
@@ -189,7 +190,7 @@ def resource_query(db, resource):
         "dna_accessibility": dna_accessibility,
         "enhancers": enhancers,
         "experiments": experiments,
-        "expression": expression,
+        # "expression": expression,
         "genes": genes,
         "histone_modifications": histone_modifications,
         "samples": samples,
@@ -205,51 +206,49 @@ def resource_query(db, resource):
         raise BadRequest('Invalid resource')
     
     table_exists(resource, engine)      # check that table exists 
-    page = check_page(request)          # check that page is valid 
-    response = func(request, Session, page)      
+    response = func(request, Session)   
     Session.close()
     engine.dispose()                              
     return response
 
 ## custom control routes
-@app.route('/api/v1/<db>/genes/symbols')
-def gene_symbols(db):
-    """custom control route getting all gene symbols"""
-    engine, Session = get_engine_session(db)
-    table_exists('genes', engine)
-    url = request.url
-    page = check_page(request)
-    q = Gene().get_all_gene_symbols(Session)
-    Session.close()
-    engine.dispose()
-    page_size = 1000
-    offset = (page-1)*page_size
-    result = q.offset(offset).limit(page_size)
-    result =  [g[0] for g in result]
-    result_tuple = (q.count(), result)
-    result = create_page(result_tuple, page, page_size, request.url)                                            
-    return jsonify(result) 
+## TODO: fix this one 
+# @app.route('/api/v1/<db>/genes/symbols')
+# def gene_symbols(db):
+#     """custom control route getting all gene symbols"""
+#     engine, Session = get_engine_session(db)
+#     table_exists('genes', engine)
+#     url = request.url
+#     page = check_page(request)
+#     q = Gene().get_all_gene_symbols(Session)
+#     Session.close()
+#     engine.dispose()
+#     page_size = 1000
+#     offset = (page-1)*page_size
+#     result = q.offset(offset).limit(page_size)
+#     result =  [g[0] for g in result]
+#     result_tuple = (q.count(), result)
+#     result = create_page(result_tuple, page, page_size, request.url)                                            
+#     return jsonify(result) 
 
-@app.route('/api/v1/<db>/short_tandem_repeats/pathogenic')
-def pathogenic_strs(db):
-    """custom control route getting pathogenic STRs"""
-    engine, Session = get_engine_session(db)
-    table_exists('short_tandem_repeats', engine)
-    page = check_page(request)
-    resource = ShortTandemRepeat()
-    q = resource.select_by_pathogenicity(Session, None)
-    Session.close()
-    engine.dispose()
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+# @app.route('/api/v1/<db>/short_tandem_repeats/pathogenic')
+# def pathogenic_strs(db):
+#     """custom control route getting pathogenic STRs"""
+#     engine, Session = get_engine_session(db)
+#     table_exists('short_tandem_repeats', engine)
+#     resource = ShortTandemRepeat()
+#     q = resource.select_by_pathogenicity(Session, None)
+#     Session.close()
+#     engine.dispose()
+#     return get_result_from_query(q, request, result_tuple_type="genomic_feature", resource=resource)
 
-@app.route('/api/v1/<db>/tss/genic')
-def genic_tss(db):
-    """custom control route getting all genic tss"""
-    engine, Session = get_engine_session(db)
-    table_exists('transcription_start_sites', engine)
-    page = check_page(request)
-    resource = TSS()
-    q = resource.select_all_genic_tss(Session)   
-    Session.close()
-    engine.dispose()    
-    return get_result_from_query(q, page, result_tuple_type="genomic_feature", resource=resource)
+# @app.route('/api/v1/<db>/tss/genic')
+# def genic_tss(db):
+#     """custom control route getting all genic tss"""
+#     engine, Session = get_engine_session(db)
+#     table_exists('transcription_start_sites', engine)
+#     resource = TSS()
+#     q = resource.select_all_genic_tss(Session)   
+#     Session.close()
+#     engine.dispose()    
+#     return get_result_from_query(q, request,  result_tuple_type="genomic_feature", resource=resource)

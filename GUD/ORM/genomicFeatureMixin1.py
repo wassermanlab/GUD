@@ -32,6 +32,7 @@ class GFMixin1(object):
         q = session.query(cls, Region, Source)\
             .join()\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)
+            # .order_by(cls.uid)
         return q
 
     @classmethod
@@ -77,7 +78,6 @@ class GFMixin1(object):
             .filter(Region.chrom == chrom,
                     Region.start == start,
                     Region.end == end)
-
         return q
 
     @classmethod
@@ -137,6 +137,7 @@ class GFMixin1(object):
             int(feat.Region.end),
             strand=feat.Region.strand,
             feat_type=self.__tablename__,
-            feat_id="%s_%s" % (self.__tablename__, getattr(feat, self.__name__).uid),
+            feat_id="%s_%s" % (self.__tablename__,
+                               getattr(feat, self.__name__).uid),
             qualifiers=None
         )

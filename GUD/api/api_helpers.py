@@ -4,24 +4,32 @@ from werkzeug.exceptions import NotFound, BadRequest
 import math
 import re
 from sqlalchemy import func
+from GUD.ORM import ShortTandemRepeat
+import time
 
 ## HELPER FUNCTIONS ##
 
-def get_result_tuple_simple(query, page, page_size=20):
-    offset = (page-1)*page_size
-    results = query.offset(offset).limit(page_size)
-    results = [e.serialize() for e in results]
-    return(query.count(), results)
-
-def get_result_from_query(query, page, page_size=20, result_tuple_type="simple", resource=None):
+def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple"):
+    last = request.args.get('last_uid', default=0, type=int)
     if query is None:
         raise BadRequest('query not specified correctly')
-    if result_tuple_type == "simple": 
-        result_tuple = get_result_tuple_simple(query, page)
-    elif result_tuple_type == "genomic_feature": 
-        result_tuple = get_genomic_feature_results(resource, query, page_size,  page)
-    result = create_page(result_tuple, page, page_size, request.url)           
-    return jsonify(result)
+    start = time.time()
+    results = query.filter(type(resource).uid>last).limit(page_size).all()
+    end = time.time()
+    print("limit")
+    print(end - start)
+    start = time.time()
+    results = query.filter(type(resource).uid>last).order_by(type(resource).uid)\
+        .limit(page_size).all()
+    end = time.time()
+    print("combined")
+    print(end - start)
+    last_uid = getattr(results[page_size-1], type(resource).__name__).uid
+    if (result_tuple_type == "genomic_feature"):    
+        results = [resource.as_genomic_feature(e) for e in results]
+    results = [e.serialize() for e in results]
+    results = create_page(results, last_uid, page_size, request.url)           
+    return jsonify(results)
 
 def table_exists(table_name, engine):
     if not engine.dialect.has_table(engine, table_name): 
@@ -39,40 +47,22 @@ def set_db(db):
     else:
         raise BadRequest('database must be hg19 or hg38 or test or test_hg38_chr22')
 
-def get_genomic_feature_results(resource, query, page_size, page) -> tuple:
-    offset = (page-1)*page_size
-    results = query.offset(offset).limit(page_size)
-    results = [resource.as_genomic_feature(e) for e in results]
-    results = [e.serialize() for e in results]
-    return (query.count(), results)
-
-def create_page(result_tuple, page, page_size, url) -> dict:
+def create_page(results, last_uid, page_size, url) -> dict:
     """
     returns 404 error or a page
     """
-    offset = (page-1)*page_size
     json = {}
-    result_size = result_tuple[0]
-    results = result_tuple[1]
-    if result_size == 0:
+    if len(results) == 0:
         raise NotFound('No results from this query')
-    if offset > result_size:
-        raise BadRequest('Page range is invalid, valid range for this query is between 1 and ' +
-                         str(math.ceil(result_size/page_size)))
-
-    json = {'size': result_size,
-            'results': results}
-    if (page)*page_size < result_size:  # has next
-        if re.search('\?', url) is None:
-            next_page = url+'?page='+str(page+1)
-        elif re.search('page', url) is None:
-            next_page = url+'&page='+str(page+1)
-        else:
-            next_page = re.sub('page=\d+', 'page='+str(page+1), url)
-        json['next'] = next_page
-    if (page-2)*page_size >= 0:  # has prev
-        prev_page = re.sub('page=\d+', 'page='+str(page-1), url)
-        json['prev'] = prev_page
+    json = {'results': results}
+    
+    if (re.search('\?', url) is None):
+        next_page = url+'?last_uid='+str(last_uid)
+    elif (re.search('last_uid', url) is None):
+        next_page = url+'&last_uid='+str(last_uid)
+    else:
+        next_page = re.sub('last_uid=\d+', 'last_uid='+str(last_uid), url)
+    json['next'] = next_page
     return json
 
 def genomic_feature_mixin1_queries(session, resource, request):
@@ -105,15 +95,6 @@ def genomic_feature_mixin2_queries(session, resource, request, query):
     if keys['samples'] is not None:
         q = resource.select_by_samples(session, q, keys['samples'])
     return q
-
-def check_page(request):
-    try:
-        page = request.args.get('page', default=1, type=int)
-    except:
-        raise BadRequest('pages must be positive integers')
-    if (page <= 0):
-        raise BadRequest('pages must be positive integers')
-    return page
 
 def check_split(str_list, integer=False):
     """split string delimeted by ','"""

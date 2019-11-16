@@ -23,6 +23,7 @@ class ShortTandemRepeat(GFMixin1, Base):
         Index("ix_join", cls.region_id, cls.source_id),
         Index("ix_str_pathogenic", cls.pathogenicity),
         Index("ix_str_motif", cls.motif),
+        Index("PRIMARY", cls.uid),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
