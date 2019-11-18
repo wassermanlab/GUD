@@ -32,7 +32,6 @@ class GFMixin1(object):
         q = session.query(cls, Region, Source)\
             .join()\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)
-            # .order_by(cls.uid)
         return q
 
     @classmethod

@@ -8,32 +8,47 @@ from GUD.ORM import ShortTandemRepeat
 import time
 
 ## HELPER FUNCTIONS ##
-
 def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple"):
-    last = request.args.get('last_uid', default=0, type=int)
+    last_uid = request.args.get('last_uid', default=0, type=int)
     if query is None:
         raise BadRequest('query not specified correctly')
-    start = time.time()
-    results = query.filter(type(resource).uid>last).limit(page_size).all()
-    end = time.time()
-    print("limit")
-    print(end - start)
-    start = time.time()
-    results = query.filter(type(resource).uid>last).order_by(type(resource).uid)\
-        .limit(page_size).all()
-    end = time.time()
-    print("combined")
-    print(end - start)
-    last_uid = getattr(results[page_size-1], type(resource).__name__).uid
-    if (result_tuple_type == "genomic_feature"):    
+    results = query.filter(type(resource).uid > last_uid).with_hint(type(resource), 'USE INDEX (PRIMARY)')\
+        .order_by(type(resource).uid).limit(page_size)  # seek method for ordering, we must specify the index to have speed up
+    # serialize and get uids of first and last element returned
+    try:
+        last_uid = getattr(results[page_size-1], type(resource).__name__).uid
+    except:
+        last_uid = None
+    if (result_tuple_type == "genomic_feature"):
         results = [resource.as_genomic_feature(e) for e in results]
     results = [e.serialize() for e in results]
-    results = create_page(results, last_uid, page_size, request.url)           
+    results = create_page(results, last_uid, page_size, request.url)
     return jsonify(results)
 
+
+def create_page(results, last_uid, page_size, url) -> dict:
+    """
+    returns 404 error or a page
+    """
+    json = {}
+    if len(results) == 0:
+        raise NotFound('No results from this query')
+    json = {'results': results}
+    if last_uid != None: 
+        if (re.search('\?', url) is None):
+            next_page = url+'?last_uid='+str(last_uid)
+        elif (re.search('last_uid', url) is None):
+            next_page = url+'&last_uid='+str(last_uid)
+        else:
+            next_page = re.sub('last_uid=\d+', 'last_uid='+str(last_uid), url)
+        json['next'] = next_page
+    return json
+
+
 def table_exists(table_name, engine):
-    if not engine.dialect.has_table(engine, table_name): 
+    if not engine.dialect.has_table(engine, table_name):
         raise BadRequest(table_name + ' table does not exist')
+
 
 def set_db(db):
     if db == "hg19":
@@ -45,25 +60,9 @@ def set_db(db):
     elif db == "test_hg38_chr22":
         GUDUtils.db = "test_hg38_chr22"
     else:
-        raise BadRequest('database must be hg19 or hg38 or test or test_hg38_chr22')
+        raise BadRequest(
+            'database must be hg19 or hg38 or test or test_hg38_chr22')
 
-def create_page(results, last_uid, page_size, url) -> dict:
-    """
-    returns 404 error or a page
-    """
-    json = {}
-    if len(results) == 0:
-        raise NotFound('No results from this query')
-    json = {'results': results}
-    
-    if (re.search('\?', url) is None):
-        next_page = url+'?last_uid='+str(last_uid)
-    elif (re.search('last_uid', url) is None):
-        next_page = url+'&last_uid='+str(last_uid)
-    else:
-        next_page = re.sub('last_uid=\d+', 'last_uid='+str(last_uid), url)
-    json['next'] = next_page
-    return json
 
 def genomic_feature_mixin1_queries(session, resource, request):
     """make genomic feature 1 queries"""
@@ -71,13 +70,14 @@ def genomic_feature_mixin1_queries(session, resource, request):
     # location query
     q = resource.select_all(session, None)
     if (keys['start'] is not None or keys['end'] is not None or keys['location']
-            is not None or keys['chrom'] is not None): 
+            is not None or keys['chrom'] is not None):
         if (keys['start'] is not None and keys['end'] is not None and keys['location']
-            is not None and keys['chrom'] is not None): 
+                is not None and keys['chrom'] is not None):
             q = resource.select_by_location(
                 session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
         else:
-            raise BadRequest("To filter by location you must specify location, chrom, start, and end.")
+            raise BadRequest(
+                "To filter by location you must specify location, chrom, start, and end.")
     # uid query
     if keys['uids'] is not None:
         q = resource.select_by_uids(session, q, keys['uids'])
@@ -85,6 +85,7 @@ def genomic_feature_mixin1_queries(session, resource, request):
     if keys['sources'] is not None:
         q = resource.select_by_sources(session, q, keys['sources'])
     return q
+
 
 def genomic_feature_mixin2_queries(session, resource, request, query):
     """make genomic feature 2 queries"""
@@ -95,6 +96,7 @@ def genomic_feature_mixin2_queries(session, resource, request, query):
     if keys['samples'] is not None:
         q = resource.select_by_samples(session, q, keys['samples'])
     return q
+
 
 def check_split(str_list, integer=False):
     """split string delimeted by ','"""
@@ -111,6 +113,7 @@ def check_split(str_list, integer=False):
             raise BadRequest('list query parameter needs to be integer')
 
     return s
+
 
 def get_mixin1_keys(request):
     keys = {'chrom': '',
@@ -144,6 +147,7 @@ def get_mixin1_keys(request):
             raise BadRequest(
                 "location must be specified as withing, overlapping, or exact")
     return keys
+
 
 def get_mixin2_keys(request):
     keys = {'experiments': [],
