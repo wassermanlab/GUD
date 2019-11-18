@@ -41,7 +41,8 @@ class GFMixin2(object):
             return query
         q = session.query(cls, Region, Source, Sample, Experiment)\
             .join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id, Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id, 
+            Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)
         return q
 
     @classmethod

@@ -11,16 +11,16 @@ from werkzeug.exceptions import BadRequest
 # templates 
 # API_ADDITION(3): add feature method implementation to query specific feature
 # if feature is extention of GF1/2 then follow these templates, else create custom query 
-def GF_feature_template(request, session):                           
-    """retrieves Genomic Feature 2"""
-    resource = Feature()                                                        # instansiate feature 
-    param1 = check_split(request.args.get('param1', default=None))              # get any additional parameters
-    q = genomic_feature_mixin1_queries(session, resource, request)              # build basic query for genomic_feature_mixin1
-    q = genomic_feature_mixin2_queries(session, resource, request, q)           # add to query for genomic_feature_mixin2
-    if param1 is not None:                                                      # for each additional query that is feature specific
-                                                                                # add to the query                
-        q = resource.select_by_param1(q, param1)
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature") #fetch the query 
+# def GF_feature_template(request, session):                           
+#     """retrieves Genomic Feature 2"""
+#     resource = Feature()                                                        # instansiate feature 
+#     param1 = check_split(request.args.get('param1', default=None))              # get any additional parameters
+#     q = genomic_feature_mixin1_queries(session, resource, request)              # build basic query for genomic_feature_mixin1
+#     q = genomic_feature_mixin2_queries(session, resource, request, q)           # add to query for genomic_feature_mixin2
+#     if param1 is not None:                                                      # for each additional query that is feature specific
+#                                                                                 # add to the query                
+#         q = resource.select_by_param1(q, param1)
+#     return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature") #fetch the query 
 
 # simple resources
 def chroms(request, session):                                           
@@ -117,11 +117,14 @@ def short_tandem_repeats(request, session):
     resource = ShortTandemRepeat()
     q = genomic_feature_mixin1_queries(session, resource, request)
     try:
+        pathogenic = request.args.get('pathogenic', default=False, type=bool)
         motif = request.args.get('motif', default=None, type=str)
         rotation = request.args.get('rotation', default=False, type=bool)
     except:
         raise BadRequest(
             'rotation must be set to True or False if motif is given')
+    if pathogenic:
+        q = resource.select_by_pathogenicity(session, q)
     if motif is not None:
         q = resource.select_by_motif(session, motif, q, rotation)
     return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
@@ -211,36 +214,7 @@ def resource_query(db, resource):
     engine.dispose()                              
     return response
 
-## custom control routes
-## TODO: fix this one 
-# @app.route('/api/v1/<db>/genes/symbols')
-# def gene_symbols(db):
-#     """custom control route getting all gene symbols"""
-#     engine, Session = get_engine_session(db)
-#     table_exists('genes', engine)
-#     url = request.url
-#     page = check_page(request)
-#     q = Gene().get_all_gene_symbols(Session)
-#     Session.close()
-#     engine.dispose()
-#     page_size = 1000
-#     offset = (page-1)*page_size
-#     result = q.offset(offset).limit(page_size)
-#     result =  [g[0] for g in result]
-#     result_tuple = (q.count(), result)
-#     result = create_page(result_tuple, page, page_size, request.url)                                            
-#     return jsonify(result) 
-
-# @app.route('/api/v1/<db>/short_tandem_repeats/pathogenic')
-# def pathogenic_strs(db):
-#     """custom control route getting pathogenic STRs"""
-#     engine, Session = get_engine_session(db)
-#     table_exists('short_tandem_repeats', engine)
-#     resource = ShortTandemRepeat()
-#     q = resource.select_by_pathogenicity(Session, None)
-#     Session.close()
-#     engine.dispose()
-#     return get_result_from_query(q, request, result_tuple_type="genomic_feature", resource=resource)
+# custom control routes
 
 # @app.route('/api/v1/<db>/tss/genic')
 # def genic_tss(db):
