@@ -23,13 +23,43 @@
                 "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
-            },
             "clinvar_ids": {
                 "REQUIRED": false,
                 "DESCRIPTION": "list of clinvar ids separated by comma(,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by comma(,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by comma(,)"
+            }
+        }
+    },
+    "/api/v1/{genome}/conservation": {
+        "DESCRIPTION": "gets all conservation elementsthat match specified filtering parameters.",
+        "METHOD": "GET",
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
+            "chrom": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+            },
+            "start": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
+            },
+            "end": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
+            },
+            "location": {
+                "REQUIRED": false,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "sources": {
                 "REQUIRED": false,
@@ -64,10 +94,6 @@
             "location": {
                 "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
-            },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
             },
             "uids": {
                 "REQUIRED": false,
@@ -115,10 +141,6 @@
                 "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
-            },
             "uids": {
                 "REQUIRED": false,
                 "DESCRIPTION": "list of uids separated by comma(,)"
@@ -140,10 +162,6 @@
             "genome": {
                 "REQUIRED": true,
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
-            },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
             }
         }
     },
@@ -171,10 +189,6 @@
                 "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
-            },
             "sources": {
                 "REQUIRED": false,
                 "DESCRIPTION": "list of sources separated by comma(,)"
@@ -190,16 +204,10 @@
             "rotations": {
                 "REQUIRED": false,
                 "DESCRIPTION": "boolean true or false to whether to check all rotations of specified motif"
-            }
-        }
-    },
-    "/api/v1/{genome}/short_tandem_repeats/pathogenic": {
-        "DESCRIPTION": "get a list of all pathogenic short tandem repeats",
-        "METHOD": "GET",
-        "PARAMS": {
-            "genome": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
+            "pathogenicity": {
+                "REQUIRED": false,
+                "DESCRIPTION": "boolean true or false to whether to check all rotations of specified motif"
             }
         }
     },
@@ -226,10 +234,6 @@
             "location": {
                 "REQUIRED": true,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
-            },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
             },
             "uids": {
                 "REQUIRED": false,
@@ -273,10 +277,6 @@
                 "REQUIRED": true,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
-            },
             "uids": {
                 "REQUIRED": false,
                 "DESCRIPTION": "list of uids separated by comma(,)"
@@ -318,10 +318,6 @@
             "location": {
                 "REQUIRED": true,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
-            },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
             },
             "histone_types": {
                 "REQUIRED": false,
@@ -369,10 +365,6 @@
                 "REQUIRED": true,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
-            },
             "restriction_enzymes": {
                 "REQUIRED": false,
                 "DESCRIPTION": "list of restriction enzymes separated by comma(,)"
@@ -418,10 +410,6 @@
             "location": {
                 "REQUIRED": true,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
-            },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
             },
             "genes": {
                 "REQUIRED": false,
@@ -500,10 +488,7 @@
             "min_tpm": {
                 "REQUIRED": false,
                 "DESCRIPTION": "list of uids separated by comma(,)"
-            },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"}
+            }
         }
     }
 }

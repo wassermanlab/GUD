@@ -1,16 +1,54 @@
-from flask import request
+from flask import request, jsonify
 from GUD import GUDUtils
 from werkzeug.exceptions import NotFound, BadRequest
 import math
 import re
 from sqlalchemy import func
+from GUD.ORM import ShortTandemRepeat
+import time
 
 ## HELPER FUNCTIONS ##
+def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple"):
+    last_uid = request.args.get('last_uid', default=0, type=int)
+    if query is None:
+        raise BadRequest('query not specified correctly')
+    results = query.filter(type(resource).uid > last_uid).with_hint(type(resource), 'USE INDEX (PRIMARY)')\
+        .order_by(type(resource).uid).limit(page_size)  # seek method for paginating, we must specify the index to have speed up
+    # serialize and get uids of first and last element returned
+    try:
+        last_uid = getattr(results[page_size-1], type(resource).__name__).uid
+    except:
+        last_uid = None
+    if (result_tuple_type == "genomic_feature"):
+        results = [resource.as_genomic_feature(e) for e in results]
+    results = [e.serialize() for e in results]
+    results = create_page(results, last_uid, page_size, request.url)
+    return jsonify(results)
+
+
+def create_page(results, last_uid, page_size, url) -> dict:
+    """
+    returns 404 error or a page
+    """
+    json = {}
+    if len(results) == 0:
+        raise NotFound('No results from this query')
+    json = {'results': results}
+    if last_uid != None: 
+        if (re.search('\?', url) is None):
+            next_page = url+'?last_uid='+str(last_uid)
+        elif (re.search('last_uid', url) is None):
+            next_page = url+'&last_uid='+str(last_uid)
+        else:
+            next_page = re.sub('last_uid=\d+', 'last_uid='+str(last_uid), url)
+        json['next'] = next_page
+    return json
 
 
 def table_exists(table_name, engine):
-    if not engine.dialect.has_table(engine, table_name): 
+    if not engine.dialect.has_table(engine, table_name):
         raise BadRequest(table_name + ' table does not exist')
+
 
 def set_db(db):
     if db == "hg19":
@@ -19,61 +57,27 @@ def set_db(db):
         GUDUtils.db = "hg38"
     elif db == "test":
         GUDUtils.db = "test"
+    elif db == "test_hg38_chr22":
+        GUDUtils.db = "test_hg38_chr22"
     else:
-        raise BadRequest('database must be hg19 or hg38 or test')
-
-def get_genomic_feature_results(resource, query, page_size, page) -> tuple:
-    offset = (page-1)*page_size
-    results = query.offset(offset).limit(page_size)
-    results = [resource.as_genomic_feature(e) for e in results]
-    results = [e.serialize() for e in results]
-    return (query.count(), results)
-
-
-def create_page(result_tuple, page, page_size, url) -> dict:
-    """
-    returns 404 error or a page
-    """
-    offset = (page-1)*page_size
-    json = {}
-    result_size = result_tuple[0]
-    results = result_tuple[1]
-    if result_size == 0:
-        raise NotFound('No results from this query')
-    if offset > result_size:
-        raise BadRequest('Page range is invalid, valid range for this query is between 1 and ' +
-                         str(math.ceil(result_size/page_size)))
-
-    json = {'size': result_size,
-            'results': results}
-    if (page)*page_size < result_size:  # has next
-        if re.search('\?', url) is None:
-            next_page = url+'?page='+str(page+1)
-        elif re.search('page', url) is None:
-            next_page = url+'&page='+str(page+1)
-        else:
-            next_page = re.sub('page=\d+', 'page='+str(page+1), url)
-        json['next'] = next_page
-    if (page-2)*page_size >= 0:  # has prev
-        prev_page = re.sub('page=\d+', 'page='+str(page-1), url)
-        json['prev'] = prev_page
-    return json
+        raise BadRequest(
+            'database must be hg19 or hg38 or test or test_hg38_chr22')
 
 
 def genomic_feature_mixin1_queries(session, resource, request):
+    """make genomic feature 1 queries"""
     keys = get_mixin1_keys(request)
-
     # location query
+    q = resource.select_all(session, None)
     if (keys['start'] is not None or keys['end'] is not None or keys['location']
-            is not None or keys['chrom'] is not None): 
+            is not None or keys['chrom'] is not None):
         if (keys['start'] is not None and keys['end'] is not None and keys['location']
-            is not None and keys['chrom'] is not None): 
+                is not None and keys['chrom'] is not None):
             q = resource.select_by_location(
-                session, keys['chrom'], keys['start'], keys['end'], keys['location'])
+                session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
         else:
-            raise BadRequest("To filter by location you must specify location, chrom, start, and end.")
-    else: 
-        q = None
+            raise BadRequest(
+                "To filter by location you must specify location, chrom, start, and end.")
     # uid query
     if keys['uids'] is not None:
         q = resource.select_by_uids(session, q, keys['uids'])
@@ -84,6 +88,7 @@ def genomic_feature_mixin1_queries(session, resource, request):
 
 
 def genomic_feature_mixin2_queries(session, resource, request, query):
+    """make genomic feature 2 queries"""
     keys = get_mixin2_keys(request)
     q = query
     if keys['experiments'] is not None:
@@ -93,17 +98,8 @@ def genomic_feature_mixin2_queries(session, resource, request, query):
     return q
 
 
-def check_page(request):
-    try:
-        page = request.args.get('page', default=1, type=int)
-    except:
-        raise BadRequest('pages must be positive integers')
-    if (page <= 0):
-        raise BadRequest('pages must be positive integers')
-    return page
-
-
 def check_split(str_list, integer=False):
+    """split string delimeted by ','"""
     if str_list == None:
         return None
     s = str_list.split(',')
@@ -144,18 +140,12 @@ def get_mixin1_keys(request):
             keys['end'] = int(keys['end'])
         except:
             raise BadRequest("start and end should be formatted as integers")
-
         if re.fullmatch('^(X|Y|[1-9]|1[0-9]|2[0-2])$', keys['chrom']) == None:
             raise BadRequest(
                 "chromosome should be formatted as Z where Z is X, Y, or 1-22")
-
-        if (keys['end'] - keys['start']) > 4000000:
-            raise BadRequest("start and end must be less than 4000000bp apart")
-
         if keys['location'] not in ['within', 'overlapping', 'exact']:
             raise BadRequest(
                 "location must be specified as withing, overlapping, or exact")
-
     return keys
 
 

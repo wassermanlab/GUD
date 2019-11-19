@@ -1,11 +1,4 @@
-from sqlalchemy import (
-    Column,
-    Index,
-    Integer,
-    String,
-    ForeignKey,
-    UniqueConstraint
-) 
+from sqlalchemy import (Column, Index, String, ForeignKey, UniqueConstraint) 
 import re 
 from sqlalchemy.dialects import mysql
 from .base import Base
@@ -13,13 +6,12 @@ from .experiment import Experiment
 from .gene import Gene
 from .region import Region
 from .source import Source
-from .genomic_feature import GenomicFeature
 from .genomicFeatureMixin2 import GFMixin2
 from sqlalchemy.ext.declarative import declared_attr
 
 
 class TSS(GFMixin2, Base):
-
+    # table declerations
     __tablename__ = "transcription_start_sites"
 
     gene = Column("gene", String(75), ForeignKey("genes.name2"))
@@ -41,140 +33,35 @@ class TSS(GFMixin2, Base):
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
         )
 
+    # class methods 
     @classmethod
     def is_unique(cls, session, regionID, sourceID,
                   experimentID, gene, tss):
 
         q = session.query(cls)\
             .filter(cls.region_id == regionID, cls.source_id == sourceID,
-                    cls.experiment_id == experimentID, cls.gene == gene, cls.tss == tss)
+                    cls.experiment_id == experimentID, 
+                    cls.gene == gene, cls.tss == tss)
 
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, regionID, sourceID, experimentID, gene, tss):
-
-        q = session.query(cls)\
-            .filter(cls.region_id == regionID, cls.source_id == sourceID,
-                    cls.experiment_id == experimentID, cls.gene == gene,
-                    cls.tss == tss)
-
-        return q.first()
-
-    @classmethod
-    def select_by_overlapping_location(cls, session, chrom, start, end):
-        """
-        Query objects by genomic location.
-        """
-        bins = Region._compute_bins(start, end)
-
-        q = session.query(cls, Region, Source, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Experiment.uid == cls.experiment_id)\
-            .filter(Region.chrom == chrom,
-                    Region.start < end,
-                    Region.end > start)\
-            .filter(Region.bin.in_(bins))
-
-        return q
-
-    @classmethod
-    def select_by_within_location(cls, session, chrom, start, end):
-        """
-        Query objects by genomic location.
-        """
-        bins = Region._compute_bins(start, end)
-
-        q = session.query(cls, Region, Source, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Experiment.uid == cls.experiment_id)\
-            .filter(Region.chrom == chrom,
-                    Region.start > start,
-                    Region.end < end)\
-            .filter(Region.bin.in_(bins))
-
-        return q
-
-    @classmethod
-    def select_by_exact_location(cls, session, chrom, start, end):
-        """
-        Query objects by genomic location.
-        """
-        bins = Region._compute_bins(start, end)
-
-        q = session.query(cls, Region, Source, Experiment)\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                    Experiment.uid == cls.experiment_id)\
-            .filter(Region.bin.in_(bins))\
-            .filter(Region.uid == cls.region_id)\
-            .filter(Region.chrom == chrom,
-                    Region.start == start,
-                    Region.end == end)
-        return q
-
-    @classmethod
-    def select_by_uids(cls, session, query=None, uids=[]):
-        """
-        Query objects by uids.
-        """
-
-        if query is None:
-            q = cls.make_query(session)
-        else:
-            q = query
-
-        q = q.filter(cls.uid.in_(uids))
-
-        return q
-
-    @classmethod
-    def select_by_genes(cls, query, genes):
+    def select_by_genes(cls, session, query, genes):
         """
         select by genes
         """
-
-        q = query.filter(cls.gene.in_(genes))
+        q = cls.make_query(session, query)
+        q = q.filter(cls.gene.in_(genes))
 
         return q
 
-    @classmethod  # TODO
-    def select_all_genic_tss(cls, session):
+    @classmethod 
+    def select_all_genic_tss(cls, session, query):
         """
         Query all objects associated with a gene.
         """
-        q = session.query(cls, Region, Source, Experiment).\
-            filter(Region.uid == cls.region_id, Source.uid == cls.source_id,
-                   Experiment.uid == cls.experiment_id).filter(cls.gene != None)
-
-        return q
-
-    @classmethod
-    def select_by_sources(cls, session, query, sources):
-        """
-        Query objects by sources.
-        """
-        s = [value for value, in session.query(
-            Source.uid).filter(Source.name.in_(sources)).all()]
-        q = query.filter(Source.uid.in_(s))
-
-        return q
-
-    @classmethod
-    def select_by_samples(cls, session, query, samples):
-        """
-        Query objects by sample name.
-        """
-        return query
-
-    @classmethod  # TODO
-    def select_by_experiments(cls, session, query, experiments):
-        """
-        Query objects by experiment name.
-        """
-
-        s = [value for value, in session.query(Experiment.uid).filter(
-            Experiment.name.in_(experiments)).all()]
-        q = query.filter(Experiment.uid.in_(s))
+        q = cls.make_query(session, query)
+        q = q.filter(cls.gene != None)
 
         return q
 
@@ -211,12 +98,6 @@ class TSS(GFMixin2, Base):
             "source": feat.Source.name,
         }
 
-        return GenomicFeature(
-            feat.Region.chrom,
-            int(feat.Region.start),
-            int(feat.Region.end),
-            strand=feat.Region.strand,
-            feat_type="TSS",
-            feat_id="%s_%s" % (self.__tablename__, feat.TSS.uid),
-            qualifiers=qualifiers
-        )
+        genomic_feature = super().as_genomic_feature(feat)
+        genomic_feature.qualifiers = qualifiers
+        return genomic_feature

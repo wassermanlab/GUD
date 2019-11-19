@@ -1,17 +1,10 @@
 from sqlalchemy import (
-    Column,
-    Index,
-    PrimaryKeyConstraint,
-    String,
-    UniqueConstraint
-)
+    Column, Index, PrimaryKeyConstraint, String, UniqueConstraint)
 from sqlalchemy.dialects import mysql
-
 from .base import Base
 
-
 class Experiment(Base):
-
+    # table declerations
     __tablename__ = "experiments"
     uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
     name = Column("name", String(250), nullable=False)
@@ -20,32 +13,31 @@ class Experiment(Base):
         UniqueConstraint(name),
         Index("ix_uid", uid),
         Index("ix_name", name),
-        {
-            "mysql_engine": "InnoDB",
-            "mysql_charset": "utf8"
-        }
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
+    # class methods
     @classmethod
     def select_all_experiments(cls, session):
         """
         Select all samples
         """
-
         q = session.query(cls)
-
         return q
 
     @classmethod
     def is_unique(cls, session, name):
-
+        """
+        returns true if it is unique
+        """
         q = session.query(cls).filter(cls.name == name)
-
         return len(q.all()) == 0
 
     @classmethod
     def select_unique(cls, session, name):
-
+        """
+        returns selects first by name 
+        """
         return cls.select_by_names(session, [name])[0]
 
     @classmethod
@@ -55,24 +47,14 @@ class Experiment(Base):
         If no names are provided, return all
         objects.
         """
-
         q = session.query(cls)
-
         if names:
             q = q.filter(cls.name.in_(names))
-
         return q.all()
 
     def __repr__(self):
-
         return "<Experiment(%s, %s)>" % \
-            (
-                "uid={}".format(self.uid),
-                "name={}".format(self.name)
-            )
+            ("uid={}".format(self.uid), "name={}".format(self.name))
 
     def serialize(self):
-        return {
-            'uid': self.uid,
-            'name': self.name,
-        }
+        return {'uid': self.uid, 'name': self.name, }
