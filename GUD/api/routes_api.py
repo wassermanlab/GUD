@@ -27,7 +27,12 @@ def chroms(request, session):
     """retrieves all chromosomes"""
     resource = Chrom()
     q = resource.select_all_chroms(session)
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="simple")
+    results = [e.serialize() for e in q]
+    json = {}
+    if len(results) == 0:
+        raise NotFound('No results from this query')
+    json = {'results': results}
+    return jsonify(json)
 
 def experiments(request, session): 
     """retrieves all experiments"""                                     
