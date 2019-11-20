@@ -13,7 +13,8 @@ class TFBinding(GFMixin2, Base):
     # table declerations 
     __tablename__ = "tf_binding"
     tf = Column("tf", String(25), nullable=False)
-    
+    peak =  Column("peak", mysql.LONGBLOB, nullable=False)
+
     @declared_attr
     def __table_args__(cls):
         return (
@@ -54,7 +55,8 @@ class TFBinding(GFMixin2, Base):
             "source": feat.Source.name,
             "sample": feat.Sample.name,
             "experiment": feat.Experiment.name,
-            "tf": feat.TFBinding.tf
+            "tf": feat.TFBinding.tf,
+            "peak": feat.HistoneModification.peak
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers

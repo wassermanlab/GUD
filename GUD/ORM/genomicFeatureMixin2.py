@@ -6,24 +6,9 @@ from .sample import Sample
 from .experiment import Experiment
 from sqlalchemy.ext.declarative import declared_attr
 from .genomic_feature import GenomicFeature
+from .genomicFeatureMixin1 import GFMixin1
 
-class GFMixin2(object):
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
-    uid = Column("uid", mysql.INTEGER(unsigned=True), primary_key=True)
-
-    @declared_attr
-    def region_id(cls):
-        return Column("regionID", ForeignKey("regions.uid"),
-                      nullable=False)
-
-    @declared_attr
-    def source_id(cls):
-        return Column("sourceID", ForeignKey("sources.uid"),
-                      nullable=False)
-
+class GFMixin2(GFMixin1):
     @declared_attr
     def sample_id(cls):
         return Column("sampleID", ForeignKey("samples.uid"),

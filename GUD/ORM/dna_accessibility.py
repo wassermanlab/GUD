@@ -12,6 +12,7 @@ from sqlalchemy.ext.declarative import declared_attr
 class DNAAccessibility(GFMixin2, Base):
     # table declerations
     __tablename__ = "dna_accessibility"
+    peak =  Column("peak", mysql.LONGBLOB, nullable=False)
 
     @declared_attr
     def __table_args__(cls):
@@ -32,6 +33,7 @@ class DNAAccessibility(GFMixin2, Base):
             "source": feat.Source.name,
             "sample": feat.Sample.name,
             "experiment": feat.Experiment.name,
+            "peak": feat.DNAAccessibility.peak
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers

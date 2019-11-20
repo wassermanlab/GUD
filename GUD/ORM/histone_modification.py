@@ -14,7 +14,8 @@ class HistoneModification(GFMixin2, Base):
     # table declerations 
     __tablename__ = "histone_modifications"
     histone_type = Column("histone_type", String(25), nullable=False)
-
+    peak =  Column("peak", mysql.LONGBLOB, nullable=False)
+    
     @declared_attr
     def __table_args__(cls):
         return (
@@ -56,6 +57,7 @@ class HistoneModification(GFMixin2, Base):
             "source": feat.Source.name,
             "sample": feat.Sample.name,
             "experiment": feat.Experiment.name,
+            "peak": feat.HistoneModification.peak
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers
