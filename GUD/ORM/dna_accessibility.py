@@ -1,4 +1,4 @@
-from sqlalchemy import (UniqueConstraint, Index)
+from sqlalchemy import (Column, UniqueConstraint, Index)
 from sqlalchemy.dialects import mysql
 from .base import Base
 from .experiment import Experiment
