@@ -404,6 +404,12 @@ class ParseUtililities:
             session.add(mask)
             session.commit()
 
+    def upsert_metadata(self, session, metadata):
+
+        if Mask.is_unique(session, metadata.accession, metadata.source_id):
+            session.add(metadata)
+            session.commit()
+
     def upsert_region(self, session, region):
 
         if Region.is_unique(session, region.chrom, region.start, region.end):

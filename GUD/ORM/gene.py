@@ -27,7 +27,7 @@ class Gene(GFMixin1, Base):
             # query by bin range
             Index("ix_source_join", cls.source_id, cls.region_id),
             Index("ix_name", cls.name),
-            Index("ix_name2", cls.name2),
+            Index("ix_gene_symbol", cls.gene_symbol),
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8", }
         )
 
@@ -40,15 +40,15 @@ class Gene(GFMixin1, Base):
         objects.
         """
         q = cls.make_query(session, query)
-        q = q.filter(cls.name2.in_(names))
+        q = q.filter(cls.gene_symbol.in_(names))
         return q
 
     @classmethod
     def get_all_gene_symbols(cls, session):
         """
-        Return the gene symbol (name2 field) of all objects.
+        Return the gene symbol of all objects.
         """
-        q = session.query(cls.name2).distinct()
+        q = session.query(cls.gene_symbol).distinct()
         return q
 
     @classmethod
@@ -83,7 +83,7 @@ class Gene(GFMixin1, Base):
         qualifiers = {
             "uid": feat.Gene.uid,
             "accession_number": feat.Gene.name,
-            "gene_symbol": feat.Gene.name2,
+            "gene_symbol": feat.Gene.gene_symbol,
             "cdsStart": int(feat.Gene.cdsStart),
             "cdsEnd": int(feat.Gene.cdsEnd),
             "exonStarts": feat.Gene.exonStarts,

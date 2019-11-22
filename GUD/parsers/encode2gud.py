@@ -861,10 +861,11 @@ def _insert_data_file(data_file, test=False):
             sample.Y_chroms = encode_metadata[accession].Y
 
         # Upsert sample
-        ParseUtils.upsert_region(session, sample)
+        ParseUtils.upsert_sample(session, sample)
 
         # Get sample ID
         sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
+        print(region, sample)
 
         # Get metadata
         metadata = Metadata()
@@ -873,9 +874,7 @@ def _insert_data_file(data_file, test=False):
 
         # Upsert metadata
         ParseUtils.upsert_metadata(session, metadata)
-
-
-        print(sample)
+        print(region, sample, metadata)
         break
 
 
