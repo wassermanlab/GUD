@@ -23,7 +23,7 @@ class Gene(GFMixin1, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-            UniqueConstraint(cls.region_id, cls.name, cls.source_id),
+            UniqueConstraint(cls.region_id, cls.name, cls.source_id, cls.strand),
             # query by bin range
             Index("ix_source_join", cls.source_id, cls.region_id),
             Index("ix_name", cls.name),
@@ -52,12 +52,12 @@ class Gene(GFMixin1, Base):
         return q
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID, name):
+    def is_unique(cls, session, regionID, sourceID, name, strand):
         """
         Checks uniqueness by region source and name
         """
-        q = session.query(cls).filter(cls.region_id == regionID,
-                                      cls.name == name, cls.source_id == sourceID)
+        q = session.query(cls).filter(cls.region_id == regionID, cls.strand == strand, 
+                                      cls.name == name, cls.source_id == sourceID,)
         return len(q.all()) == 0
 
     @classmethod
