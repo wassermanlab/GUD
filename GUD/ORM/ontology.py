@@ -1,19 +1,18 @@
 from sqlalchemy import (Column, ForeignKey, String, PrimaryKeyConstraint,
                         UniqueConstraint, Index)
 from sqlalchemy.dialects import mysql
-from .source import Source
+from .sample import Sample
 from .base import Base
 from sqlalchemy.ext.declarative import declared_attr
 
 
-class SampleMetadata(Base):
+class Ontology(Base):
     # table declerations
-    __tablename__ = "sample_metadata"
+    __tablename__ = "ontology"
 
     uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
     gud_name = Column("gud_name", String(250), nullable=False)
-    original_name = Column("original_name", String(250), nullable=False)
-    sourceID = Column("sourceID", ForeignKey("sources.uid"), nullable=False)
+    sampleID = Column("original_name", ForeignKey("samples.uid")), nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),

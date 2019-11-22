@@ -16,6 +16,7 @@ class TSS(GFMixin2, Base):
 
     gene = Column("gene", String(75), ForeignKey("genes.name2"))
     tss = Column("tss", mysql.INTEGER(unsigned=True))
+    strand = Column("strand", mysql.CHAR(1))
 
     @declared_attr
     def sample_id(cls):

@@ -14,11 +14,10 @@ class Region(Base):
         "chroms.chrom"), nullable=False)
     start = Column("start", mysql.INTEGER(unsigned=True), nullable=False)
     end = Column("end", mysql.INTEGER(unsigned=True), nullable=False)
-    strand = Column("strand", mysql.CHAR(1))
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(chrom, start, end, strand),
+        UniqueConstraint(chrom, start, end),
         CheckConstraint("end > start"),
         Index("ix_bin_chrom", bin, chrom),
         Index("ix_uid", uid),
