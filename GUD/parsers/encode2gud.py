@@ -63,10 +63,6 @@ mysql arguments:
   -p STR, --pwd STR   password (default = ignore this option)
   -P INT, --port INT  port number (default = %s)
   -u STR, --user STR  user name (default = current user)
-
-deprecated arguments:
-  -m, --merge         merge genomic regions using bedtools
-                      (default = False)
 """ % (usage_msg, (cpu_count() - 1), GUDUtils.db, GUDUtils.port)
 
 #-------------#
@@ -165,7 +161,6 @@ def parse_args():
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
-    # optional_group.add_argument("-m", "--merge", action="store_true")
     optional_group.add_argument("-r", "--remove", action="store_true")
     optional_group.add_argument("-t", "--test", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
@@ -248,10 +243,8 @@ def main():
     GUDUtils.db = args.db
 
     # Insert ENCODE data
-    # encode_to_gud(args.genome, args.samples, args.feature, args.sample_type, args.dummy_dir, args.merge, args.remove, args.test, args.threads)
     encode_to_gud(args.genome, args.samples, args.feature, args.sample_type, args.dummy_dir, args.remove, args.test, args.threads)
 
-# def encode_to_gud(genome, samples_file, feat_type, sample_type, dummy_dir="/tmp/", merge=False, remove=False, test=False, threads=1):
 def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="/tmp/",remove=False, test=False, threads=1):
     """
     e.g. python -m GUD.parsers.encode2gud --genome hg38 --samples ./samples/ENCODE.tsv --feature accessibility
@@ -263,10 +256,8 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
     global engine
     global experiment
     global samples
-    global source
     global Feature
     global Session
-    source_name = "ENCODE"
     set_tempdir(dummy_dir) # i.e. for pyBedTools
 
     # Testing
@@ -309,20 +300,13 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
     # Get samples
     samples = _get_samples(session, samples_file)
 
-    # Get source
-    source = Source()
-    source.name = source_name
-    ParseUtils.upsert_source(session, source)
-    source = ParseUtils.get_source(session, source_name)
-
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
 
     # Parse metadata
     # Add experiment metadata (i.e. biosample sex and summary)
-    # encodes = _add_experiment_metadata(_parse_metadata(genome, metadata_file))
-    encodes = _parse_metadata(genome, metadata_file)
+    encodes = _add_experiment_metadata(_parse_metadata(genome, metadata_file))
 
     # Filter ENCODE objects (i.e. keep the best type of file per accession)
     # Group ENCODE objects by experiment target and type
@@ -353,7 +337,6 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         engine.dispose()
 
         # Prepare data
-        # data_file = _preprocess_data(grouped_metadata[(experiment_target, experiment_type)], dummy_dir, merge, test, threads)
         subgrouped_encodes = grouped_encodes[(experiment_target, experiment_type)]
         data_file = _preprocess_data(subgrouped_encodes, dummy_dir, test, threads)
 
@@ -409,7 +392,7 @@ def _download_metadata(genome, feat_type, dummy_dir="/tmp/"):
     metadata_file = os.path.join(url, "metadata.tsv")
     dummy_file = os.path.join(dummy_dir, "metadata.%s.%s.tsv" % (genome, feat_type))
     if not os.path.exists(dummy_file):
-        f = urlretrieve(metadata_file, dummy_file)
+        urlretrieve(metadata_file, dummy_file)
 
     return(dummy_file)
 
@@ -614,7 +597,6 @@ def _group_ENCODE_objects(encode_objects):
 
     return(grouped_encode_objects)
 
-# def _preprocess_data(meta_objects, dummy_dir="/tmp/", merge=False, test=False, threads=1):
 def _preprocess_data(encode_objects, dummy_dir="/tmp/", test=False, threads=1):
 
     # Initialize
@@ -668,28 +650,6 @@ def _preprocess_data(encode_objects, dummy_dir="/tmp/", test=False, threads=1):
         # Add dummy file
         dummy_files.append(dummy_file)
 
-        # # Merge BED
-        # if merge:
-
-        #     # Initialize
-        #     a = BedTool(dummy_file)
-
-        #     # Skip if already merged
-        #     dummy_file = os.path.join(dummy_dir, "dummy.merged.bed")
-        #     if not os.path.exists(dummy_file):
-        #         a.merge(stream=True).saveas(dummy_file)
-
-        #     # Add dummy file
-        #     dummy_files.append(dummy_file)
-
-        # # Intersect
-        # a = BedTool(dummy_files[1])
-        # b = BedTool(dummy_files[-1])
-        # a.intersect(b, wa=True, wb=True, stream=True).saveas(bed_file)
-
-        # # Clean PyBedTools files
-        # cleanup(remove_all=True)
-
         # Copy file
         shutil.copy(dummy_files[1], bed_file)
 
@@ -722,50 +682,6 @@ def _split_data(data_file, threads=1):
         if split_file.startswith(prefix):
             split_files.append(os.path.join(split_dir, split_file))
 
-    # # For each split file...
-    # for split_file in os.listdir(data_file_dir):
-
-    #     # Append split file
-    #     split_file = os.path.join(data_file_dir, split_file)
-    #     if os.path.abspath(data_file) in split_file:
-    #         split_files.append(split_file)
-    
-
-    # # For each chromosome...
-    # for chrom in chroms:
-
-    #     # Skip if file already split
-    #     split_file = "%s.%s" % (data_file, chrom)
-    #     if not os.path.exists(split_file):
-
-    #         # Parallel split
-    #         cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" > %s' % (data_file, threads, "chr%s" % chrom, split_file)
-    #         subprocess.call(cmd, shell=True)
-
-    #     # Append split file
-    #     statinfo = os.stat(split_file)
-    #     if statinfo.st_size:
-    #         split_files.append(split_file)
-    #     else:
-    #         os.remove(split_file)
-
-    # # Get number of lines
-    # process = subprocess.check_output(["wc -l %s" % data_file], shell=True)
-    # m = re.search("(\d+)", str(process))
-    # l = math.ceil(int(m.group(1))/(threads*10))
-
-    # # Split
-    # cmd = "split -l %s %s %s." % (l, data_file, data_file)
-    # subprocess.call(cmd, shell=True)
-
-    # # For each split file...
-    # for split_file in os.listdir(data_file_dir):
-
-    #     # Append split file
-    #     split_file = os.path.join(data_file_dir, split_file)
-    #     if os.path.abspath(data_file) in split_file:
-    #         split_files.append(split_file)
-
     return(split_files)
 
 def _download_ENCODE_bed_file(encode, dummy_dir="/tmp/", test=False):
@@ -777,6 +693,7 @@ def _download_ENCODE_bed_file(encode, dummy_dir="/tmp/", test=False):
     if test:
         print(current_process().name)
 
+    # DO NOT REMOVE THIS!
     # # Preprocess BAM data
     # if encode.output_format == "bam":
 
@@ -830,25 +747,20 @@ def _insert_data_file(data_file, test=False):
         # Initialize
         accession = line[3]
 
-        # Get region
+        # Upsert region
         region = Region()
         region.chrom = line[0][3:]
         region.start = int(line[1])
         region.end = int(line[2])
         region.bin = assign_bin(region.start, region.end)
-
-        # Ignore non-standard chroms, scaffolds, etc.
         if region.chrom not in chroms:
             continue
-
-        # Upsert region
         ParseUtils.upsert_region(session, region)
 
-        # Get region ID
+        # Get region
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
-        print(region)
 
-        # Get sample
+        # Upsert sample
         sample = Sample()
         if not encodes[accession].summary:
             sample.name = encodes[accession].biosample_name
@@ -859,23 +771,43 @@ def _insert_data_file(data_file, test=False):
         sample.cancer = samples[encodes[accession].biosample_name][2]
         if encodes[accession].sex is not None:
             sample.X_chroms = encodes[accession].X
-            sample.Y_chroms = encodes[accession].Y
-
-        # Upsert sample
+            sample.Y_chroms = encodes[accession].Y       
         ParseUtils.upsert_sample(session, sample)
 
-        # Get sample ID
+        # Get sample
         sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
-        print(sample)
 
-        # Get metadata
+        # Get source
         metadata = Metadata()
         metadata.accession = accession
         metadata.source_id = source.uid
 
+        # Get source
+        source = Source()
+        source.name = "ENCODE"
+        ParseUtils.upsert_source(session, source)
+        source = ParseUtils.get_source(session, source_name)
+
+    def get_metadata(self):
+        metadata = []
+        metadata.append(self.accession)
+        metadata.append(self.experiment_type)
+
+        self.accession = accession
+        self.biosample_name = biosample_name
+        self.biosample_type = biosample_type
+        self.download_url = download_url
+        self.experiment_accession = experiment_accession
+        self.experiment_type = experiment_type
+        self.experiment_target = experiment_target
+        self.genome_assembly = genome_assembly
+        self.output_format = output_format
+        self.output_type = output_type
+        self.status = status
+        self.treatments = treatments
+
         # Upsert metadata
         ParseUtils.upsert_metadata(session, metadata)
-        print(metadata)
         break
 
         # Get feature
@@ -919,4 +851,5 @@ def _insert_data_file(data_file, test=False):
 # Main        #
 #-------------#
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()

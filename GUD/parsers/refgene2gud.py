@@ -309,4 +309,5 @@ def _insert_data(data_file, test=False):
 # Main        #
 #-------------#
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()

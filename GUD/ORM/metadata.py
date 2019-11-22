@@ -28,7 +28,7 @@ class Metadata(Base):
         q = session.query(cls)\
             .filter(
                 cls.accession == accession,
-                cls.sourceID == sourceID
+                cls.source_id == sourceID
         )
 
         return len(q.all()) == 0

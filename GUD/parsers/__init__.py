@@ -23,25 +23,11 @@ from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.mask import Mask
+from GUD.ORM.metadata import Metadata
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-
-# Citation for parallel
-# @article{Tange2011a,
-#   title = {GNU Parallel - The Command-Line Power Tool},
-#   author = {O. Tange},
-#   address = {Frederiksberg, Denmark},
-#   journal = {;login: The USENIX Magazine},
-#   month = {Feb},
-#   number = {1},
-#   volume = {36},
-#   url = {http://www.gnu.org/s/parallel},
-#   year = {2011},
-#   pages = {42-47},
-#   doi = {10.5281/zenodo.16303}
-# }
 
 class ParseUtililities:
     """
@@ -283,7 +269,7 @@ class ParseUtililities:
             create_database(self.dbname)
 
             # For each table...
-            for table in [Chrom(), Experiment(), Region(), Sample(), Source()]:
+            for table in [Chrom(), Experiment(), Region(), Sample(), Source(), Metadata()]:
                     self.create_table(table)
     
             # Download data
@@ -406,7 +392,7 @@ class ParseUtililities:
 
     def upsert_metadata(self, session, metadata):
 
-        if Mask.is_unique(session, metadata.accession, metadata.source_id):
+        if Metadata.is_unique(session, metadata.accession, metadata.source_id):
             session.add(metadata)
             session.commit()
 
