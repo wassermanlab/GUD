@@ -32,22 +32,3 @@ class Metadata(Base):
         )
 
         return len(q.all()) == 0
-
-    @classmethod
-    def select_unique(cls, session, accession, sourceID):
-
-        q = session.query(cls)\
-            .filter(
-                cls.accession == accession,
-                cls.sourceID == sourceID
-        )
-
-        return q.first()
-
-    # def serialize(self):
-    #     return {
-    #         'uid': self.uid,
-    #         'gud_name': self.gud_name,
-    #         'original_name': self.original_name,
-    #         'sourceID': self.sourceID,
-    #     }
