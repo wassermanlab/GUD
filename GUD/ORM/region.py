@@ -26,18 +26,22 @@ class Region(Base):
     
     # class methods
     @classmethod
-    def is_unique(cls, session, chrom, start, end, strand=None):
+    # def is_unique(cls, session, chrom, start, end, strand=None):
+    def is_unique(cls, session, chrom, start, end):
         q = session.query(cls)\
             .filter(
                 cls.chrom == chrom, cls.start == int(start),
-                cls.end == int(end), cls.strand == strand)
+                # cls.end == int(end), cls.strand == strand)
+                cls.end == int(end))
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, chrom, start, end, strand=None):
+    # def select_unique(cls, session, chrom, start, end, strand=None):
+    def select_unique(cls, session, chrom, start, end):
         q = session.query(cls)\
             .filter(cls.chrom == chrom, cls.start == int(start),
-                    cls.end == int(end), cls.strand == strand)
+                    # cls.end == int(end), cls.strand == strand)
+                    cls.end == int(end))
         return(q.first())
 
     @classmethod
@@ -74,6 +78,6 @@ class Region(Base):
                 "bin={}".format(self.bin),
                 "chrom={}".format(self.chrom),
                 "start={}".format(self.start),
-                "end={}".format(self.end),
-                "strand={}".format(self.strand)
+                "end={}".format(self.end)
+                # "strand={}".format(self.strand)
             )

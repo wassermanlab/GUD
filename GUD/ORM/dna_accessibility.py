@@ -12,13 +12,14 @@ from sqlalchemy.ext.declarative import declared_attr
 class DNAAccessibility(GFMixin2, Base):
     # table declerations
     __tablename__ = "dna_accessibility"
-    peak =  Column("peak", mysql.LONGBLOB, nullable=False)
+    score = Column("score", mysql.FLOAT)
+    peak = Column("peak", mysql.INTEGER)
 
     @declared_attr
     def __table_args__(cls):
         return (
-        UniqueConstraint(cls.region_id, cls.sample_id,
-                         cls.experiment_id, cls.source_id),
+        UniqueConstraint(cls.region_id, cls.sample_id, cls.experiment_id,
+                         cls.source_id, cls.peak),
         Index("ix_join", cls.region_id, cls.sample_id,
               cls.experiment_id, cls.source_id),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
@@ -33,6 +34,7 @@ class DNAAccessibility(GFMixin2, Base):
             "source": feat.Source.name,
             "sample": feat.Sample.name,
             "experiment": feat.Experiment.name,
+            "score": feat.DNAAccessibility.score,
             "peak": feat.DNAAccessibility.peak
         }
         genomic_feature = super().as_genomic_feature(feat)

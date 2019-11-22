@@ -349,8 +349,8 @@ class ParseUtililities:
     def get_experiment(self, session, experiment_type):
         return(Experiment.select_unique(session, experiment_type))
 
-    def get_region(self, session, chrom, start, end, strand=None):
-        return(Region.select_unique(session, chrom, start, end, strand))
+    def get_region(self, session, chrom, start, end):
+        return(Region.select_unique(session, chrom, start, end))
 
     def get_sample(self, session, name, X, Y, treatment, cell_line, cancer):
         return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
@@ -406,7 +406,7 @@ class ParseUtililities:
 
     def upsert_region(self, session, region):
 
-        if Region.is_unique(session, region.chrom, region.start, region.end, region.strand):
+        if Region.is_unique(session, region.chrom, region.start, region.end):
             session.add(region)
             session.commit()
 

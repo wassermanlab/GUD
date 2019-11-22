@@ -13,13 +13,14 @@ class TFBinding(GFMixin2, Base):
     # table declerations 
     __tablename__ = "tf_binding"
     tf = Column("tf", String(25), nullable=False)
-    peak =  Column("peak", mysql.LONGBLOB, nullable=False)
+    score = Column("score", mysql.FLOAT)
+    peak = Column("peak", mysql.INTEGER)
 
     @declared_attr
     def __table_args__(cls):
         return (
-        UniqueConstraint(cls.region_id, cls.sample_id,
-                         cls.experiment_id, cls.source_id, cls.tf),
+        UniqueConstraint(cls.region_id, cls.sample_id, cls.experiment_id,
+                         cls.source_id, cls.tf, cls.peak),
         Index("ix_join", cls.region_id, cls.sample_id, cls.experiment_id, cls.source_id),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
@@ -56,7 +57,8 @@ class TFBinding(GFMixin2, Base):
             "sample": feat.Sample.name,
             "experiment": feat.Experiment.name,
             "tf": feat.TFBinding.tf,
-            "peak": feat.HistoneModification.peak
+            "score": feat.TFBinding.score,
+            "peak": feat.TFBinding.peak
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers

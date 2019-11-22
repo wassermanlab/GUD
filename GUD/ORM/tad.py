@@ -12,9 +12,10 @@ from sqlalchemy.ext.declarative import declared_attr
 class TAD(GFMixin2, Base):
     # table declerations
     __tablename__ = "tads"
-
     restriction_enzyme = Column(
         "restriction_enzyme", String(25), nullable=False)
+    hierarchical_level = Column(
+        "hierarchical_level", String(25))
 
     @declared_attr
     def __table_args__(cls):
@@ -56,6 +57,7 @@ class TAD(GFMixin2, Base):
             "sample": feat.Sample.name,
             "experiment": feat.Experiment.name,
             "restriction_enzyme": feat.TAD.restriction_enzyme,
+            "hierarchical_level": feat.TAD.hierarchical_level
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers
