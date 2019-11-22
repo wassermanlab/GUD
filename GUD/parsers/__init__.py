@@ -23,7 +23,6 @@ from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.mask import Mask
-from GUD.ORM.metadata import Metadata
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
@@ -269,7 +268,7 @@ class ParseUtililities:
             create_database(self.dbname)
 
             # For each table...
-            for table in [Chrom(), Experiment(), Region(), Sample(), Source(), Metadata()]:
+            for table in [Chrom(), Experiment(), Region(), Sample(), Source()]:
                     self.create_table(table)
     
             # Download data
@@ -341,8 +340,8 @@ class ParseUtililities:
     def get_sample(self, session, name, X, Y, treatment, cell_line, cancer):
         return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
 
-    def get_source(self, session, source_name):
-        return(Source.select_unique(session, source_name))
+    def get_source(self, session, name, source_metadata, metadata_descriptor, url):
+        return(Source.select_unique(session, name, source_metadata, metadata_descriptor, url))
 
     #--------------#
     # Upserts      #
@@ -374,7 +373,7 @@ class ParseUtililities:
 
     def upsert_gene(self, session, gene):
 
-        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name):
+        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name, gene.strand):
             session.add(gene)
             session.commit()
 
@@ -388,12 +387,6 @@ class ParseUtililities:
 
         if Mask.is_unique(session, mask.region_id, mask.source_id):
             session.add(mask)
-            session.commit()
-
-    def upsert_metadata(self, session, metadata):
-
-        if Metadata.is_unique(session, metadata.accession, metadata.source_id):
-            session.add(metadata)
             session.commit()
 
     def upsert_region(self, session, region):
@@ -410,7 +403,7 @@ class ParseUtililities:
 
     def upsert_source(self, session, source):
 
-        if Source.is_unique(session, source.name):
+        if Source.is_unique(session, source.name, source.source_metadata, source.metadata_descriptor, source.url):
             session.add(source)
             session.commit()
 

@@ -245,7 +245,7 @@ def main():
     # Insert ENCODE data
     encode_to_gud(args.genome, args.samples, args.feature, args.sample_type, args.dummy_dir, args.remove, args.test, args.threads)
 
-def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="/tmp/",remove=False, test=False, threads=1):
+def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
     e.g. python -m GUD.parsers.encode2gud --genome hg38 --samples ./samples/ENCODE.tsv --feature accessibility
     """
@@ -840,7 +840,7 @@ def _insert_data_file(data_file, test=False):
         # Testing
         if test:
             lines += 1
-            if lines > 1000:
+            if lines == 1000:
                 break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
