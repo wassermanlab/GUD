@@ -17,7 +17,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 
 class RepeatMask(GFMixin1, Base):
-
+    # table declerations 
     __tablename__ = "rmsk"
 
     swScore = Column("swScore", Float, nullable=False)
@@ -33,19 +33,12 @@ class RepeatMask(GFMixin1, Base):
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
-    @classmethod
-    def is_unique(cls, session, regionID, sourceID):
-        q = session.query(cls).filter(
-            cls.region_id == regionID, cls.source_id == sourceID)
-        q = q.all()
-        if len(q) == 0:
-            return True
-        else:
-            return False
-
+    # class methods 
     @classmethod
     def as_genomic_feature(self, feat):
-        # Define qualifiers
+        """
+        extend parent class by adding qualifiers
+        """
         qualifiers = {
             "uid": feat.RepeatMask.uid,
             "source": feat.Source.name,
@@ -55,11 +48,6 @@ class RepeatMask(GFMixin1, Base):
             "repFamily": feat.RepeatMask.repFamily,
             "repClass": feat.RepeatMask.repClass
         }
-        return GenomicFeature(
-            feat.Region.chrom,
-            int(feat.Region.start),
-            int(feat.Region.end),
-            strand=feat.Region.strand,
-            feat_type="RepeatMask",
-            feat_id="%s_%s" % (self.__tablename__, feat.RepeatMask.uid),
-            qualifiers=qualifiers)
+        genomic_feature = super().as_genomic_feature(feat)
+        genomic_feature.qualifiers = qualifiers
+        return genomic_feature

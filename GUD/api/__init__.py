@@ -22,6 +22,9 @@ engine_hg38, Session_hg38 = GUDUtils.get_engine_session(GUDUtils._get_db_name())
 set_db("test")
 engine_test, Session_test = GUDUtils.get_engine_session(GUDUtils._get_db_name())
 
+set_db("test_hg38_chr22")
+engine_test_hg38_chr22, Session_test_hg38_chr22 = GUDUtils.get_engine_session(GUDUtils._get_db_name())
+
 def get_engine_session(db): 
     if db == "hg19":
         return engine_hg19, Session_hg19()
@@ -29,8 +32,10 @@ def get_engine_session(db):
         return engine_hg38, Session_hg38()
     elif db == "test":
         return engine_test, Session_test()
+    elif db == "test_hg38_chr22":
+        return engine_test_hg38_chr22, Session_test_hg38_chr22()
     else:
-        raise BadRequest('database must be hg19 or hg38 or test')
+        raise BadRequest('database must be hg19 or hg38 or test or test_hg38_chr22')
 
 import GUD.api.routes
 

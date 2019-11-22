@@ -1,19 +1,18 @@
-from binning import (containing_bins, contained_bins)
-from sqlalchemy import (UniqueConstraint, Index)
+from sqlalchemy import (Column, UniqueConstraint, Index)
 from sqlalchemy.dialects import mysql
 from .base import Base
 from .experiment import Experiment
 from .region import Region
 from .sample import Sample
 from .source import Source
-from .genomic_feature import GenomicFeature
 from .genomicFeatureMixin2 import GFMixin2
 from sqlalchemy.ext.declarative import declared_attr
 
 
 class DNAAccessibility(GFMixin2, Base):
-
+    # table declerations
     __tablename__ = "dna_accessibility"
+    peak =  Column("peak", mysql.LONGBLOB, nullable=False)
 
     @declared_attr
     def __table_args__(cls):
@@ -25,20 +24,7 @@ class DNAAccessibility(GFMixin2, Base):
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
-    @classmethod
-    def select_unique(cls, session, regionID,
-                      sampleID, experimentID, sourceID):
-
-        q = session.query(cls).\
-            filter(
-                cls.region_id == regionID,
-                cls.sample_id == sampleID,
-                cls.experiment_id == experimentID,
-                cls.source_id == sourceID
-        )
-
-        return q.first()
-
+    # class methods
     @classmethod
     def as_genomic_feature(self, feat):
         # Define qualifiers
@@ -47,11 +33,8 @@ class DNAAccessibility(GFMixin2, Base):
             "source": feat.Source.name,
             "sample": feat.Sample.name,
             "experiment": feat.Experiment.name,
+            "peak": feat.DNAAccessibility.peak
         }
-        return GenomicFeature(
-            feat.Region.chrom,
-            int(feat.Region.start),
-            int(feat.Region.end),
-            strand=feat.Region.strand,
-            feat_id="%s_%s" % (self.__tablename__, feat.DNAAccessibility.uid),
-            qualifiers=qualifiers)
+        genomic_feature = super().as_genomic_feature(feat)
+        genomic_feature.qualifiers = qualifiers
+        return genomic_feature
