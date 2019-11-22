@@ -324,12 +324,12 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
     # encodes = _add_experiment_metadata(_parse_metadata(genome, metadata_file))
     encodes = _parse_metadata(genome, metadata_file)
 
-    # Filter metadata (i.e. keep the best BED file per experiment)
-    # Group metadata by experiment target and type
-    grouped_metadata = _group_metadata(_filter_metadata(encode_metadata, sample_type))
+    # Filter ENCODE objects (i.e. keep the best type of file per accession)
+    # Group ENCODE objects by experiment target and type
+    grouped_encodes = _group_ENCODE_objects(_filter_ENCODE_objects(encodes, sample_type))
 
     # For each experiment target/type...
-    for experiment_target, experiment_type in sorted(grouped_metadata):
+    for experiment_target, experiment_type in sorted(grouped_encodes):
 
         # Beware, for this should not be possible!
         if experiment_target is not None:
@@ -354,8 +354,8 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
 
         # Prepare data
         # data_file = _preprocess_data(grouped_metadata[(experiment_target, experiment_type)], dummy_dir, merge, test, threads)
-        meta_objects = grouped_metadata[(experiment_target, experiment_type)]
-        data_file = _preprocess_data(meta_objects, dummy_dir, test, threads)
+        subgrouped_encodes = grouped_encodes[(experiment_target, experiment_type)]
+        data_file = _preprocess_data(subgrouped_encodes, dummy_dir, test, threads)
 
         # Split data
         data_files = _split_data(data_file, threads)
@@ -587,8 +587,8 @@ def _filter_ENCODE_objects(encode_objects, sample_type=None):
 
             # For each ENCODE object...
             for encode in grouped_encode_objects[accession]:
-                if meta_object.output_type == out_type:
-                    filtered_encode_objects.add(meta_object)
+                if encode.output_type == out_type:
+                    filtered_encode_objects.add(encode)
                     exit_loop = True
 
             if exit_loop:
@@ -599,23 +599,23 @@ def _filter_ENCODE_objects(encode_objects, sample_type=None):
 def _group_ENCODE_objects(encode_objects):
 
     # Initialize
-    grouped_metadata = {}
+    grouped_encode_objects = {}
 
-    # For each ENCODE metadata object...
-    for metadata_object in metadata:
+    # For each ENCODE object...
+    for encode in encode_objects:
 
         # Initialize
-        experiment_target = metadata_object.experiment_target
-        experiment_type = metadata_object.experiment_type
+        experiment_target = encode.experiment_target
+        experiment_type = encode.experiment_type
 
         # Group metadata
-        grouped_metadata.setdefault((experiment_target, experiment_type), set())
-        grouped_metadata[(experiment_target, experiment_type)].add(metadata_object)
+        grouped_encode_objects.setdefault((experiment_target, experiment_type), set())
+        grouped_encode_objects[(experiment_target, experiment_type)].add(encode)
 
-    return(grouped_metadata)
+    return(grouped_encode_objects)
 
 # def _preprocess_data(meta_objects, dummy_dir="/tmp/", merge=False, test=False, threads=1):
-def _preprocess_data(meta_objects, dummy_dir="/tmp/", test=False, threads=1):
+def _preprocess_data(encode_objects, dummy_dir="/tmp/", test=False, threads=1):
 
     # Initialize
     dummy_files = []
@@ -623,10 +623,10 @@ def _preprocess_data(meta_objects, dummy_dir="/tmp/", test=False, threads=1):
     regexp = re.compile("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$")
 
     # Get label
-    meta_object = next(iter(meta_objects))
-    label = meta_object.experiment_type
+    encode = next(iter(encode_objects))
+    label = encode.experiment_type
     if Feature.__tablename__ in target_tables:
-        m = regexp.search(meta_object.experiment_target)
+        m = regexp.search(encode.experiment_target)
         label += ".%s" % m.group(2)
 
     # Skip if BED file exists
@@ -639,7 +639,7 @@ def _preprocess_data(meta_objects, dummy_dir="/tmp/", test=False, threads=1):
 
             # Get ENCODE BED files
             pool = Pool(processes=threads)
-            for download_file in pool.imap(partial(_download_ENCODE_bed_file, dummy_dir=dummy_dir, test=test), meta_objects):
+            for download_file in pool.imap(partial(_download_ENCODE_bed_file, dummy_dir=dummy_dir, test=test), encode_objects):
 
                 # Initialize
                 m = re.search("\/(\w+).(bam|bed.gz)$", download_file)
@@ -768,39 +768,39 @@ def _split_data(data_file, threads=1):
 
     return(split_files)
 
-def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/", test=False):
+def _download_ENCODE_bed_file(encode, dummy_dir="/tmp/", test=False):
 
     # Initialize
-    download_file = os.path.join(dummy_dir, metadata_object.accession)
+    download_file = os.path.join(dummy_dir, encode.accession)
 
     # Testing
     if test:
         print(current_process().name)
 
     # # Preprocess BAM data
-    # if metadata_object.output_format == "bam":
+    # if encode.output_format == "bam":
 
     #     # Skip if peaks file already exists
-    #     peaks_file = os.path.join(dummy_dir, "%s_peaks.narrowPeak" % metadata_object.accession)
+    #     peaks_file = os.path.join(dummy_dir, "%s_peaks.narrowPeak" % encode.accession)
     #     if not os.path.exists(peaks_file):
 
     #         # Download BAM file
     #         download_file += ".bam"
     #         if not os.path.exists(download_file):
-    #            urlretrieve(metadata_object.download_url, download_file)        
+    #            urlretrieve(encode.download_url, download_file)        
 
     #         # From "An atlas of chromatin accessibility in the adult human brain" (Fullard et al. 2018):
     #         # Peaks for OCRs were called using the model-based Analysis of ChIP-seq (MACS) (Zhang et al. 2008)
     #         # v2.1 (https://github.com/taoliu/MACS/). It models the shift size of tags and models local biases
     #         # in sequencability and mapability through a dynamic Poisson background model. We used the following
     #         # parameters (Kaufman et al. 2016): "--keep-dup all", "--shift -100", "--extsize 200", "--nomodel".
-    #         cmd = "macs2 callpeak -t %s --keep-dup all --shift -100 --extsize 200 --nomodel --outdir %s -n %s" % (download_file, dummy_dir, metadata_object.accession)
+    #         cmd = "macs2 callpeak -t %s --keep-dup all --shift -100 --extsize 200 --nomodel --outdir %s -n %s" % (download_file, dummy_dir, encode.accession)
     #         process = subprocess.Popen([cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     #         stdout, stderr = process.communicate()
 
     #         # Remove files
-    #         os.remove(os.path.join(dummy_dir, "%s_peaks.xls" % metadata_object.accession))
-    #         os.remove(os.path.join(dummy_dir, "%s_summits.bed" % metadata_object.accession))
+    #         os.remove(os.path.join(dummy_dir, "%s_peaks.xls" % encode.accession))
+    #         os.remove(os.path.join(dummy_dir, "%s_summits.bed" % encode.accession))
 
     #         # Set peaks file as download file
     #         shutil.move(peaks_file, download_file)
@@ -810,7 +810,7 @@ def _download_ENCODE_bed_file(metadata_object, dummy_dir="/tmp/", test=False):
     # Download BED file
     download_file += ".bed.gz"
     if not os.path.exists(download_file):
-        urlretrieve(metadata_object.download_url, download_file)
+        urlretrieve(encode.download_url, download_file)
 
     return(download_file)
 
@@ -846,26 +846,27 @@ def _insert_data_file(data_file, test=False):
 
         # Get region ID
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
+        print(region)
 
         # Get sample
         sample = Sample()
-        if not encode_metadata[accession].summary:
-            sample.name = encode_metadata[accession].biosample_name
+        if not encodes[accession].summary:
+            sample.name = encodes[accession].biosample_name
         else:
-            sample.name = encode_metadata[accession].summary
-        sample.treatment = samples[encode_metadata[accession].biosample_name][0]
-        sample.cell_line = samples[encode_metadata[accession].biosample_name][1]
-        sample.cancer = samples[encode_metadata[accession].biosample_name][2]
-        if encode_metadata[accession].sex is not None:
-            sample.X_chroms = encode_metadata[accession].X
-            sample.Y_chroms = encode_metadata[accession].Y
+            sample.name = encodes[accession].summary
+        sample.treatment = samples[encodes[accession].biosample_name][0]
+        sample.cell_line = samples[encodes[accession].biosample_name][1]
+        sample.cancer = samples[encodes[accession].biosample_name][2]
+        if encodes[accession].sex is not None:
+            sample.X_chroms = encodes[accession].X
+            sample.Y_chroms = encodes[accession].Y
 
         # Upsert sample
         ParseUtils.upsert_sample(session, sample)
 
         # Get sample ID
         sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
-        print(region, sample)
+        print(sample)
 
         # Get metadata
         metadata = Metadata()
@@ -874,12 +875,8 @@ def _insert_data_file(data_file, test=False):
 
         # Upsert metadata
         ParseUtils.upsert_metadata(session, metadata)
-        print(region, sample, metadata)
+        print(metadata)
         break
-
-
-
-
 
         # Get feature
         feature = Feature()
