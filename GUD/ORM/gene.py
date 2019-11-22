@@ -13,11 +13,11 @@ class Gene(GFMixin1, Base):
 
     # inherits uid, regionID, sourceID
     name = Column("name", String(75), nullable=False)
-    name2 = Column("name2", String(75), nullable=False)
-    cdsStart = Column("cdsStart", mysql.INTEGER(unsigned=True), nullable=False)
-    cdsEnd = Column("cdsEnd", mysql.INTEGER(unsigned=True), nullable=False)
-    exonStarts = Column("exonStarts", mysql.LONGBLOB, nullable=False)
-    exonEnds = Column("exonEnds", mysql.LONGBLOB, nullable=False)
+    gene_symbol = Column("gene_symbol", String(75), nullable=False)
+    coding_start = Column("coding_start", mysql.INTEGER(unsigned=True), nullable=False)
+    coding_end = Column("coding_end", mysql.INTEGER(unsigned=True), nullable=False)
+    exon_starts = Column("exon_starts", mysql.LONGBLOB, nullable=False)
+    exon_ends = Column("exon_ends", mysql.LONGBLOB, nullable=False)
     strand = Column("strand", mysql.CHAR(1))
 
     @declared_attr

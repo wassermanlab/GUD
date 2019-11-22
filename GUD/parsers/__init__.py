@@ -14,6 +14,7 @@ from zipfile import ZipFile
 
 from GUD.ORM.chrom import Chrom
 from GUD.ORM.conservation import Conservation
+from GUD.ORM.cpg_island import CpGIsland
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.gene import Gene
@@ -348,8 +349,8 @@ class ParseUtililities:
     def get_experiment(self, session, experiment_type):
         return(Experiment.select_unique(session, experiment_type))
 
-    def get_region(self, session, chrom, start, end, strand=None):
-        return(Region.select_unique(session, chrom, start, end, strand))
+    def get_region(self, session, chrom, start, end):
+        return(Region.select_unique(session, chrom, start, end))
 
     def get_sample(self, session, name, X, Y, treatment, cell_line, cancer):
         return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
@@ -371,6 +372,12 @@ class ParseUtililities:
 
         if Conservation.is_unique(session, conservation.region_id, conservation.source_id):
             session.add(conservation)
+            session.commit()
+
+    def upsert_cpg_island(self, session, cpg_island):
+
+        if CpGIsland.is_unique(session, cpg_island.region_id, cpg_island.source_id):
+            session.add(cpg_island)
             session.commit()
 
     def upsert_experiment(self, session, experiment):
@@ -399,7 +406,7 @@ class ParseUtililities:
 
     def upsert_region(self, session, region):
 
-        if Region.is_unique(session, region.chrom, region.start, region.end, region.strand):
+        if Region.is_unique(session, region.chrom, region.start, region.end):
             session.add(region)
             session.commit()
 
@@ -430,6 +437,8 @@ class ParseUtililities:
         if CNV.is_unique(session, cnv.region_id, cnv.source_id, cnv.copy_number_change):
             session.add(cnv)
             session.commit()
+        else:
+            print("here")
 
     def upsert_clinvar(self, session, clinvar):
         if clinvar.is_unique(session, clinvar.clinvar_variation_ID):
