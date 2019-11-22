@@ -9,6 +9,7 @@ from numpy import isnan
 import os
 from pybedtools import BedTool, cleanup, set_tempdir
 import re
+import requests
 import shutil
 import subprocess
 import sys
@@ -43,12 +44,12 @@ into GUD.
   --samples FILE      ENCODE samples (manually-curated)
   --feature STR       type of genomic feature ("atac-seq"
                       "accessibility", "histone" or "tf")
+  --sample-type STR   restrict to samples of speficied type
+                      ("cells" or "tissues"; default = ignore)
 
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
-  -m, --merge         merge genomic regions using bedtools
-                      (default = False)
   -r, --remove        remove downloaded files (default = False)
   -t, --test          limit the total of inserts to ~1K per
                       thread for testing (default = False)
@@ -60,6 +61,10 @@ mysql arguments:
   -p STR, --pwd STR   password (default = ignore this option)
   -P INT, --port INT  port number (default = %s)
   -u STR, --user STR  user name (default = current user)
+
+deprecated arguments:
+  -m, --merge         merge genomic regions using bedtools
+                      (default = False)
 """ % (usage_msg, (cpu_count() - 1), GUDUtils.db, GUDUtils.port)
 
 #-------------#
@@ -68,23 +73,15 @@ mysql arguments:
 
 class EncodeMetadata:
 
-    def __init__(self, accession, biosample, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments):
-        """
-        m = re.search(
-            "^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$",
-            
-        )
-        if m:
-            tag = m.group(1)
-            experiment_target = m.group(2)
-        """
+    def __init__(self, accession, biosample_name, biosample_type, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments):
 
         # Fix hg38
         if genome_assembly == "GRCh38":
             genome_assembly = "hg38"
 
         self.accession = accession
-        self.biosample = biosample
+        self.biosample_name = biosample_name
+        self.biosample_type = biosample_type
         self.download_url = download_url
         self.experiment_accession = experiment_accession
         self.experiment_type = experiment_type
@@ -94,6 +91,56 @@ class EncodeMetadata:
         self.output_type = output_type
         self.status = status
         self.treatments = treatments
+
+        # To be initialized later
+        self._biosample_sex = None
+        self._biosample_summary = None
+
+    @property
+    def sex(self):
+        """
+        sex of biosample
+        """
+        return(self._biosample_sex)
+
+    @sex.setter
+    def sex(self, value):
+        self._biosample_sex = str(value)
+
+    @property
+    def summary(self):
+        """
+        summary of biosample
+        """
+        return(self._biosample_summary)
+
+    @summary.setter
+    def summary(self, value):
+        self._biosample_summary = str(value)
+
+    @property
+    def X(self):
+        """
+        number of X chromosomes
+        """
+        if self.sex == "female":
+            return(2)
+        elif self.sex == "male":
+            return(1)
+        else:
+            return(None)
+
+    @property
+    def Y(self):
+        """
+        number of Y chromosomes
+        """
+        if self.sex == "female":
+            return(0)
+        elif self.sex == "male":
+            return(1)
+        else:
+            return(None)
 
 #-------------#
 # Functions   #
@@ -110,12 +157,13 @@ def parse_args():
     parser.add_argument("--genome")
     parser.add_argument("--samples")
     parser.add_argument("--feature")
+    parser.add_argument("--sample-type")
 
     # Optional args
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("-m", "--merge", action="store_true")
+    # optional_group.add_argument("-m", "--merge", action="store_true")
     optional_group.add_argument("-r", "--remove", action="store_true")
     optional_group.add_argument("-t", "--test", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
@@ -157,6 +205,14 @@ def check_args(args):
         print(": ".join(error))
         exit(0)
 
+    # Check for sample types
+    valid_sample_types = ["cells", "tissues"]
+    if args.sample_type is not None:
+        if args.sample_type not in valid_sample_types:
+            error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--sample-type\"", "invalid choice", "\"%s\" (choose from" % args.sample_type, "%s or ignore this option)\n" % " ".join(["\"%s\"" % i for i in valid_sample_types])]
+            print(": ".join(error))
+            exit(0)
+
     # Check "--threads" argument
     try:
         args.threads = int(args.threads)
@@ -190,11 +246,13 @@ def main():
     GUDUtils.db = args.db
 
     # Insert ENCODE data
-    encode_to_gud(args.genome, args.samples, args.feature, args.dummy_dir, args.merge, args.remove, args.test, args.threads)
+    # encode_to_gud(args.genome, args.samples, args.feature, args.sample_type, args.dummy_dir, args.merge, args.remove, args.test, args.threads)
+    encode_to_gud(args.genome, args.samples, args.feature, args.sample_type, args.dummy_dir, args.remove, args.test, args.threads)
 
-def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=False, remove=False, test=False, threads=1):
+# def encode_to_gud(genome, samples_file, feat_type, sample_type, dummy_dir="/tmp/", merge=False, remove=False, test=False, threads=1):
+def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="/tmp/",remove=False, test=False, threads=1):
     """
-    python -m GUD.parsers.encode2gud --genome hg19 --samples --dummy-dir ./tmp/
+    e.g. python -m GUD.parsers.encode2gud --genome hg38 --samples ./samples/ENCODE.tsv --feature accessibility
     """
 
     # Initialize
@@ -202,7 +260,6 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
     global engine
     global experiment
     global Feature
-    global metadata
     global Session
     global samples
     global source
@@ -260,16 +317,18 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
     engine.dispose()
 
     # Parse metadata
+    # Add experiment metadata (i.e. biosample sex and summary)
+    # metadata = _add_experiment_metadata(_parse_metadata(genome, metadata_file))
     metadata = _parse_metadata(genome, metadata_file)
 
     # Filter metadata (i.e. keep the best BED file per experiment)
-    # Group metadata by experiment target and experiment type
-    grouped_metadata = _group_metadata(_filter_metadata())
+    # Group metadata by experiment target and type
+    grouped_metadata = _group_metadata(_filter_metadata(metadata, sample_type))
 
     # For each experiment target/type...
     for experiment_target, experiment_type in grouped_metadata:
 
-        # Beware, for this is not possible!
+        # Beware, for this should not be possible!
         if experiment_target is not None:
             if feat_type != "histone" and feat_type != "tf":
                 continue
@@ -288,7 +347,9 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", merge=Fals
         engine.dispose()
 
         # Prepare data
-        data_file = _preprocess_data(grouped_metadata[(experiment_target, experiment_type)], dummy_dir, merge, test, threads)
+        # data_file = _preprocess_data(grouped_metadata[(experiment_target, experiment_type)], dummy_dir, merge, test, threads)
+        meta_objects = grouped_metadata[(experiment_target, experiment_type)]
+        data_file = _preprocess_data(meta_objects, dummy_dir, test, threads)
 
         # Split data
         data_files = _split_data(data_file, threads)
@@ -394,7 +455,8 @@ def _parse_metadata(genome, metadata_file):
 
             # Initialize
             accession = line[accession_idx]
-            biosample = line[biosample_idx]
+            biosample_name = line[biosample_name_idx]
+            biosample_type = line[biosample_type_idx]
             download_url = line[download_idx]
             experiment_accession = line[experiment_acc_idx]
             experiment_type = line[experiment_type_idx]
@@ -410,12 +472,12 @@ def _parse_metadata(genome, metadata_file):
                 treatments = None
 
             # Warn me!
-            if biosample not in samples:
+            if biosample_name not in samples:
                 i_have_been_warned = True
-                warnings.warn("missing sample: %s" % biosample, Warning, stacklevel=2)
+                warnings.warn("missing sample: %s" % biosample_name, Warning, stacklevel=2)
 
             # ENCODE metadata object
-            metadata_object = EncodeMetadata(accession, biosample, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments)
+            metadata_object = EncodeMetadata(accession, biosample_name, biosample_type, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments)
 
             # Add metadata
             if metadata_object.genome_assembly == genome and metadata_object.status == "released" and not metadata_object.treatments:
@@ -424,7 +486,8 @@ def _parse_metadata(genome, metadata_file):
         else:
             # Get indices
             accession_idx = line.index("File accession")
-            biosample_idx = line.index("Biosample term name")
+            biosample_name_idx = line.index("Biosample term name")
+            biosample_type_idx = line.index("Biosample type")
             download_idx = line.index("File download URL")
             experiment_acc_idx = line.index("Experiment accession")
             experiment_type_idx = line.index("Assay")
@@ -442,7 +505,58 @@ def _parse_metadata(genome, metadata_file):
 
     return(metadata_objects)
 
-def _filter_metadata():
+def _add_experiment_metadata(metadata):
+    """
+    https://www.encodeproject.org/help/rest-api/
+    """
+
+    # Initialize
+    experiments = set()
+    biosample_summaries = {}
+    updated_metadata = {}
+    headers = {"accept": "application/json"}
+
+    # For each accession...
+    for accession in metadata:
+
+        # Get experiment
+        meta_object = metadata[accession]
+        experiments.add(meta_object.experiment_accession)
+
+    # For each experiment...
+    for experiment in experiments:
+
+        # Get biosample summary
+        url = "https://www.encodeproject.org/experiment/%s/?frame=object" % experiment
+        response = requests.get(url, headers=headers)
+        biosample_summary = response.json()["biosample_summary"]
+        biosample_summaries.setdefault(experiment, biosample_summary)
+
+    # For each accession...
+    for accession in metadata:
+
+        # Initialize
+        is_female = False
+        is_male = False
+
+        # Get experiment metadata
+        meta_object = metadata[accession]
+        biosample_summary = biosample_summaries[meta_object.experiment_accession]
+        meta_object.summary = biosample_summary
+        if re.search(" female ", biosample_summary):
+            is_female = True
+        if re.search(" male ", biosample_summary):
+            is_male = True
+        if is_female != is_male:
+            if is_female:
+                meta_object.sex = "female"
+            else:
+                meta_object.sex = "male"
+        updated_metadata.setdefault(accession, meta_object)
+
+    return(updated_metadata)
+
+def _filter_metadata(metadata, sample_type=None):
 
     # Initialize
     grouped_metadata = {}
@@ -453,12 +567,16 @@ def _filter_metadata():
     for accession in metadata:
 
         # Group metadata by experiment accession
-        metadata_object = metadata[accession]
-        grouped_metadata.setdefault(metadata_object.experiment_accession, [])
-        grouped_metadata[metadata_object.experiment_accession].append(metadata_object)
+        meta_object = metadata[accession]
+        if sample_type == "tissues" and meta_object.biosample_type != "tissue":
+            continue
+        elif sample_type == "cells" and meta_object.biosample_type == "tissue":
+            continue
+        grouped_metadata.setdefault(meta_object.experiment_accession, [])
+        grouped_metadata[meta_object.experiment_accession].append(meta_object)
 
     # For each experiment accession...
-    for experiment_acc in grouped_metadata:
+    for accession in grouped_metadata:
 
         # Initialize
         exit_loop = False
@@ -467,10 +585,9 @@ def _filter_metadata():
         for out_type in output_types:
 
             # For each ENCODE metadata object...
-            for metadata_object in grouped_metadata[experiment_acc]:
-
-                if metadata_object.output_type == out_type:
-                    filtered_metadata.add(metadata_object)
+            for meta_object in grouped_metadata[accession]:
+                if meta_object.output_type == out_type:
+                    filtered_metadata.add(meta_object)
                     exit_loop = True
 
             if exit_loop:
@@ -496,16 +613,19 @@ def _group_metadata(metadata):
 
     return(grouped_metadata)
 
-def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, test=False, threads=1):
+# def _preprocess_data(meta_objects, dummy_dir="/tmp/", merge=False, test=False, threads=1):
+def _preprocess_data(meta_objects, dummy_dir="/tmp/", test=False, threads=1):
 
     # Initialize
     dummy_files = []
+    target_tables = ["histone_modifications", "tf_binding"]
+    regexp = re.compile("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$")
 
     # Get label
-    metadata_object = next(iter(metadata_objects))
-    label = metadata_object.experiment_type
-    if Feature.__tablename__ == "histone_modifications" or Feature.__tablename__ == "tf_binding":
-        m = re.search("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$", metadata_object.experiment_target)
+    meta_object = next(iter(meta_objects))
+    label = meta_object.experiment_type
+    if Feature.__tablename__ in target_tables:
+        m = regexp.search(meta_object.experiment_target)
         label += ".%s" % m.group(2)
 
     # Skip if BED file exists
@@ -518,7 +638,7 @@ def _preprocess_data(metadata_objects, dummy_dir="/tmp/", merge=False, test=Fals
 
             # Get ENCODE BED files
             pool = Pool(processes=threads)
-            for download_file in pool.imap(partial(_download_ENCODE_bed_file, dummy_dir=dummy_dir, test=test), metadata_objects):
+            for download_file in pool.imap(partial(_download_ENCODE_bed_file, dummy_dir=dummy_dir, test=test), meta_objects):
 
                 # Initialize
                 m = re.search("\/(\w+).(bam|bed.gz)$", download_file)
