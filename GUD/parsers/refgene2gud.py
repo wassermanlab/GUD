@@ -174,6 +174,11 @@ def refgene_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     m = re.search("^%s/*(.+).txt.gz$" % dummy_dir, data_file) 
     source_name = m.group(1)
     source.name = source_name
+    # TODO: Oriol fill this in!
+    # source.metadata = 
+    # source.metadata_descriptor = 
+    # source.url = 
+    # source.insert_date =
     ParseUtils.upsert_source(session, source)
     source = ParseUtils.get_source(session, source_name)
 
@@ -269,7 +274,7 @@ def _insert_data(data_file, test=False):
         region.start = int(line[4])
         region.end = int(line[5])
         region.bin = assign_bin(region.start, region.end)
-        region.strand = line[3]
+       
 
         # Ignore non-standard chroms, scaffolds, etc.
         if region.chrom not in chroms:
@@ -279,7 +284,7 @@ def _insert_data(data_file, test=False):
         ParseUtils.upsert_region(session, region)
 
         # Get region ID
-        region = ParseUtils.get_region(session, region.chrom, region.start, region.end, region.strand)
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
         # Get gene
         gene = Gene()
@@ -289,6 +294,7 @@ def _insert_data(data_file, test=False):
         gene.cdsEnd = int(line[7])
         gene.exonStarts = line[9].encode("utf-8")
         gene.exonEnds = line[10].encode("utf-8")
+        gene.strand = line[3]
         gene.region_id = region.uid
         gene.source_id = source.uid
 
