@@ -363,8 +363,6 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         # Parallelize inserts to the database
         ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data_file, test=test), threads)
 
-        exit(0)
-
         # Remove data files
         if remove:
             if os.path.exists(data_file):
