@@ -27,7 +27,6 @@ from GUD import GUDUtils
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.histone_modification import HistoneModification
-from GUD.ORM.metadata import Metadata
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
@@ -139,6 +138,25 @@ class ENCODE:
             return(1)
         else:
             return(None)
+
+    def get_metadata_and_descriptor(self):
+
+        # Initialize
+        metadata = []
+        descriptor = [] 
+
+        self.accession = accession
+        self.biosample_name = biosample_name
+        self.biosample_type = biosample_type
+        self.download_url = download_url
+        self.experiment_accession = experiment_accession
+        self.experiment_type = experiment_type
+        self.experiment_target = experiment_target
+        self.genome_assembly = genome_assembly
+        self.output_format = output_format
+        self.output_type = output_type
+        self.status = status
+        self.treatments = treatments
 
 #-------------#
 # Functions   #
@@ -258,7 +276,6 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
     global samples
     global Feature
     global Session
-    set_tempdir(dummy_dir) # i.e. for pyBedTools
 
     # Testing
     if test:
@@ -433,6 +450,7 @@ def _parse_metadata(genome, metadata_file):
     i_have_been_warned = False
     accession_idx = None
     encode_objects = {}
+    regexp = re.compile("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$")
 
     # For each line...
     for line in ParseUtils.parse_tsv_file(metadata_file):
@@ -450,6 +468,9 @@ def _parse_metadata(genome, metadata_file):
             experiment_target = line[experiment_target_idx]
             if type(experiment_target) is float and isnan(experiment_target):
                 experiment_target = None
+            else:
+                m = regexp.search(experiment_target)
+                experiment_target = m.group(2)
             genome_assembly = line[genome_assembly_idx]
             output_format = line[output_format_idx]
             output_type = line[output_type_idx]
@@ -601,15 +622,12 @@ def _preprocess_data(encode_objects, dummy_dir="/tmp/", test=False, threads=1):
 
     # Initialize
     dummy_files = []
-    target_tables = ["histone_modifications", "tf_binding"]
-    regexp = re.compile("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$")
 
     # Get label
     encode = next(iter(encode_objects))
     label = encode.experiment_type
-    if Feature.__tablename__ in target_tables:
-        m = regexp.search(encode.experiment_target)
-        label += ".%s" % m.group(2)
+    if encode.experiment_target is not None:
+        label += ".%s" % encode.experiment_target
 
     # Skip if BED file exists
     bed_file = os.path.join(dummy_dir, "%s.bed" % label)
@@ -735,6 +753,8 @@ def _insert_data_file(data_file, test=False):
 
     # Initialize
     session = Session()
+    accession2sample = {}
+    accession2source = {}
 
     # Testing
     if test:
@@ -750,8 +770,8 @@ def _insert_data_file(data_file, test=False):
         # Upsert region
         region = Region()
         region.chrom = line[0][3:]
-        region.start = int(line[1])
-        region.end = int(line[2])
+        region.start = line[1]
+        region.end = line[2]
         region.bin = assign_bin(region.start, region.end)
         if region.chrom not in chroms:
             continue
@@ -760,81 +780,62 @@ def _insert_data_file(data_file, test=False):
         # Get region
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
-        # Upsert sample
-        sample = Sample()
-        if not encodes[accession].summary:
-            sample.name = encodes[accession].biosample_name
-        else:
-            sample.name = encodes[accession].summary
-        sample.treatment = samples[encodes[accession].biosample_name][0]
-        sample.cell_line = samples[encodes[accession].biosample_name][1]
-        sample.cancer = samples[encodes[accession].biosample_name][2]
-        if encodes[accession].sex is not None:
-            sample.X_chroms = encodes[accession].X
-            sample.Y_chroms = encodes[accession].Y       
-        ParseUtils.upsert_sample(session, sample)
+        if accession not in accession2sample:
 
-        # Get sample
-        sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
+            # Upsert sample
+            sample = Sample()
+            if not encodes[accession].summary:
+                sample.name = encodes[accession].biosample_name
+            else:
+                sample.name = encodes[accession].summary
+            sample.treatment = samples[encodes[accession].biosample_name][0]
+            sample.cell_line = samples[encodes[accession].biosample_name][1]
+            sample.cancer = samples[encodes[accession].biosample_name][2]
+            if encodes[accession].sex is not None:
+                sample.X_chroms = encodes[accession].X
+                sample.Y_chroms = encodes[accession].Y       
+            ParseUtils.upsert_sample(session, sample)
 
-        # Get source
-        metadata = Metadata()
-        metadata.accession = accession
-        metadata.source_id = source.uid
+            # Get sample
+            sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
 
-        # Get source
-        source = Source()
-        source.name = "ENCODE"
-        ParseUtils.upsert_source(session, source)
-        source = ParseUtils.get_source(session, source_name)
+            # Add sample
+            accession2sample.setdefault(accession, sample)
 
-    def get_metadata(self):
-        metadata = []
-        metadata.append(self.accession)
-        metadata.append(self.experiment_type)
+        if accession not in accession2source:
 
-        self.accession = accession
-        self.biosample_name = biosample_name
-        self.biosample_type = biosample_type
-        self.download_url = download_url
-        self.experiment_accession = experiment_accession
-        self.experiment_type = experiment_type
-        self.experiment_target = experiment_target
-        self.genome_assembly = genome_assembly
-        self.output_format = output_format
-        self.output_type = output_type
-        self.status = status
-        self.treatments = treatments
+            # Upsert source
+            source = Source()
+            source.name = "ENCODE"
+            # This is to satisfy ENCODE's citing guidelines:
+            # https://www.encodeproject.org/help/citing-encode/
+            source.source_metadata = "%s,%s," % (accession, encodes[accession].experiment_accession)
+            source.metadata_descriptor = "file_accession,experiment_accession,"
+            source.url = encodes[accession].download_url
+            ParseUtils.upsert_source(session, source)
 
-        # Upsert metadata
-        ParseUtils.upsert_metadata(session, metadata)
-        break
+            # Get source
+            source = ParseUtils.get_source(session, source.name, source.source_metadata, source.metadata_descriptor, source.url)
 
-        # Get feature
+            # Add source
+            accession2sample.setdefault(accession, sample)
+
+        # Upsert feature
         feature = Feature()
         feature.region_id = region.uid
-        feature.sample_id = samples[sample_name]
+        feature.sample_id = accession2sample[accession].uid
         feature.experiment_id = experiment.uid
-        feature.source_id = source.uid
-
-        # Upsert accessibility
+        feature.source_id = accession2source[accession].uid
+        feature.score = line[4]
+        feature.peak = line[5]
         if Feature.__tablename__ == "dna_accessibility":
             ParseUtils.upsert_accessibility(session, feature)
-
         else:
-
-            # Get experiment target
-            m = re.search("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$", metadata[line[3]].experiment_target)
-            experiment_target = m.group(2)
-
-            # Upsert histone
             if Feature.__tablename__ == "histone_modifications":
-                feature.histone_type = experiment_target
+                feature.histone_type = encodes[accession].experiment_target
                 ParseUtils.upsert_histone(session, feature)
-
-            # Upsert TF
             else:
-                feature.tf = experiment_target
+                feature.tf = encodes[accession].experiment_target
                 ParseUtils.upsert_tf(session, feature)
 
         # Testing

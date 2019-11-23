@@ -267,37 +267,30 @@ def _insert_data(data_file, test=False):
         if not line:
             continue
 
-        # Get region
+        # Upsert region
         region = Region()
         region.chrom = line[2][3:]
-        region.start = int(line[4])
-        region.end = int(line[5])
+        region.start = line[4]
+        region.end = line[5]
         region.bin = assign_bin(region.start, region.end)
-       
-
-        # Ignore non-standard chroms, scaffolds, etc.
         if region.chrom not in chroms:
             continue
-
-        # Upsert region
         ParseUtils.upsert_region(session, region)
 
-        # Get region ID
+        # Get region
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
-        # Get gene
+        # Upsert gene
         gene = Gene()
         gene.name = line[1]
         gene.gene_symbol = line[12]
-        gene.coding_start = int(line[6])
-        gene.coding_end = int(line[7])
+        gene.coding_start = line[6]
+        gene.coding_end = line[7]
         gene.exon_starts = line[9].encode("utf-8")
         gene.exon_ends = line[10].encode("utf-8")
         gene.strand = line[3]
         gene.region_id = region.uid
         gene.source_id = source.uid
-
-        # Upsert gene
         ParseUtils.upsert_gene(session, gene)
 
         # Testing
