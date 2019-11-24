@@ -330,7 +330,7 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         encodes = _add_experiment_metadata(_parse_metadata(genome, metadata_file))
 
         handle = ParseUtils._get_file_handle(pickle_file, "wb")
-        encodes = pickle.dump(encodes, handle)
+        pickle.dump(encodes, handle)
 
     else:
 
@@ -371,9 +371,6 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
 
         # Split data
         data_files = _split_data(data_file, threads)
-
-        print(data_files)
-        exit(0)
 
         # Insert samples/sources
         _insert_samples_and_sources(subgrouped_accessions)
