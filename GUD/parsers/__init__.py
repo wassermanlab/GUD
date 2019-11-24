@@ -439,14 +439,14 @@ class ParseUtililities:
         from multiprocessing import Pool
         import time
 
-        while data_files:
+        while len(data_files) > 0:
 
             # Initialize pool
             pool = Pool(processes=threads)
 
             for p in range(threads):
 
-                if data_files:
+                if len(data_files) > 0:
 
                     # Submit job
                     data_file = data_files.pop(0)
