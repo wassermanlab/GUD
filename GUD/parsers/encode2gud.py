@@ -341,9 +341,6 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
     # Group ENCODE accessions by experiment target and type
     grouped_accessions = _group_ENCODE_accessions(_filter_ENCODE_accessions(feat_type, sample_type))
 
-    print(grouped_accessions)
-    exit(0)
-
     # For each experiment target/type...
     for experiment_target, experiment_type in sorted(grouped_accessions):
 
@@ -374,6 +371,9 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
 
         # Split data
         data_files = _split_data(data_file, threads)
+
+        print(data_files)
+        exit(0)
 
         # Insert samples/sources
         _insert_samples_and_sources(subgrouped_accessions)
