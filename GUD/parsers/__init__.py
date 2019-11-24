@@ -434,7 +434,7 @@ class ParseUtililities:
     # Multiprocess #
     #--------------#
 
-    def insert_data_files_in_parallel(self, data_files, insert_function, threads=1):
+    def insert_data_files_in_parallel(self, data_files, insert_function, threads=1, sleep=0):
 
         from multiprocessing import Pool
         import time
@@ -452,8 +452,8 @@ class ParseUtililities:
                     data_file = data_files.pop(0)
                     pool.apply_async(insert_function, args=(data_file,))
 
-                    # Pause for five second before submitting the next job
-                    time.sleep(1)
+                    # Sleep for a number of seconds before submitting the next job
+                    time.sleep(sleep)
 
                 else:
                     # Exit for loop

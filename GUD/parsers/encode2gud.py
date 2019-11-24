@@ -372,10 +372,11 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         # Split data
         data_files = _split_data(data_file, threads)
 
+        # Insert samples/sources
+        _insert_samples_and_sources(subgrouped_accessions)
+
         # Parallelize inserts to the database
         ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data_file, test=test), threads)
-
-        break
 
         # Remove data files
         if remove:
@@ -778,6 +779,42 @@ def _download_ENCODE_bed_file(encode, dummy_dir="/tmp/", test=False):
 
     return(download_file)
 
+def _insert_samples_and_sources(accessions):
+
+    # Initialize
+    session = Session()
+
+    # For each accession...
+    for accession in accessions:
+
+        # Upsert sample
+        sample = Sample()
+        if not encodes[accession].summary:
+            sample.name = encodes[accession].biosample_name
+        else:
+            sample.name = encodes[accession].summary
+        sample.treatment = samples[encodes[accession].biosample_name][0]
+        sample.cell_line = samples[encodes[accession].biosample_name][1]
+        sample.cancer = samples[encodes[accession].biosample_name][2]
+        if encodes[accession].sex is not None:
+            sample.X = encodes[accession].X
+            sample.Y = encodes[accession].Y       
+        ParseUtils.upsert_sample(session, sample)
+
+        # Upsert source
+        source = Source()
+        source.name = "ENCODE"
+        # This is to satisfy ENCODE's citing guidelines:
+        # https://www.encodeproject.org/help/citing-encode/
+        source.source_metadata = "%s," % accession
+        source.metadata_descriptor = "accession,"
+        source.url = encodes[accession].download_url
+        ParseUtils.upsert_source(session, source)
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
+
 def _insert_data_file(data_file, test=False):
 
     # Initialize
@@ -809,52 +846,26 @@ def _insert_data_file(data_file, test=False):
         # Get region
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
-        if accession not in accession2sample:
-
-            # Upsert sample
-            sample = Sample()
-            if not encodes[accession].summary:
-                sample.name = encodes[accession].biosample_name
-            else:
-                sample.name = encodes[accession].summary
-            sample.treatment = samples[encodes[accession].biosample_name][0]
-            sample.cell_line = samples[encodes[accession].biosample_name][1]
-            sample.cancer = samples[encodes[accession].biosample_name][2]
-            if encodes[accession].sex is not None:
-                sample.X = encodes[accession].X
-                sample.Y = encodes[accession].Y       
-            ParseUtils.upsert_sample(session, sample)
-
-            # Get sample
+        # Get sample
+        if accession not in accession2sample:    
             sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
-
-            # Add sample
             accession2sample.setdefault(accession, sample)
+        else:
+            sample = accession2sample[accession]
 
+        # Get source
         if accession not in accession2source:
-
-            # Upsert source
-            source = Source()
-            source.name = "ENCODE"
-            # This is to satisfy ENCODE's citing guidelines:
-            # https://www.encodeproject.org/help/citing-encode/
-            source.source_metadata = "%s," % accession
-            source.metadata_descriptor = "accession,"
-            source.url = encodes[accession].download_url
-            ParseUtils.upsert_source(session, source)
-
-            # Get source
             source = ParseUtils.get_source(session, source.name, source.source_metadata, source.metadata_descriptor, source.url)
-
-            # Add source
             accession2source.setdefault(accession, source)
+        else:
+            source = accession2source[accession]
 
         # Upsert feature
         feature = Feature()
         feature.region_id = region.uid
-        feature.sample_id = accession2sample[accession].uid
+        feature.sample_id = sample.uid
         feature.experiment_id = experiment.uid
-        feature.source_id = accession2source[accession].uid
+        feature.source_id = source.uid
         feature.score = line[4]
         feature.peak = line[5]
         if Feature.__tablename__ == "dna_accessibility":
