@@ -25,8 +25,8 @@ help_msg = """%s
 inserts features from the UCSC's "refGene" table into GUD.
 
   --genome STR        genome assembly
-  --version STR       refgene version (e.g. "NCBI Homo sapiens
-                      Annotation Release 109 (2018-03-29)")
+  --version STR       e.g. "NCBI Homo sapiens Annotation
+                      Release 109 (2018-03-29)")
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -134,7 +134,7 @@ def main():
 
 def refgene_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
-    e.g. python -m GUD.parsers.refgene2gud --genome hg38 --dummy-dir ./tmp/ --test -P 3306
+    e.g. python -m GUD.parsers.refgene2gud --genome hg38 --test -P 3306
     """
 
     # Initialize
@@ -149,7 +149,7 @@ def refgene_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False,
         from multiprocessing import current_process
 
     # Download data
-    (data_file, url) = _download_data(genome, dummy_dir)
+    data_file, url = _download_data(genome, dummy_dir)
 
     # Get database name
     db_name = GUDUtils._get_db_name()

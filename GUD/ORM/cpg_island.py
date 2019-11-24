@@ -17,11 +17,11 @@ class CpGIsland(GFMixin1, Base):
 
     __tablename__ = "cpg_islands"
 
-    cpgNum = Column("cpgNum", Integer)
-    gcNum = Column("gcNum", Integer)
-    perCpg = Column("perCpg", Float)
-    perGc = Column("perGc", Float)
-    obsExp = Column("obsExp", Float)
+    cpgs = Column("cpgs", Integer, nullable=False)
+    gcs = Column("gcs", Integer, nullable=False)
+    cpg_percent = Column("cpg_percent", Float, nullable=False)
+    gc_percent = Column("gc_percent", Float, nullable=False)
+    obsexp_ratio = Column("obsexp_ratio", Float, nullable=False)
 
     @declared_attr
     def __table_args__(cls):
@@ -42,35 +42,35 @@ class CpGIsland(GFMixin1, Base):
 
         return len(q.all()) == 0
 
-    @classmethod
-    def select_unique(cls, session, regionID, sourceID):
+    # @classmethod
+    # def select_unique(cls, session, regionID, sourceID):
 
-        q = session.query(cls)\
-            .filter(
-                cls.region_id == regionID,
-                cls.source_id == sourceID
-        )
+    #     q = session.query(cls)\
+    #         .filter(
+    #             cls.region_id == regionID,
+    #             cls.source_id == sourceID
+    #     )
 
-        return q.first()
+    #     return q.first()
 
-    @classmethod
-    def as_genomic_feature(self, feat):
+    # @classmethod
+    # def as_genomic_feature(self, feat):
 
-        qualifiers = {
-            "uid": feat.CpGIsland.uid,
-            "cpgNum": feat.CpGIsland.cpgNum,
-            "gcNum": feat.CpGIsland.gcNum,
-            "perCpg": feat.CpGIsland.perCpg,
-            "perGc": feat.CpGIsland.perGc,
-            "obsExp": feat.CpGIsland.obsExp,
-            "source": feat.Source.name,
-        }
+    #     qualifiers = {
+    #         "uid": feat.CpGIsland.uid,
+    #         "cpgNum": feat.CpGIsland.cpgNum,
+    #         "gcNum": feat.CpGIsland.gcNum,
+    #         "perCpg": feat.CpGIsland.perCpg,
+    #         "perGc": feat.CpGIsland.perGc,
+    #         "obsExp": feat.CpGIsland.obsExp,
+    #         "source": feat.Source.name,
+    #     }
 
-        return GenomicFeature(
-            feat.Region.chrom,
-            int(feat.Region.start),
-            int(feat.Region.end),
-            feat_type="CpGIsland",
-            feat_id="%s_%s" % (self.__tablename__, feat.CpGIsland.uid),
-            qualifiers=qualifiers
-        )
+    #     return GenomicFeature(
+    #         feat.Region.chrom,
+    #         int(feat.Region.start),
+    #         int(feat.Region.end),
+    #         feat_type="CpGIsland",
+    #         feat_id="%s_%s" % (self.__tablename__, feat.CpGIsland.uid),
+    #         qualifiers=qualifiers
+    #     )
