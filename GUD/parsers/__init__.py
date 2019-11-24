@@ -439,21 +439,25 @@ class ParseUtililities:
         from multiprocessing import Pool
         import time
 
-        for p in range(0, len(data_files), threads):
+        while data_files:
 
             # Initialize pool
             pool = Pool(processes=threads)
 
-            for q in range(p, p + threads):
+            for p in range(threads):
 
-                if q == len(data_files):
+                if data_files:
+
+                    # Submit job
+                    data_file = data_files.pop(0)
+                    pool.apply_async(insert_function, args=(data_file,))
+
+                    # Pause for five second before submitting the next job
+                    time.sleep(1)
+
+                else:
+                    # Exit for loop
                     break
-
-                # Submit job
-                pool.apply_async(insert_function, args=(data_files[q],))
-
-                # Pause for five second before submitting the next job
-                time.sleep(1)
 
             # Close the pool and wait for everything to finish
             pool.close()
