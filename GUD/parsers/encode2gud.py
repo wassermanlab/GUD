@@ -589,7 +589,7 @@ def _filter_ENCODE_accessions(feat_type, sample_type=None):
     output_types = {
         "accessibility": ["peaks"],
         "atac-seq": [],
-        "histone": ["replicated peaks", "stable peaks", "peaks"],
+        "histone": ["peaks"],
         "tf": ["optimal idr thresholded peaks", "conservative idr thresholded peaks", "pseudoreplicated idr thresholded peaks", "peaks"]
     }
 
