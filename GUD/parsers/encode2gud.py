@@ -372,6 +372,9 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         # Split data
         data_files = _split_data(data_file, threads)
 
+        print(data_files)
+        exit(0)
+
         # Insert samples/sources
         _insert_samples_and_sources(subgrouped_accessions)
 
@@ -859,6 +862,8 @@ def _insert_data_file(data_file, test=False):
             accession2source.setdefault(accession, source)
         else:
             source = accession2source[accession]
+
+        print()
 
         # Upsert feature
         feature = Feature()
