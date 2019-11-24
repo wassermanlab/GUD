@@ -372,9 +372,6 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         # Split data
         data_files = _split_data(data_file, threads)
 
-        print(data_files)
-        exit(0)
-
         # Insert samples/sources
         _insert_samples_and_sources(subgrouped_accessions)
 
@@ -850,7 +847,18 @@ def _insert_data_file(data_file, test=False):
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
         # Get sample
-        if accession not in accession2sample:    
+        if accession not in accession2sample:
+            sample = Sample()
+            if not encodes[accession].summary:
+                sample.name = encodes[accession].biosample_name
+            else:
+                sample.name = encodes[accession].summary
+            sample.treatment = samples[encodes[accession].biosample_name][0]
+            sample.cell_line = samples[encodes[accession].biosample_name][1]
+            sample.cancer = samples[encodes[accession].biosample_name][2]
+            if encodes[accession].sex is not None:
+                sample.X = encodes[accession].X
+                sample.Y = encodes[accession].Y
             sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
             accession2sample.setdefault(accession, sample)
         else:
@@ -858,12 +866,15 @@ def _insert_data_file(data_file, test=False):
 
         # Get source
         if accession not in accession2source:
+            source = Source()
+            source.name = "ENCODE"
+            source.source_metadata = "%s," % accession
+            source.metadata_descriptor = "accession,"
+            source.url = encodes[accession].download_url
             source = ParseUtils.get_source(session, source.name, source.source_metadata, source.metadata_descriptor, source.url)
             accession2source.setdefault(accession, source)
         else:
             source = accession2source[accession]
-
-        print()
 
         # Upsert feature
         feature = Feature()
