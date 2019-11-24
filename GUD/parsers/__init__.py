@@ -436,53 +436,27 @@ class ParseUtililities:
 
     def insert_data_files_in_parallel(self, data_files, insert_function, threads=1):
 
-        # from itertools import islice
         from multiprocessing import Pool
+        import time
 
-        # Parallelize
-        pool = Pool(processes=threads)
-        pool.map(insert_function, data_files)
-        pool.close()
+        for p in range(0, len(data_files), threads):
 
-    #     # Get iterable
-    #     iterable = self.parse_tsv_file(data_file)
+            # Initialize pool
+            pool = Pool(processes=threads)
 
-    #     # Get chunks
-    #     chunks = self._grouper(iterable)
+            for q in range(p, p + threads):
 
-    #     while True:
+                if q == len(data_files):
+                    break
 
-    #         # Groups chunks for multiprocessing
-    #         grouped_chunks = [list(chunk) for chunk in islice(chunks, threads)]
+                # Submit job
+                pool.apply_async(insert_function, args=(data_files[q],))
 
-    #         if grouped_chunks:
-    #             pool.map(insert_function, grouped_chunks)
+                # Pause for five second before submitting the next job
+                time.sleep(1)
 
-    #         else:
-    #             break
-
-    #         if test:
-    #             break
-
-    #     if test:
-    #         for chunk in islice(chunks, threads):
-    #             continue
-
-    #     # Close pool
-    #     pool.close()
-
-    # def _grouper(self, iterable, n=5000, fillvalue=None):
-
-    #     import sys
-    #     # Python 3+
-    #     if sys.version_info > (3, 0):
-    #         from itertools import zip_longest
-    #     # Python 2.7
-    #     else:
-    #         from itertools import izip_longest as zip_longest
-
-    #     args = [iter(iterable)] * n
-
-    #     return(zip_longest(*args, fillvalue=fillvalue))
+            # Close the pool and wait for everything to finish
+            pool.close()
+            pool.join()
 
 ParseUtils = ParseUtililities()

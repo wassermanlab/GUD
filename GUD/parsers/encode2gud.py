@@ -46,7 +46,7 @@ into GUD.
   --feature STR       type of genomic feature ("atac-seq"
                       "accessibility", "histone" or "tf")
   --sample-type STR   restrict to samples of speficied type
-                      ("cells" or "tissues"; default = ignore)
+                      ("cell" or "tissue"; default = ignore)
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -221,7 +221,7 @@ def check_args(args):
         exit(0)
 
     # Check for sample types
-    valid_sample_types = ["cells", "tissues"]
+    valid_sample_types = ["cell", "tissue"]
     if args.sample_type is not None:
         if args.sample_type not in valid_sample_types:
             error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--sample-type\"", "invalid choice", "\"%s\" (choose from" % args.sample_type, "%s or ignore this option)\n" % " ".join(["\"%s\"" % i for i in valid_sample_types])]
@@ -321,16 +321,28 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
     session.close()
     engine.dispose()
 
-    # Parse metadata
-    # Add experiment metadata (i.e. biosample sex and summary)
-    encodes = _add_experiment_metadata(_parse_metadata(genome, metadata_file))
+    # Unless pickle file exists
+    pickle_file = "%s.pickle" % metadata_file
+    if not os.path.exists(pickle_file):
 
-    # Filter ENCODE objects (i.e. keep the best type of file per accession)
-    # Group ENCODE objects by experiment target and type
-    grouped_encodes = _group_ENCODE_objects(_filter_ENCODE_objects(encodes, sample_type))
+        # Parse metadata
+        # Add experiment metadata (i.e. biosample sex and summary)
+        encodes = _add_experiment_metadata(_parse_metadata(genome, metadata_file))
+
+        handle = ParseUtils._get_file_handle(pickle_file, "wb")
+        encodes = pickle.dump(encodes, handle)
+
+    else:
+
+        handle = ParseUtils._get_file_handle(pickle_file, "rb")
+        encodes = pickle.load(handle)
+
+    # Filter ENCODE accessions (i.e. for each experiment, keep the accession from the best type of file)
+    # Group ENCODE accessions by experiment target and type
+    grouped_accessions = _group_ENCODE_accessions(_filter_ENCODE_accessions(feat_type, sample_type))
 
     # For each experiment target/type...
-    for experiment_target, experiment_type in sorted(grouped_encodes):
+    for experiment_target, experiment_type in sorted(grouped_accessions):
 
         # Beware, for this should not be possible!
         if experiment_target is not None:
@@ -354,14 +366,16 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         engine.dispose()
 
         # Prepare data
-        subgrouped_encodes = grouped_encodes[(experiment_target, experiment_type)]
-        data_file = _preprocess_data(subgrouped_encodes, dummy_dir, test, threads)
+        subgrouped_accessions = grouped_accessions[(experiment_target, experiment_type)]
+        data_file = _preprocess_data(subgrouped_accessions, dummy_dir, test, threads)
 
         # Split data
         data_files = _split_data(data_file, threads)
 
         # Parallelize inserts to the database
         ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data_file, test=test), threads)
+
+        break
 
         # Remove data files
         if remove:
@@ -559,70 +573,83 @@ def _add_experiment_metadata(encode_objects):
 
     return(updated_encode_objects)
 
-def _filter_ENCODE_objects(encode_objects, sample_type=None):
+def _filter_ENCODE_accessions(feat_type, sample_type=None):
 
     # Initialize
-    grouped_encode_objects = {}
-    filtered_encode_objects = set()
-    output_types = ["optimal idr thresholded peaks", "pseudoreplicated idr thresholded peaks", "peaks", "alignments"]
+    done = set()
+    grouped_accessions = {}
+    filtered_accessions = set()
+
+    # Possible output files (from ENCODE pipelines)
+    # https://www.encodeproject.org/atac-seq/
+    # https://www.encodeproject.org/data-standards/dnase-seq/
+    # https://www.encodeproject.org/chip-seq/histone/
+    # https://www.encodeproject.org/chip-seq/transcription_factor/
+    output_types = {
+        "accessibility": ["peaks"],
+        "atac-seq": [],
+        "histone": ["replicated peaks", "stable peaks", "peaks"],
+        "tf": ["optimal idr thresholded peaks", "conservative idr thresholded peaks", "pseudoreplicated idr thresholded peaks", "peaks"]
+    }
 
     # For each accession...
-    for accession in encode_objects:
+    for accession in encodes:
 
         # Group ENCODE objects by experiment accession
-        encode = encode_objects[accession]
-        if sample_type == "tissues" and encode.biosample_type != "tissue":
+        encode = encodes[accession]
+        if sample_type == "tissue" and encode.biosample_type != "tissue":
             continue
-        elif sample_type == "cells" and encode.biosample_type == "tissue":
+        elif sample_type == "cell" and encode.biosample_type == "tissue":
             continue
-        grouped_encode_objects.setdefault(encode.experiment_accession, [])
-        grouped_encode_objects[encode.experiment_accession].append(encode)
+        grouped_accessions.setdefault(encode.experiment_accession, [])
+        grouped_accessions[encode.experiment_accession].append(accession)
 
-    # For each experiment accession...
-    for accession in grouped_encode_objects:
+    # For each output type...
+    for out_type in output_types[feat_type]:
 
-        # Initialize
-        exit_loop = False
+        # For each experiment accession...
+        for experiment_accession in grouped_accessions:        
 
-        # For each output type...
-        for out_type in output_types:
+            # Skip experiment
+            if experiment_accession in done:
+                continue
 
-            # For each ENCODE object...
-            for encode in grouped_encode_objects[accession]:
-                if encode.output_type == out_type:
-                    filtered_encode_objects.add(encode)
-                    exit_loop = True
+            # For each accession...
+            for accession in grouped_accessions[experiment_accession]:
 
-            if exit_loop:
-                break
+                if encodes[accession].output_type.lower() == out_type:
+                    filtered_accessions.add(accession)
+                    done.add(experiment_accession)
 
-    return(filtered_encode_objects)
+    return(filtered_accessions)
 
-def _group_ENCODE_objects(encode_objects):
+def _group_ENCODE_accessions(accessions):
 
     # Initialize
-    grouped_encode_objects = {}
+    grouped_accessions = {}
 
-    # For each ENCODE object...
-    for encode in encode_objects:
+    # For each accession...
+    for accession in accessions:
 
         # Initialize
-        experiment_target = encode.experiment_target
-        experiment_type = encode.experiment_type
+        experiment_target = encodes[accession].experiment_target
+        experiment_type = encodes[accession].experiment_type
 
         # Group metadata
-        grouped_encode_objects.setdefault((experiment_target, experiment_type), set())
-        grouped_encode_objects[(experiment_target, experiment_type)].add(encode)
+        grouped_accessions.setdefault((experiment_target, experiment_type), set())
+        grouped_accessions[(experiment_target, experiment_type)].add(accession)
 
-    return(grouped_encode_objects)
+    return(grouped_accessions)
 
-def _preprocess_data(encode_objects, dummy_dir="/tmp/", test=False, threads=1):
+def _preprocess_data(accessions, dummy_dir="/tmp/", test=False, threads=1):
 
     # Initialize
     dummy_files = []
+    encode_objects = set()
 
     # Get label
-    encode = next(iter(encode_objects))
+    accession = next(iter(accessions))
+    encode = encodes[accession]
     label = encode.experiment_type
     if encode.experiment_target is not None:
         label += ".%s" % encode.experiment_target
@@ -634,6 +661,10 @@ def _preprocess_data(encode_objects, dummy_dir="/tmp/", test=False, threads=1):
         # Skip if BED file exists
         dummy_file = os.path.join(dummy_dir, "dummy.bed")
         if not os.path.exists(dummy_file):
+
+            # For each accession...
+            for accession in accessions:
+                encode_objects.add(encodes[accession])
 
             # Get ENCODE BED files
             pool = Pool(processes=threads)
@@ -790,8 +821,8 @@ def _insert_data_file(data_file, test=False):
             sample.cell_line = samples[encodes[accession].biosample_name][1]
             sample.cancer = samples[encodes[accession].biosample_name][2]
             if encodes[accession].sex is not None:
-                sample.X_chroms = encodes[accession].X
-                sample.Y_chroms = encodes[accession].Y       
+                sample.X = encodes[accession].X
+                sample.Y = encodes[accession].Y       
             ParseUtils.upsert_sample(session, sample)
 
             # Get sample
@@ -807,8 +838,8 @@ def _insert_data_file(data_file, test=False):
             source.name = "ENCODE"
             # This is to satisfy ENCODE's citing guidelines:
             # https://www.encodeproject.org/help/citing-encode/
-            source.source_metadata = "%s,%s," % (accession, encodes[accession].experiment_accession)
-            source.metadata_descriptor = "file_accession,experiment_accession,"
+            source.source_metadata = "%s," % accession
+            source.metadata_descriptor = "accession,"
             source.url = encodes[accession].download_url
             ParseUtils.upsert_source(session, source)
 
@@ -816,7 +847,7 @@ def _insert_data_file(data_file, test=False):
             source = ParseUtils.get_source(session, source.name, source.source_metadata, source.metadata_descriptor, source.url)
 
             # Add source
-            accession2sample.setdefault(accession, sample)
+            accession2source.setdefault(accession, source)
 
         # Upsert feature
         feature = Feature()
