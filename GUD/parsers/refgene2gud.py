@@ -18,7 +18,7 @@ from GUD.ORM.source import Source
 from . import ParseUtils
 
 usage_msg = """
-usage: %s --genome STR [-h] [options]
+usage: %s --genome STR --version STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
@@ -134,7 +134,7 @@ def main():
 
 def refgene_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
-    e.g. python -m GUD.parsers.refgene2gud --genome hg38 --test -P 3306
+    e.g. python -m GUD.parsers.refgene2gud --genome hg38 --version abcd --test -P 3306
     """
 
     # Initialize

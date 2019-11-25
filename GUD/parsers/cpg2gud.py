@@ -18,7 +18,7 @@ from GUD.ORM.source import Source
 from . import ParseUtils
 
 usage_msg = """
-usage: %s --genome STR [-h] [options]
+usage: %s --genome STR --version STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
@@ -134,7 +134,7 @@ def main():
 
 def cpg_islands_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
-    e.g. python -m GUD.parsers.cpg2gud --genome hg38 --test -P 3306
+    e.g. python -m GUD.parsers.cpg2gud --genome hg38 --version abcd --test -P 3306
     """
 
     # Initialize
@@ -190,8 +190,6 @@ def cpg_islands_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=Fa
 
     # Split data
     data_files = _split_data(data_file, threads)
-
-    print(data_files)
 
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
@@ -286,8 +284,8 @@ def _insert_data(data_file, test=False):
         cpg_island = CpGIsland()
         cpg_island.cpgs = line[6]
         cpg_island.gcs = line[7]
-        cpg_island.cpg_percent = line[8]
-        cpg_island.gc_percent = line[9]
+        cpg_island.percent_cpg = line[8]
+        cpg_island.percent_gc = line[9]
         cpg_island.obsexp_ratio = line[10]
         cpg_island.region_id = region.uid
         cpg_island.source_id = source.uid

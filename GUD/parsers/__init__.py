@@ -24,6 +24,7 @@ from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.mask import Mask
 from GUD.ORM.region import Region
+from GUD.ORM.repeat_mask import RepeatMask
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
@@ -394,6 +395,14 @@ class ParseUtililities:
         if Region.is_unique(session, region.chrom, region.start, region.end):
             session.add(region)
             session.commit()
+
+    def upsert_rmsk(self, session, repeat):
+
+        if RepeatMask.is_unique(session, repeat.region_id, repeat.source_id, repeat.name, repeat.strand):
+            session.add(repeat)
+            session.commit()
+        else:
+            print("here")
 
     def upsert_sample(self, session, sample):
 

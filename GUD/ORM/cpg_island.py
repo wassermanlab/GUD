@@ -19,28 +19,17 @@ class CpGIsland(GFMixin1, Base):
 
     cpgs = Column("cpgs", Integer, nullable=False)
     gcs = Column("gcs", Integer, nullable=False)
-    cpg_percent = Column("cpg_percent", Float, nullable=False)
-    gc_percent = Column("gc_percent", Float, nullable=False)
+    percent_cpg = Column("percent_cpg", Float, nullable=False)
+    percent_gc = Column("percent_gc", Float, nullable=False)
     obsexp_ratio = Column("obsexp_ratio", Float, nullable=False)
 
     @declared_attr
     def __table_args__(cls):
         return (
         UniqueConstraint(cls.region_id, cls.source_id),
-        Index("ix_join", cls.source_id, cls.region_id), # query by bin range
+        Index("ix_join", cls.region_id, cls.source_id),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
-
-    @classmethod
-    def is_unique(cls, session, regionID, sourceID):
-
-        q = session.query(cls)\
-            .filter(
-                cls.region_id == regionID,
-                cls.source_id == sourceID
-        )
-
-        return len(q.all()) == 0
 
     # @classmethod
     # def select_unique(cls, session, regionID, sourceID):

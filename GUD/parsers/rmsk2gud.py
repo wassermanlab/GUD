@@ -2,49 +2,50 @@
 
 import argparse
 from binning import assign_bin
+from functools import partial
 import getpass
 from multiprocessing import cpu_count
-from multiprocessing import current_process
 import os
 import re
-from sqlalchemy_utils import database_exists
+import subprocess
 import sys
-# Python 3+
-if sys.version_info > (3, 0):
-    from urllib.request import urlopen, urlretrieve
-# Python 2.7
-else:
-    from urllib import urlopen, urlretrieve
 
 # Import from GUD module
-from GUD import GUDglobals
+from GUD import GUDUtils
 from GUD.ORM.region import Region
-from GUD.ORM.mask import Mask
+from GUD.ORM.repeat_mask import RepeatMask
 from GUD.ORM.source import Source
-from . import _get_chroms, _get_db_name, _get_region, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_mask, _upsert_region, _upsert_source
+from . import ParseUtils
 
 usage_msg = """
-usage: %s --genome STR [-h] [options]
+usage: %s --genome STR --version STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
 inserts features from the UCSC's "rmsk" table into GUD.
 
   --genome STR        genome assembly
+  --version STR       e.g. "2018-08-10" (date last updated)
 
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
-  -t, --threads       number of additional threads to use
-                      (default = %s)
+  -r, --remove        remove downloaded files (default = False)
+  -t, --test          limit the total of inserts to ~1K per
+                      thread for testing (default = False)
+  --threads INT       number of threads to use (default = %s)
 
 mysql arguments:
   -d STR, --db STR    database name (default = "%s")
   -H STR, --host STR  host name (default = "localhost")
   -p STR, --pwd STR   password (default = ignore this option)
-  -P STR, --port STR  port number (default = %s)
+  -P INT, --port INT  port number (default = %s)
   -u STR, --user STR  user name (default = current user)
-""" % (usage_msg, (cpu_count() - 1), GUDglobals.db_name, GUDglobals.db_port)
+""" % (usage_msg, (cpu_count() - 1), GUDUtils.db, GUDUtils.port)
+
+#-------------#
+# Functions   #
+#-------------#
 
 #-------------#
 # Functions   #
@@ -59,19 +60,22 @@ def parse_args():
 
     # Mandatory args
     parser.add_argument("--genome")
+    parser.add_argument("--version")
 
     # Optional args
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("-t", "--threads", default=(cpu_count() - 1))
+    optional_group.add_argument("-r", "--remove", action="store_true")
+    optional_group.add_argument("-t", "--test", action="store_true")
+    optional_group.add_argument("--threads", default=(cpu_count() - 1))
     
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=GUDglobals.db_name)
+    mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
     mysql_group.add_argument("-H", "--host", default="localhost")
     mysql_group.add_argument("-p", "--pwd")
-    mysql_group.add_argument("-P", "--port", default=GUDglobals.db_port)
+    mysql_group.add_argument("-P", "--port", default=GUDUtils.port)
     mysql_group.add_argument("-u", "--user", default=getpass.getuser())
 
     args = parser.parse_args()
@@ -91,12 +95,12 @@ def check_args(args):
         exit(0)
 
     # Check mandatory arguments
-    if not args.genome:
-        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\" is required\n"]
+    if not args.genome or not args.version:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\" \"--version\" are required\n"]
         print(": ".join(error))
         exit(0)
 
-    # Check "-t" argument
+    # Check "--threads" argument
     try:
         args.threads = int(args.threads)
     except:
@@ -108,122 +112,193 @@ def check_args(args):
     if not args.pwd:
         args.pwd = ""
 
+    # Check MySQL port
+    try:
+        args.port = int(args.port)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"-P\" \"--port\"", "invalid int value", "\"%s\"\n" % args.port]
+        print(": ".join(error))
+        exit(0)
+
 def main():
 
     # Parse arguments
     args = parse_args()
 
-    # Insert repeat mask data
-    rmsk_to_gud(args.user, args.pwd, args.host, args.port, args.db, args.genome, args.dummy_dir, args.threads)
+    # Set MySQL options
+    GUDUtils.user = args.user
+    GUDUtils.pwd = args.pwd
+    GUDUtils.host = args.host
+    GUDUtils.port = args.port
+    GUDUtils.db = args.db
 
-def rmsk_to_gud(user, pwd, host, port, db, genome, dummy_dir="/tmp/", threads=1):
+    # Insert repeating elements by RepeatMasker
+    rmsk_to_gud(args.genome, args.version, args.dummy_dir, args.remove, args.test, args.threads)
+
+def rmsk_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
-    python -m GUD.parsers.rmsk2gud --genome hg19 --dummy-dir ./tmp/
+    e.g. python -m GUD.parsers.rmsk2gud --genome hg38 --version abcd --test -P 3306
     """
 
-    # Globals
+    # Initialize
     global chroms
     global engine
     global Session
     global source
 
+    # Testing
+    if test:
+        global current_process
+        from multiprocessing import current_process
+
     # Download data
-    dummy_file = _download_data(genome, dummy_dir)
+    data_file, url = _download_data(genome, dummy_dir)
 
     # Get database name
-    db_name = _get_db_name(user, pwd, host, port, db)
-
-    # If database does not exist...
-    if not database_exists(db_name):
-        _initialize_gud_db(user, pwd, host, port, db, genome)
+    db_name = GUDUtils._get_db_name()
 
     # Get engine/session
-    engine, Session = _initialize_engine_session(db_name)
-    session = Session()
+    engine, Session = GUDUtils.get_engine_session(db_name)
+
+    # Initialize parser utilities
+    ParseUtils.genome = genome
+    ParseUtils.dbname = db_name
+    ParseUtils.engine = engine
+
+    # If database does not exist...
+    ParseUtils.initialize_gud_db()
 
     # Create table
-    if not engine.has_table(Mask.__tablename__):
-        Mask.__table__.create(bind=engine)
+    ParseUtils.create_table(RepeatMask)
+
+    # Start a new session
+    session = Session()
 
     # Get valid chromosomes
-    chroms = _get_chroms(session)
+    chroms = ParseUtils.get_chroms(session)
 
     # Get source
     source = Source()
-    m = re.search("^%s/*(.+).txt.gz$" % dummy_dir, dummy_file) 
-    source_name = m.group(1)
-    source.name = source_name
-    _upsert_source(session, source)
-    source = _get_source(session, source_name)
+    m = re.search("^%s/*(.+).txt.gz$" % dummy_dir, data_file) 
+    source.name = m.group(1)
+    source.source_metadata = "%s," % version
+    source.metadata_descriptor = "version,"
+    source.url = url
+    ParseUtils.upsert_source(session, source)
+    source = ParseUtils.get_source(session, source.name, source.source_metadata, source.metadata_descriptor, url)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
 
-    # Parallelize inserts to the database
-    _process_data_in_chunks(dummy_file, _insert_data_in_chunks, threads)
+    # Split data
+    data_files = _split_data(data_file, threads)
 
-    # Dispose session
+    # Parallelize inserts to the database
+    ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
+
+    # Remove data files
+    if remove:
+        if os.path.exists(data_file):
+            os.remove(data_file)
+        for data_file in data_files:
+            if os.path.exists(data_file):
+                os.remove(data_file)
+
+    # Remove session
     Session.remove()
 
-    # # Remove downloaded file
-    # if os.path.exists(dummy_file):
-    #     os.remove(dummy_file)
-
 def _download_data(genome, dummy_dir="/tmp/"):
+
+    # Python 3+
+    if sys.version_info > (3, 0):
+        from urllib.request import urlretrieve
+    # Python 2.7
+    else:
+        from urllib import urlretrieve
 
     # Initialize
     url = "ftp://hgdownload.soe.ucsc.edu/goldenPath/%s/database" % genome
     ftp_file = os.path.join(url, "rmsk.txt.gz")
-    dummy_file = os.path.join(dummy_dir, "rmsk.txt.gz")
+    data_file = os.path.join(dummy_dir, "rmsk.txt.gz")
 
     # Download data
-    if not os.path.exists(dummy_file):
-        f = urlretrieve(ftp_file, dummy_file)
+    if not os.path.exists(data_file):
+        f = urlretrieve(ftp_file, data_file)
 
-    return(dummy_file)
+    return(data_file, ftp_file)
 
-def _insert_data_in_chunks(chunk):
+def _split_data(data_file, threads=1):
 
-    print(current_process().name)
+    # Initialize
+    split_files = []
+    split_dir = os.path.dirname(os.path.realpath(data_file))
+
+    # Get number of lines
+    output = subprocess.check_output(["zless %s | wc -l" % data_file], shell=True)
+    m = re.search("(\d+)", str(output))
+    L = float(m.group(1))
+
+    # Split
+    prefix = "%s." % data_file.split("/")[-1]
+    cmd = "zless %s | split -d -l %s - %s" % (data_file, int(L/threads)+1, os.path.join(split_dir, prefix))
+    subprocess.run(cmd, shell=True)
+
+    # For each split file...
+    for split_file in os.listdir(split_dir):
+
+        # Append split file
+        if split_file.startswith(prefix):
+            split_files.append(os.path.join(split_dir, split_file))
+
+    return(split_files)
+
+def _insert_data(data_file, test=False):
 
     # Initialize
     session = Session()
 
+    # Testing
+    if test:
+        lines = 0
+        print(current_process().name)
+
     # For each line...
-    for line in chunk:
+    for line in ParseUtils.parse_tsv_file(data_file):
 
         # Skip empty lines
         if not line:
             continue
 
-        # Get region
+        # Upsert region
         region = Region()
-        region.chrom = line[5]
-        region.start = int(line[6])
-        region.end = int(line[7])
+        region.chrom = line[5][3:]
+        region.start = line[6]
+        region.end = line[7]
         region.bin = assign_bin(region.start, region.end)
-        region.strand = line[9]
-
-        # Ignore non-standard chroms, scaffolds, etc.
         if region.chrom not in chroms:
             continue
+        ParseUtils.upsert_region(session, region)
 
-        # Upsert region
-        _upsert_region(session, region)
+        # Get region
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
-        # Get region ID
-        region = _get_region(session, region.chrom, region.start, region.end, region.strand)
+        # Upsert CpG island
+        repeat = RepeatMask()
+        repeat.score = line[1]
+        repeat.name = line[10]
+        repeat.repeat_class = line[11]
+        repeat.family = line[12]
+        repeat.strand = line[9]
+        repeat.region_id = region.uid
+        repeat.source_id = source.uid
+        ParseUtils.upsert_rmsk(session, repeat)
 
-        # Get mask
-        mask = Mask()
-        mask.regionID = region.uid
-        mask.sourceID = source.uid
-        mask.name = "%s," % ",".join(line[10:12+1])
-        mask.score = float(line[1])
-
-        # Upsert mask
-        _upsert_mask(session, mask)
+        # Testing
+        if test:
+            lines += 1
+            if lines > 1000:
+                break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
