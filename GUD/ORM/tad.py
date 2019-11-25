@@ -12,10 +12,8 @@ from sqlalchemy.ext.declarative import declared_attr
 class TAD(GFMixin2, Base):
     # table declerations
     __tablename__ = "tads"
-    restriction_enzyme = Column(
-        "restriction_enzyme", String(25), nullable=False)
-    hierarchical_level = Column(
-        "hierarchical_level", String(25))
+    restriction_enzyme = Column("restriction_enzyme", String(25), nullable=False)
+    hierarchical_level = Column("hierarchical_level", String(25))
 
     @declared_attr
     def __table_args__(cls):

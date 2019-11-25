@@ -70,24 +70,24 @@ class Gene(GFMixin1, Base):
         exonEnds = []
 
         # For each exon start...
-        for i in str(feat.Gene.exonStarts).split(","):
+        for i in str(feat.Gene.exon_starts).split(","):
             if i.isdigit():
                 exonStarts.append(int(i))
 
         # For each exon end...
-        for i in str(feat.Gene.exonEnds).split(","):
+        for i in str(feat.Gene.exon_ends).split(","):
             if i.isdigit():
                 exonStarts.append(int(i))
 
         # Define qualifiers
         qualifiers = {
             "uid": feat.Gene.uid,
-            "accession_number": feat.Gene.name,
+            "name": feat.Gene.name,
             "gene_symbol": feat.Gene.gene_symbol,
-            "cdsStart": int(feat.Gene.cdsStart),
-            "cdsEnd": int(feat.Gene.cdsEnd),
-            "exonStarts": feat.Gene.exonStarts,
-            "exonEnds": feat.Gene.exonEnds,
+            "coding_start": int(feat.Gene.coding_start),
+            "coding_end": int(feat.Gene.coding_end),
+            "exon_starts": feat.Gene.exon_starts,
+            "exon_ends": feat.Gene.exon_ends,
             "source": feat.Source.name,
         }
         genomic_feature = super().as_genomic_feature(feat)

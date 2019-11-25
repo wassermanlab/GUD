@@ -40,21 +40,21 @@ class RepeatMask(GFMixin1, Base):
 
         return len(q.all()) == 0
 
-    # # class methods 
-    # @classmethod
-    # def as_genomic_feature(self, feat):
-    #     """
-    #     extend parent class by adding qualifiers
-    #     """
-    #     qualifiers = {
-    #         "uid": feat.RepeatMask.uid,
-    #         "source": feat.Source.name,
-    #         "swScore": feat.RepeatMask.swScore,
-    #         "repName": feat.RepeatMask.repName,
-    #         "repClass": feat.RepeatMask.repClass,
-    #         "repFamily": feat.RepeatMask.repFamily,
-    #         "repClass": feat.RepeatMask.repClass
-    #     }
-    #     genomic_feature = super().as_genomic_feature(feat)
-    #     genomic_feature.qualifiers = qualifiers
-    #     return genomic_feature
+    # class methods 
+    @classmethod
+    def as_genomic_feature(self, feat):
+        """
+        extend parent class by adding qualifiers
+        """
+        qualifiers = {
+            "uid": feat.RepeatMask.uid,
+            "source": feat.Source.name,
+            "score": feat.RepeatMask.score,
+            "name": feat.RepeatMask.name,
+            "repeat_class": feat.RepeatMask.repeat_class,
+            "family": feat.RepeatMask.family,
+            "strand": feat.RepeatMask.strand,
+        }
+        genomic_feature = super().as_genomic_feature(feat)
+        genomic_feature.qualifiers = qualifiers
+        return genomic_feature

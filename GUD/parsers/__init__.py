@@ -22,7 +22,6 @@ from GUD.ORM.copy_number_variant import CNV
 from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.histone_modification import HistoneModification
-from GUD.ORM.mask import Mask
 from GUD.ORM.region import Region
 from GUD.ORM.repeat_mask import RepeatMask
 from GUD.ORM.sample import Sample
@@ -341,7 +340,7 @@ class ParseUtililities:
     def get_sample(self, session, name, X, Y, treatment, cell_line, cancer):
         return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
 
-    def get_source(self, session, name, source_metadata, metadata_descriptor, url):
+    def get_source(self, session, name, source_metadata=None, metadata_descriptor=None, url=None):
         return(Source.select_unique(session, name, source_metadata, metadata_descriptor, url))
 
     #--------------#
@@ -384,11 +383,11 @@ class ParseUtililities:
             session.add(histone)
             session.commit()
 
-    def upsert_mask(self, session, mask):
+    # def upsert_mask(self, session, mask):
 
-        if Mask.is_unique(session, mask.region_id, mask.source_id):
-            session.add(mask)
-            session.commit()
+    #     if Mask.is_unique(session, mask.region_id, mask.source_id):
+    #         session.add(mask)
+    #         session.commit()
 
     def upsert_region(self, session, region):
 

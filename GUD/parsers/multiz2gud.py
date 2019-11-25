@@ -289,7 +289,7 @@ def _insert_data(data_file, test=False):
         ParseUtils.upsert_region(session, region)
 
         # Get region ID
-        region = ParseUtils.get_region(session, region.chrom, region.start, region.end, region.strand)
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
         # Get conservation
         conservation = Conservation()

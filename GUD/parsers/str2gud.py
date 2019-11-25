@@ -6,6 +6,7 @@ from GUD.ORM.source import Source
 from GUD.ORM.region import Region
 from GUD import GUDUtils
 from binning import assign_bin
+from copy import deepcopy
 from functools import partial
 import getpass
 from multiprocessing import Pool, cpu_count
@@ -206,7 +207,6 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     # Get valid chromosomes
     chroms = ParseUtils.get_chroms(session)
 
-
     # Get source
     source = Source()
     source.name = source_name
@@ -217,16 +217,12 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     session.close()
     engine.dispose()
 
-    # Prepare data
-    data_file = str_file
-
     # Split data
-    data_files = _split_data(data_file, threads)
-
+    data_files = _split_data(str_file, threads)
+    print(data_files)
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(
-        data_files, partial(_insert_data, based=based, test=test), threads)
-
+        deepcopy(data_files), partial(_insert_data, based=based, test=test), threads)
     # Remove data file
     for df in data_files:
         if os.path.exists(df):
@@ -237,34 +233,28 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
 
 def _split_data(data_file, threads=1):
 
-    # import math
-
     # Initialize
     split_files = []
+    split_dir = os.path.dirname(os.path.realpath(data_file))
 
-    # For each chromosome...
-    for chrom in chroms:
+    # Get number of lines
+    output = subprocess.check_output(["wc -l %s" % data_file], shell=True)
+    m = re.search("(\d+)", str(output))
+    L = float(m.group(1))
 
-        # Skip if file already split
-        split_file = "%s.%s" % (data_file, chrom)
-        if not os.path.exists(split_file):
+    # Split
+    prefix = "%s." % data_file.split("/")[-1]
+    cmd = "less %s | split -d -l %s - %s" % (data_file, int(L/threads)+1, os.path.join(split_dir, prefix))
+    subprocess.run(cmd, shell=True)
 
-            # Parallel split
-            # cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (
-            #     threads, chrom, data_file, split_file)
-            cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (
-                threads, "chr%s" % chrom, data_file, split_file)
-            subprocess.call(cmd, shell=True)
+    # For each split file...
+    for split_file in os.listdir(split_dir):
 
         # Append split file
-        statinfo = os.stat(split_file)
-        if statinfo.st_size:
-            split_files.append(split_file)
-        else:
-            os.remove(split_file)
+        if split_file.startswith(prefix):
+            split_files.append(os.path.join(split_dir, split_file))
 
     return(split_files)
-
 
 def _insert_data(data_file, based=1, test=False):
 
@@ -278,15 +268,17 @@ def _insert_data(data_file, based=1, test=False):
 
     # For each line...
     for line in ParseUtils.parse_tsv_file(data_file):
-
         # Get region
         region = Region()
         # region.chrom = line[0]
-        region.chrom = line[0][3:]
-        region.start = int(line[1])
+        if line[0].startswith("chr"):
+            region.chrom = line[0][3:]
+        else:
+            region.chrom = line[0]
+        region.start = line[1]
         if based:
             region.start -= 1
-        region.end = int(line[2])
+        region.end = line[2]
         region.bin = assign_bin(region.start, region.end)
 
         # Ignore non-standard chroms, scaffolds, etc.
@@ -298,7 +290,7 @@ def _insert_data(data_file, based=1, test=False):
 
         # Get region ID
         region = ParseUtils.get_region(
-            session, region.chrom, region.start, region.end, region.strand)
+            session, region.chrom, region.start, region.end)
 
         # Get feature
         STR = ShortTandemRepeat()

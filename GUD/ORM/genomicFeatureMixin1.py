@@ -134,7 +134,6 @@ class GFMixin1(object):
             feat.Region.chrom,
             int(feat.Region.start),
             int(feat.Region.end),
-            strand=feat.Region.strand,
             feat_type=self.__tablename__,
             feat_id="%s_%s" % (self.__tablename__,
                                getattr(feat, self.__name__).uid),
