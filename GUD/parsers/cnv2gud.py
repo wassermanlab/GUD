@@ -23,11 +23,11 @@ import argparse
 # --cnv_file /space/home/tavshalom/GUD_TABLES/Transfer_GRCh38_190723/GRCh38.nr_deletions.GUDformatted.tsv \
 # -d test -u gud_w 
 usage_msg = """
-usage: %s --genome STR [-h] [options]
+usage: %s --genome STR --cnv_file FILE --source_name STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
-inserts copy number variants from curated sourcesq.
+inserts copy number variants from curated sources into GUD.
 
   --genome STR        genome assembly
   --cnv_file FILE     Copy number variant file with columns #chrom\tstart\tend\tcopy_number_change\tclinical_assertion\tclinvar_accession\tdbVar_accession
@@ -130,8 +130,6 @@ def check_args(args):
         print(": ".join(error))
         exit(0)
 
-# str_file, based, source_name
-
 
 def main():
 
@@ -147,10 +145,9 @@ def main():
 
     # Insert ENCODE data
     cnv_to_gud(args.genome, args.source_name, args.cnv_file,
-                  args.test, args.threads)
+               args.test, args.threads)
 
 
-# TODO removed m and dummy_dir
 def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
     """
     python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --snv_file <FILE> 
@@ -200,11 +197,8 @@ def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
     session.close()
     engine.dispose()
 
-    # Prepare data
-    data_file = cnv_file
-
     # Split data
-    data_files = _split_data(data_file, threads)
+    data_files = _split_data(cnv_file, threads)
 
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(
@@ -220,29 +214,26 @@ def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
 
 def _split_data(data_file, threads=1):
 
-    # import math
-
     # Initialize
     split_files = []
+    split_dir = os.path.dirname(os.path.realpath(data_file))
 
-    # For each chromosome...
-    for chrom in chroms:
+    # Get number of lines
+    output = subprocess.check_output(["wc -l %s" % data_file], shell=True)
+    m = re.search("(\d+)", str(output))
+    L = float(m.group(1))
 
-        # Skip if file already split
-        split_file = "%s.%s" % (data_file, chrom)
-        if not os.path.exists(split_file):
+    # Split
+    prefix = "%s." % data_file.split("/")[-1]
+    cmd = "less %s | split -d -l %s - %s" % (data_file, int(L/threads)+1, os.path.join(split_dir, prefix))
+    subprocess.run(cmd, shell=True)
 
-            # Parallel split
-            cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (
-                threads, chrom, data_file, split_file)
-            subprocess.call(cmd, shell=True)
+    # For each split file...
+    for split_file in os.listdir(split_dir):
 
         # Append split file
-        statinfo = os.stat(split_file)
-        if statinfo.st_size:
-            split_files.append(split_file)
-        else:
-            os.remove(split_file)
+        if split_file.startswith(prefix):
+            split_files.append(os.path.join(split_dir, split_file))
 
     return(split_files)
 
@@ -262,20 +253,15 @@ def _insert_data(data_file, test=False):
         # Get region
         region = Region()
         region.chrom = str(line[0])
-        region.start = int(line[1])
-        region.end = int(line[2])
+        region.start = line[1]
+        region.end = line[2]
         region.bin = assign_bin(region.start, region.end)
-
-        # Ignore non-standard chroms, scaffolds, etc.
         if region.chrom not in chroms:
             continue
-
-        # Upsert region
         ParseUtils.upsert_region(session, region)
 
-        # Get region ID
-        region = ParseUtils.get_region(
-            session, region.chrom, region.start, region.end)
+        # Get region
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
         # Get feature
         cnv = CNV()

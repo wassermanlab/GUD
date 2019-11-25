@@ -23,7 +23,7 @@ import argparse
 # --str_file /space/home/tavshalom/GUD_TABLES/Transfer_GRCh38_190723/Genomic_STR.GUDformatted.tsv \
 # --based 1 -d hg38 -u gud_w 
 usage_msg = """
-usage: %s --genome STR [-h] [options]
+usage: %s --genome STR --str_file FILE [-h] --based INT --source_name STR [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
@@ -147,8 +147,6 @@ def check_args(args):
         print(": ".join(error))
         exit(0)
 
-# str_file, based, source_name
-
 
 def main():
 
@@ -164,10 +162,9 @@ def main():
 
     # Insert ENCODE data
     str_to_gud(args.genome, args.source_name, args.str_file,
-                  args.based, args.test, args.threads)
+               args.based, args.test, args.threads)
 
 
-# TODO removed m and dummy_dir
 def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     """
     python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --str_file <FILE> --based <0|1>
@@ -223,10 +220,10 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     ParseUtils.insert_data_files_in_parallel(
         data_files, partial(_insert_data, based=based, test=test), threads)
 
-    # # Remove data file
-    # for df in data_files:
-    #     if os.path.exists(df):
-    #         os.remove(df)
+    # Remove data file
+    for df in data_files:
+        if os.path.exists(df):
+            os.remove(df)
 
     # Remove session
     Session.remove()

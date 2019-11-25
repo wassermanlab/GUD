@@ -6,8 +6,9 @@ from sqlalchemy.dialects import mysql
 
 
 class Expression(Base):
-
+    # table declerations
     __tablename__ = "expression"
+
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     expression_level = Column("expression_level", mysql.FLOAT, nullable=False)
     tss_id = Column("tssID", mysql.INTEGER, ForeignKey("transcription_start_sites.uid"),

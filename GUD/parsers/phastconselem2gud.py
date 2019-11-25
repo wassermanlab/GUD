@@ -18,7 +18,7 @@ from GUD.ORM.source import Source
 from . import ParseUtils
 
 usage_msg = """
-usage: %s --genome STR [-h] [options]
+usage: %s --genome STR --version STR [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
@@ -26,10 +26,12 @@ inserts features from the UCSC's "phastConsElements100way" table
 into GUD.
 
   --genome STR        genome assembly
+  --version STR       e.g. "2015-05-08" (date last updated)
 
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
+  -r, --remove        remove downloaded files (default = False)
   -t, --test          limit the total of inserts to ~1K per
                       thread for testing (default = False)
   --threads INT       number of threads to use (default = %s)
@@ -55,11 +57,13 @@ def parse_args():
 
     # Mandatory args
     parser.add_argument("--genome")
+    parser.add_argument("--version")
 
     # Optional args
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
+    optional_group.add_argument("-r", "--remove", action="store_true")
     optional_group.add_argument("-t", "--test", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
     
@@ -88,8 +92,8 @@ def check_args(args):
         exit(0)
 
     # Check mandatory arguments
-    if not args.genome:
-        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\" is required\n"]
+    if not args.genome or not args.version:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\" \"--version\" are required\n"]
         print(": ".join(error))
         exit(0)
 
@@ -126,14 +130,14 @@ def main():
     GUDUtils.db = args.db
 
     # Insert conservation data
-    conservation_to_gud(args.genome, args.dummy_dir, args.test, args.threads)
+    conservation_to_gud(args.genome, args.version, args.dummy_dir, args.remove, args.test, args.threads)
 
-def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
+def conservation_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
-    python -m GUD.parsers.phastconselem2gud --genome hg38 --dummy-dir ./tmp/ --test -P 3306
+    e.g. python -m GUD.parsers.phastconselem2gud --genome hg38 --version abcd --test -P 3306
     """
 
-    # Initialize
+# Initialize
     global chroms
     global engine
     global Session
@@ -145,7 +149,7 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
         from multiprocessing import current_process
 
     # Download data
-    data_file = _download_data(genome, dummy_dir)
+    data_file, url = _download_data(genome, dummy_dir)
 
     # Get database name
     db_name = GUDUtils._get_db_name()
@@ -173,10 +177,12 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     # Get source
     source = Source()
     m = re.search("^%s/*(.+).txt.gz$" % dummy_dir, data_file) 
-    source_name = m.group(1)
-    source.name = source_name
+    source.name = m.group(1)
+    source.source_metadata = "%s," % version
+    source.metadata_descriptor = "version,"
+    source.url = url
     ParseUtils.upsert_source(session, source)
-    source = ParseUtils.get_source(session, source_name)
+    source = ParseUtils.get_source(session, source.name, source.source_metadata, source.metadata_descriptor, url)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
@@ -185,17 +191,16 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     # Split data
     data_files = _split_data(data_file, threads)
 
-    # Remove data file
-    if not test and os.path.exists(data_file):
-        os.remove(data_file)
-
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
 
     # Remove data files
-    for data_file in data_files:
-        if not test and os.path.exists(data_file):
+    if remove:
+        if os.path.exists(data_file):
             os.remove(data_file)
+        for data_file in data_files:
+            if os.path.exists(data_file):
+                os.remove(data_file)
 
     # Remove session
     Session.remove()
@@ -230,31 +235,30 @@ def _download_data(genome, dummy_dir="/tmp/"):
     if not os.path.exists(data_file):
         f = urlretrieve(os.path.join(url, ftp_files[0][1]), data_file)
 
-    return(data_file)
+    return(data_file, os.path.join(url, ftp_files[0][1]))
 
 def _split_data(data_file, threads=1):
 
     # Initialize
     split_files = []
+    split_dir = os.path.dirname(os.path.realpath(data_file))
 
-    # For each chromosome...
-    for chrom in chroms:
+    # Get number of lines
+    output = subprocess.check_output(["zless %s | wc -l" % data_file], shell=True)
+    m = re.search("(\d+)", str(output))
+    L = float(m.group(1))
 
-        # Skip if file already split
-        split_file = "%s.%s" % (data_file, chrom)
-        if not os.path.exists(split_file):
+    # Split
+    prefix = "%s." % data_file.split("/")[-1]
+    cmd = "zless %s | split -d -l %s - %s" % (data_file, int(L/threads)+1, os.path.join(split_dir, prefix))
+    subprocess.run(cmd, shell=True)
 
-            # Parallel split
-            # cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "[[:space:]]%s[[:space:]]" > %s' % (data_file, threads, chrom, split_file)
-            cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "[[:space:]]%s[[:space:]]" > %s' % (data_file, threads, "chr%s" % chrom, split_file)
-            subprocess.call(cmd, shell=True)
+    # For each split file...
+    for split_file in os.listdir(split_dir):
 
         # Append split file
-        statinfo = os.stat(split_file)
-        if statinfo.st_size:
-            split_files.append(split_file)
-        else:
-            os.remove(split_file)
+        if split_file.startswith(prefix):
+            split_files.append(os.path.join(split_dir, split_file))
 
     return(split_files)
 
@@ -275,31 +279,24 @@ def _insert_data(data_file, test=False):
         if not line:
             continue
 
-        # Get region
+        # Upsert region
         region = Region()
-        # region.chrom = line[1]
         region.chrom = line[1][3:]
-        region.start = int(line[2])
-        region.end = int(line[3])
+        region.start = line[2]
+        region.end = line[3]
         region.bin = assign_bin(region.start, region.end)
-
-        # Ignore non-standard chroms, scaffolds, etc.
         if region.chrom not in chroms:
             continue
-
-        # Upsert region
         ParseUtils.upsert_region(session, region)
 
-        # Get region ID
+        # Get region
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
-        # Get conservation
+        # Upsert conservation
         conservation = Conservation()
         conservation.region_id = region.uid
         conservation.source_id = source.uid
-        conservation.score = 1.0
-
-        # Upsert conservation
+        conservation.score = line[5]
         ParseUtils.upsert_conservation(session, conservation)
 
         # Testing
