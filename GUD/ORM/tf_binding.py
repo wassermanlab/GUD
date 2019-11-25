@@ -1,7 +1,8 @@
-from sqlalchemy import (Column, Index, String, UniqueConstraint)
+from sqlalchemy import (Column, Index, String, ForeignKey, UniqueConstraint) 
 from sqlalchemy.dialects import mysql
 from .base import Base
 from .experiment import Experiment
+from .gene import Gene
 from .region import Region
 from .sample import Sample
 from .source import Source
@@ -12,7 +13,7 @@ from sqlalchemy.ext.declarative import declared_attr
 class TFBinding(GFMixin2, Base):
     # table declerations 
     __tablename__ = "tf_binding"
-    tf = Column("tf", String(25), nullable=False)
+    tf = Column("tf", String(25), ForeignKey("genes.gene_symbol"), nullable=False)
     score = Column("score", mysql.FLOAT)
     peak = Column("peak", mysql.INTEGER)
 

@@ -8,7 +8,6 @@ from multiprocessing import Pool, cpu_count
 from numpy import isnan
 import os
 import pickle
-from pybedtools import BedTool, cleanup, set_tempdir
 import re
 import requests
 import shutil

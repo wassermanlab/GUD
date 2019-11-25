@@ -14,7 +14,7 @@ class TSS(GFMixin2, Base):
     # table declerations
     __tablename__ = "transcription_start_sites"
 
-    gene = Column("gene", String(75), ForeignKey("genes.name2"))
+    gene = Column("gene", String(75), ForeignKey("genes.gene_symbol"))
     tss = Column("tss", mysql.INTEGER(unsigned=True))
     strand = Column("strand", mysql.CHAR(1))
 
@@ -22,13 +22,16 @@ class TSS(GFMixin2, Base):
     def sample_id(cls):
         return Column("sampleIDs", mysql.LONGBLOB, nullable=False)
 
-    avg_expression_levels = Column("avg_expression_levels", mysql.LONGBLOB,
-                                   nullable=False)
+    @declared_attr
+    def expression_level(cls):
+        return Column("expression_levels", mysql.LONGBLOB, nullable=False)
 
     @declared_attr
     def __table_args__(cls):
         return (
-            UniqueConstraint(cls.region_id, cls.sample_id, cls.experiment_id, cls.gene, cls.tss),
+            # UniqueConstraint(cls.region_id, cls.sample_id, cls.experiment_id, cls.gene, cls.tss),
+            UniqueConstraint(cls.region_id, cls.experiment_id, cls.source_id,
+                             cls.gene, cls.tss, cls.strand),
             Index("ix_join", cls.region_id, cls.experiment_id, cls.source_id),
             Index("ix_gene_tss", cls.gene, cls.tss),
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
@@ -72,7 +75,7 @@ class TSS(GFMixin2, Base):
         # Initialize
         isfloat = re.compile("\d+(\.\d+)?")
         sampleIDs = []
-        avg_expression_levels = []
+        expression_levels = []
 
         # For each exon start...
         for i in str(feat.TSS.sample_id).split(","):
@@ -80,9 +83,9 @@ class TSS(GFMixin2, Base):
                 sampleIDs.append(int(i))
 
         # For each exon end...
-        for i in str(feat.TSS.avg_expression_levels).split(","):
+        for i in str(feat.TSS.expression_level).split(","):
             if isfloat.match(i):
-                avg_expression_levels.append(float(i))
+                expression_levels.append(float(i))
 
         # Define qualifiers
         try:
@@ -94,7 +97,7 @@ class TSS(GFMixin2, Base):
             "gene": feat.TSS.gene,
             "tss": feat.TSS.tss,
             "sampleIDs": feat.TSS.sample_id,
-            "avg_expression_levels": feat.TSS.avg_expression_levels,
+            "expression_levels": feat.TSS.expression_level,
             "experiment": experiment_name,
             "source": feat.Source.name,
         }

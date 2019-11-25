@@ -1,67 +1,42 @@
-from sqlalchemy import (
-    and_,
-    or_,
-    Column,
-    Float,
-    ForeignKey,
-    Index,
-    Integer,
-    PrimaryKeyConstraint,
-    UniqueConstraint
-)
-from sqlalchemy.dialects import mysql
-
+from sqlalchemy import (Column, Index, ForeignKey, PrimaryKeyConstraint, UniqueConstraint)
 from .base import Base
 from .sample import Sample
 from .tss import TSS
+from sqlalchemy.dialects import mysql
 
 
 class Expression(Base):
 
     __tablename__ = "expression"
     uid = Column("uid", mysql.INTEGER(unsigned=True))
-    tssID = Column("tssID", Integer, ForeignKey(
-        "transcription_start_sites.uid"), nullable=False)
-    sampleID = Column("sampleID", Integer, ForeignKey(
-        "samples.uid"), nullable=False)
-    avg_expression_level = Column(
-        "avg_expression_level", Float, nullable=False)
+    expression_level = Column("expression_level", mysql.FLOAT, nullable=False)
+    tss_id = Column("tssID", mysql.INTEGER, ForeignKey("transcription_start_sites.uid"),
+                    nullable=False)
+    sample_id = Column("sampleID", mysql.INTEGER, ForeignKey("samples.uid"),
+                       nullable=False)
+ 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(tssID, sampleID),
-        Index("ix_tssID", tssID),
-        Index("ix_sampleID", sampleID),
+        UniqueConstraint(tss_id, sample_id),
+        Index("ix_tssID", tss_id),
+        Index("ix_sampleID", sample_id),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
-    def serialize(self, feat):
-        return {
-            'uid': feat.Expression.uid,
-            'tssID': feat.Expression.tssID,
-            'sample': feat.Sample.name,
-            'avg_tpm': feat.Expression.avg_expression_level,
-            }
-
+    # class methods
     @classmethod
     def is_unique(cls, session, tssID, sampleID):
 
-        q = session.query(cls)\
-            .filter(
-                cls.tssID == tssID,
-                cls.sampleID == sampleID
-        )
+        q = session.query(cls).filter(cls.tss_id == tssID,
+                                      cls.sample_id == sampleID)
 
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, tssID,
-                      sampleID):
+    def select_unique(cls, session, tssID, sampleID):
 
-        q = session.query(cls)\
-            .filter(
-                cls.tssID == tssID,
-                cls.sampleID == sampleID
-        )
+        q = session.query(cls).filter(cls.tss_id == tssID,
+                                      cls.sample_id == sampleID)
 
         return q.first()
 
@@ -102,9 +77,9 @@ class Expression(Base):
         Query objects by expression level
         """
         if query is not None:
-            q = query.filter(cls.avg_expression_level >= min_tpm)
+            q = query.filter(cls.expression_level >= min_tpm)
             if max_tpm is not None:
-                q = q.filter(max_tpm >= cls.avg_expression_level)
+                q = q.filter(max_tpm >= cls.expression_level)
         else:
             q = session.query(cls, Sample)\
                 .join()\
@@ -112,12 +87,20 @@ class Expression(Base):
                     Sample.uid == cls.sampleID
                 )\
                 .filter(
-                    cls.avg_expression_level >= min_tpm
+                    cls.expression_level >= min_tpm
                 )
             if max_tpm is not None:
-                q = q.filter(max_tpm >= cls.avg_expression_level)
+                q = q.filter(max_tpm >= cls.expression_level)
 
         return q
+
+    def serialize(self, feat):
+        return {
+            'uid': feat.Expression.uid,
+            'tssID': feat.Expression.tss_id,
+            'sample': feat.Sample.name,
+            'expression_level': feat.Expression.expression_level,
+            }
 
     def __repr__(self):
 
@@ -126,7 +109,7 @@ class Expression(Base):
                 "uid={}".format(self.uid),
                 "tssID={}".format(self.tssID),
                 "sampleID={}".format(self.sampleID),
-                "avg_expression_level={}".format(
-                    self.avg_expression_level
+                "expression_level={}".format(
+                    self.expression_level
                 )
             )
