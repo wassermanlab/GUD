@@ -1,4 +1,4 @@
-from sqlalchemy import (Column, Index, Float, UniqueConstraint)
+from sqlalchemy import (Column, Index, UniqueConstraint)
 from sqlalchemy.dialects import mysql
 from .base import Base
 from .source import Source
@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declared_attr
 class Conservation(GFMixin1, Base):
     # table declerations
     __tablename__ = "conservation"
-    score = Column("score", Float)
+    score = Column("score", mysql.FLOAT)
 
     @declared_attr
     def __table_args__(cls):

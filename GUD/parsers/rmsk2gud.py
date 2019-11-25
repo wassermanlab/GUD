@@ -47,10 +47,6 @@ mysql arguments:
 # Functions   #
 #-------------#
 
-#-------------#
-# Functions   #
-#-------------#
-
 def parse_args():
     """
     This function parses arguments provided via the command line and returns an {argparse} object.
