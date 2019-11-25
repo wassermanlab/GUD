@@ -1,8 +1,11 @@
-from sqlalchemy import (Column, Index, ForeignKey, PrimaryKeyConstraint, UniqueConstraint)
-from .base import Base
-from .sample import Sample
-from .tss import TSS
+# from sqlalchemy import (Column, Index, ForeignKey, PrimaryKeyConstraint, UniqueConstraint)
+# from .base import Base
+# from .sample import Sample
+# from .tss import TSS
+# from sqlalchemy.dialects import mysql
+from sqlalchemy import (Column, Index, PrimaryKeyConstraint, ForeignKey, UniqueConstraint)
 from sqlalchemy.dialects import mysql
+from .base import Base
 
 
 class Expression(Base):
@@ -11,9 +14,9 @@ class Expression(Base):
 
     uid = Column("uid", mysql.INTEGER(unsigned=True))
     expression_level = Column("expression_level", mysql.FLOAT, nullable=False)
-    tss_id = Column("tssID", mysql.INTEGER, ForeignKey("transcription_start_sites.uid"),
+    tss_id = Column("tssID", mysql.INTEGER(unsigned=True), ForeignKey("transcription_start_sites.uid"),
                     nullable=False)
-    sample_id = Column("sampleID", mysql.INTEGER, ForeignKey("samples.uid"),
+    sample_id = Column("sampleID", mysql.INTEGER(unsigned=True), ForeignKey("samples.uid"),
                        nullable=False)
  
     __table_args__ = (
