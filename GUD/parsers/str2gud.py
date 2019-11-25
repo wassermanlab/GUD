@@ -160,15 +160,16 @@ def main():
     GUDUtils.port = args.port
     GUDUtils.db = args.db
 
-    # Insert ENCODE data
+    # Insert short tandem repeats
     str_to_gud(args.genome, args.source_name, args.str_file,
                args.based, args.test, args.threads)
 
 
 def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     """
-    python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --str_file <FILE> --based <0|1>
+    python -m GUD.parsers.str2gud --genome hg38 --source_name <name> --str_file <FILE> --based <0|1>
     """
+
     # Initialize
     global chroms
     global engine
@@ -228,6 +229,7 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     # Remove session
     Session.remove()
 
+
 def _split_data(data_file, threads=1):
 
     # Initialize
@@ -270,12 +272,12 @@ def _insert_data(data_file, based=1, test=False):
         region = Region()
         region.chrom = str(line[0])
         if region.chrom.startswith("chr"):
-            region.chrom = str(region.chrom[3:])
-        region.start = line[1] - based
-        region.end = line[2]
-        region.bin = assign_bin(region.start, region.end)
+            region.chrom = region.chrom[3:]
         if region.chrom not in chroms:
             continue
+        region.start = int(line[1]) - based
+        region.end = int(line[2])
+        region.bin = assign_bin(region.start, region.end)
         ParseUtils.upsert_region(session, region)
 
         # Get region
@@ -292,7 +294,7 @@ def _insert_data(data_file, based=1, test=False):
         # Testing
         if test:
             lines += 1
-            if lines > 1000:
+            if lines == 1000:
                 break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
