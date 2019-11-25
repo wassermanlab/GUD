@@ -14,7 +14,6 @@ __all__ = [
     "expression",
     "gene",
     "histone_modification",
-    "metadata",
     "region",
     "repeat_mask",
     "sample",
@@ -36,7 +35,6 @@ from .experiment import Experiment
 from .expression import Expression
 from .gene import Gene
 from .histone_modification import HistoneModification
-from .metadata import Metadata
 from .repeat_mask import RepeatMask
 from .mask import Mask
 from .region import Region

@@ -24,6 +24,7 @@ class HistoneModification(GFMixin2, Base):
                          cls.source_id, cls.histone_type, cls.peak),
         Index("ix_join", cls.region_id, cls.sample_id,
               cls.experiment_id, cls.source_id),
+        Index("ix_histone_type", cls.histone_type),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 

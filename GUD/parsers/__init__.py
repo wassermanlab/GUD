@@ -24,24 +24,10 @@ from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.mask import Mask
 from GUD.ORM.region import Region
+from GUD.ORM.repeat_mask import RepeatMask
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-
-# Citation for parallel
-# @article{Tange2011a,
-#   title = {GNU Parallel - The Command-Line Power Tool},
-#   author = {O. Tange},
-#   address = {Frederiksberg, Denmark},
-#   journal = {;login: The USENIX Magazine},
-#   month = {Feb},
-#   number = {1},
-#   volume = {36},
-#   url = {http://www.gnu.org/s/parallel},
-#   year = {2011},
-#   pages = {42-47},
-#   doi = {10.5281/zenodo.16303}
-# }
 
 class ParseUtililities:
     """
@@ -355,8 +341,8 @@ class ParseUtililities:
     def get_sample(self, session, name, X, Y, treatment, cell_line, cancer):
         return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
 
-    def get_source(self, session, source_name):
-        return(Source.select_unique(session, source_name))
+    def get_source(self, session, name, source_metadata, metadata_descriptor, url):
+        return(Source.select_unique(session, name, source_metadata, metadata_descriptor, url))
 
     #--------------#
     # Upserts      #
@@ -388,7 +374,7 @@ class ParseUtililities:
 
     def upsert_gene(self, session, gene):
 
-        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name):
+        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name, gene.strand):
             session.add(gene)
             session.commit()
 
@@ -404,17 +390,19 @@ class ParseUtililities:
             session.add(mask)
             session.commit()
 
-    def upsert_metadata(self, session, metadata):
-
-        if Mask.is_unique(session, metadata.accession, metadata.source_id):
-            session.add(metadata)
-            session.commit()
-
     def upsert_region(self, session, region):
 
         if Region.is_unique(session, region.chrom, region.start, region.end):
             session.add(region)
             session.commit()
+
+    def upsert_rmsk(self, session, repeat):
+
+        if RepeatMask.is_unique(session, repeat.region_id, repeat.source_id, repeat.name, repeat.strand):
+            session.add(repeat)
+            session.commit()
+        else:
+            print("here")
 
     def upsert_sample(self, session, sample):
 
@@ -424,7 +412,7 @@ class ParseUtililities:
 
     def upsert_source(self, session, source):
 
-        if Source.is_unique(session, source.name):
+        if Source.is_unique(session, source.name, source.source_metadata, source.metadata_descriptor, source.url):
             session.add(source)
             session.commit()
 
@@ -455,55 +443,33 @@ class ParseUtililities:
     # Multiprocess #
     #--------------#
 
-    def insert_data_files_in_parallel(self, data_files, insert_function, threads=1):
+    def insert_data_files_in_parallel(self, data_files, insert_function, threads=1, sleep=0):
 
-        # from itertools import islice
         from multiprocessing import Pool
+        import time
 
-        # Parallelize
-        pool = Pool(processes=threads)
-        pool.map(insert_function, data_files)
-        pool.close()
+        while len(data_files) > 0:
 
-    #     # Get iterable
-    #     iterable = self.parse_tsv_file(data_file)
+            # Initialize pool
+            pool = Pool(processes=threads)
 
-    #     # Get chunks
-    #     chunks = self._grouper(iterable)
+            for p in range(threads):
 
-    #     while True:
+                if len(data_files) > 0:
 
-    #         # Groups chunks for multiprocessing
-    #         grouped_chunks = [list(chunk) for chunk in islice(chunks, threads)]
+                    # Submit job
+                    data_file = data_files.pop(0)
+                    pool.apply_async(insert_function, args=(data_file,))
 
-    #         if grouped_chunks:
-    #             pool.map(insert_function, grouped_chunks)
+                    # Sleep for a number of seconds before submitting the next job
+                    time.sleep(sleep)
 
-    #         else:
-    #             break
+                else:
+                    # Exit for loop
+                    break
 
-    #         if test:
-    #             break
-
-    #     if test:
-    #         for chunk in islice(chunks, threads):
-    #             continue
-
-    #     # Close pool
-    #     pool.close()
-
-    # def _grouper(self, iterable, n=5000, fillvalue=None):
-
-    #     import sys
-    #     # Python 3+
-    #     if sys.version_info > (3, 0):
-    #         from itertools import zip_longest
-    #     # Python 2.7
-    #     else:
-    #         from itertools import izip_longest as zip_longest
-
-    #     args = [iter(iterable)] * n
-
-    #     return(zip_longest(*args, fillvalue=fillvalue))
+            # Close the pool and wait for everything to finish
+            pool.close()
+            pool.join()
 
 ParseUtils = ParseUtililities()

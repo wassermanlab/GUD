@@ -18,7 +18,7 @@ class Gene(GFMixin1, Base):
     coding_end = Column("coding_end", mysql.INTEGER(unsigned=True), nullable=False)
     exon_starts = Column("exon_starts", mysql.LONGBLOB, nullable=False)
     exon_ends = Column("exon_ends", mysql.LONGBLOB, nullable=False)
-    strand = Column("strand", mysql.CHAR(1))
+    strand = Column("strand", mysql.CHAR(1), nullable=False)
 
     @declared_attr
     def __table_args__(cls):

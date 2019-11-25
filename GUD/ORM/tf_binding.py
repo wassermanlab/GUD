@@ -22,6 +22,7 @@ class TFBinding(GFMixin2, Base):
         UniqueConstraint(cls.region_id, cls.sample_id, cls.experiment_id,
                          cls.source_id, cls.tf, cls.peak),
         Index("ix_join", cls.region_id, cls.sample_id, cls.experiment_id, cls.source_id),
+        Index("ix_tf", cls.tf),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 

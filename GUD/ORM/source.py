@@ -17,35 +17,35 @@ class Source(Base):
 
     uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
     name = Column("name", String(250), nullable=False)
-    metadata = Column("metadata", mysql.LONGBLOB)
-    metadata_descriptor = Column("metadata_descriptor", mysql.LONGBLOB)
+    source_metadata = Column("source_metadata", String(250))
+    metadata_descriptor = Column("metadata_descriptor", String(250))
     url = Column("url", String(250))
     insert_date = Column("insert_date", DateTime,
                          default=datetime.utcnow, nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(name, metadata, metadata_descriptor, url),
+        UniqueConstraint(name, source_metadata, metadata_descriptor, url),
         Index("ix_uid", uid),
         Index("ix_name", name),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
     @classmethod
-    def is_unique(cls, session, name, metadata, metadata_descriptor, url):
+    def is_unique(cls, session, name, source_metadata, metadata_descriptor, url):
 
         q = session.query(cls)\
-            .filter(cls.name == name, cls.metadata == metadata, cls.url == url,
-                    cls.metadata_descriptor == metadata_descriptor)
+            .filter(cls.name == name, cls.source_metadata == source_metadata,
+                    cls.metadata_descriptor == metadata_descriptor, cls.url == url)
 
         return len(q.all()) == 0
 
     @classmethod
-    def select_unique(cls, session, name, metadata, metadata_descriptor, url):
+    def select_unique(cls, session, name, source_metadata, metadata_descriptor, url):
 
         q = session.query(cls)\
-            .filter(cls.name == name, cls.metadata == metadata, cls.url == url,
-                    cls.metadata_descriptor == metadata_descriptor)
+            .filter(cls.name == name, cls.source_metadata == source_metadata,
+                    cls.metadata_descriptor == metadata_descriptor, cls.url == url)
 
         return q.first()
 
@@ -87,7 +87,7 @@ class Source(Base):
         return {
             'uid': self.uid,
             'name': self.name,
-            'metadata': self.metadata, 
+            'source_metadata': self.source_metadata, 
             'metadata_descriptor': self.metadata_descriptor, 
             'url': self.url,
             'insert_date': self.insert_date
