@@ -442,23 +442,22 @@ class ParseUtililities:
     # Multiprocess #
     #--------------#
 
-    def insert_data_files_in_parallel(self, data_files, insert_function, threads=1, sleep=0):
+    def insert_data_files_in_parallel(self, files, insert_function, threads=1, sleep=0):
 
         from multiprocessing import Pool
         import time
 
-        while len(data_files) > 0:
+        while len(files) > 0:
 
             # Initialize pool
             pool = Pool(processes=threads)
 
             for p in range(threads):
 
-                if len(data_files) > 0:
+                if len(files) > 0:
 
                     # Submit job
-                    data_file = data_files.pop(0)
-                    pool.apply_async(insert_function, args=(data_file,))
+                    pool.apply_async(insert_function, args=(files.pop(0),))
 
                     # Sleep for a number of seconds before submitting the next job
                     time.sleep(sleep)

@@ -2,13 +2,13 @@
 
 import argparse
 from binning import assign_bin
+from copy import copy
 from functools import partial
 import getpass
 from multiprocessing import Pool, cpu_count
 from numpy import isnan
 import os
 import pickle
-from pybedtools import BedTool, cleanup, set_tempdir
 import re
 import requests
 import shutil
@@ -376,7 +376,7 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         _insert_samples_and_sources(subgrouped_accessions)
 
         # Parallelize inserts to the database
-        ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data_file, test=test), threads)
+        ParseUtils.insert_data_files_in_parallel(copy(data_files), partial(_insert_data_file, test=test), threads)
 
         # Remove data files
         if remove:
