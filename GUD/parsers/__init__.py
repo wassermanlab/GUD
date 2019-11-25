@@ -400,8 +400,6 @@ class ParseUtililities:
         if RepeatMask.is_unique(session, repeat.region_id, repeat.source_id, repeat.name, repeat.strand):
             session.add(repeat)
             session.commit()
-        else:
-            print("here")
 
     def upsert_sample(self, session, sample):
 
@@ -430,8 +428,6 @@ class ParseUtililities:
         if CNV.is_unique(session, cnv.region_id, cnv.source_id, cnv.copy_number_change):
             session.add(cnv)
             session.commit()
-        else:
-            print("here")
 
     def upsert_clinvar(self, session, clinvar):
         if clinvar.is_unique(session, clinvar.clinvar_variation_ID):

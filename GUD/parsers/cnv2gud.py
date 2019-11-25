@@ -143,15 +143,16 @@ def main():
     GUDUtils.port = args.port
     GUDUtils.db = args.db
 
-    # Insert ENCODE data
+    # Insert CNV data
     cnv_to_gud(args.genome, args.source_name, args.cnv_file,
                args.test, args.threads)
 
 
 def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
     """
-    python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --snv_file <FILE> 
+    python -m GUD.parsers.cnv2gud --genome hg38 --source_name <name> --cnv_file <FILE> 
     """
+
     # Initialize
     global chroms
     global engine
@@ -186,7 +187,6 @@ def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
     # Get valid chromosomes
     chroms = ParseUtils.get_chroms(session)
 
-
     # Get source
     source = Source()
     source.name = source_name
@@ -211,6 +211,7 @@ def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
 
     # Remove session
     Session.remove()
+
 
 def _split_data(data_file, threads=1):
 
@@ -253,11 +254,13 @@ def _insert_data(data_file, test=False):
         # Get region
         region = Region()
         region.chrom = str(line[0])
-        region.start = line[1]
-        region.end = line[2]
-        region.bin = assign_bin(region.start, region.end)
+        if region.chrom.startswith("chr"):
+            region.chrom = region.chrom[3:]
         if region.chrom not in chroms:
             continue
+        region.start = int(line[1])
+        region.end = int(line[2])
+        region.bin = assign_bin(region.start, region.end)
         ParseUtils.upsert_region(session, region)
 
         # Get region
@@ -268,16 +271,18 @@ def _insert_data(data_file, test=False):
         cnv.region_id = region.uid
         cnv.source_id = source.uid
         cnv.copy_number_change = int(line[3])
-        cnv.clinical_assertion = line[4].replace(";", ",").encode(encoding='UTF-8')
-        cnv.clinvar_accession = line[5].replace(";", ",").encode(encoding='UTF-8')
-        cnv.dbVar_accession = line[6].replace(";", ",").encode(encoding='UTF-8')
-
+        clinical_assertion = "%s," % line[4].replace(";", ",")
+        cnv.clinical_assertion = clinical_assertion.encode(encoding="UTF-8")
+        clinvar_accession = "%s," % line[5].replace(";", ",")
+        cnv.clinvar_accession = clinvar_accession.encode(encoding="UTF-8")
+        dbVar_accession = "%s," % line[6].replace(";", ",")
+        cnv.dbVar_accession = dbVar_accession.encode(encoding="UTF-8")
         ParseUtils.upsert_cnv(session, cnv)
 
         # Testing
         if test:
             lines += 1
-            if lines > 1000:
+            if lines == 1000:
                 break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!

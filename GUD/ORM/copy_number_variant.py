@@ -20,7 +20,7 @@ class CNV(GFMixin1, Base):
     @declared_attr
     def __table_args__(cls):
         return (
-            Index("ix_join", cls.source_id, cls.region_id),
+            Index("ix_join", cls.source_id, cls.region_id, cls.copy_number_change),
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8"})
 
     # class methods

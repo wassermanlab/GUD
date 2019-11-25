@@ -269,11 +269,11 @@ def _insert_data(data_file, test=False):
         # Upsert region
         region = Region()
         region.chrom = line[5][3:]
+        if region.chrom not in chroms:
+            continue
         region.start = line[6]
         region.end = line[7]
         region.bin = assign_bin(region.start, region.end)
-        if region.chrom not in chroms:
-            continue
         ParseUtils.upsert_region(session, region)
 
         # Get region
