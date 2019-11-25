@@ -6,7 +6,6 @@ from GUD.ORM.source import Source
 from GUD.ORM.region import Region
 from GUD import GUDUtils
 from binning import assign_bin
-from copy import deepcopy
 from functools import partial
 import getpass
 from multiprocessing import Pool, cpu_count
@@ -219,14 +218,15 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
 
     # Split data
     data_files = _split_data(str_file, threads)
-    print(data_files)
+
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(
-        deepcopy(data_files), partial(_insert_data, based=based, test=test), threads)
-    # Remove data file
-    for df in data_files:
-        if os.path.exists(df):
-            os.remove(df)
+        data_files, partial(_insert_data, based=based, test=test), threads)
+
+    # # Remove data file
+    # for df in data_files:
+    #     if os.path.exists(df):
+    #         os.remove(df)
 
     # Remove session
     Session.remove()
@@ -268,37 +268,28 @@ def _insert_data(data_file, based=1, test=False):
 
     # For each line...
     for line in ParseUtils.parse_tsv_file(data_file):
-        # Get region
-        region = Region()
-        # region.chrom = line[0]
-        if line[0].startswith("chr"):
-            region.chrom = line[0][3:]
-        else:
-            region.chrom = line[0]
-        region.start = line[1]
-        if based:
-            region.start -= 1
-        region.end = line[2]
-        region.bin = assign_bin(region.start, region.end)
-
-        # Ignore non-standard chroms, scaffolds, etc.
-        if region.chrom not in chroms:
-            continue
 
         # Upsert region
+        region = Region()
+        region.chrom = str(line[0])
+        if region.chrom.startswith("chr"):
+            region.chrom = str(region.chrom[3:])
+        region.start = line[1] - based
+        region.end = line[2]
+        region.bin = assign_bin(region.start, region.end)
+        if region.chrom not in chroms:
+            continue
         ParseUtils.upsert_region(session, region)
 
-        # Get region ID
-        region = ParseUtils.get_region(
-            session, region.chrom, region.start, region.end)
+        # Get region
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
-        # Get feature
+        # Upsert short tandem repeat
         STR = ShortTandemRepeat()
         STR.region_id = region.uid
         STR.source_id = source.uid
         STR.motif = line[3]
         STR.pathogenicity = int(line[4])
-
         ParseUtils.upsert_str(session, STR)
 
         # Testing
