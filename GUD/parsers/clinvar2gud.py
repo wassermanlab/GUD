@@ -276,14 +276,13 @@ def _insert_data(data_file, test=False):
         region = ParseUtils.get_region(
             session, region.chrom, region.start, region.end)
 
-        # Get feature
+        # Upsert clinvar feature
         clinvar = ClinVar()
         clinvar.region_id = region.uid
         clinvar.source_id = source.uid
-        clinvar.ref = line[3].encode(encoding='UTF-8')
-        clinvar.alt = line[4].encode(encoding='UTF-8')
+        clinvar.ref = line[3].encode("utf-8")
+        clinvar.alt = line[4].encode("utf-8")
         clinvar.clinvar_variation_ID = line[2]
-        ## get info 
         info = line[7].split(";")
         infoDict = {}
         for t in info: 
@@ -291,12 +290,12 @@ def _insert_data(data_file, test=False):
                 infoDict[t.split("=")[0]] = t.split("=")[1]
         try:
             ANN = infoDict["ANN"].split("|")
-            clinvar.ANN_Annotation = ANN[1].encode(encoding='UTF-8')
-            clinvar.ANN_Annotation_Impact = ANN[2].encode(encoding='UTF-8')
-            clinvar.ANN_Gene_Name = ANN[3].encode(encoding='UTF-8')
-            clinvar.ANN_Gene_ID = ANN[4].encode(encoding='UTF-8')
-            clinvar.ANN_Feature_Type = ANN[5].encode(encoding='UTF-8')
-            clinvar.ANN_Feature_ID = ANN[6].encode(encoding='UTF-8')
+            clinvar.ANN_Annotation = ANN[1].encode("utf-8")
+            clinvar.ANN_Annotation_Impact = ANN[2].encode("utf-8")
+            clinvar.ANN_Gene_Name = ANN[3].encode("utf-8")
+            clinvar.ANN_Gene_ID = ANN[4].encode("utf-8")
+            clinvar.ANN_Feature_Type = ANN[5].encode("utf-8")
+            clinvar.ANN_Feature_ID = ANN[6].encode("utf-8")
         except:
             clinvar.ANN_Annotation = None
             clinvar.ANN_Annotation_Impact = None
@@ -309,15 +308,15 @@ def _insert_data(data_file, test=False):
         except:  
             clinvar.CADD = None
         try:
-            clinvar.CLNDISDB = infoDict["CLNDISDB"].encode(encoding='UTF-8')
+            clinvar.CLNDISDB = infoDict["CLNDISDB"].encode("utf-8")
         except:  
             clinvar.CLNDN = None
         try:
-            clinvar.CLNDN = infoDict["CLNDN"].encode(encoding='UTF-8')
+            clinvar.CLNDN = infoDict["CLNDN"].encode("utf-8")
         except:  
             clinvar.CLNDN = None
         try:
-            clinvar.CLNSIG = infoDict["CLNSIG"].encode(encoding='UTF-8')
+            clinvar.CLNSIG = infoDict["CLNSIG"].encode("utf-8")
         except:  
             clinvar.CLNSIG = None
         try:
@@ -336,8 +335,8 @@ def _insert_data(data_file, test=False):
             clinvar.gnomad_genome_hom_global    = float(infoDict["gnomad_genome_hom_global"])
         except:
             clinvar.gnomad_genome_hom_global    = None
-
         ParseUtils.upsert_clinvar(session, clinvar)
+
         # Testing
         if test:
             lines += 1
