@@ -445,8 +445,50 @@
             }
         }
     },
-    "/api/v1/{genome}/tss": {
+    "/api/v1/{genome}/tf_binding": {
         "DESCRIPTION": "get list of tf binding sites based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
+            "chrom": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+            },
+            "start": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
+            },
+            "end": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
+            },
+            "location": {
+                "REQUIRED": true,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
+            },
+            "tfs": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of tfs separated by comma(,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by comma(,)"
+            },
+            "experiments": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of experiments separated by comma(,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by comma(,)"
+            }
+        }
+    },
+    "/api/v1/{genome}/tss": {
+        "DESCRIPTION": "get list of transcription start sites binding sites based off filtering parameters",
         "METHOD": "GET",
         "PARAMS": {
             "genome": {
