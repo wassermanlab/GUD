@@ -7,6 +7,8 @@
     "Enhancers": ["/api/v1/{genome}/enhancers"],
     "DNA Accessibility": ["/api/v1/{genome}/dna_accessibility"],
     "Histone Modifications": [ "/api/v1/{genome}/histone_modifications"],
+    "Repeat Masks": ["/api/v1/{genome}/rmsk"],
+    "CpG Islands": ["/api/v1/{genome}/cpg_islands"],
     "Topologically Associating Domains": ["/api/v1/{genome}/tads"],
     "Transcription Start Sites": ["/api/v1/{genome}/tss"],
     "Chromosomes": ["/api/v1/{genome}/chroms"],
