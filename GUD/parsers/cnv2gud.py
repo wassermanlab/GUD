@@ -275,7 +275,7 @@ def _insert_data(data_file, test=False):
 
         # Get region ID
         region = ParseUtils.get_region(
-            session, region.chrom, region.start, region.end, region.strand)
+            session, region.chrom, region.start, region.end)
 
         # Get feature
         cnv = CNV()

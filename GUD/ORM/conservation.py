@@ -32,5 +32,4 @@ class Conservation(GFMixin1, Base):
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers
-        genomic_feature.score = feat.Conservation.score
         return genomic_feature

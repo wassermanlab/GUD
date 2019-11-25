@@ -31,35 +31,25 @@ class CpGIsland(GFMixin1, Base):
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
-    # @classmethod
-    # def select_unique(cls, session, regionID, sourceID):
+  
+    @classmethod
+    def as_genomic_feature(self, feat):
 
-    #     q = session.query(cls)\
-    #         .filter(
-    #             cls.region_id == regionID,
-    #             cls.source_id == sourceID
-    #     )
+        qualifiers = {
+            "uid": feat.CpGIsland.uid,
+            "cpgs": feat.CpGIsland.cpgs,
+            "gcs": feat.CpGIsland.gcs,
+            "percent_cpg": feat.CpGIsland.percent_cpg,
+            "percent_gc": feat.CpGIsland.percent_gc,
+            "obsexp_ratio": feat.CpGIsland.obsexp_ratio,
+            "source": feat.Source.name,
+        }
 
-    #     return q.first()
-
-    # @classmethod
-    # def as_genomic_feature(self, feat):
-
-    #     qualifiers = {
-    #         "uid": feat.CpGIsland.uid,
-    #         "cpgNum": feat.CpGIsland.cpgNum,
-    #         "gcNum": feat.CpGIsland.gcNum,
-    #         "perCpg": feat.CpGIsland.perCpg,
-    #         "perGc": feat.CpGIsland.perGc,
-    #         "obsExp": feat.CpGIsland.obsExp,
-    #         "source": feat.Source.name,
-    #     }
-
-    #     return GenomicFeature(
-    #         feat.Region.chrom,
-    #         int(feat.Region.start),
-    #         int(feat.Region.end),
-    #         feat_type="CpGIsland",
-    #         feat_id="%s_%s" % (self.__tablename__, feat.CpGIsland.uid),
-    #         qualifiers=qualifiers
-    #     )
+        return GenomicFeature(
+            feat.Region.chrom,
+            int(feat.Region.start),
+            int(feat.Region.end),
+            feat_type="CpGIsland",
+            feat_id="%s_%s" % (self.__tablename__, feat.CpGIsland.uid),
+            qualifiers=qualifiers
+        )

@@ -155,16 +155,6 @@
             }
         }
     },
-    "/api/v1/{genome}/genes/symbols": {
-        "DESCRIPTION": "get list of all gene symbols",
-        "METHOD": "GET",
-        "PARAMS": {
-            "genome": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify which genome assembly hg19|hg38"
-            }
-        }
-    },
     "/api/v1/{genome}/short_tandem_repeats": {
         "DESCRIPTION": "get list of short tandem repeats based off filtering parameters",
         "METHOD": "GET",
