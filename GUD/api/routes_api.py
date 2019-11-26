@@ -134,16 +134,16 @@ def short_tandem_repeats(request, session):
     resource = ShortTandemRepeat()
     q = genomic_feature_mixin1_queries(session, resource, request)
     try:
-        pathogenic = request.args.get('pathogenic', default=False, type=bool)
+        pathogenic = request.args.get('pathogenicity', default=False, type=bool)
         motif = request.args.get('motif', default=None, type=str)
-        rotation = request.args.get('rotation', default=False, type=bool)
+        rotations = request.args.get('rotations', default=False, type=bool)
     except:
         raise BadRequest(
             'rotation must be set to True or False if motif is given')
     if pathogenic:
         q = resource.select_by_pathogenicity(session, q)
     if motif is not None:
-        q = resource.select_by_motif(session, motif, q, rotation)
+        q = resource.select_by_motif(session, motif, q, rotations)
     return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
 # GF2 queries 

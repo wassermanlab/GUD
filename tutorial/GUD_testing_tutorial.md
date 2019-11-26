@@ -2,7 +2,7 @@
 
 ### Background
 
-The Genomic Unification Database (GUD) is a project developed by the Wasserman lab to house a unified version of several different data-sets and data-types describing human genomic information. The database is designed to reduce data redundancies found in the original data-sets and to leverage the full capacities of mySQL. The back end code is in Python, Flask, and SQLAlchemy and uses a mySQL database housed on the CMMT servers. For ease of access we have developed a simple API for querying the database which should be used to retrieve data.   
+The Genomic Unification Database (GUD) is a project developed by the Wasserman lab to house a unified version of several different data-sets and data-types describing human genomic information. The database is designed to reduce data redundancies found in the original data-sets and to leverage the full capacities of mySQL. The back end code is in Python and Flask and uses a mySQL database housed on the CMMT servers. For ease of access we have developed a simple API for querying the database which should be used to retrieve data.   
 
 ![](/home/tamar/Desktop/GUD/tutorial/pics/Fig.2.png)
 
@@ -31,7 +31,7 @@ For faster programmatic access it is best to fetch blocks of data through script
 
 #### R
 
-This script fetches the first page in R.
+These are scripts for loading results into a data frame. Keep in mind this might take a while if you are trying to fetch millions of rows.
 
 ```R
 # if not installed uncomment and install these packages
@@ -42,14 +42,31 @@ This script fetches the first page in R.
 require("httr")
 require("jsonlite")
 
+# fetching a single page
 base <- "http://gud.cmmt.ubc.ca:8080/api/v1/"
 db <- "hg38/"
-resource <- "genes"
-# add whatever filters you want to resource 
-call1 <- paste(base, db, resource, sep="")
-page <- GET(call1)
+resource <- "genes" # replace this with your desired query resource and filters
+url <- paste(base, db, resource, sep="")
+page <- GET(url)
 page_text <- content(page, "text")
 page_json <- fromJSON(page_text, flatten = TRUE)
+
+# fetching all pages from a query 
+full_set <- data.frame() 
+base <- "http://127.0.0.1:5000/api/v1/"
+db <- "hg38/"
+resource <- "short_tandem_repeats?pathogenicity=true"   # replace this with your desired query resource and filters
+# add whatever filters you want to resource   
+next_url <- paste(base, db, resource, sep="")
+
+while(!is.null(next_url)){
+  page <-GET(next_url)
+  page_text <- content(page, "text", encoding="UTF-8")
+  page_json <- fromJSON(page_text, flatten = TRUE)
+  next_url <- page_json$`next`
+  results <- page_json$results
+  full_set <- rbind(full_set, results)
+}
 
 ```
 
@@ -60,7 +77,7 @@ Requirements:
 - Python 3
 - requests module, install with`pip install requests`
 
-The following script takes an initial script and gets all the results. Keep in mind this might take a while if you are trying to fetch millions of rows.
+The following script takes an initial script and gets all the results in an array, this can later be parsed into whatever data structure the user wants. Keep in mind this might take a while if you are trying to fetch millions of rows.
 
 ```python
 import requests
