@@ -160,19 +160,19 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "uids": {
@@ -202,19 +202,19 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "uids": {
@@ -282,19 +282,19 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "histone_types": {
@@ -408,19 +408,19 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "restriction_enzymes": {
@@ -454,19 +454,19 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "tfs": {
@@ -496,19 +496,19 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
             },
             "start": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
+                "REQUIRED": false,
                 "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "genes": {
