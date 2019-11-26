@@ -1,38 +1,47 @@
-file_name	sample_name	experiment_type	restriction_enzyme	source_name	add	treatment	cell_line	cancer
-A549_raw-rep1_TADs.txt	A-549	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-AdrenalGland_Donor-AD2-raw_TADs.txt	adrenal gland	Hi-C	HindIII	3D-genome	Yes	No	No	No
-Aorta_STL002_Leung2015-raw_TADs.txt	aorta	Hi-C	HindIII	3D-genome	Yes	No	No	No
-Bladder_Donor-BL1-raw_TADs.txt	bladder	Hi-C	HindIII	3D-genome	Yes	No	No	No
-Bowel_Small_Donor-SB2-raw_TADs.txt	small intestine	Hi-C	HindIII	3D-genome	Yes	No	No	No
-Caki2_raw-rep1_TADs.txt	Caki-2	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-Cortex_DLPFC_Donor-CO-raw_TADs.txt	dorsolateral prefrontal cortex	Hi-C	HindIII	3D-genome	Yes	No	No	No
-G401_raw-rep1_TADs.txt	G-401	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-GM12878_Lieberman-raw_TADs.txt	GM12878	in situ Hi-C	MboI	3D-genome	Yes	No	Yes	No
-H1-ESC_Dixon2015-raw_TADs.txt	WA01	Hi-C	HindIII	3D-genome	Yes	No	Yes	No
-H1-MES_Dixon2015-raw_TADs.txt	mesendoderm (derived from WA01)	Hi-C	HindIII	3D-genome	Yes	No	No	No
-H1-MSC_Dixon2015-raw_TADs.txt	mesenchymal stem cell (derived from WA01)	Hi-C	HindIII	3D-genome	Yes	No	No	No
-H1-NPC_Dixon2015-raw_TADs.txt	neural progenitor cell (derived from WA01)	Hi-C	HindIII	3D-genome	Yes	No	No	No
-H1-TRO_Dixon2015-raw_TADs.txt	trophectoderm (derived from WA01)	Hi-C	HindIII	3D-genome	Yes	No	No	No
-HMEC_Lieberman-raw_TADs.txt	HMEC-1	in situ Hi-C	MboI	3D-genome	Yes	No	Yes	No
-HUVEC_Lieberman-raw_TADs.txt	HUVEC-C	in situ Hi-C	MboI	3D-genome	Yes	No	Yes	No
-IMR90_Lieberman-raw_TADs.txt	IMR-90	in situ Hi-C	MboI	3D-genome	Yes	No	Yes	No
-K562_Lieberman-raw_TADs.txt	K-562	in situ Hi-C	MboI	3D-genome	Yes	No	Yes	Yes
-KBM7_Lieberman-raw_TADs.txt	KBM-7	in situ Hi-C	MboI	3D-genome	Yes	No	Yes	Yes
-Liver_STL011_Leung2015-raw_TADs.txt	liver	Hi-C	HindIII	3D-genome	Yes	No	No	No
-LNCaP_raw-rep1_TADs.txt	LNCaP	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-Lung_Donor-LG1-raw_TADs.txt	lung	Hi-C	HindIII	3D-genome	Yes	No	No	No
-Muscle_Psoas_Donor-PO1-raw_TADs.txt	skeletal muscle (psoas)	Hi-C	HindIII	3D-genome	Yes	No	No	No
-NCIH460_raw-rep1_TADs.txt	NCI-H460	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-NHEK_Lieberman-raw_TADs.txt	NHEK	in situ Hi-C	MboI	3D-genome	Yes	No	Yes	No
-PANC1_raw-rep1_TADs.txt	PANC-1	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-Pancreas_Donor-PA2-raw_TADs.txt	pancreas	Hi-C	HindIII	3D-genome	Yes	No	No	No
-RPMI7951_raw-rep1_TADs.txt	RPMI-7951	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-SJCRH30_raw-rep1_TADs.txt	Rh30	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-SKMEL5_raw-rep1_TADs.txt	SK-MEL-5	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-SKNDZ_raw-rep1_TADs.txt	SK-N-DZ	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-SKNMC_raw-rep1_TADs.txt	SK-N-MC	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-Spleen_Donor-PX1-raw_TADs.txt	spleen	Hi-C	HindIII	3D-genome	Yes	No	No	No
-T470_raw-rep1_TADs.txt	T-47D	Hi-C	HindIII	3D-genome	Yes	No	Yes	Yes
-Thymus_STL001_Leung2015-raw_TADs.txt	thymus	Hi-C	HindIII	3D-genome	Yes	No	No	No
-VentricleLeft_STL003_Leung2015-raw_TADs.txt	left ventricle	Hi-C	HindIII	3D-genome	Yes	No	No	No
-VentricleRight_Donor-RV3-raw_TADs.txt	right ventricle	Hi-C	HindIII	3D-genome	Yes	No	No	No
+3D_Genome_Browser_file_same	3D_Genome_Browser_sample_same	experiment_type	restriction_enzyme	treatment	cell_line	cancer	add	sample_name	comments
+A549_ENCODE3-Dekker_TADs.txt	A549_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	A-549	
+Adrenal_Schmitt2016_TADs.txt	Adrenal_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	adrenal gland	
+Aorta_STL002_Leung_2015_TADs.txt	Aorta_STL002_Leung_2015	Hi-C	HindIII	No	No	No	Yes	aorta	
+Bladder_Schmitt2016_TADs.txt	Bladder_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	bladder	
+Bowel_Small_Schmitt2016_TADs.txt	Bowel_Small_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	small intestine	
+Caki2_ENCODE3-Dekker_TADs.txt	Caki2_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	Caki-2	
+Cortex_DLPFC_Schmitt2016_TADs.txt	Cortex_DLPFC_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	dorsolateral prefrontal cortex	
+Epidermal_Keratinocyte_day0.Rubin_2017-raw.domains	Epidermal_Keratinocyte_day0.Rubin_2017	Hi-C	HindIII	No	No	No	Yes	keratinocyte (undifferentiated)	
+Epidermal_Keratinocyte_day3.Rubin_2017-raw.domains	Epidermal_Keratinocyte_day3.Rubin_2017	Hi-C	HindIII	No	No	No	Yes	keratinocyte (differentiated; day 3)	
+Epidermal_Keratinocyte_day6.Rubin_2017-raw.domains	Epidermal_Keratinocyte_day6.Rubin_2017	Hi-C	HindIII	No	No	No	Yes	keratinocyte (differentiated; day 6)	
+G401_ENCODE3-Dekker_TADs.txt	G401_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	G-401	
+GM12878_Lieberman_2009_TADs.txt	GM12878_Lieberman_2009			No	Yes	No	No	GM12878	sample does not exist!!!
+GM12878_Rao_2014_TADs.txt	GM12878_Rao_2014	in situ Hi-C	MboI	No	Yes	No	Yes	GM12878	
+H1-ESC_Dixon_2015_TADs.txt	H1-ESC_Dixon_2015	Hi-C	HindIII	No	Yes	No	Yes	WA01	
+H1-MES_Dixon_2015_TADs.txt	H1-MES_Dixon_2015	Hi-C	HindIII	No	No	No	Yes	mesendoderm (derived from WA01)	
+H1-MSC_Dixon_2015_TADs.txt	H1-MSC_Dixon_2015	Hi-C	HindIII	No	No	No	Yes	mesenchymal stem cell (derived from WA01)	
+H1-NPC_Dixon_2015_TADs.txt	H1-NPC_Dixon_2015	Hi-C	HindIII	No	No	No	Yes	neural progenitor cell (derived from WA01)	
+H1-TRO_Dixon_2015_TADs.txt	H1-TRO_Dixon_2015	Hi-C	HindIII	No	No	No	Yes	trophectoderm (derived from WA01)	
+HCT-116_RAD21-mAC_no_auxin.Rao_2017-raw.domains	HCT-116_RAD21-mAC_no_auxin	in situ Hi-C	MboI	No	Yes	Yes	Yes	HCT 116	
+HCT-116_RAD21-mAC_auxin_6hr.Rao_2017-raw.domains	HCT-116_RAD21-mAC_auxin_6hr	in situ Hi-C	MboI	Yes	Yes	Yes	Yes	HCT 116	
+HepG2.ENCODE3-raw.domains	HepG2-ENCODE3-Dekker	in situ Hi-C	DpnII	No	Yes	Yes	Yes	Hep-G2	
+Hippocampus_Schmitt2016_TADs.txt	Hippocampus_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	hippocampus	
+HMEC_Rao_2014_TADs.txt	HMEC_Rao_2014	in situ Hi-C	MboI	No	Yes	No	Yes	HMEC-1	
+HUVEC_Rao_2014_TADs.txt	HUVEC_Rao_2014	in situ Hi-C	MboI	No	Yes	No	Yes	HUVEC-C	
+IMR90_Rao_2014_TADs.txt	IMR90_Rao_2014	in situ Hi-C	MboI	No	Yes	No	Yes	IMR-90	
+K562_Lieberman_2009_TADs.txt	K562_Lieberman_2009	Hi-C	HindIII	No	Yes	Yes	Yes	K-562	
+K562_Rao_2014_TADs.txt	K562_Rao_2014	in situ Hi-C	MboI	No	Yes	Yes	Yes	K-562	
+KBM7_Rao_2014_TADs.txt	KBM7_Rao_2014	in situ Hi-C	MboI	No	Yes	Yes	Yes	KBM-7	
+Liver_STL011_Leung_2015_TADs.txt	Liver_STL011_Leung_2015	Hi-C	HindIII	No	No	No	Yes	liver	
+LNCAP_ENCODE3-Dekker_TADs.txt	LNCAP_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	LNCaP	
+Lung_Schmitt2016_TADs.txt	Lung_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	lung	
+NCIH460_ENCODE3-Dekker_TADs.txt	NCIH460_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	NCI-H460	
+NHEK_Rao_2014_TADs.txt	NHEK_Rao_2014	in situ Hi-C	MboI	No	Yes	No	Yes	NHEK	
+Ovary_Schmitt2016_TADs.txt	Ovary_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	ovary	
+PANC1_ENCODE3-Dekker_TADs.txt	PANC1_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	PANC-1	
+Pancreas_Schmitt2016_TADs.txt	Pancreas_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	pancreas	
+Psoas_Schmitt2016_TADs.txt	Psoas_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	skeletal muscle (psoas)	
+RPMI7951_ENCODE3-Dekker_TADs.txt	RPMI7951_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	RPMI-7951	
+SJCRH30_ENCODE3-Dekker_TADs.txt	SJCRH30_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	Rh30	
+SKMEL5_ENCODE3-Dekker_TADs.txt	SKMEL5_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	SK-MEL-5	
+SKNDZ_ENCODE3-Dekker_TADs.txt	SKNDZ_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	SK-N-DZ	
+SKNMC_ENCODE3-Dekker_TADs.txt	SKNMC_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	SK-N-MC	
+Spleen_Schmitt2016_TADs.txt	Spleen_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	spleen	
+T470_ENCODE3-Dekker_TADs.txt	T470_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	Yes	T-47D	
+VentricleLeft_STL003_Leung_2015_TADs.txt	VentricleLeft_STL003_Leung_2015	Hi-C	HindIII	No	No	No	Yes	left ventricle	
+Ventricle_Right_Schmitt2016_TADs.txt	Ventricle_Right_Schmitt2016	Hi-C	HindIII	No	No	No	Yes	right ventricle	

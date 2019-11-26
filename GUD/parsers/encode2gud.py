@@ -138,25 +138,6 @@ class ENCODE:
         else:
             return(None)
 
-    def get_metadata_and_descriptor(self):
-
-        # Initialize
-        metadata = []
-        descriptor = [] 
-
-        self.accession = accession
-        self.biosample_name = biosample_name
-        self.biosample_type = biosample_type
-        self.download_url = download_url
-        self.experiment_accession = experiment_accession
-        self.experiment_type = experiment_type
-        self.experiment_target = experiment_target
-        self.genome_assembly = genome_assembly
-        self.output_format = output_format
-        self.output_type = output_type
-        self.status = status
-        self.treatments = treatments
-
 #-------------#
 # Functions   #
 #-------------#
@@ -493,8 +474,8 @@ def _parse_metadata(genome, metadata_file):
 
             # Warn me!
             if biosample_name not in samples:
-                i_have_been_warned = True
                 warnings.warn("missing sample: %s" % biosample_name, Warning, stacklevel=2)
+                i_have_been_warned = True
 
             # Add ENCODE object
             encode = ENCODE(accession, biosample_name, biosample_type, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments)
