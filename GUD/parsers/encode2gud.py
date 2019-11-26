@@ -343,11 +343,6 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
     # For each experiment target/type...
     for experiment_target, experiment_type in sorted(grouped_accessions):
 
-        # i.e. required by C. Brown
-        if experiment_target is not None:
-            if experiment_target != "H3K27me3":
-                continue
-
         # Beware, for this should not be possible!
         if experiment_target is not None:
             if feat_type != "histone" and feat_type != "tf":
