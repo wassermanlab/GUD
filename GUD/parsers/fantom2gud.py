@@ -112,6 +112,10 @@ def check_args(args):
         error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\" \"--samples\" \"--feature\" are required\n"]
         print(": ".join(error))
         exit(0)
+    if args.genome != "hg38":
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\"", "invalid genome assembly", "\"%s\"\n" % args.genome]
+        print(": ".join(error))
+        exit(0)
 
     # Check for invalid feature
     valid_features = ["enhancer", "tss"]
@@ -198,7 +202,6 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     ParseUtils.create_table(Feature)
     if Feature.__tablename__ == "transcription_start_sites":
         ParseUtils.create_table(Expression)
-    exit(0)
 
     # Start a new session
     session = Session()
@@ -208,16 +211,12 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
 
     # Get experiment
     experiment = Experiment()
-    experiment.name = experiment_type
+    experiment.name = "CAGE"
     ParseUtils.upsert_experiment(session, experiment)
-    experiment = ParseUtils.get_experiment(session, experiment_type)    
+    experiment = ParseUtils.get_experiment(session, experiment.name)    
 
     # Download data
-    download_file = _download_data(genome, dummy_dir)
-
-    # Get samples
-    samples = _get_samples(session, samples_file)
-    print(samples)
+    download_file, url = _download_data(genome, feat_type, dummy_dir)
 
     # Get source
     source = Source()
@@ -226,38 +225,71 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     sources = ParseUtils.get_source(session, source_name)
     source = next(iter(sources))
 
+    # Get samples
+    samples = _get_samples(session, samples_file)
+    print(samples)
+
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
 
-# def _download_data(genome, feat_type, dummy_dir="/tmp/"):
+def _download_data(genome, feat_type, dummy_dir="/tmp/"):
 
-#     # Python 3+
-#     if sys.version_info > (3, 0):
-#         from urllib.request import urlretrieve
-#     # Python 2.7
-#     else:
-#         from urllib import urlretrieve
+    import requests
 
-#     # Initialize
-#     url = "http://fantom.gsc.riken.jp/5/datafiles/"
+    # Initialize
+    url = "http://fantom.gsc.riken.jp/5/datafiles/"
 
-#     # If latest human/mouse genomes...
-#     if genome == "hg38" or genome == "mm10":
-#         url += "reprocessed/%s_latest/extra" % genome
-#         # Get experiment
-#         if feat_type == "enhancer":
-#             ftp_file = "F5.%s.enhancers.expression.usage.matrix.gz" %s genome
-#         else:
-            
-#     else:
-#         url += "latest/extra"
+    # If latest genome...
+    if genome == "hg38":
+        url += "reprocessed/%s_latest/extra/" % genome
+        if feat_type == "enhancer":
+            url += "enhancer"
+            ftp_file = "F5.%s.enhancers.expression.usage.matrix.gz" % genome
+        else:
+            url += "CAGE_peaks_expression"
+            ftp_file = "%s_fair+new_CAGE_peaks_phase1and2_tpm_ann.osc.txt.gz" % genome
+    else:
+        # Not implemented!
+        pass
 
-#     dummy_file = os.path.join(dummy_dir, ftp_file)
-#     if not os.path.exists(dummy_file):
-#         f = urlretrieve(os.path.join(url, ftp_file), dummy_file)
+    # Download data
+    dummy_file = os.path.join(dummy_dir, ftp_file)
+    if not os.path.exists(dummy_file):
+        os.system("curl --silent -o %s %s" % (dummy_file, os.path.join(url, ftp_file)))
 
-#     return(dummy_file)
+    return(dummy_file, os.path.join(url, ftp_file))
+
+def _get_samples(session, file_name):
+
+    # Initialize
+    samples = {}
+
+    # For each line...
+    for line in ParseUtils.parse_tsv_file(file_name):
+
+        # If add...
+        if line[4] == "Yes":
+
+            # Initialize
+            sample_name = line[0]
+            if line[1] == "Yes":
+                treatment = True
+            else:
+                treatment = False
+            if line[2] == "Yes":
+                cell_line = True
+            else:
+                cell_line = False
+            if line[3] == "Yes":
+                cancer = True
+            else:
+                cancer = False
+
+            # Add sample
+            samples.setdefault(sample_name, (treatment, cell_line, cancer))
+
+    return(samples)
 
 # def _get_samples(session, file_name):
 
