@@ -1,35 +1,27 @@
 # GUD - Genomic Unification Database Testing Tutorial
 
-### Background
+## Table of Contents
 
-The Genomic Unification Database (GUD) is a project developed by the Wasserman lab to house a unified version of several different data-sets and data-types describing human genomic information. The database is designed to reduce data redundancies found in the original data-sets and to leverage the full capacities of mySQL. The back end code is in Python and Flask and uses a mySQL database housed on the CMMT servers. For ease of access we have developed a simple API for querying the database which should be used to retrieve data.   
+[toc]
 
-![](/home/tamar/Desktop/GUD/tutorial/pics/Fig.2.png)
-
-### Pre-requisites 
+## Pre-requisites 
 
 - `CMMT VPN`
 
 - browser 
 - programming language of choice for api access
 
-### Available Resources 
-
-GUD follows this basic schema, from the database you can fetch all the Genomic Feature 1 and 2 (GF1/GF2) features, chroms, samples, experiments, and sources. For the purpose of this tutorial we have inserted a subset of the data, mainly these tables: `chroms, clinvar, conservation, copy_number_variants, cpg_islands, experiments, genes, histone_modifications, regions, rmsk, samples, short_tandem_repeats, sources, tf_binding`.
-
-![](/home/tamar/Desktop/GUD/tutorial/pics/GUD_schema-orm.png)
-
-### Access Model 
+## Access Model 
 
 GUD is designed for programmatic access through an API. A front end API website is available at the URL `http://gud.cmmt.ubc.ca:8080/`, for now this is only accessible if you are on the CMMT network, either through a VPN or via a Ethernet cable. This website has some basic documentation on access as well as a live API where users can test small queries to understand the query syntax. Please use the website for learning how to use the API. 
 
 ![](/home/tamar/Desktop/GUD/tutorial/pics/Screenshot from 2019-11-25 16-58-41.png)
 
-### API Access Scripts
+## API Access Scripts
 
 For faster programmatic access it is best to fetch blocks of data through scripts. We provide simple scripts for querying the database programmatically in `R` and `Python`. For other languages please consult google! Currently the API caps request from the same IP address at 5 per second so please be aware when designing your own scripts. 
 
-#### R
+### R
 
 These are scripts for loading results into a data frame. Keep in mind this might take a while if you are trying to fetch millions of rows.
 
@@ -70,7 +62,7 @@ while(!is.null(next_url)){
 
 ```
 
-#### Python
+### Python
 
 Requirements: 
 
@@ -109,9 +101,9 @@ def get_all_results(request_url):
     return results
 ```
 
-### Testing Guide
+## Testing Guide
 
-#### Steps: 
+### Steps: 
 
 1. Check that you are on the CMMT network, either via wired connection or VPN
 
@@ -131,14 +123,14 @@ def get_all_results(request_url):
 
     **NOTE:** Be aware that GUD expects 1 based inputs and returns 0 based coordinates. 
 
-#### Bugs:
+### Bugs:
 
 - We are expecting bugs to arise when you test the live_api, help us by reporting all bugs here: https://docs.google.com/spreadsheets/d/1LxgiacPJcwV7YU5gEHJFkRBdj7Ac_XxlRR-u1GycnZk/edit?usp=sharing. 
 - When reporting bugs please write the exact steps to reproduce the bug
 - Include screenshots if the bug is something visual 
 - Optional but helpful - if you can open the devtools (ctrl-shift-i on chrome) and check the console tab for any errors and record them
 
-#### Some examples of bugs:
+### Some examples of bugs:
 
 - Sending a request and getting “loading...” for more than a 5 minutes
 
@@ -148,6 +140,18 @@ def get_all_results(request_url):
 
 - Any visual problems 
 
-#### Comments: 
+### Comments: 
 
 Any general comments/suggestions are highly appreciated, please message me (Tamar) on slack or by email tavshalom@cmmt.ubc.ca. 
+
+## Background
+
+The Genomic Unification Database (GUD) is a project developed by the Wasserman lab to house a unified version of several different data-sets and data-types describing human genomic information. The database is designed to reduce data redundancies found in the original data-sets and to leverage the full capacities of mySQL. The back end code is in Python and Flask and uses a mySQL database housed on the CMMT servers. For ease of access we have developed a simple API for querying the database which should be used to retrieve data.   
+
+![](/home/tamar/Desktop/GUD/tutorial/pics/Fig.2.png)
+
+## Available Resources 
+
+GUD follows this basic schema, from the database you can fetch all the Genomic Feature 1 and 2 (GF1/GF2) features, chroms, samples, experiments, and sources. For the purpose of this tutorial we have inserted a subset of the data, mainly these tables: `chroms, clinvar, conservation, copy_number_variants, cpg_islands, dna_accessibility, experiments, genes, histone_modifications, regions, rmsk,                  samples, short_tandem_repeats, sources, tf_binding`.
+
+![](/home/tamar/Desktop/GUD/tutorial/pics/GUD_schema-orm.png)
