@@ -70,15 +70,16 @@ def genomic_feature_mixin1_queries(session, resource, request):
     keys = get_mixin1_keys(request)
     # location query
     q = resource.select_all(session, None)
-    if (keys['start'] is not None or keys['end'] is not None or keys['location']
-            is not None or keys['chrom'] is not None):
-        if (keys['start'] is not None and keys['end'] is not None and keys['location']
-                is not None and keys['chrom'] is not None):
-            q = resource.select_by_location(
+    # just chrom
+    if (keys['start'] is None and keys['end'] is None and keys['location'] is None and keys['chrom'] is not None):
+        q = resource.select_by_location(session, q, keys['chrom'])
+    # all location
+    elif (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
+        q = resource.select_by_location(
                 session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
-        else:
-            raise BadRequest(
-                "To filter by location you must specify location, chrom, start, and end.")
+    # partial location 
+    elif (keys['start'] is not None or keys['end'] is not None or keys['location'] is not None or keys["chrom"] is not None):
+        raise BadRequest("To filter by location you must specify location, chrom, start, and end or just a chrom.")
     # uid query
     if keys['uids'] is not None:
         q = resource.select_by_uids(session, q, keys['uids'])

@@ -29,87 +29,7 @@ class GFMixin2(GFMixin1):
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id, 
             Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)
         return q
-
-    @classmethod
-    def select_all(cls, session, query):
-        q = cls.make_query(session, query)
-        return q
-
-    @classmethod
-    def select_by_overlapping_location(cls, session, query, chrom, start, end):
-        """
-        Query objects by genomic location, 
-        retrieve all objects that overlap with range.
-        """
-        bins = Region._compute_bins(start, end)
-        q = query.filter(Region.chrom == chrom,
-                         Region.start < end,
-                         Region.end > start)\
-            .filter(Region.bin.in_(bins))
-        return q
-
-    @classmethod
-    def select_by_within_location(cls, session, query, chrom, start, end):
-        """
-        Query objects by genomic location, 
-        retrieve all objects that are within range.
-        """
-        bins = Region._compute_bins(start, end)
-        q = query.filter(Region.chrom == chrom,
-                         Region.start >= start,
-                         Region.end <= end)\
-            .filter(Region.bin.in_(bins))
-
-        return q
-
-    @classmethod
-    def select_by_exact_location(cls, session, query, chrom, start, end):
-        """
-        Query objects by exact genomic location.
-        """
-        bins = Region._compute_bins(start, end)
-        q = query.filter(Region.bin.in_(bins))\
-            .filter(Region.chrom == chrom,
-                    Region.start == start,
-                    Region.end == end)
-
-        return q
-
-    @classmethod
-    def select_by_location(cls, session, query, chrom, start, end, location):
-        """
-        Query objects by genomic location.
-        """
-        q = cls.make_query(session, query)
-        if location == 'exact':
-            q = cls.select_by_exact_location(session, q,  chrom, start, end)
-        elif location == 'within':
-            q = cls.select_by_within_location(session, q, chrom, start, end)
-        elif location == 'overlapping':
-            q = cls.select_by_overlapping_location(
-                session, q,  chrom, start, end)
-        else:
-            return False
-        return q
-
-    @classmethod
-    def select_by_uids(cls, session, query, uids):
-        """
-        filter query by uids.
-        """
-        q = cls.make_query(session, query)
-        q = q.filter(cls.uid.in_(uids))
-        return q
-
-    @classmethod
-    def select_by_sources(cls, session, query, sources):
-        """
-        filter query by sources.
-        """
-        q = cls.make_query(session, query)
-        q = q.filter(Source.name.in_(sources))
-        return q
-
+        
     @classmethod
     def select_by_samples(cls, session, query, samples):
         """
@@ -140,18 +60,3 @@ class GFMixin2(GFMixin1):
                                       cls.experiment_id == experimentID)
         q = q.all()
         return len(q) == 0
-
-    @classmethod
-    def as_genomic_feature(self, feat):
-        """
-        Return feature as GenomicFeature object. 
-        """
-        return GenomicFeature(
-            feat.Region.chrom,
-            int(feat.Region.start),
-            int(feat.Region.end),
-            feat_type=self.__tablename__,
-            feat_id="%s_%s" % (self.__tablename__,
-                               getattr(feat, self.__name__).uid),
-            qualifiers=None
-        )

@@ -165,7 +165,7 @@ def histone_modifications(request, session):
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     if histone_types is not None: 
-        q = resource.select_by_histone_type(q, histone_types)
+        q = resource.select_by_histone_type(session, q, histone_types)
     return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
 def tads(request, session):                                           
