@@ -181,7 +181,9 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
     global chroms
     global engine
     global experiment
-    global samples
+    global restriction_enzyme
+    global sample
+    global source
     global Feature
     global Session
 
@@ -235,26 +237,36 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
     engine.dispose()
 
     # Extract data
-    extracted_files = _extract_data(data_file, dummy_dir)
-    print(extracted_files)
-    exit(0)
+    extracted_files = _extract_data(data_file, samples, dummy_dir)
 
-    # Split data
-    data_files = _split_data(data_file, threads)
+    # For each file...
+    for extracted_file in sorted(extracted_files):
 
-    # Parallelize inserts to the database
-    ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
+        # Split data
+        data_files = _split_data(extracted_file, threads)
 
-    # Remove data files
-    if remove:
-        if os.path.exists(data_file):
-            os.remove(data_file)
-        for data_file in data_files:
+        # Get experiment
+        extracted_file = extracted_file.split("/")
+        experiment = Experiment()
+        experiment.name = samples[extracted_file[-1]].experiment_type
+        ParseUtils.upsert_experiment(session, experiment)
+        experiment = ParseUtils.get_experiment(session, experiment_type)
+
+
+
+        # Parallelize inserts to the database
+        ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
+
+        # Remove data files
+        if remove:
             if os.path.exists(data_file):
                 os.remove(data_file)
+            for data_file in data_files:
+                if os.path.exists(data_file):
+                    os.remove(data_file)
 
-    # Remove session
-    Session.remove()
+        # Remove session
+        Session.remove()
 
 def _download_data(genome, feat_type, dummy_dir="/tmp/"):
 
@@ -272,7 +284,7 @@ def _download_data(genome, feat_type, dummy_dir="/tmp/"):
     if not os.path.exists(data_file):
         f = urlretrieve(os.path.join(url, ftp_file), data_file)
 
-    return(data_file, os.path.join(url, ftp_file))d
+    return(data_file, os.path.join(url, ftp_file))
 
 def _get_samples(session, file_name):
 
@@ -290,7 +302,7 @@ def _get_samples(session, file_name):
 
     return(samples)
 
-def _extract_data(data_file, dummy_dir):
+def _extract_data(data_file, samples, dummy_dir):
 
     # Initialize
     extracted_files = []
@@ -303,6 +315,10 @@ def _extract_data(data_file, dummy_dir):
 
             zip_file = zip_file.split("/")
 
+            # Skip
+            if zip_file[-1] == "":
+                continue
+
             # Warn me!
             if zip_file[-1] not in samples:
                 warnings.warn("missing sample: %s" % zip_file[-1], Warning, stacklevel=2)
@@ -311,10 +327,11 @@ def _extract_data(data_file, dummy_dir):
             # Extract file
             extracted_file = os.path.join(dummy_dir, zip_file[-1])
             if not os.path.exists(extracted_file):
-                myzip.extract("/".join(zip_file), dummy_dir)
+                content = myzip.read("/".join(zip_file))
+                ParseUtils.write(extracted_file, content.decode(encoding="UTF-8"))
 
             # Add extracted file
-            extracted_files.append(extracted_file)            
+            extracted_files.append(extracted_file)
 
     if i_have_been_warned:
         error = ["%s" % os.path.basename(__file__), "error", "missing samples"]
