@@ -29,6 +29,7 @@ from .chrom import Chrom
 from .clinvar import ClinVar
 from .conservation import Conservation
 from .copy_number_variant import CNV
+from .cpg_island import CpGIsland
 from .dna_accessibility import DNAAccessibility
 from .enhancer import Enhancer
 from .experiment import Experiment

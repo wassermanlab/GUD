@@ -12,14 +12,13 @@ from sqlalchemy.ext.declarative import declared_attr
 class TAD(GFMixin2, Base):
     # table declerations
     __tablename__ = "tads"
-    restriction_enzyme = Column("restriction_enzyme", String(25), nullable=False)
     hierarchical_level = Column("hierarchical_level", String(25))
 
     @declared_attr
     def __table_args__(cls):
         return (
             UniqueConstraint(cls.region_id, cls.sample_id,
-                             cls.experiment_id, cls.sample_id, cls.restriction_enzyme),
+                             cls.experiment_id, cls.sample_id),
             Index("ix_join", cls.region_id, cls.sample_id,
                   cls.experiment_id, cls.source_id),
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
@@ -27,22 +26,12 @@ class TAD(GFMixin2, Base):
 
     # class methods
     @classmethod
-    def select_by_restriction_enzymes(cls, session, query, restriction_enzymes):
-        """
-        Query objects by sources.
-        """
-        q = cls.make_query(session, query)
-        q = q.filter(cls.restriction_enzyme.in_(restriction_enzymes))
-        return q
-
-    @classmethod
     def is_unique(cls, session, regionID, sampleID, experimentID,
-                  sourceID, restriction_enzyme):
+                  sourceID):
 
         q = session.query(cls).\
             filter(cls.region_id == regionID, cls.sample_id == sampleID,
-                   cls.experiment_id == experimentID, cls.source_id == sourceID,
-                   cls.restriction_enzyme == restriction_enzyme)
+                   cls.experiment_id == experimentID, cls.source_id == sourceID)
 
         return len(q.all()) == 0
 
@@ -54,7 +43,6 @@ class TAD(GFMixin2, Base):
             "source": feat.Source.name,
             "sample": feat.Sample.name,
             "experiment": feat.Experiment.name,
-            "restriction_enzyme": feat.TAD.restriction_enzyme,
             "hierarchical_level": feat.TAD.hierarchical_level
         }
         genomic_feature = super().as_genomic_feature(feat)

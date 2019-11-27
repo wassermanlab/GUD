@@ -28,16 +28,11 @@ function create_row(param, params) {
     var desc = document.createElement("td");
     desc.id = param + "Desc";
     desc.innerHTML = params[param]['DESCRIPTION'];
-    // create required  box
-    var req = document.createElement("td");
-    req.innerHTML = params[param]['REQUIRED'];
-    req.id = param + "Req";
     // add elements to dom
     $("#" + newRow.id).append(key);
     $("#" + newRow.id).append(value);
     $("#" + value.id).append(input);
     $("#" + newRow.id).append(desc);
-    $("#" + newRow.id).append(req);
 }
 
 // on change of select resource 

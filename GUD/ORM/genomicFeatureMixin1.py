@@ -40,6 +40,16 @@ class GFMixin1(object):
         return q
 
     @classmethod
+    def select_by_chrom(cls, session, query, chrom):
+        """
+        Query objects by genomic location, 
+        retrieve all objects that are in a sepcific chrom.
+        """
+        q = query.filter(Region.chrom == chrom)
+
+        return q
+
+    @classmethod
     def select_by_overlapping_location(cls, session, query, chrom, start, end):
         """
         Query objects by genomic location, 
@@ -80,12 +90,14 @@ class GFMixin1(object):
         return q
 
     @classmethod
-    def select_by_location(cls, session, query, chrom, start, end, location):
+    def select_by_location(cls, session, query, chrom, start=None, end=None, location=None):
         """
         Query objects by genomic location.
         """
         q = cls.make_query(session, query)
-        if location == 'exact':
+        if (start is None and end is None and location is None): 
+            q = cls.select_by_chrom(session, q, chrom)
+        elif location == 'exact':
             q = cls.select_by_exact_location(session, q,  chrom, start, end)
         elif location == 'within':
             q = cls.select_by_within_location(session, q, chrom, start, end)

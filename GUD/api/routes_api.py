@@ -2,8 +2,8 @@
 from GUD.api import app, get_engine_session
 from flask import request, jsonify
 # API_ADDITION(1): import feature that you would like to add
-from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation,
-                     DNAAccessibility, Enhancer, HistoneModification, TAD, 
+from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation, CpGIsland,
+                     DNAAccessibility, Enhancer, HistoneModification, RepeatMask, TAD, 
                      TFBinding, TSS, Chrom, Sample, Experiment, Source, Expression) 
 from GUD.api.api_helpers import *
 from werkzeug.exceptions import BadRequest
@@ -108,6 +108,12 @@ def copy_number_variants(request, session):
         q = resource.select_by_dbvar_accession(session, q, dbVar_accession)
     return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
+def cpg_islands(request, session): 
+    """retrieves conserved elements"""
+    resource = CpGIsland()
+    q = genomic_feature_mixin1_queries(session, resource, request)                                           
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
+
 def genes(request, session):                                           
     """retrieves genes"""
     resource = Gene()
@@ -117,21 +123,27 @@ def genes(request, session):
         q = resource.select_by_names(session, q, names)
     return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
+def rmsk(request, session): 
+    """retrieves conserved elements"""
+    resource = RepeatMask()
+    q = genomic_feature_mixin1_queries(session, resource, request)                                           
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
+
 def short_tandem_repeats(request, session):                            
     """retrieves all STRs"""
     resource = ShortTandemRepeat()
     q = genomic_feature_mixin1_queries(session, resource, request)
     try:
-        pathogenic = request.args.get('pathogenic', default=False, type=bool)
+        pathogenic = request.args.get('pathogenicity', default=False, type=bool)
         motif = request.args.get('motif', default=None, type=str)
-        rotation = request.args.get('rotation', default=False, type=bool)
+        rotations = request.args.get('rotations', default=False, type=bool)
     except:
         raise BadRequest(
             'rotation must be set to True or False if motif is given')
     if pathogenic:
         q = resource.select_by_pathogenicity(session, q)
     if motif is not None:
-        q = resource.select_by_motif(session, motif, q, rotation)
+        q = resource.select_by_motif(session, motif, q, rotations)
     return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
 # GF2 queries 
@@ -153,7 +165,7 @@ def histone_modifications(request, session):
     q = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     if histone_types is not None: 
-        q = resource.select_by_histone_type(q, histone_types)
+        q = resource.select_by_histone_type(session, q, histone_types)
     return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
 
 def tads(request, session):                                           
@@ -195,6 +207,7 @@ def resource_query(db, resource):
         "clinvar": clinvar, 
         "copy_number_variants": copy_number_variants,
         "conservation": conservation,
+        "cpg_islands": cpg_islands,
         "dna_accessibility": dna_accessibility,
         "enhancers": enhancers,
         "experiments": experiments,
@@ -204,6 +217,7 @@ def resource_query(db, resource):
         "samples": samples,
         "short_tandem_repeats": short_tandem_repeats,
         "sources": sources,
+        "rmsk": rmsk,
         "tads": tads,
         "tf_binding": tf_binding,
         "tss": tss
