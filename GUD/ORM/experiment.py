@@ -8,7 +8,7 @@ class Experiment(Base):
     __tablename__ = "experiments"
     uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
     name = Column("name", String(250), nullable=False)
-    source_metadata = Column("source_metadata", String(250))
+    experiment_metadata = Column("experiment_metadata", String(250))
     metadata_descriptor = Column("metadata_descriptor", String(250))
     
     __table_args__ = (
