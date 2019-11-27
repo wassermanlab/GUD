@@ -31,7 +31,9 @@ class GFMixin1(object):
             return query
         q = session.query(cls, Region, Source)\
             .join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)
+            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
+            .with_hint(Source, 'USE INDEX (PRIMARY)')\
+            .with_hint(Region, 'USE INDEX (PRIMARY)')
         return q
 
     @classmethod

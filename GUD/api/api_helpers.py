@@ -14,10 +14,13 @@ def get_result_from_query(query, request, resource, page_size=20, result_tuple_t
         raise BadRequest('query not specified correctly')
     results = query.filter(type(resource).uid > last_uid).with_hint(type(resource), 'USE INDEX (PRIMARY)')\
         .order_by(type(resource).uid).limit(page_size)  # seek method for paginating, we must specify the index to have speed up
-    print(results)
+    print(results)   # TODO: take this out later
     # serialize and get uids of first and last element returned
     try:
-        last_uid = getattr(results[page_size-1], type(resource).__name__).uid
+        if (result_tuple_type == "genomic_feature"):
+            last_uid = getattr(results[page_size-1], type(resource).__name__).uid
+        else:
+            last_uid = results[page_size-1].uid
     except:
         last_uid = None
     if (result_tuple_type == "genomic_feature"):

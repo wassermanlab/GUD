@@ -27,7 +27,11 @@ class GFMixin2(GFMixin1):
         q = session.query(cls, Region, Source, Sample, Experiment)\
             .join()\
             .filter(Region.uid == cls.region_id, Source.uid == cls.source_id, 
-            Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)
+            Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
+            .with_hint(Sample, 'USE INDEX (PRIMARY)')\
+            .with_hint(Source, 'USE INDEX (PRIMARY)')\
+            .with_hint(Region, 'USE INDEX (PRIMARY)')\
+            .with_hint(Experiment, 'USE INDEX (PRIMARY)')
         return q
         
     @classmethod
