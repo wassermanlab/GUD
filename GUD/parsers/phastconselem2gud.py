@@ -281,11 +281,13 @@ def _insert_data(data_file, test=False):
 
         # Upsert region
         region = Region()
-        region.chrom = line[1][3:]
+        region.chrom = str(line[1])
+        if region.chrom.startswith("chr"):
+            region.chrom = region.chrom[3:]
         if region.chrom not in chroms:
             continue
-        region.start = line[2]
-        region.end = line[3]
+        region.start = int(line[2])
+        region.end = int(line[3])
         region.bin = assign_bin(region.start, region.end)
         ParseUtils.upsert_region(session, region)
 
@@ -296,7 +298,7 @@ def _insert_data(data_file, test=False):
         conservation = Conservation()
         conservation.region_id = region.uid
         conservation.source_id = source.uid
-        conservation.score = line[5]
+        conservation.score = float(line[5])
         ParseUtils.upsert_conservation(session, conservation)
 
         # Testing

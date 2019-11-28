@@ -815,11 +815,13 @@ def _insert_data_file(data_file, test=False):
 
         # Upsert region
         region = Region()
-        region.chrom = line[0][3:]
+        region.chrom = str(line[0])
+        if region.chrom.startswith("chr"):
+            region.chrom = region.chrom[3:]
         if region.chrom not in chroms:
             continue
-        region.start = line[1]
-        region.end = line[2]
+        region.start = int(line[1])
+        region.end = int(line[2])
         region.bin = assign_bin(region.start, region.end)
         ParseUtils.upsert_region(session, region)
 
@@ -862,8 +864,8 @@ def _insert_data_file(data_file, test=False):
         feature.sample_id = sample.uid
         feature.experiment_id = experiment.uid
         feature.source_id = source.uid
-        feature.score = line[4]
-        feature.peak = line[5]
+        feature.score = float(line[4])
+        feature.peak = int(line[5])
         if Feature.__tablename__ == "dna_accessibility":
             ParseUtils.upsert_accessibility(session, feature)
         else:

@@ -455,8 +455,8 @@ def _insert_data(data_file, experiment, sample, source, test=False):
                 region.chrom = region.chrom[3:]
             if region.chrom not in chroms:
                 continue
-            region.start = line[1]
-            region.end = line[2]
+            region.start = int(line[1])
+            region.end = int(line[2])
             region.bin = assign_bin(region.start, region.end)
             ParseUtils.upsert_region(session, region)
 

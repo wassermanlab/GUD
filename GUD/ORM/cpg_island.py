@@ -1,11 +1,5 @@
-from sqlalchemy import (
-    Column,
-    Float,
-    Index,
-    Integer,
-    UniqueConstraint
-)
-
+from sqlalchemy import (Column, Index, UniqueConstraint)
+from sqlalchemy.dialects import mysql
 from .base import Base
 from .region import Region
 from .source import Source
@@ -17,11 +11,11 @@ class CpGIsland(GFMixin1, Base):
 
     __tablename__ = "cpg_islands"
 
-    cpgs = Column("cpgs", Integer, nullable=False)
-    gcs = Column("gcs", Integer, nullable=False)
-    percent_cpg = Column("percent_cpg", Float, nullable=False)
-    percent_gc = Column("percent_gc", Float, nullable=False)
-    obsexp_ratio = Column("obsexp_ratio", Float, nullable=False)
+    cpgs = Column("cpgs", mysql.INTEGER, nullable=False)
+    gcs = Column("gcs", mysql.INTEGER, nullable=False)
+    percent_cpg = Column("percent_cpg", mysql.FLOAT, nullable=False)
+    percent_gc = Column("percent_gc", mysql.FLOAT, nullable=False)
+    obsexp_ratio = Column("obsexp_ratio", mysql.FLOAT, nullable=False)
 
     @declared_attr
     def __table_args__(cls):

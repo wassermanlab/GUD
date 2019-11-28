@@ -269,9 +269,13 @@ def _insert_data(data_file, test=False):
 
         # Upsert region
         region = Region()
-        region.chrom = line[1][3:]
-        region.start = line[2]
-        region.end = line[3]
+        region.chrom = str(line[1])
+        if region.chrom.startswith("chr"):
+            region.chrom = region.chrom[3:]
+        if region.chrom not in chroms:
+            continue
+        region.start = int(line[2])
+        region.end = int(line[3])
         region.bin = assign_bin(region.start, region.end)
         if region.chrom not in chroms:
             continue
@@ -282,11 +286,11 @@ def _insert_data(data_file, test=False):
 
         # Upsert CpG island
         cpg_island = CpGIsland()
-        cpg_island.cpgs = line[6]
+        cpg_island.cpgs = int(line[6])
         cpg_island.gcs = line[7]
-        cpg_island.percent_cpg = line[8]
-        cpg_island.percent_gc = line[9]
-        cpg_island.obsexp_ratio = line[10]
+        cpg_island.percent_cpg = float(line[8])
+        cpg_island.percent_gc = float(line[9])
+        cpg_island.obsexp_ratio = float(line[10])
         cpg_island.region_id = region.uid
         cpg_island.source_id = source.uid
         ParseUtils.upsert_cpg_island(session, cpg_island)
