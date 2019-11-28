@@ -250,18 +250,15 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
     ParseUtils.upsert_source(session, source)
     source = ParseUtils.get_source(session, source.name, source.source_metadata, source.metadata_descriptor, url)
 
-    # Get samples
-    samples = _get_samples(session, samples_file)
-
-    # Insert experiments/samples
-    _insert_experiments_and_samples(samples)
-
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
 
+    # Get samples
+    samples = _get_samples(session, samples_file)
+
     # Extract data
-    extracted_files = set(_extract_data(data_file, samples, dummy_dir))
+    extracted_files = _extract_data(data_file, samples, dummy_dir)
 
     # For each file...
     for extracted_file in sorted(extracted_files):
@@ -285,6 +282,7 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
             experiment.name = tdgenbrow.experiment_type
             experiment.experiment_metadata = "%s," % tdgenbrow.restriction_enzyme
             experiment.metadata_descriptor = "restriction_enzyme,"
+            ParseUtils.upsert_experiment(session, experiment)
             experiment = ParseUtils.get_experiment(session, experiment.name, experiment.experiment_metadata, experiment.metadata_descriptor)
 
             # Get sample
@@ -296,6 +294,7 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
             if tdgenbrow.sex is not None:
                 sample.X = tdgenbrow.X
                 sample.Y = tdgenbrow.Y
+            ParseUtils.upsert_sample(session, sample)
             sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
 
             # This is ABSOLUTELY necessary to prevent MySQL from crashing!
@@ -366,42 +365,6 @@ def _get_samples(session, file_name):
         samples.setdefault(line[0], TDGenBrow(line[0], line[1], line[2], line[3], treatment, cell_line, cancer, sex, add))
 
     return(samples)
-
-def _insert_experiments_and_samples(samples):
-
-    # Initialize
-    session = Session()
-
-    # For each key...
-    for key in sorted(samples):
-
-        # Initialize
-        tdgenbrow = samples[key]
-
-        # Skip        
-        if tdgenbrow.add:
-
-            # Upsert experiment
-            experiment = Experiment()
-            experiment.name = tdgenbrow.experiment_type
-            experiment.experiment_metadata = "%s," % tdgenbrow.restriction_enzyme
-            experiment.metadata_descriptor = "restriction_enzyme,"
-            ParseUtils.upsert_experiment(session, experiment)
-
-            # Upsert sample
-            sample = Sample()
-            sample.name = tdgenbrow.sample_name
-            sample.treatment = tdgenbrow.treatment
-            sample.cell_line = tdgenbrow.cell_line
-            sample.cancer = tdgenbrow.cancer
-            if tdgenbrow.sex is not None:
-                sample.X = tdgenbrow.X
-                sample.Y = tdgenbrow.Y
-            ParseUtils.upsert_sample(session, sample)
-
-    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
-    session.close()
-    engine.dispose()
 
 def _extract_data(data_file, samples, dummy_dir):
 
