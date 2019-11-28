@@ -369,6 +369,9 @@ def _get_samples(session, file_name):
 
 def _insert_experiments_and_samples(samples):
 
+    # Initialize
+    session = Session()
+
     # For each key...
     for key in sorted(samples):
 
@@ -395,6 +398,10 @@ def _insert_experiments_and_samples(samples):
                 sample.X = tdgenbrow.X
                 sample.Y = tdgenbrow.Y
             ParseUtils.upsert_sample(session, sample)
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
 
 def _extract_data(data_file, samples, dummy_dir):
 
