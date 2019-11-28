@@ -245,28 +245,53 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
         # Split data
         data_files = _split_data(extracted_file, threads)
 
-        # Get experiment
+        # Skip
         extracted_file = extracted_file.split("/")
+        if not samples[extracted_file[-1]].add:
+            continue
+
+        # Get experiment
         experiment = Experiment()
         experiment.name = samples[extracted_file[-1]].experiment_type
+        experiment.experiment_metadata = "%s," % samples[extracted_file[-1]].restriction_enzyme
+        experiment.metadata_descriptor = "restriction_enzyme,"
         ParseUtils.upsert_experiment(session, experiment)
-        experiment = ParseUtils.get_experiment(session, experiment_type)
+        experiment = ParseUtils.get_experiment(session, experiment.name, experiment.experiment_metadata, experiment.metadata_descriptor)
+
+        # Get sample
+        sample = Sample()
+        sample.name = samples[extracted_file[-1]].sample_name
+        sample.treatment = samples[extracted_file[-1]].sample_name
+        sample.cell_line = samples[extracted_file[-1]].sample_name
+        sample.cancer = samples[extracted_file[-1]].sample_name
+        if encodes[accession].sex is not None:
+            sample.X = encodes[accession].X
+            sample.Y = encodes[accession].Y       
+        ParseUtils.upsert_sample(session, sample)
 
 
+        self.file_name = file_name
+        self.sample_name = sample_name
+        self.experiment_type = experiment_type
+        self.restriction_enzyme = restriction_enzyme
+        self.treatment = treatment
+        self.cell_line = cell_line
+        self.cancer = cancer
+        self.add = add
 
-        # Parallelize inserts to the database
-        ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
+        # # Parallelize inserts to the database
+        # ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
 
-        # Remove data files
-        if remove:
-            if os.path.exists(data_file):
-                os.remove(data_file)
-            for data_file in data_files:
-                if os.path.exists(data_file):
-                    os.remove(data_file)
+        # # Remove data files
+        # if remove:
+        #     if os.path.exists(data_file):
+        #         os.remove(data_file)
+        #     for data_file in data_files:
+        #         if os.path.exists(data_file):
+        #             os.remove(data_file)
 
-        # Remove session
-        Session.remove()
+        # # Remove session
+        # Session.remove()
 
 def _download_data(genome, feat_type, dummy_dir="/tmp/"):
 
@@ -295,10 +320,23 @@ def _get_samples(session, file_name):
     for line in ParseUtils.parse_tsv_file(file_name):
 
         # Add 3D Genome Browser object
-        obj = TDGenBrow(line[0], line[1], line[2], line[3], line[4], line[5], line[6], line[7])
-
-        # Add sample
-        samples.setdefault(line[0], obj)
+        if line[4] == "Yes":
+            treatment = True
+        else:
+            treatment = False
+        if line[5] == "Yes":
+            cell_line = True
+        else:
+            cell_line = False
+        if line[6] == "Yes":
+            cancer = True
+        else:
+            cancer = False
+        if line[7] == "Yes":
+            add = True
+        else:
+            add = False
+        samples.setdefault(line[0], TDGenBrow(line[0], line[1], line[2], line[3], treatment, cell_line, cancer, add))
 
     return(samples)
 

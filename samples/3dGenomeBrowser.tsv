@@ -1,0 +1,55 @@
+3D_Genome_Browser_file_same	3D_Genome_Browser_sample_same	experiment_type	restriction_enzyme	treatment	cell_line	cancer	sex	add	sample_name	comments
+A549_raw-merged_TADs.txt	A549_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	male	Yes	A-549	
+Adrenal_Schmitt2016-raw_TADs.txt	Adrenal_Schmitt2016	Hi-C	HindIII	No	No	No	female	Yes	adrenal gland	
+Aorta_STL002.Leung_2015-raw.domains	Aorta_STL002_Leung_2015	Hi-C	HindIII	No	No	No	female	Yes	aorta	
+Aorta_STL002_Leung_2015-raw_TADs.txt	Aorta_STL002_Leung_2015	Hi-C	HindIII	No	No	No	female	Yes	aorta	
+Bladder_Schmitt2016-raw_TADs.txt	Bladder_Schmitt2016	Hi-C	HindIII	No	No	No	male	Yes	bladder	
+Bowel_Small_Schmitt2016-raw_TADs.txt	Bowel_Small_Schmitt2016	Hi-C	HindIII	No	No	No	female	Yes	small intestine	
+Caki2_raw-merged_TADs.txt	Caki2_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	male	Yes	Caki-2	
+Cortex_DLPFC_Schmitt2016-raw_TADs.txt	Cortex_DLPFC_Schmitt2016	Hi-C	HindIII	No	No	No	male	Yes	dorsolateral prefrontal cortex	
+Epidermal_Keratinocyte_day0.Rubin_2017-raw.domains	Epidermal_Keratinocyte_day0.Rubin_2017	Hi-C	HindIII	No	No	No	male	Yes	keratinocyte (undifferentiated)	
+Epidermal_Keratinocyte_day3.Rubin_2017-raw.domains	Epidermal_Keratinocyte_day3.Rubin_2017	Hi-C	HindIII	No	No	No	male	Yes	keratinocyte (differentiated; day 3)	
+Epidermal_Keratinocyte_day6.Rubin_2017-raw.domains	Epidermal_Keratinocyte_day6.Rubin_2017	Hi-C	HindIII	No	No	No	male	Yes	keratinocyte (differentiated; day 6)	
+G401_raw-merged_TADs.txt	G401_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	male	Yes	G-401	
+GM12878_Lieberman_2009-raw_TADs.txt	GM12878_Lieberman_2009			No	Yes	No	female	No	GM12878	sample does not exist!!!
+GM12878_Rao_2014-raw_TADs.txt	GM12878_Rao_2014	in situ Hi-C	MboI	No	Yes	No	female	Yes	GM12878	
+H1-ESC.Jin_2013-raw.domains	H1-ESC_Jin_2013	Hi-C	HindIII	No	Yes	No	male	Yes	WA01	
+H1-ESC_Dixon_2015-raw_TADs.txt	H1-ESC_Dixon_2015	Hi-C	HindIII	No	Yes	No	male	Yes	WA01	
+H1-MES_Dixon_2015-raw_TADs.txt	H1-MES_Dixon_2015	Hi-C	HindIII	No	No	No	male	Yes	mesendoderm (derived from WA01)	
+H1-MSC_Dixon_2015-raw_TADs.txt	H1-MSC_Dixon_2015	Hi-C	HindIII	No	No	No	male	Yes	mesenchymal stem cell (derived from WA01)	
+H1-NPC_Dixon_2015-raw_TADs.txt	H1-NPC_Dixon_2015	Hi-C	HindIII	No	No	No	male	Yes	neural progenitor cell (derived from WA01)	
+H1-TRO_Dixon_2015-raw_TADs.txt	H1-TRO_Dixon_2015	Hi-C	HindIII	No	No	No	male	Yes	trophectoderm (derived from WA01)	
+HCT-116_RAD21-mAC_no_auxin.Rao_2017-raw.domains	HCT-116_RAD21-mAC_no_auxin	in situ Hi-C	MboI	No	Yes	Yes	male	Yes	HCT 116	
+HCT-116_RAD21-mAC_auxin_6hr.Rao_2017-raw.domains	HCT-116_RAD21-mAC_auxin_6hr	in situ Hi-C	MboI	Yes	Yes	Yes	male	Yes	HCT 116	
+HepG2.ENCODE3-raw.domains	HepG2-ENCODE3-Dekker	in situ Hi-C	DpnII	No	Yes	Yes	male	Yes	Hep-G2	
+Hippocampus_Schmitt2016-raw_TADs.txt	Hippocampus_Schmitt2016	Hi-C	HindIII	No	No	No	male	Yes	hippocampus	
+HMEC_Rao_2014-raw_TADs.txt	HMEC_Rao_2014	in situ Hi-C	MboI	No	Yes	No	female	Yes	HMEC	
+HUVEC_Rao_2014-raw_TADs.txt	HUVEC_Rao_2014	in situ Hi-C	MboI	No	Yes	No	male	Yes	HUVEC	
+IMR90.Jin_2013-raw.domains	IMR90_Jin_2013	Hi-C	HindIII	No	Yes	No	female	Yes	IMR-90	
+IMR90_Flavopiridol.Jin_2013-raw.domains	IMR90_Flavopiridol_Jin_2013	Hi-C	HindIII	Yes	Yes	No	female	Yes	IMR-90	
+IMR90_TNF-a.Jin_2013-raw.domains	IMR90_TNF-a_Jin_2013	Hi-C	HindIII	Yes	Yes	No	female	Yes	IMR-90	
+IMR90_Rao_2014-raw_TADs.txt	IMR90_Rao_2014	in situ Hi-C	MboI	No	Yes	No	female	Yes	IMR-90	
+K562_Lieberman_2009-raw_TADs.txt	K562_Lieberman_2009	Hi-C	HindIII	No	Yes	Yes	female	Yes	K-562	
+K562_Rao_2014-raw_TADs.txt	K562_Rao_2014	in situ Hi-C	MboI	No	Yes	Yes	female	Yes	K-562	
+KBM7_Rao_2014-raw_TADs.txt	KBM7_Rao_2014	in situ Hi-C	MboI	No	Yes	Yes	male	Yes	KBM-7	
+Liver_STL011.Leung_2015-raw.domains	Liver_STL011_Leung_2015	Hi-C	HindIII	No	No	No	male	Yes	liver	
+Liver_STL011_Leung_2015-raw_TADs.txt	Liver_STL011_Leung_2015	Hi-C	HindIII	No	No	No	male	Yes	liver	
+LNCAP_raw-merged_TADs.txt	LNCAP_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	male	Yes	LNCaP	
+Lung_Schmitt2016-raw_TADs.txt	Lung_Schmitt2016	Hi-C	HindIII	No	No	No		Yes	lung	
+NCIH460_raw-merged_TADs.txt	NCIH460_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	male	Yes	NCI-H460	
+NHEK_Rao_2014-raw_TADs.txt	NHEK_Rao_2014	in situ Hi-C	MboI	No	Yes	No	female	Yes	NHEK	
+Ovary_Schmitt2016-raw_TADs.txt	Ovary_Schmitt2016	Hi-C	HindIII	No	No	No	female	Yes	ovary	
+PANC1_raw-merged_TADs.txt	PANC1_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	male	Yes	PANC-1	
+Pancreas_Schmitt2016-raw_TADs.txt	Pancreas_Schmitt2016	Hi-C	HindIII	No	No	No		Yes	pancreas	
+Psoas_Schmitt2016-raw_TADs.txt	Psoas_Schmitt2016	Hi-C	HindIII	No	No	No	male	Yes	skeletal muscle (psoas)	
+RPMI7951_raw-merged_TADs.txt	RPMI7951_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	female	Yes	RPMI-7951	
+SJCRH30_raw-merged_TADs.txt	SJCRH30_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	male	Yes	Rh30	
+SKMEL5_raw-merged_TADs.txt	SKMEL5_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	female	Yes	SK-MEL-5	
+SKNDZ_raw-merged_TADs.txt	SKNDZ_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	female	Yes	SK-N-DZ	
+SKNMC_raw-merged_TADs.txt	SKNMC_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	female	Yes	SK-N-MC	
+Spleen_Schmitt2016-raw_TADs.txt	Spleen_Schmitt2016	Hi-C	HindIII	No	No	No	male	Yes	spleen	
+T470_raw-merged_TADs.txt	T470_ENCODE3-Dekker	Hi-C	HindIII	No	Yes	Yes	female	Yes	T-47D	
+Thymus_STL001.Leung_2015-raw.domains	Thymus_STL011_Leung_2015	Hi-C	HindIII	No	No	No	male	Yes	thymus	
+VentricleLeft_STL003.Leung_2015-raw.domains	VentricleLeft_STL003_Leung_2015	Hi-C	HindIII	No	No	No	male	Yes	left ventricle	
+VentricleLeft_STL003_Leung_2015-raw_TADs.txt	VentricleLeft_STL003_Leung_2015	Hi-C	HindIII	No	No	No	male	Yes	left ventricle	
+Ventricle_Right_Schmitt2016-raw_TADs.txt	Ventricle_Right_Schmitt2016	Hi-C	HindIII	No	No	No	male	Yes	right ventricle	

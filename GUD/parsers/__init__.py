@@ -331,8 +331,8 @@ class ParseUtililities:
     def get_chroms(self, session):
         return(Chrom.chrom_sizes(session))
 
-    def get_experiment(self, session, experiment_type):
-        return(Experiment.select_unique(session, experiment_type))
+    def get_experiment(self, session, name, experiment_metadata=None, metadata_descriptor=None):
+        return(Experiment.select_unique(session, name, experiment_metadata, metadata_descriptor))
 
     def get_region(self, session, chrom, start, end):
         return(Region.select_unique(session, chrom, start, end))
@@ -367,7 +367,7 @@ class ParseUtililities:
 
     def upsert_experiment(self, session, experiment):
 
-        if Experiment.is_unique(session, experiment.name):
+        if Experiment.is_unique(session, experiment.name, experiment.experiment_metadata, experiment.metadata_descriptor):
             session.add(experiment)
             session.commit()
 
