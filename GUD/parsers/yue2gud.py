@@ -488,4 +488,5 @@ def _insert_data(data_file, experiment, sample, source, test=False):
 # Main        #
 #-------------#
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
