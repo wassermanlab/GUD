@@ -27,6 +27,8 @@ from GUD.ORM.repeat_mask import RepeatMask
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
+from GUD.ORM.tad import TAD
+
 
 class ParseUtililities:
     """
@@ -432,6 +434,11 @@ class ParseUtililities:
     def upsert_clinvar(self, session, clinvar):
         if clinvar.is_unique(session, clinvar.clinvar_variation_ID):
             session.add(clinvar)
+            session.commit()
+
+    def upsert_tad(self, session, tad):
+        if TAD.is_unique(session, tad.region_id, tad.sample_id, tad.experiment_id, tad.source_id):
+            session.add(tad)
             session.commit()
 
     #--------------#

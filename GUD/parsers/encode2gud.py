@@ -778,7 +778,7 @@ def _insert_samples_and_sources(accessions):
         sample.cancer = samples[encodes[accession].biosample_name][2]
         if encodes[accession].sex is not None:
             sample.X = encodes[accession].X
-            sample.Y = encodes[accession].Y       
+            sample.Y = encodes[accession].Y
         ParseUtils.upsert_sample(session, sample)
 
         # Upsert source

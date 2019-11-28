@@ -65,7 +65,7 @@ mysql arguments:
 
 class TDGenBrow:
 
-    def __init__(self, file_name, sample_name, experiment_type, restriction_enzyme, treatment, cell_line, cancer, add):
+    def __init__(self, file_name, sample_name, experiment_type, restriction_enzyme, treatment, cell_line, cancer, sex, add):
 
         self.file_name = file_name
         self.sample_name = sample_name
@@ -74,7 +74,32 @@ class TDGenBrow:
         self.treatment = treatment
         self.cell_line = cell_line
         self.cancer = cancer
+        self.sex = sex
         self.add = add
+
+    @property
+    def X(self):
+        """
+        number of X chromosomes
+        """
+        if self.sex == "female":
+            return(2)
+        elif self.sex == "male":
+            return(1)
+        else:
+            return(None)
+
+    @property
+    def Y(self):
+        """
+        number of Y chromosomes
+        """
+        if self.sex == "female":
+            return(0)
+        elif self.sex == "male":
+            return(1)
+        else:
+            return(None)
 
 #-------------#
 # Functions   #
@@ -180,10 +205,6 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
     # Initialize
     global chroms
     global engine
-    global experiment
-    global restriction_enzyme
-    global sample
-    global source
     global Feature
     global Session
 
@@ -213,14 +234,14 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
         pass
     ParseUtils.create_table(Feature)
 
+    # Download data
+    data_file, url = _download_data(genome, feat_type, dummy_dir)
+
     # Start a new session
     session = Session()
 
     # Get valid chromosomes
     chroms = ParseUtils.get_chroms(session)
-
-    # Download data
-    data_file, url = _download_data(genome, feat_type, dummy_dir)
 
     # Get source
     source = Source()
@@ -229,12 +250,12 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
     ParseUtils.upsert_source(session, source)
     source = ParseUtils.get_source(session, source.name, source.source_metadata, source.metadata_descriptor, url)
 
-    # Get samples
-    samples = _get_samples(session, samples_file)
-
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
+
+    # Get samples
+    samples = _get_samples(session, samples_file)
 
     # Extract data
     extracted_files = _extract_data(data_file, samples, dummy_dir)
@@ -242,56 +263,57 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
     # For each file...
     for extracted_file in sorted(extracted_files):
 
+        # Initialize
+        extracted_file = extracted_file.split("/")
+        tdgenbrow = samples[extracted_file[-1]]
+        extracted_file = "/".join(extracted_file)
+
         # Split data
         data_files = _split_data(extracted_file, threads)
 
-        # Skip
-        extracted_file = extracted_file.split("/")
-        if not samples[extracted_file[-1]].add:
-            continue
+        # Skip        
+        if tdgenbrow.add:
 
-        # Get experiment
-        experiment = Experiment()
-        experiment.name = samples[extracted_file[-1]].experiment_type
-        experiment.experiment_metadata = "%s," % samples[extracted_file[-1]].restriction_enzyme
-        experiment.metadata_descriptor = "restriction_enzyme,"
-        ParseUtils.upsert_experiment(session, experiment)
-        experiment = ParseUtils.get_experiment(session, experiment.name, experiment.experiment_metadata, experiment.metadata_descriptor)
+            # Initialize
+            session = Session()
 
-        # Get sample
-        sample = Sample()
-        sample.name = samples[extracted_file[-1]].sample_name
-        sample.treatment = samples[extracted_file[-1]].sample_name
-        sample.cell_line = samples[extracted_file[-1]].sample_name
-        sample.cancer = samples[extracted_file[-1]].sample_name
-        if encodes[accession].sex is not None:
-            sample.X = encodes[accession].X
-            sample.Y = encodes[accession].Y       
-        ParseUtils.upsert_sample(session, sample)
+            # Get experiment
+            experiment = Experiment()
+            experiment.name = tdgenbrow.experiment_type
+            experiment.experiment_metadata = "%s," % tdgenbrow.restriction_enzyme
+            experiment.metadata_descriptor = "restriction_enzyme,"
+            ParseUtils.upsert_experiment(session, experiment)
+            experiment = ParseUtils.get_experiment(session, experiment.name, experiment.experiment_metadata, experiment.metadata_descriptor)
 
+            # Get sample
+            sample = Sample()
+            sample.name = tdgenbrow.sample_name
+            sample.treatment = tdgenbrow.treatment
+            sample.cell_line = tdgenbrow.cell_line
+            sample.cancer = tdgenbrow.cancer
+            if tdgenbrow.sex is not None:
+                sample.X = tdgenbrow.X
+                sample.Y = tdgenbrow.Y
+            ParseUtils.upsert_sample(session, sample)
+            sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
 
-        self.file_name = file_name
-        self.sample_name = sample_name
-        self.experiment_type = experiment_type
-        self.restriction_enzyme = restriction_enzyme
-        self.treatment = treatment
-        self.cell_line = cell_line
-        self.cancer = cancer
-        self.add = add
+            # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+            session.close()
+            engine.dispose()
 
-        # # Parallelize inserts to the database
-        # ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
+            # Parallelize inserts to the database
+            ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, experiment=experiment, sample=sample, source=source, test=test), threads)
 
-        # # Remove data files
-        # if remove:
-        #     if os.path.exists(data_file):
-        #         os.remove(data_file)
-        #     for data_file in data_files:
-        #         if os.path.exists(data_file):
-        #             os.remove(data_file)
+        # Remove data files
+        if remove:
+            if os.path.exists(extracted_file):
+                os.remove(extracted_file)
+            for data_file in data_files:
+                if os.path.exists(data_file):
+                    os.remove(data_file)
 
-        # # Remove session
-        # Session.remove()
+    # Remove session
+    Session.remove()
 
 def _download_data(genome, feat_type, dummy_dir="/tmp/"):
 
@@ -332,11 +354,15 @@ def _get_samples(session, file_name):
             cancer = True
         else:
             cancer = False
-        if line[7] == "Yes":
+        if line[7] != "male" and line[7] != "female":
+            sex = None
+        else:
+            sex = line[7]
+        if line[8] == "Yes":
             add = True
         else:
             add = False
-        samples.setdefault(line[0], TDGenBrow(line[0], line[1], line[2], line[3], treatment, cell_line, cancer, add))
+        samples.setdefault(line[0], TDGenBrow(line[0], line[1], line[2], line[3], treatment, cell_line, cancer, sex, add))
 
     return(samples)
 
@@ -403,7 +429,7 @@ def _split_data(data_file, threads=1):
 
     return(split_files)
 
-def _insert_data(data_file, test=False):
+def _insert_data(data_file, experiment, sample, source, test=False):
 
     # Initialize
     session = Session()
@@ -417,37 +443,41 @@ def _insert_data(data_file, test=False):
     for line in ParseUtils.parse_tsv_file(data_file):
 
         # Skip empty lines
-        if not line:
+        if len(line) == 0:
             continue
 
-        # Upsert region
-        region = Region()
-        region.chrom = line[5][3:]
-        region.start = line[6]
-        region.end = line[7]
-        region.bin = assign_bin(region.start, region.end)
-        if region.chrom not in chroms:
-            continue
-        ParseUtils.upsert_region(session, region)
+        if Feature.__tablename__ == "tads":
 
-        # Get region
-        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
+            # Upsert region
+            region = Region()
+            region.chrom = str(line[0])
+            if region.chrom.startswith("chr"):
+                region.chrom = region.chrom[3:]
+            if region.chrom not in chroms:
+                continue
+            region.start = line[1]
+            region.end = line[2]
+            region.bin = assign_bin(region.start, region.end)
+            ParseUtils.upsert_region(session, region)
 
-        # Upsert CpG island
-        repeat = RepeatMask()
-        repeat.score = line[1]
-        repeat.name = line[10]
-        repeat.repeat_class = line[11]
-        repeat.family = line[12]
-        repeat.strand = line[9]
-        repeat.region_id = region.uid
-        repeat.source_id = source.uid
-        ParseUtils.upsert_rmsk(session, repeat)
+            # Get region
+            region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
+
+            # Upsert feature
+            feature = Feature()
+            feature.region_id = region.uid
+            feature.sample_id = sample.uid
+            feature.experiment_id = experiment.uid
+            feature.source_id = source.uid
+            ParseUtils.upsert_tad(session, feature)
+
+        else:
+            pass
 
         # Testing
         if test:
             lines += 1
-            if lines > 1000:
+            if lines == 1000:
                 break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
