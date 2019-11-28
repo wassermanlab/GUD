@@ -72,6 +72,7 @@ class GFMixin1(object):
         retrieve all objects that are within range.
         """
         bins = Region._compute_bins(start, end)
+        print(bins)
         q = query.filter(Region.chrom == chrom,
                          Region.start >= start,
                          Region.end <= end)\
