@@ -82,10 +82,10 @@ def clinvar(request, session):
     """retrieves clinvar variants"""
     resource = ClinVar()
     clinvarIDs = check_split(request.args.get('clinvar_ids', default=None), True)
-    q = genomic_feature_mixin1_queries(session, resource, request)
+    q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
     if clinvarIDs is not None:
         q = resource.select_by_clinvarID(session, q, clinvarIDs)                                               
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature")
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", last_uid)
 
 def conservation(request, session): 
     """retrieves conserved elements"""

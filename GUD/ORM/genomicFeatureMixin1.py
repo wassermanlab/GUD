@@ -26,6 +26,20 @@ class GFMixin1(object):
 
     # methods
     @classmethod
+    def get_last_uid_region(cls, session, chrom, start=None, end=None):
+        # returns last uid from region
+        q = session.query(cls, Region)\
+            .join()\
+            .filter(Region.uid == cls.region_id)\
+            .filter(Region.chrom == chrom)
+        if (start is not None and end is not None):
+            bins = Region._compute_bins(start, end)
+            q = q.filter(Region.bin.in_(bins))
+        
+        res = q.order_by(cls.uid).limit(1)
+        return (res-1)
+
+    @classmethod
     def make_query(cls, session, query):
         if (query is not None):
             return query
@@ -72,6 +86,7 @@ class GFMixin1(object):
         retrieve all objects that are within range.
         """
         bins = Region._compute_bins(start, end)
+        print (bins)
         q = query.filter(Region.chrom == chrom,
                          Region.start >= start,
                          Region.end <= end)\

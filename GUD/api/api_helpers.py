@@ -8,8 +8,11 @@ from GUD.ORM import ShortTandemRepeat
 import time
 
 ## HELPER FUNCTIONS ##
-def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple"):
-    last_uid = request.args.get('last_uid', default=0, type=int)
+def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple", luid = 0):
+    if (luid = 0):
+        last_uid = request.args.get('last_uid', default=0, type=int)
+    else: 
+        last_uid = luid
     if query is None:
         raise BadRequest('query not specified correctly')
     results = query.filter(type(resource).uid > last_uid).with_hint(type(resource), 'USE INDEX (PRIMARY)')\
@@ -73,13 +76,16 @@ def genomic_feature_mixin1_queries(session, resource, request):
     keys = get_mixin1_keys(request)
     # location query
     q = resource.select_all(session, None)
+    last_uid = 0
     # just chrom
     if (keys['start'] is None and keys['end'] is None and keys['location'] is None and keys['chrom'] is not None):
         q = resource.select_by_location(session, q, keys['chrom'])
+        last_uid = resource.get_last_uid_region(session, keys['chrom'])
     # all location
     elif (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
         q = resource.select_by_location(
                 session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
+        last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
     # partial location 
     elif (keys['start'] is not None or keys['end'] is not None or keys['location'] is not None or keys["chrom"] is not None):
         raise BadRequest("To filter by location you must specify location, chrom, start, and end or just a chrom.")
@@ -89,7 +95,7 @@ def genomic_feature_mixin1_queries(session, resource, request):
     # sources query
     if keys['sources'] is not None:
         q = resource.select_by_sources(session, q, keys['sources'])
-    return q
+    return q, last_uid
 
 
 def genomic_feature_mixin2_queries(session, resource, request, query):
@@ -125,13 +131,15 @@ def get_mixin1_keys(request):
             'start': '',
             'end': '',
             'location': '',
-            'sources': []}
+            'sources': [], 
+            'last_uid': ''}
     keys['chrom'] = request.args.get('chrom', default=None, type=str)
     keys['end'] = request.args.get('end', default=None)
     keys['location'] = request.args.get('location', default=None, type=str)
     keys['start'] = request.args.get('start', default=None)
     keys['sources'] = check_split(request.args.get('sources', default=None))
     keys['uids'] = check_split(request.args.get('uids', default=None))
+    keys['last_uid'] = request.args.get('last_uid', default=0, type=int)
 
     if keys['uids'] is not None:        # convert uids if they are in uri
         for i in range(len(keys['uids'])):
