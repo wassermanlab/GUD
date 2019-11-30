@@ -25,13 +25,11 @@ class GFMixin2(GFMixin1):
         if (query is not None):
             return query
         q = session.query(cls, Region, Source, Sample, Experiment)\
-            .join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id, 
-            Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)\
-            .with_hint(Sample, 'USE INDEX (PRIMARY)')\
-            .with_hint(Source, 'USE INDEX (PRIMARY)')\
-            .with_hint(Region, 'USE INDEX (PRIMARY)')\
-            .with_hint(Experiment, 'USE INDEX (PRIMARY)')
+            .prefix_with("STRAIGHT_JOIN")\
+            .join(Region, Region.uid == cls.region_id)\
+            .join(Source, Source.uid == cls.source_id)\
+            .join(Experiment, Experiment.uid == cls.experiment_id)\
+            .join(Sample, Sample.uid == cls.sample_id)
         return q
         
     @classmethod

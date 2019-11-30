@@ -26,9 +26,11 @@ class GFMixin1(object):
 
     # methods
     @classmethod
-    def get_last_uid_region(cls, session, chrom, start=None, end=None):
+    def get_last_uid_region(cls, session, chrom, start, end):
         # returns last uid from region
-        q = session.query(cls, Region)\
+        if (chrom is None and start is None and end is None):
+            return 0
+        q = session.query(cls)\
             .join()\
             .filter(Region.uid == cls.region_id)\
             .filter(Region.chrom == chrom)
@@ -36,7 +38,11 @@ class GFMixin1(object):
             bins = Region._compute_bins(start, end)
             q = q.filter(Region.bin.in_(bins))
         
-        res = q.order_by(cls.uid).limit(1)
+        res = q.order_by(cls.uid).limit(1).first()
+        if (res == None):
+            return None
+        else:
+            res = res.uid
         return (res-1)
 
     @classmethod
@@ -44,10 +50,9 @@ class GFMixin1(object):
         if (query is not None):
             return query
         q = session.query(cls, Region, Source)\
-            .join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
-            .with_hint(Source, 'USE INDEX (PRIMARY)')\
-            .with_hint(Region, 'USE INDEX (PRIMARY)')
+            .prefix_with("STRAIGHT_JOIN")\
+            .join(Region, Region.uid == cls.region_id)\
+            .join(Source, Source.uid == cls.source_id)
         return q
 
     @classmethod
@@ -86,7 +91,6 @@ class GFMixin1(object):
         retrieve all objects that are within range.
         """
         bins = Region._compute_bins(start, end)
-        print (bins)
         q = query.filter(Region.chrom == chrom,
                          Region.start >= start,
                          Region.end <= end)\

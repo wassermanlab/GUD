@@ -9,14 +9,16 @@ import time
 
 ## HELPER FUNCTIONS ##
 def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple", luid = 0):
-    if (luid = 0):
+    if (luid == 0):
         last_uid = request.args.get('last_uid', default=0, type=int)
+    elif (luid is None):
+        raise NotFound('No results from this query') 
     else: 
         last_uid = luid
     if query is None:
         raise BadRequest('query not specified correctly')
-    results = query.filter(type(resource).uid > last_uid).with_hint(type(resource), 'USE INDEX (PRIMARY)')\
-        .order_by(type(resource).uid).limit(page_size)  # seek method for paginating, we must specify the index to have speed up
+    results = query.filter(type(resource).uid > last_uid)\
+        .order_by(type(resource).uid).limit(page_size) 
     print(results)   # TODO: take this out later
     # serialize and get uids of first and last element returned
     try:
@@ -76,16 +78,13 @@ def genomic_feature_mixin1_queries(session, resource, request):
     keys = get_mixin1_keys(request)
     # location query
     q = resource.select_all(session, None)
-    last_uid = 0
     # just chrom
     if (keys['start'] is None and keys['end'] is None and keys['location'] is None and keys['chrom'] is not None):
         q = resource.select_by_location(session, q, keys['chrom'])
-        last_uid = resource.get_last_uid_region(session, keys['chrom'])
     # all location
     elif (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
         q = resource.select_by_location(
                 session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
-        last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
     # partial location 
     elif (keys['start'] is not None or keys['end'] is not None or keys['location'] is not None or keys["chrom"] is not None):
         raise BadRequest("To filter by location you must specify location, chrom, start, and end or just a chrom.")
@@ -95,6 +94,10 @@ def genomic_feature_mixin1_queries(session, resource, request):
     # sources query
     if keys['sources'] is not None:
         q = resource.select_by_sources(session, q, keys['sources'])
+    
+    last_uid = 0
+    if (keys["last_uid"] == 0): 
+        last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
     return q, last_uid
 
 

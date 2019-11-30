@@ -85,13 +85,13 @@ def clinvar(request, session):
     q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
     if clinvarIDs is not None:
         q = resource.select_by_clinvarID(session, q, clinvarIDs)                                               
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", luid=last_uid)
 
 def conservation(request, session): 
     """retrieves conserved elements"""
     resource = Conservation()
     q, last_uid = genomic_feature_mixin1_queries(session, resource, request)                                           
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", luid=last_uid)
 
 def copy_number_variants(request, session):                             
     """retrieves copy number variants"""
@@ -106,13 +106,13 @@ def copy_number_variants(request, session):
         q = resource.select_by_clinvar_accession(session, q, clinvar_accession)
     if dbVar_accession is not None:
         q = resource.select_by_dbvar_accession(session, q, dbVar_accession)
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", luid=last_uid)
 
 def cpg_islands(request, session): 
     """retrieves conserved elements"""
     resource = CpGIsland()
     q, last_uid = genomic_feature_mixin1_queries(session, resource, request)                                           
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",luid=last_uid)
 
 def genes(request, session):                                           
     """retrieves genes"""
@@ -121,13 +121,13 @@ def genes(request, session):
     names = check_split(request.args.get('names', default=None))
     if names is not None:
         q = resource.select_by_names(session, q, names)
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", luid=last_uid)
 
 def rmsk(request, session): 
     """retrieves conserved elements"""
     resource = RepeatMask()
     q, last_uid = genomic_feature_mixin1_queries(session, resource, request)                                           
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", luid=last_uid)
 
 def short_tandem_repeats(request, session):                            
     """retrieves all STRs"""
@@ -144,20 +144,20 @@ def short_tandem_repeats(request, session):
         q = resource.select_by_pathogenicity(session, q)
     if motif is not None:
         q = resource.select_by_motif(session, motif, q, rotations)
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature", luid=last_uid)
 
 # GF2 queries 
 def dna_accessibility(request, session):                                
     resource = DNAAccessibility()
     q,last_uid = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",luid=last_uid)
 
 def enhancers(request, session):                                        
     resource = Enhancer()
     q,last_uid = genomic_feature_mixin1_queries(session, resource, request)
     q = genomic_feature_mixin2_queries(session, resource, request, q)
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",luid=last_uid)
 
 def histone_modifications(request, session):                           
     resource = HistoneModification()
@@ -166,7 +166,7 @@ def histone_modifications(request, session):
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     if histone_types is not None: 
         q = resource.select_by_histone_type(session, q, histone_types)
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",luid=last_uid)
 
 def tads(request, session):                                           
     resource = TAD()
@@ -175,7 +175,7 @@ def tads(request, session):
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     if restriction_enzymes is not None:
         q = resource.select_by_restriction_enzymes(q, restriction_enzymes)
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",luid=last_uid)
 
 def tf_binding(request, session):    
     resource = TFBinding()
@@ -184,7 +184,7 @@ def tf_binding(request, session):
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     if tfs is not None:
         q = resource.select_by_tf(q, tfs)                                
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",luid=last_uid)
 
 def tss(request, session):
     resource = TSS()
@@ -196,7 +196,7 @@ def tss(request, session):
     q = genomic_feature_mixin2_queries(session, resource, request, q)
     if genes is not None: 
         q = resource.select_by_genes(q, genes)               
-    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",last_uid)
+    return get_result_from_query(q, request, resource, page_size=20, result_tuple_type="genomic_feature",luid=last_uid)
 
 @app.route('/api/v1/<db>/<resource>')
 def resource_query(db, resource): 

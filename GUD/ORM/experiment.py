@@ -13,7 +13,7 @@ class Experiment(Base):
     
     __table_args__ = (
         PrimaryKeyConstraint(uid),
-        UniqueConstraint(name),
+        UniqueConstraint(name, experiment_metadata, metadata_descriptor),
         Index("ix_uid", uid),
         Index("ix_name", name),
         {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
