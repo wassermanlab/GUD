@@ -7,6 +7,7 @@ from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation, CpGIsl
                      TFBinding, TSS, Chrom, Sample, Experiment, Source, Expression) 
 from GUD.api.api_helpers import *
 from werkzeug.exceptions import BadRequest
+import time
 
 # templates 
 # API_ADDITION(3): add feature method implementation to query specific feature
@@ -226,9 +227,10 @@ def resource_query(db, resource):
     func = switch.get(resource, "none")
     if func == "none":                  # check if this is invalid route 
         raise BadRequest('Invalid resource')
-    
+    start_time = time.time()
     table_exists(resource, engine)      # check that table exists 
-    response = func(request, Session)   
+    response = func(request, Session)
+    print(time.time() - start_time)   
     Session.close()
     engine.dispose()                              
     return response
