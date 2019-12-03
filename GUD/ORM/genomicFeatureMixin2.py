@@ -37,8 +37,10 @@ class GFMixin2(GFMixin1):
         """
         filter query by samples.
         """
+        sample_uids = session.query(Sample).filter(Sample.name.in_(samples)).all()
+        sample_uids = [t.uid for t in sample_uids]
         q = cls.make_query(session, query)
-        q = q.filter(Sample.name.in_(samples))
+        q = q.filter(Sample.uid.in_(sample_uids))
         return q
 
     @classmethod
@@ -46,8 +48,10 @@ class GFMixin2(GFMixin1):
         """
         filter query by experiments.
         """
+        experiment_uids = session.query(Experiment).filter(Experiment.name.in_(experiments)).all()
+        experiment_uids = [t.uid for t in experiment_uids]
         q = cls.make_query(session, query)
-        q = q.filter(Experiment.name.in_(experiments))
+        q = q.filter(Experiment.uid.in_(experiment_uids))
         return q
 
     @classmethod

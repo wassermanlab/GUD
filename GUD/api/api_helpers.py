@@ -19,7 +19,7 @@ def get_result_from_query(query, request, resource, page_size=20, result_tuple_t
         raise BadRequest('query not specified correctly')
     results = query.filter(type(resource).uid > last_uid)\
         .order_by(type(resource).uid).limit(page_size) 
-    print(results)   # TODO: take this out later
+    print(results.statement.compile(compile_kwargs={"literal_binds": True}))
     # serialize and get uids of first and last element returned
     try:
         if (result_tuple_type == "genomic_feature"):

@@ -30,15 +30,18 @@ class GFMixin1(object):
         # returns last uid from region
         if (chrom is None and start is None and end is None):
             return 0
+
         q = session.query(cls)\
-            .join(Region, (Region.uid == cls.region_id)\
+            .join(Region, Region.uid == cls.region_id)\
             .with_hint(cls, 'USE INDEX (PRIMARY)')\
             .with_hint(Region, 'USE INDEX (PRIMARY)')\
             .filter(Region.chrom == chrom)
-        print(q)
+
         if (start is not None and end is not None):
             bins = Region._compute_bins(start, end)
             q = q.filter(Region.bin.in_(bins))
+        print(q.order_by(cls.uid).limit(1).statement.compile(compile_kwargs={"literal_binds": True}))
+    
         res = q.order_by(cls.uid).limit(1).first()
         if (res == None):
             return None
