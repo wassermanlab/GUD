@@ -3,6 +3,7 @@ from sqlalchemy.dialects import mysql
 from .genomic_feature import GenomicFeature
 from .region import Region
 from .source import Source
+from .chrom import Chrom
 from sqlalchemy.ext.declarative import declared_attr
 
 
@@ -33,13 +34,16 @@ class GFMixin1(object):
 
         q = session.query(cls)\
             .join(Region, Region.uid == cls.region_id)\
-            .with_hint(cls, 'USE INDEX (PRIMARY)')\
-            .with_hint(Region, 'USE INDEX (PRIMARY)')\
             .filter(Region.chrom == chrom)
+            # .with_hint(cls, 'USE INDEX (PRIMARY)')\
+            # .with_hint(Region, 'USE INDEX (PRIMARY)')\
 
         if (start is not None and end is not None):
             bins = Region._compute_bins(start, end)
-            q = q.filter(Region.bin.in_(bins))
+        else :
+            end = session.query(Chrom).filter(Chrom.chrom == chrom).first().size
+            bins = Region._compute_bins(0, end)
+        q = q.filter(Region.bin.in_(bins))
         print(q.order_by(cls.uid).limit(1).statement.compile(compile_kwargs={"literal_binds": True}))
     
         res = q.order_by(cls.uid).limit(1).first()
@@ -70,8 +74,10 @@ class GFMixin1(object):
         Query objects by genomic location, 
         retrieve all objects that are in a sepcific chrom.
         """
+        # end = session.query(Chrom).filter(Chrom.chrom == chrom).first().size
+        # bins = Region._compute_bins(0, end)
+        # q = query.filter(Region.chrom == chrom).filter(Region.bin.in_(bins))
         q = query.filter(Region.chrom == chrom)
-
         return q
 
     @classmethod
