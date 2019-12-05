@@ -8,13 +8,18 @@ from GUD.ORM import ShortTandemRepeat
 import time
 
 ## HELPER FUNCTIONS ##
-def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple"):
-    last_uid = request.args.get('last_uid', default=0, type=int)
+def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple", luid = 0):
+    if (luid == 0):
+        last_uid = request.args.get('last_uid', default=0, type=int)
+    elif (luid is None):
+        raise NotFound('No results from this query') 
+    else: 
+        last_uid = luid
     if query is None:
         raise BadRequest('query not specified correctly')
-    results = query.filter(type(resource).uid > last_uid).with_hint(type(resource), 'USE INDEX (PRIMARY)')\
-        .order_by(type(resource).uid).limit(page_size)  # seek method for paginating, we must specify the index to have speed up
-    print(results)   # TODO: take this out later
+    results = query.filter(type(resource).uid > last_uid)\
+        .order_by(type(resource).uid).limit(page_size) 
+    print(results.statement.compile(compile_kwargs={"literal_binds": True}))
     # serialize and get uids of first and last element returned
     try:
         if (result_tuple_type == "genomic_feature"):
@@ -89,7 +94,11 @@ def genomic_feature_mixin1_queries(session, resource, request):
     # sources query
     if keys['sources'] is not None:
         q = resource.select_by_sources(session, q, keys['sources'])
-    return q
+    
+    last_uid = 0
+    if (keys["last_uid"] == 0): 
+        last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
+    return q, last_uid
 
 
 def genomic_feature_mixin2_queries(session, resource, request, query):
@@ -125,13 +134,15 @@ def get_mixin1_keys(request):
             'start': '',
             'end': '',
             'location': '',
-            'sources': []}
+            'sources': [], 
+            'last_uid': ''}
     keys['chrom'] = request.args.get('chrom', default=None, type=str)
     keys['end'] = request.args.get('end', default=None)
     keys['location'] = request.args.get('location', default=None, type=str)
     keys['start'] = request.args.get('start', default=None)
     keys['sources'] = check_split(request.args.get('sources', default=None))
     keys['uids'] = check_split(request.args.get('uids', default=None))
+    keys['last_uid'] = request.args.get('last_uid', default=0, type=int)
 
     if keys['uids'] is not None:        # convert uids if they are in uri
         for i in range(len(keys['uids'])):

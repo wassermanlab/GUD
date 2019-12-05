@@ -3,6 +3,7 @@ from sqlalchemy.dialects import mysql
 from .genomic_feature import GenomicFeature
 from .region import Region
 from .source import Source
+from .chrom import Chrom
 from sqlalchemy.ext.declarative import declared_attr
 
 
@@ -26,14 +27,40 @@ class GFMixin1(object):
 
     # methods
     @classmethod
+    def get_last_uid_region(cls, session, chrom, start, end):
+        # returns last uid from region
+        if (chrom is None and start is None and end is None):
+            return 0
+
+        q = session.query(cls)\
+            .join(Region, Region.uid == cls.region_id)\
+            .filter(Region.chrom == chrom)
+            # .with_hint(cls, 'USE INDEX (PRIMARY)')\
+            # .with_hint(Region, 'USE INDEX (PRIMARY)')\
+
+        if (start is not None and end is not None):
+            bins = Region._compute_bins(start, end)
+        else :
+            end = session.query(Chrom).filter(Chrom.chrom == chrom).first().size
+            bins = Region._compute_bins(0, end)
+        q = q.filter(Region.bin.in_(bins))
+        print(q.order_by(cls.uid).limit(1).statement.compile(compile_kwargs={"literal_binds": True}))
+    
+        res = q.order_by(cls.uid).limit(1).first()
+        if (res == None):
+            return None
+        else:
+            res = res.uid
+        return (res-1)
+
+    @classmethod
     def make_query(cls, session, query):
         if (query is not None):
             return query
         q = session.query(cls, Region, Source)\
-            .join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id,)\
-            .with_hint(Source, 'USE INDEX (PRIMARY)')\
-            .with_hint(Region, 'USE INDEX (PRIMARY)')
+            .prefix_with("STRAIGHT_JOIN")\
+            .join(Region, Region.uid == cls.region_id)\
+            .join(Source, Source.uid == cls.source_id)
         return q
 
     @classmethod
@@ -47,8 +74,10 @@ class GFMixin1(object):
         Query objects by genomic location, 
         retrieve all objects that are in a sepcific chrom.
         """
+        # end = session.query(Chrom).filter(Chrom.chrom == chrom).first().size
+        # bins = Region._compute_bins(0, end)
+        # q = query.filter(Region.chrom == chrom).filter(Region.bin.in_(bins))
         q = query.filter(Region.chrom == chrom)
-
         return q
 
     @classmethod
