@@ -28,7 +28,7 @@ class Conservation(GFMixin1, Base):
         qualifiers = {
             "uid": feat.Conservation.uid,
             "score": feat.Conservation.score,
-            "source": feat.Source.name,
+            "source": feat.sourceName,
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers

@@ -35,14 +35,8 @@ class GFMixin1(object):
         q = session.query(cls)\
             .join(Region, Region.uid == cls.region_id)\
             .filter(Region.chrom == chrom)
-            # .with_hint(cls, 'USE INDEX (PRIMARY)')\
-            # .with_hint(Region, 'USE INDEX (PRIMARY)')\
 
-        if (start is not None and end is not None):
-            bins = Region._compute_bins(start, end)
-        else :
-            end = session.query(Chrom).filter(Chrom.chrom == chrom).first().size
-            bins = Region._compute_bins(0, end)
+        bins = Region._compute_bins(start, end)
         q = q.filter(Region.bin.in_(bins))
         print(q.order_by(cls.uid).limit(1).statement.compile(compile_kwargs={"literal_binds": True}))
     
@@ -57,7 +51,7 @@ class GFMixin1(object):
     def make_query(cls, session, query):
         if (query is not None):
             return query
-        q = session.query(cls, Region, Source)\
+        q = session.query(cls, Region.chrom, Region.start, Region.end, Source.name.label('sourceName'))\
             .prefix_with("STRAIGHT_JOIN")\
             .join(Region, Region.uid == cls.region_id)\
             .join(Source, Source.uid == cls.source_id)
@@ -66,18 +60,6 @@ class GFMixin1(object):
     @classmethod
     def select_all(cls, session, query):
         q = cls.make_query(session, query)
-        return q
-
-    @classmethod
-    def select_by_chrom(cls, session, query, chrom):
-        """
-        Query objects by genomic location, 
-        retrieve all objects that are in a sepcific chrom.
-        """
-        # end = session.query(Chrom).filter(Chrom.chrom == chrom).first().size
-        # bins = Region._compute_bins(0, end)
-        # q = query.filter(Region.chrom == chrom).filter(Region.bin.in_(bins))
-        q = query.filter(Region.chrom == chrom)
         return q
 
     @classmethod
@@ -122,14 +104,11 @@ class GFMixin1(object):
         return q
 
     @classmethod
-    def select_by_location(cls, session, query, chrom, start=None, end=None, location=None):
+    def select_by_location(cls, session, query, chrom, start=None, end=None, location="within"):
         """
         Query objects by genomic location.
         """
-        q = cls.make_query(session, query)
-        if (start is None and end is None and location is None): 
-            q = cls.select_by_chrom(session, q, chrom)
-        elif location == 'exact':
+        if location == 'exact':
             q = cls.select_by_exact_location(session, q,  chrom, start, end)
         elif location == 'within':
             q = cls.select_by_within_location(session, q, chrom, start, end)
@@ -175,9 +154,9 @@ class GFMixin1(object):
         Return feature as GenomicFeature object. 
         """
         return GenomicFeature(
-            feat.Region.chrom,
-            int(feat.Region.start),
-            int(feat.Region.end),
+            feat.chrom,
+            int(feat.start),
+            int(feat.end),
             feat_type=self.__tablename__,
             feat_id="%s_%s" % (self.__tablename__,
                                getattr(feat, self.__name__).uid),

@@ -56,9 +56,9 @@ class HistoneModification(GFMixin2, Base):
         qualifiers = {
             "uid": feat.HistoneModification.uid,
             "histone_type": feat.HistoneModification.histone_type,
-            "source": feat.Source.name,
-            "sample": feat.Sample.name,
-            "experiment": feat.Experiment.name,
+            "source": feat.sourceName,
+            "sample": feat.sampleName,
+            "experiment": feat.experimentName,
             "score": feat.HistoneModification.score,
             "peak": feat.HistoneModification.peak
         }

@@ -88,7 +88,7 @@ class Gene(GFMixin1, Base):
             "coding_end": int(feat.Gene.coding_end),
             "exon_starts": feat.Gene.exon_starts,
             "exon_ends": feat.Gene.exon_ends,
-            "source": feat.Source.name,
+            "source": feat.sourceName,
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers

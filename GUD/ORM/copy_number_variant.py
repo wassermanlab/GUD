@@ -73,7 +73,7 @@ class CNV(GFMixin1, Base):
         """
         qualifiers = {
             "uid": feat.CNV.uid,
-            "source": feat.Source.name,
+            "source": feat.sourceName,
             "copy_number_change": feat.CNV.copy_number_change,
             "clinical_assertion": feat.CNV.clinical_assertion,
             "clinvar_accession": feat.CNV.clinvar_accession,
