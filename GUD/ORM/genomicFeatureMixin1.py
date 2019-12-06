@@ -83,7 +83,6 @@ class GFMixin1(object):
         retrieve all objects that are within range.
         """
         bins = Region._compute_bins(start, end)
-        print(bins)
         q = query.filter(Region.chrom == chrom,
                          Region.start >= start,
                          Region.end <= end)\
@@ -108,6 +107,7 @@ class GFMixin1(object):
         """
         Query objects by genomic location.
         """
+        q = cls.make_query(session, query)
         if location == 'exact':
             q = cls.select_by_exact_location(session, q,  chrom, start, end)
         elif location == 'within':
