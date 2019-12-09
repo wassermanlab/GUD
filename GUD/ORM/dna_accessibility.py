@@ -31,9 +31,9 @@ class DNAAccessibility(GFMixin2, Base):
         # Define qualifiers
         qualifiers = {
             "uid": feat.DNAAccessibility.uid,
-            "source": feat.Source.name,
-            "sample": feat.Sample.name,
-            "experiment": feat.Experiment.name,
+            "source": feat.sourceName,
+            "sample": feat.sampleName,
+            "experiment": feat.experimentName,
             "score": feat.DNAAccessibility.score,
             "peak": feat.DNAAccessibility.peak
         }

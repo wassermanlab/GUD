@@ -24,7 +24,8 @@ class GFMixin2(GFMixin1):
     def make_query(cls, session, query):
         if (query is not None):
             return query
-        q = session.query(cls, Region, Source, Sample, Experiment)\
+            # Region, Source, Sample, Experiment
+        q = session.query(cls, Region.chrom, Region.start, Region.end, Source.name.label('sourceName'), Sample.name.label('sampleName'), Experiment.name.label('experimentName'))\
             .prefix_with("STRAIGHT_JOIN")\
             .join(Region, Region.uid == cls.region_id)\
             .join(Source, Source.uid == cls.source_id)\

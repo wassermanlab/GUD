@@ -48,7 +48,7 @@ class RepeatMask(GFMixin1, Base):
         """
         qualifiers = {
             "uid": feat.RepeatMask.uid,
-            "source": feat.Source.name,
+            "source": feat.sourceName,
             "score": feat.RepeatMask.score,
             "name": feat.RepeatMask.name,
             "repeat_class": feat.RepeatMask.repeat_class,

@@ -78,11 +78,8 @@ def genomic_feature_mixin1_queries(session, resource, request):
     keys = get_mixin1_keys(request)
     # location query
     q = resource.select_all(session, None)
-    # just chrom
-    if (keys['start'] is None and keys['end'] is None and keys['location'] is None and keys['chrom'] is not None):
-        q = resource.select_by_location(session, q, keys['chrom'])
     # all location
-    elif (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
+    if (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
         q = resource.select_by_location(
                 session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
     # partial location 
@@ -148,20 +145,26 @@ def get_mixin1_keys(request):
         for i in range(len(keys['uids'])):
             if keys['uids'][i].isdigit():
                 keys['uids'][i] = int(keys['uids'][i])
+    
+    # check that location is specified
+    if (keys['start'] is None or keys['end'] is None or keys['location'] is None or keys['chrom'] is None):
+        raise BadRequest("parameter list must include a region to query (start, end, chrom, location)")
 
     if (keys['start'] is not None and keys['end'] is not None and keys['location']
             is not None and keys['chrom'] is not None):
         try:
-            keys['start'] = int(keys['start']) - 1
-            keys['end'] = int(keys['end'])
+            keys['start'] = int(keys['start'].replace(',', '')) - 1
+            keys['end'] = int(keys['end'].replace(',', ''))
         except:
             raise BadRequest("start and end should be formatted as integers")
+        if (keys['end']-keys['start'] > 4000000): # check limit 
+            raise BadRequest("region must be less than 4,000,000bp")
         if re.fullmatch('^(X|Y|[1-9]|1[0-9]|2[0-2])$', keys['chrom']) == None:
             raise BadRequest(
                 "chromosome should be formatted as Z where Z is X, Y, or 1-22")
         if keys['location'] not in ['within', 'overlapping', 'exact']:
             raise BadRequest(
-                "location must be specified as withing, overlapping, or exact")
+                "location must be specified as within, overlapping, or exact")
     return keys
 
 

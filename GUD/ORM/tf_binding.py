@@ -55,9 +55,9 @@ class TFBinding(GFMixin2, Base):
         # Define qualifiers
         qualifiers = {
             "uid": feat.TFBinding.uid,
-            "source": feat.Source.name,
-            "sample": feat.Sample.name,
-            "experiment": feat.Experiment.name,
+            "source": feat.sourceName,
+            "sample": feat.sampleName,
+            "experiment": feat.experimentName,
             "tf": feat.TFBinding.tf,
             "score": feat.TFBinding.score,
             "peak": feat.TFBinding.peak
