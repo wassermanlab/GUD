@@ -810,8 +810,6 @@ def _insert_data_file(data_file, test=False):
     # For each line...
     for line in ParseUtils.parse_tsv_file(data_file):
 
-        print(line)
-
         # Initialize
         accession = line[3]
 
