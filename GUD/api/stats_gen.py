@@ -5,6 +5,27 @@ from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation, CpGIsl
                      TFBinding, TSS, Chrom, Sample, Experiment, Source, Expression) 
 import pandas as pd
 
+switch = {
+        "chroms": Chrom(),
+        "clinvar": ClinVar(), 
+        "copy_number_variants": CNV(),
+        "conservation": Conservation(),
+        "cpg_islands": CpGIsland(),
+        "dna_accessibility": DNAAccessibility(),
+        "enhancers": Enhancer(),
+        "experiments": Experiment(),
+        # "expression": Experession(),
+        "genes": Gene(),
+        "histone_modifications": HistoneModification(),
+        "samples": Sample(),
+        "short_tandem_repeats": ShortTandemRepeat(),
+        "sources": Source(),
+        "rmsk": RepeatMask(),
+        "tads": TAD(),
+        "tf_binding": TFBinding(),
+        "tss": TSS()
+    }
+
 def is_gf1(table):
     """returns True if table is gf1 and False if not"""
     if table in ['clinvar', 'conservation', 'copy_number_variants', 'cpg_islands', 'genes', 'rmsk', 'short_tandem_repeats']:
@@ -17,25 +38,22 @@ def is_gf2(table):
         return True
     return False
 
-def get_unique_sources(table):
+def get_unique_sources(table, session):
     if is_gf1(table): 
-        return "LIST"
-        # get unique source in list delimeted by;
-        # return string list
+        resource = switch[table]
+        return resource.get_unique_source_names(session)
     return None
 
-def get_unique_samples(table):
+def get_unique_samples(table, session):
     if is_gf2(table): 
-        return "LIST"
-        # get unique sample in list delimeted by;
-        # return string list
+        resource = switch[table]
+        return resource.get_unique_sample_names(session)
     return None
 
-def get_unique_experiments(table):
+def get_unique_experiments(table, session):
     if is_gf2(table): 
-        return "LIST"
-        # get unique experiments in list delimeted by;
-        # return string list
+        resource = switch[table]
+        return resource.get_unique_experiment_names(session)
     return None
 
 def output_stats():
@@ -65,9 +83,9 @@ def output_stats():
         rows.append(row[2])
 
     for t in tables:
-        unique_source_names.append(get_unique_sources(t))
-        unique_sample_names.append(get_unique_samples(t))
-        unique_experiment_names.append(get_unique_experiments(t)) 
+        unique_source_names.append(get_unique_sources(t, session))
+        unique_sample_names.append(get_unique_samples(t, session))
+        unique_experiment_names.append(get_unique_experiments(t, session)) 
 
     # output experiments table
     # output samples table

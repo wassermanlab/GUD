@@ -21,6 +21,22 @@ class GFMixin2(GFMixin1):
 
     # methods###################
     @classmethod
+    def get_unique_sample_names(cls, session):
+        sample_ids = session.query(cls.sample_id).distinct().all()
+        sample_ids = [s[0] for s in sample_ids]
+        sample_names = session.query(Sample.name).filter(Sample.uid.in_(sample_ids)).distinct().all()
+        sample_names = [s[0] for s in sample_names]
+        return sample_names
+
+    @classmethod
+    def get_unique_experiment_names(cls, session):
+        experiment_ids = session.query(cls.experiment_id).distinct().all()
+        experiment_ids = [s[0] for s in experiment_ids]
+        experiment_names = session.query(Experiment.name).filter(Experiment.uid.in_(experiment_ids)).distinct().all()
+        experiment_names = [s[0] for s in experiment_names]
+        return experiment_names
+    
+    @classmethod
     def make_query(cls, session, query):
         if (query is not None):
             return query
