@@ -45,6 +45,7 @@ class GFMixin1(object):
             return None
         else:
             res = res.uid
+        print (res-1)
         return (res-1)
 
     @classmethod

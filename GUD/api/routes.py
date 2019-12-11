@@ -35,3 +35,7 @@ def docs():
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
+
+@app.route('/stats')
+def stats():
+    return render_template('stats.html')

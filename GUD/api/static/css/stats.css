@@ -1,0 +1,9 @@
+.row{
+    margin-top:15px;
+}
+.list-group{
+    max-height: 300px;
+    margin-bottom: 10px;
+    overflow:scroll;
+    -webkit-overflow-scrolling: touch;
+}

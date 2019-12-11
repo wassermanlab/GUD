@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/stats.css')}}">
+{% endblock head %}
+
+{% block content %}
+{% include "nav.html" %}
+<div class="container navbar-fix">
+    <!-- Title Block -->
+    <div class="row">
+        <div class="col-sm">
+            <h1>Database Statistics</h1>
+        </div>
+    </div>
+    <!-- overview -->
+    <div class="row">
+        <div class="col-6">
+            <!-- img -->
+            <img class="img-fluid"
+                src="https://c7.uihere.com/files/151/662/425/pie-chart-diagram-computer-icons-circle-graph.jpg"
+                alt="Italian Trulli">
+        </div>
+        <div class="col-6">
+            <!-- table overview -->
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Table</th>
+                        <th scope="col">MB</th>
+                        <th scope="col">%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">chroms</th>
+                        <td>10</td>
+                        <td>1%</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">chroms</th>
+                        <td>10</td>
+                        <td>1%</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Total</th>
+                        <td>10</td>
+                        <td>1%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- specifics -->
+    <div class="row">
+        <div class="col">
+            <!-- summary -->
+            <!-- selection form -->
+            <form>
+                <div class="form-group row">
+                    <label for="database" class="col-sm-2 col-form-label">Database</label>
+                    <div class="col-sm-10">
+                        <select class="custom-select mr-sm-2" id="database">
+                            <option value="hg38" selected>hg38</option>
+                            <option value="hg19">hg19</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="table" class="col-sm-2 col-form-label">Table</label>
+                    <div class="col-sm-10">
+                        <select class="custom-select mr-sm-2" id="table">
+                            <option selected>Select</option>
+                            <option value="sample">sample</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-light btn-lg btn-block">Go</button>
+            </form>
+        </div>
+        <!-- summary table -->
+        <div class="col">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">rows</th>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">size in MB</th>
+                        <td>10</td>
+                    </tr>
+                    <tr id="source_name_num">
+                        <th scope="row">number of source names</th>
+                        <td>10</td>
+                    </tr>
+                    <tr id="sample_name_num">
+                        <th scope="row">number of sample names</th>
+                        <td>10</td>
+                    </tr>
+                    <tr id="experiment_name_num">
+                        <th scope="row">number of experiment names</th>
+                        <td>10</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- lists -->
+    <div id="lists" class="row">
+        <div id="sourceNameList" class="col">
+            <h3>Source name list</h3>
+            <ul class="list-group">
+                <li class="list-group-item">Cras justo odio</li>
+                <li class="list-group-item">Dapibus ac facilisis in</li>
+                <li class="list-group-item">Morbi leo risus</li>
+                <li class="list-group-item">Porta ac consectetur ac</li>
+                <li class="list-group-item">Vestibulum at eros</li>
+            </ul>
+        </div>
+        <div id="sampleNameList" class="col">
+            <h3>Sample name list </h3>
+            <ul class="list-group">
+                <li class="list-group-item">Cras justo odio</li>
+                <li class="list-group-item">Dapibus ac facilisis in</li>
+                <li class="list-group-item">Morbi leo risus</li>
+                <li class="list-group-item">Porta ac consectetur ac</li>
+                <li class="list-group-item">Vestibulum at eros</li>
+            </ul>
+        </div>
+        <div id="experimentNameList" class="col">
+            <h3>Experiment name list</h3>
+            <ul class="list-group">
+                <li class="list-group-item">Cras justo odio</li>
+                <li class="list-group-item">Dapibus ac facilisis in</li>
+                <li class="list-group-item">Morbi leo risus</li>
+                <li class="list-group-item">Porta ac consectetur ac</li>
+                <li class="list-group-item">Vestibulum at eros</li>
+            </ul>
+        </div>
+
+    </div>
+    <!-- more stuff -->
+    <div id="sourceList" class="row">
+        <div class="col">
+            <h3>Sources</h3>
+            <table class="table table-bordered">
+                <!-- source: uid, name, source_metadata, metadata_descriptor, url, insert_date -->
+                <thead>
+                    <tr>
+                        <th scope="col">uid</th>
+                        <th scope="col">name</th>
+                        <th scope="col">source_metadata</th>
+                        <th scope="col">metadata_descriptor</th>
+                        <th scope="col">url</th>
+                        <th scope="col">insert_date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="col">uid</th>
+                        <td scope="col">name</td>
+                        <td scope="col">source_metadata</td>
+                        <td scope="col">metadata_descriptor</td>
+                        <td scope="col">url</td>
+                        <td scope="col">insert_date</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="sampleList" class="row">
+        <div class="col">
+            <h3>Samples</h3>
+            <table class="table table-bordered">
+                <!-- source: uid, name, source_metadata, metadata_descriptor, url, insert_date -->
+                <thead>
+                    <tr>
+                        <th scope="col">uid</th>
+                        <th scope="col">name</th>
+                        <th scope="col">X_chrom</th>
+                        <th scope="col">Y_chrom</th>
+                        <th scope="col">treatment</th>
+                        <th scope="col">cell_line</th>
+                        <th scope="col">cancer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="col">uid</th>
+                        <td scope="col">name</td>
+                        <td scope="col">X_chrom</td>
+                        <td scope="col">Y_chrom</td>
+                        <td scope="col">treatment</td>
+                        <td scope="col">cell_line</td>
+                        <td scope="col">cancer</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="experimentList" class="row">
+        <div class="col">
+            <h3>Experiments</h3>
+            <table class="table table-bordered">
+                <!-- source: uid, name, source_metadata, metadata_descriptor, url, insert_date -->
+                <thead>
+                    <tr>
+                        <th scope="col">uid</th>
+                        <th scope="col">name</th>
+                        <th scope="col">experiment_metadata</th>
+                        <th scope="col">metadata_descriptor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="col">uid</th>
+                        <td scope="col">name</td>
+                        <td scope="col">experiment_metadata</td>
+                        <td scope="col">metadata_descriptor</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+{% include "footer.html" %}
+{% endblock content%}
