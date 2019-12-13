@@ -51,10 +51,6 @@ def stats(db="hg38", resource="select"):
     extra = None
     info = pd.read_csv("GUD/api/static/stats/"+db+"_summary_stats.csv")\
         .set_index("table").transpose().to_dict('list')
-    print(info[resource])
-    print(type(info[resource][3]))
-    print(info[resource][4])
-    print(info[resource][5])
     if (resource == "experiments"):
         extra = pd.read_csv("GUD/api/static/stats/"+db+"_all_experiments.csv")\
         .set_index("uid").transpose().to_dict('list')
@@ -64,4 +60,4 @@ def stats(db="hg38", resource="select"):
     elif (resource == "samples"):
         extra = pd.read_csv("GUD/api/static/stats/"+db+"_all_samples.csv")\
         .set_index("uid").transpose().to_dict('list')
-    return render_template('stats.html', db=db, resource=resource, info=info, extra = extra)
+    return render_template('stats.html', db=db, resource=resource, info=info, extra=extra)

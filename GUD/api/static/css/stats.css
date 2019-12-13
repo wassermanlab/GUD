@@ -1,9 +1,18 @@
 .row{
     margin-top:15px;
 }
-.list-group{
-    max-height: 300px;
-    margin-bottom: 10px;
-    overflow:scroll;
-    -webkit-overflow-scrolling: touch;
+.scrollable{
+    max-height: 600px !important;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.scrollable-sm{
+    height: 400px !important;
+    overflow: scroll;
+    overflow-x: hidden; 
+}
+
+td {
+    word-break:break-all;
 }
