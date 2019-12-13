@@ -45,7 +45,16 @@ class GFMixin1(object):
             return None
         else:
             res = res.uid
+        print (res-1)
         return (res-1)
+
+    @classmethod
+    def get_unique_source_names(cls, session):
+        source_ids = session.query(cls.source_id).distinct().all()
+        source_ids = [s[0] for s in source_ids]
+        source_names = session.query(Source.name).filter(Source.uid.in_(source_ids)).distinct().all()
+        source_names = [s[0] for s in source_names]
+        return source_names
 
     @classmethod
     def make_query(cls, session, query):

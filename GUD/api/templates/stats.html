@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<script>var address_base = '{{address_base}}'; </script>
+<link rel="stylesheet" href="{{ url_for('static',filename='css/stats.css')}}">
+<script src="{{ url_for('static', filename='js/stats.js')}}"></script>
+{% endblock head %}
+
+{% block content %}
+{% include "nav.html" %}
+<div class="container navbar-fix" style="margin-bottom: 15px;">
+    <!-- Title Block -->
+    <div class="row">
+        <div class="col-sm">
+            <h1>Database Statistics</h1>
+        </div>
+    </div>
+    <!-- overview -->
+    <div class="row">
+        <div class="col-6">
+            <!-- img -->
+            <img class="img-fluid" src="{{ url_for('static', filename='stats/hg38_piechart.png')}}">
+        </div>
+        <div class="col-6">
+            <!-- table overview -->
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th width="50%">Table</th>
+                        <th width="25%">MB</th>
+                        <th width="25%">%</th>
+                    </tr>
+                </thead>
+            </table>
+            <div class="scrollable">
+                <table class="table table-bordered">
+                    <tbody>
+                        {% for row in info.keys() %}
+                        <tr>
+                            <th width="50%" scope="row">{{row}}</th>
+                            <td width="25%">{{info[row][0]}}</td>
+                            <td width="25%">{{'%.3f'%(info[row][1])}}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- specifics -->
+    <div class="row">
+        <div class="col">
+            <!-- summary -->
+            <!-- selection form -->
+            <form id="statsForm">
+                <div class="form-group row">
+                    <label for="database" class="col-sm-2 col-form-label">Database</label>
+                    <div class="col-sm-10">
+                        <select name="genome" class="custom-select mr-sm-2" id="database">
+                            <option value="hg38" selected>hg38</option>
+                            <option value="hg19">hg19</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="table" class="col-sm-2 col-form-label">Table</label>
+                    <div class="col-sm-10">
+                        <select name="resource" class="custom-select mr-sm-2" id="resourceSelect">
+                            <option selected value="select">Select</option>
+                            {% for i in info.keys() %}
+                            <option value="{{i}}">{{i}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+            <button onclick="getStats()" class="btn btn-light btn-lg btn-block">Get Stats</button>
+        </div>
+        <!-- summary table -->
+        <div class="col">
+            {% if resource != "select" %}
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">rows</th>
+                        <td>{{info[resource][2]}}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">size in MB</th>
+                        <td>{{info[resource][0]}}</td>
+                    </tr>
+                    {% if info[resource][3] == info[resource][3] %}
+                    <tr>
+                        <th scope="row">Unique source names</th>
+                        <td>{{info[resource][3].split(";") | length}}</td>
+                    </tr>
+                    {% endif %}
+                    {% if info[resource][4] == info[resource][4] %}
+                    <tr>
+                        <th scope="row">Unique sample names</th>
+                        <td>{{info[resource][4].split(";") | length}}</td>
+                    </tr>
+                    {% endif %}
+                    {% if info[resource][5] == info[resource][5] %}
+                    <tr>
+                        <th scope="row">Unique experiment names</th>
+                        <td>{{info[resource][5].split(";") | length}}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            {%endif%}
+        </div>
+    </div>
+    <!-- lists -->
+    {% if resource != "select" %}
+    <div id="lists" class="row">
+        <div id="sourceNameList" class="col">
+            {% if info[resource][3] == info[resource][3] %}
+            <h3>Source name list</h3>
+            <div class="scrollable-sm">
+                <ul class="list-group">
+                    {% for row in info[resource][3].split(";") %}
+                    <li class="list-group-item">{{row}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        <div id="sampleNameList" class="col">
+            {% if info[resource][4] == info[resource][4] %}
+            <h3>Sample name list</h3>
+            <div class="scrollable-sm">
+                <ul class="list-group">
+                    {% for row in info[resource][4].split(";") %}
+                    <li class="list-group-item">{{row}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        <div id="experimentNameList" class="col">
+            {% if info[resource][5] == info[resource][5] %}
+            <h3>Experiment name list</h3>
+            <div class="scrollable-sm">
+                <ul class="list-group">
+                    {% for row in info[resource][5].split(";") %}
+                    <li class="list-group-item">{{row}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {%endif%}
+    <!-- more stuff -->
+    {% if resource == "sources" %}
+    <div id="sourceList" class="row">
+        <div class="col">
+            <h3>Sources</h3>
+            <table class="table table-bordered">
+                <!-- source: uid, name, source_metadata, metadata_descriptor, url, insert_date -->
+                <thead>
+                    <tr>
+                        <th width="10%" scope="col">uid</th>
+                        <th width="30%" scope="col">name</th>
+                        <th width="15%" scope="col">source_metadata</th>
+                        <th width="15%" scope="col">metadata_descriptor</th>
+                        <th width="15%" scope="col">url</th>
+                        <th width="15%" scope="col">insert_date</th>
+                    </tr>
+                </thead>
+            </table>
+            <div class="scrollable">
+                <table class="table table-bordered">
+                    <tbody>
+                        {% for row in extra.keys() %}
+                        <tr>
+                            <th width="10%" scope="col">{{row}}</th>
+                            <td width="30%" scope="col">{{extra[row][0]}}</td>
+                            <td width="15%" scope="col">{{extra[row][1]}}</td>
+                            <td width="15%" scope="col">{{extra[row][2]}}</td>
+                            <td width="15%" scope="col">{{extra[row][3]}}</td>
+                            <td width="15%" scope="col">{{extra[row][4]}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if resource == "samples" %}
+    <div id="sampleList" class="row">
+        <div class="col">
+            <h3>Samples</h3>
+            <table class="table table-bordered">
+                <!-- source: uid, name, source_metadata, metadata_descriptor, url, insert_date -->
+                <thead>
+                    <tr>
+                        <th width="10%" width="10%" scope="col">uid</th>
+                        <th width="40%" width="40%" scope="col">name</th>
+                        <th width="10%" width="10%" scope="col">X_chrom</th>
+                        <th width="10%" width="10%" scope="col">Y_chrom</th>
+                        <th width="10%" width="10%" scope="col">treatment</th>
+                        <th width="10%" width="10%" scope="col">cell_line</th>
+                        <th width="10%" width="10%" scope="col">cancer</th>
+                    </tr>
+                </thead>
+            </table>
+            <div class="scrollable">
+                <table class="table table-bordered">
+                    <tbody>
+                        {% for row in extra.keys() %}
+                        <tr>
+                            <th width="10%" scope="col">{{row}}</th>
+                            <td width="40%" scope="col">{{extra[row][0]}}</td>
+                            <td width="10%" scope="col">{{extra[row][1]}}</td>
+                            <td width="10%" scope="col">{{extra[row][2]}}</td>
+                            <td width="10%" scope="col">{{extra[row][3]}}</td>
+                            <td width="10%" scope="col">{{extra[row][4]}}</td>
+                            <td width="10%" scope="col">{{extra[row][5]}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if resource == "experiments" %}
+    <div id="experimentList" class="row">
+        <div class="col">
+            <h3>Experiments</h3>
+            <table class="table table-bordered">
+                <!-- source: uid, name, source_metadata, metadata_descriptor, url, insert_date -->
+                <thead>
+                    <tr>
+                        <th width="10%" scope="col">uid</th>
+                        <th width="30%" scope="col">name</th>
+                        <th width="30%" scope="col">experiment_metadata</th>
+                        <th width="30%" scope="col">metadata_descriptor</th>
+                    </tr>
+                </thead>
+            </table>
+            <div class="scrollable">
+                <table class="table table-bordered">
+                    <tbody>
+                        {% for row in extra.keys() %}
+                        <tr>
+                            <th width="10%" scope="col">{{row}}</th>
+                            <td width="30%" scope="col">{{extra[row][0]}}</td>
+                            <td width="30%" scope="col">{{extra[row][1]}}</td>
+                            <td width="30%" scope="col">{{extra[row][2]}}</td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% include "footer.html" %}
+{% endblock content%}
