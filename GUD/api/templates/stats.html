@@ -3,8 +3,9 @@
 {% block head %}
 {{ super() }}
 <script>var address_base = '{{address_base}}'; </script>
+<script>var info = '{{info|tojson|safe}}'; </script>
 <link rel="stylesheet" href="{{ url_for('static',filename='css/stats.css')}}">
-<script src="{{ url_for('static', filename='js/stats.js')}}"></script>
+<script src="https://d3js.org/d3.v3.min.js"></script>
 {% endblock head %}
 
 {% block content %}
@@ -18,11 +19,21 @@
     </div>
     <!-- overview -->
     <div class="row">
-        <div class="col-6">
-            <!-- img -->
-            <img class="img-fluid" src="{{ url_for('static', filename='stats/hg38_piechart.png')}}">
+        <div class="col">
+            <div id="piechart">
+            <svg>
+                <g id="canvas">
+                    <g id="art" />
+                    <g id="labels" />
+                </g>
+            </svg>
         </div>
-        <div class="col-6">
+            <!-- img -->
+            <!-- <img class="img-fluid" src="{{ url_for('static', filename='stats/hg38_piechart.png')}}"> -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
             <!-- table overview -->
             <table class="table table-bordered">
                 <thead>
@@ -263,5 +274,6 @@
     {% endif %}
 </div>
 </div>
+<script src="{{ url_for('static', filename='js/stats.js')}}"></script>
 {% include "footer.html" %}
 {% endblock content%}
