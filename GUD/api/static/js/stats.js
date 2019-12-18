@@ -174,7 +174,7 @@ var cDim = {
 
 svg.attr({
   height: cDim.height,
-  width: '60%'
+  width: '50%'
 });
 
 canvas.attr('transform', 'translate(' + (cDim.width/2) + ', ' + (cDim.height/2) + ')');
