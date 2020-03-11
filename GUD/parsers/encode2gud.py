@@ -771,11 +771,7 @@ def _download_ENCODE_bed_file(encode, dummy_dir="/tmp/", test=False):
     # Download BED file
     download_file += ".bed.gz"
     if not os.path.exists(download_file):
-    
-        try:
-            os.system("wget --quiet -O %s %s" % (download_file, encode.download_url))
-        except:
-            urlretrieve(encode.download_url, download_file)
+        urlretrieve(encode.download_url, download_file)
 
     return(download_file)
 
