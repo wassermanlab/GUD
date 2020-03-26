@@ -65,4 +65,8 @@ class Experiment(Base):
             ("uid={}".format(self.uid), "name={}".format(self.name))
 
     def serialize(self):
-        return {'uid': self.uid, 'name': self.name, }
+        return {'uid': self.uid, 
+                'name': self.name, 
+                'metadata_descriptor': self.metadata_descriptor,
+                'experiment_metadata': self.experiment_metadata}
+

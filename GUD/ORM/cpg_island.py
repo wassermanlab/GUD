@@ -36,14 +36,9 @@ class CpGIsland(GFMixin1, Base):
             "percent_cpg": feat.CpGIsland.percent_cpg,
             "percent_gc": feat.CpGIsland.percent_gc,
             "obsexp_ratio": feat.CpGIsland.obsexp_ratio,
-            "source": feat.Source.name,
+            "source": feat.sourceName,
         }
 
-        return GenomicFeature(
-            feat.Region.chrom,
-            int(feat.Region.start),
-            int(feat.Region.end),
-            feat_type="CpGIsland",
-            feat_id="%s_%s" % (self.__tablename__, feat.CpGIsland.uid),
-            qualifiers=qualifiers
-        )
+        genomic_feature = super().as_genomic_feature(feat)
+        genomic_feature.qualifiers = qualifiers
+        return genomic_feature

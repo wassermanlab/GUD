@@ -89,7 +89,7 @@ class TSS(GFMixin2, Base):
 
         # Define qualifiers
         try:
-            experiment_name = feat.Experiment.name
+            experiment_name = feat.experimentName
         except:
             experiment_name = "CAGE"
         qualifiers = {
@@ -98,8 +98,8 @@ class TSS(GFMixin2, Base):
             "tss": feat.TSS.tss,
             "sampleIDs": feat.TSS.sample_id,
             "expression_levels": feat.TSS.expression_level,
-            "experiment": experiment_name,
-            "source": feat.Source.name,
+            "source": feat.sourceName,
+            "experiment": feat.experimentName,
         }
 
         genomic_feature = super().as_genomic_feature(feat)

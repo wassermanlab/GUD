@@ -30,9 +30,9 @@ class Enhancer(GFMixin2, Base):
         # Define qualifiers
         qualifiers = {
             "uid": feat.DNAAccessibility.uid,
-            "source": feat.Source.name,
-            "sample": feat.Sample.name,
-            "experiment": feat.Experiment.name,
+            "source": feat.sourceName,
+            "sample": feat.sampleName,
+            "experiment": feat.experimentName,
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers

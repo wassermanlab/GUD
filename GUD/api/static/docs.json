@@ -9,7 +9,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -47,7 +47,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -81,7 +81,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -127,7 +127,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -161,7 +161,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -203,7 +203,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -245,7 +245,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -283,7 +283,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -329,7 +329,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -363,7 +363,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -409,7 +409,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -455,7 +455,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,
@@ -497,7 +497,7 @@
             },
             "chrom": {
                 "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY, must be used with start, end, and location"
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
                 "REQUIRED": false,

@@ -8,16 +8,24 @@ from GUD.ORM import ShortTandemRepeat
 import time
 
 ## HELPER FUNCTIONS ##
-def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple"):
-    last_uid = request.args.get('last_uid', default=0, type=int)
+def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple", luid = 0):
+    if (luid == 0):
+        last_uid = request.args.get('last_uid', default=0, type=int)
+    elif (luid is None):
+        raise NotFound('No results from this query') 
+    else: 
+        last_uid = luid
     if query is None:
         raise BadRequest('query not specified correctly')
-    results = query.filter(type(resource).uid > last_uid).with_hint(type(resource), 'USE INDEX (PRIMARY)')\
-        .order_by(type(resource).uid).limit(page_size)  # seek method for paginating, we must specify the index to have speed up
-    print(results)
+    results = query.filter(type(resource).uid > last_uid)\
+        .order_by(type(resource).uid).limit(page_size) 
+    print(results.statement.compile(compile_kwargs={"literal_binds": True}))
     # serialize and get uids of first and last element returned
     try:
-        last_uid = getattr(results[page_size-1], type(resource).__name__).uid
+        if (result_tuple_type == "genomic_feature"):
+            last_uid = getattr(results[page_size-1], type(resource).__name__).uid
+        else:
+            last_uid = results[page_size-1].uid
     except:
         last_uid = None
     if (result_tuple_type == "genomic_feature"):
@@ -70,11 +78,8 @@ def genomic_feature_mixin1_queries(session, resource, request):
     keys = get_mixin1_keys(request)
     # location query
     q = resource.select_all(session, None)
-    # just chrom
-    if (keys['start'] is None and keys['end'] is None and keys['location'] is None and keys['chrom'] is not None):
-        q = resource.select_by_location(session, q, keys['chrom'])
     # all location
-    elif (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
+    if (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
         q = resource.select_by_location(
                 session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
     # partial location 
@@ -86,7 +91,11 @@ def genomic_feature_mixin1_queries(session, resource, request):
     # sources query
     if keys['sources'] is not None:
         q = resource.select_by_sources(session, q, keys['sources'])
-    return q
+    
+    last_uid = 0
+    if (keys["last_uid"] == 0): 
+        last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
+    return q, last_uid
 
 
 def genomic_feature_mixin2_queries(session, resource, request, query):
@@ -122,32 +131,40 @@ def get_mixin1_keys(request):
             'start': '',
             'end': '',
             'location': '',
-            'sources': []}
+            'sources': [], 
+            'last_uid': ''}
     keys['chrom'] = request.args.get('chrom', default=None, type=str)
     keys['end'] = request.args.get('end', default=None)
     keys['location'] = request.args.get('location', default=None, type=str)
     keys['start'] = request.args.get('start', default=None)
     keys['sources'] = check_split(request.args.get('sources', default=None))
     keys['uids'] = check_split(request.args.get('uids', default=None))
+    keys['last_uid'] = request.args.get('last_uid', default=0, type=int)
 
     if keys['uids'] is not None:        # convert uids if they are in uri
         for i in range(len(keys['uids'])):
             if keys['uids'][i].isdigit():
                 keys['uids'][i] = int(keys['uids'][i])
+    
+    # check that location is specified
+    if (keys['start'] is None or keys['end'] is None or keys['location'] is None or keys['chrom'] is None):
+        raise BadRequest("parameter list must include a region to query (start, end, chrom, location)")
 
     if (keys['start'] is not None and keys['end'] is not None and keys['location']
             is not None and keys['chrom'] is not None):
         try:
-            keys['start'] = int(keys['start']) - 1
-            keys['end'] = int(keys['end'])
+            keys['start'] = int(keys['start'].replace(',', '')) - 1
+            keys['end'] = int(keys['end'].replace(',', ''))
         except:
             raise BadRequest("start and end should be formatted as integers")
+        if (keys['end']-keys['start'] > 4000000): # check limit 
+            raise BadRequest("region must be less than 4,000,000bp")
         if re.fullmatch('^(X|Y|[1-9]|1[0-9]|2[0-2])$', keys['chrom']) == None:
             raise BadRequest(
                 "chromosome should be formatted as Z where Z is X, Y, or 1-22")
         if keys['location'] not in ['within', 'overlapping', 'exact']:
             raise BadRequest(
-                "location must be specified as withing, overlapping, or exact")
+                "location must be specified as within, overlapping, or exact")
     return keys
 
 

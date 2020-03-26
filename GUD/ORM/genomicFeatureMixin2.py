@@ -21,13 +21,32 @@ class GFMixin2(GFMixin1):
 
     # methods###################
     @classmethod
+    def get_unique_sample_names(cls, session):
+        sample_ids = session.query(cls.sample_id).distinct().all()
+        sample_ids = [s[0] for s in sample_ids]
+        sample_names = session.query(Sample.name).filter(Sample.uid.in_(sample_ids)).distinct().all()
+        sample_names = [s[0] for s in sample_names]
+        return sample_names
+
+    @classmethod
+    def get_unique_experiment_names(cls, session):
+        experiment_ids = session.query(cls.experiment_id).distinct().all()
+        experiment_ids = [s[0] for s in experiment_ids]
+        experiment_names = session.query(Experiment.name).filter(Experiment.uid.in_(experiment_ids)).distinct().all()
+        experiment_names = [s[0] for s in experiment_names]
+        return experiment_names
+    
+    @classmethod
     def make_query(cls, session, query):
         if (query is not None):
             return query
-        q = session.query(cls, Region, Source, Sample, Experiment)\
-            .join()\
-            .filter(Region.uid == cls.region_id, Source.uid == cls.source_id, 
-            Sample.uid == cls.sample_id, Experiment.uid == cls.experiment_id)
+            # Region, Source, Sample, Experiment
+        q = session.query(cls, Region.chrom, Region.start, Region.end, Source.name.label('sourceName'), Sample.name.label('sampleName'), Experiment.name.label('experimentName'))\
+            .prefix_with("STRAIGHT_JOIN")\
+            .join(Region, Region.uid == cls.region_id)\
+            .join(Source, Source.uid == cls.source_id)\
+            .join(Experiment, Experiment.uid == cls.experiment_id)\
+            .join(Sample, Sample.uid == cls.sample_id)
         return q
         
     @classmethod
@@ -35,8 +54,10 @@ class GFMixin2(GFMixin1):
         """
         filter query by samples.
         """
+        sample_uids = session.query(Sample).filter(Sample.name.in_(samples)).all()
+        sample_uids = [t.uid for t in sample_uids]
         q = cls.make_query(session, query)
-        q = q.filter(Sample.name.in_(samples))
+        q = q.filter(Sample.uid.in_(sample_uids))
         return q
 
     @classmethod
@@ -44,8 +65,10 @@ class GFMixin2(GFMixin1):
         """
         filter query by experiments.
         """
+        experiment_uids = session.query(Experiment).filter(Experiment.name.in_(experiments)).all()
+        experiment_uids = [t.uid for t in experiment_uids]
         q = cls.make_query(session, query)
-        q = q.filter(Experiment.name.in_(experiments))
+        q = q.filter(Experiment.uid.in_(experiment_uids))
         return q
 
     @classmethod
