@@ -268,11 +268,13 @@ def _insert_data(data_file, test=False):
 
         # Upsert region
         region = Region()
-        region.chrom = line[5][3:]
+        region.chrom = str(line[5])
+        if region.chrom.startswith("chr"):
+            region.chrom = region.chrom[3:]
         if region.chrom not in chroms:
             continue
-        region.start = line[6]
-        region.end = line[7]
+        region.start = int(line[6])
+        region.end = int(line[7])
         region.bin = assign_bin(region.start, region.end)
         ParseUtils.upsert_region(session, region)
 
@@ -281,7 +283,7 @@ def _insert_data(data_file, test=False):
 
         # Upsert CpG island
         repeat = RepeatMask()
-        repeat.score = line[1]
+        repeat.score = float(line[1])
         repeat.name = line[10]
         repeat.repeat_class = line[11]
         repeat.family = line[12]

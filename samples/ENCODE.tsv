@@ -1,419 +1,854 @@
-ENCODE_sample_name	treatment	cell_line	cancer	add	sample_type	GUD_cell_or_tissue	comments
-iPS-11a	No	Yes	No	Yes	cell line	11a	
-iPS-15b	No	Yes	No	Yes	cell line	15b	
-iPS-18a	No	Yes	No	Yes	cell line	18a	
-iPS-18c	No	Yes	No	Yes	cell line	18c	
-iPS-20b	No	Yes	No	Yes	cell line	20b	
-22Rv1	No	Yes	Yes	Yes	cell line	22Rv1	
-RCC 7860	No	Yes	Yes	Yes	cell line	786-O	
-A172	No	Yes	Yes	Yes	cell line	A-172	
-A549	No	Yes	Yes	Yes	cell line	A-549	
-A673	No	Yes	Yes	Yes	cell line	A-673	
-A204.1	No	Yes	Yes	Yes	cell line	A204.1	
-ACC112	No	Yes	Yes	Yes	cell line	ACC112	
-ACHN	No	Yes	Yes	Yes	cell line	ACHN	
-adipocyte	No	No	No	Yes	in vitro differentiated cells	adipocyte	
-adipose tissue	No	No	No	Yes	tissue	adipose tissue	
-subcutaneous abdominal adipose tissue	No	No	No	Yes	tissue	adipose tissue (subcutaneous; abdominal)	
-subcutaneous adipose tissue	No	No	No	Yes	tissue	adipose tissue (subcutaneous)	
-adrenal gland	No	No	No	Yes	tissue	adrenal gland	
-AG04449	No	Yes	No	Yes	cell line	AG04449	
-AG04450	No	Yes	No	Yes	cell line	AG04450	
-AG08395	No	Yes	No	Yes	cell line	AG08395	
-AG08396	No	Yes	No	Yes	cell line	AG08396	
-AG09309	No	Yes	No	Yes	cell line	AG09309	
-AG09319	No	Yes	No	Yes	cell line	AG09319	
-AG10803	No	Yes	No	Yes	cell line	AG10803	
-AG20443	No	Yes	No	Yes	cell line	AG20443	
-Ammon's horn	No	No	No	Yes	tissue	Ammon's horn	
-amnion	No	No	No	Yes	tissue	amniotic membrane	
-angular gyrus	No	No	No	Yes	tissue	angular gyrus	
-aorta	No	No	No	Yes	tissue	aorta	
-ascending aorta	No	No	No	Yes	tissue	aorta (ascending)	
-thoracic aorta	No	No	No	Yes	tissue	aorta (thorax)	
-tibial artery	No	No	No	Yes	tissue	artery (tibia)	
-astrocyte	No	No	No	Yes	primary cell	astrocyte	
-astrocyte of the cerebellum	No	No	No	Yes	primary cell	astrocyte (cerebellum)	
-astrocyte of the hippocampus	No	No	No	Yes	primary cell	astrocyte (hippocampus)	
-astrocyte of the spinal cord	No	No	No	Yes	primary cell	astrocyte (spinal cord)	
-B cell	No	No	No	Yes	primary cell	B cell	
-naive B cell	No	No	No	Yes	primary cell	B cell (naive)	
-BE2C	No	Yes	Yes	Yes	cell line	BE2C	
-bipolar neuron	No	No	No	Yes	in vitro differentiated cells	bipolar neuron	
-BJ	No	Yes	No	Yes	cell line	BJ	
-EL	No	Yes	No	Yes	cell line	BJ-EL	
-ELR	No	Yes	No	Yes	cell line	BJ-ELR	
-arm bone	No	No	No	Yes	tissue	bone (arm)	
-left arm bone	No	No	No	Yes	tissue	bone (arm; left)	
-right arm bone	No	No	No	Yes	tissue	bone (arm; right)	
-femur	No	No	No	Yes	tissue	bone (femur)	
-leg bone	No	No	No	Yes	tissue	bone (leg)	
-left leg bone	No	No	No	Yes	tissue	bone (leg; left)	
-right leg bone	No	No	No	Yes	tissue	bone (leg; right)	
-brain	No	No	No	Yes	tissue	brain	
-middle frontal area 46	No	No	No	Yes	tissue	Brodmann area 46 (middle; frontal)	
-C803	No	Yes	No	Yes	cell line	C1 100 08 0003	
-C4-2B	No	Yes	Yes	Yes	cell line	C4-2B	
-Caco-2	No	Yes	Yes	Yes	cell line	Caco-2	
-Caki2	No	Yes	Yes	Yes	cell line	Caki-2	
-cardiovascular progenitor cell	No	No	No	Yes	in vitro differentiated cells	cardiovascular progenitor cell	
-caudate nucleus	No	No	No	Yes	tissue	caudate nucleus	
-cerebellar cortex	No	No	No	Yes	tissue	cerebellar cortex	
-cerebellum	No	No	No	Yes	tissue	cerebellum	
-chorion	No	No	No	Yes	tissue	chorionic membrane	
-chorionic villus	No	No	No	Yes	tissue	chorionic villus	
-cingulate gyrus	No	No	No	Yes	tissue	cingulate gyrus	
-CMK	No	Yes	Yes	Yes	cell line	CMK	
-COLO829	No	Yes	Yes	Yes	cell line	COLO 829	
-colon	No	No	No	Yes	tissue	colon	
-sigmoid colon	No	No	No	Yes	tissue	colon (sigmoid)	
-transverse colon	No	No	No	Yes	tissue	colon (transverse)	
-coronary artery	No	No	No	Yes	tissue	coronary artery	
-D341Med	No	Yes	Yes	Yes	cell line	D341 Med	
-H54	No	Yes	Yes	Yes	cell line	D54	
-D721Med	No	Yes	Yes	Yes	cell line	D721 Med	
-Daoy	No	Yes	Yes	Yes	cell line	Daoy	
-CD1c-positive myeloid dendritic cell	No	No	No	Yes	primary cell	dendritic cell (CD1c-positive; derived from myeloid cell)	
-DND-41	No	Yes	Yes	Yes	cell line	DND-41	
-DOHH2	No	Yes	Yes	Yes	cell line	DoHH2	
-ectodermal cell	No	No	No	Yes	in vitro differentiated cells	ectodermal cell	
-EH	No	Yes	Yes	Yes	cell line	EH	
-ELF-1	No	Yes	No	Yes	cell line	Elf1	
-embryonic facial prominence	No	No	No	Yes	tissue	embryonic facial prominence	
-endodermal cell	No	No	No	Yes	in vitro differentiated cells	endodermal cell	
-endometrium	No	No	No	Yes	tissue	endometrium	
-dermis blood vessel endothelial cell	No	No	No	Yes	primary cell	endothelial cell (blood vessel dermis)	
-brain microvascular endothelial cell	No	No	No	Yes	primary cell	endothelial cell (brain microvasculature)	
-glomerular endothelial cell	No	No	No	Yes	primary cell	endothelial cell (glomerulus)	
-lung microvascular endothelial cell	No	No	No	Yes	primary cell	endothelial cell (lung microvasculature)	
-dermis microvascular lymphatic vessel endothelial cell	No	No	No	Yes	primary cell	endothelial cell (microvascular lymphatic vessel dermis)	
-pulmonary artery endothelial cell	No	No	No	Yes	primary cell	endothelial cell (pulmonary artery)	
-kidney capillary endothelial cell	No	No	No	Yes	primary cell	endothelial cell (renal capilar)	
-endothelial cell of umbilical vein	No	No	No	Yes	primary cell	endothelial cell (umbilical vein)	
-amniotic epithelial cell	No	No	No	Yes	primary cell	epithelial cell (amniotic membrane)	
-breast epithelium	No	No	No	Yes	tissue	epithelial cell (breast)	
-mammary epithelial cell	No	No	No	Yes	primary cell	epithelial cell (breast)	
-bronchial epithelial cell	No	No	No	Yes	primary cell	epithelial cell (bronchi)	
-choroid plexus epithelial cell	No	No	No	Yes	primary cell	epithelial cell (choroid plexus)	
-epithelial cell of esophagus	No	No	No	Yes	primary cell	epithelial cell (esophagus)	
-esophagus squamous epithelium	No	No	No	Yes	tissue	epithelial cell (esophagus)	
-kidney epithelial cell	No	No	No	Yes	primary cell	epithelial cell (kidney)	
-luminal epithelial cell of mammary gland	No	No	No	Yes	primary cell	epithelial cell (mammary gland; lumen)	
-epithelial cell of prostate	No	No	No	Yes	primary cell	epithelial cell (prostate)	
-renal cortical epithelial cell	No	No	No	Yes	primary cell	epithelial cell (renal cortex)	
-kidney glomerular epithelial cell	No	No	No	Yes	primary cell	epithelial cell (renal glomerulus)	
-epithelial cell of proximal tubule	No	No	No	Yes	primary cell	epithelial cell (renal proximal tubule)	
-glomerular visceral epithelial cell	No	No	No	Yes	primary cell	epithelial cell (visceral glomerulus)	
-erythroblast	No	No	No	Yes	primary cell	erythroblast	
-esophagus	No	No	No	Yes	tissue	esophagus	
-eye	No	No	No	Yes	tissue	eye	
-fibroblast of skin of abdomen	No	No	No	Yes	primary cell	fibroblast (abdominal skin)	
-fibroblast of the aortic adventitia	No	No	No	Yes	primary cell	fibroblast (aortic adventitia)	
-fibroblast of breast	No	No	No	Yes	primary cell	fibroblast (breast)	
-fibroblast of the conjunctiva	No	No	No	Yes	primary cell	fibroblast (conjunctiva)	
-fibroblast of dermis	No	No	No	Yes	primary cell	fibroblast (dermis)	
-foreskin fibroblast	No	No	No	Yes	primary cell	fibroblast (foreskin)	
-fibroblast of gingiva	No	No	No	Yes	primary cell	fibroblast (gingiva)	
-cardiac fibroblast	No	No	No	Yes	primary cell	fibroblast (heart)	
-fibroblast of lung	No	No	No	Yes	primary cell	fibroblast (lung)	
-fibroblast of mammary gland	No	No	No	Yes	primary cell	fibroblast (mammary gland)	
-fibroblast of villous mesenchyme	No	No	No	Yes	primary cell	fibroblast (mesenchymal villi)	
-fibroblast of peridontal ligament	No	No	No	Yes	primary cell	fibroblast (periodontal ligament)	
-fibroblast of pulmonary artery	No	No	No	Yes	primary cell	fibroblast (pulmonary artery)	
-fibroblast of skin of upper back	No	No	No	Yes	tissue	fibroblast (skin; back; upper)	
-fibroblast of skin of back	No	No	No	Yes	tissue	fibroblast (skin; back)	
-fibroblast of skin of left biceps	No	No	No	Yes	tissue	fibroblast (skin; biceps; left)	
-fibroblast of skin of right biceps	No	No	No	Yes	tissue	fibroblast (skin; biceps; right)	
-fibroblast of skin of left quadriceps	No	No	No	Yes	tissue	fibroblast (skin; quadriceps; left)	
-fibroblast of skin of right quadriceps	No	No	No	Yes	tissue	fibroblast (skin; quadriceps; right)	
-fibroblast of skin of scalp	No	No	No	Yes	tissue	fibroblast (skin; scalp)	
-skin fibroblast	No	No	No	Yes	primary cell	fibroblast (skin)	
-frontal cortex	No	No	No	Yes	tissue	frontal cortex	
-G401	No	Yes	Yes	Yes	cell line	G-401	
-G401.6	No	Yes	Yes	Yes	cell line	G401.6	
-gastroesophageal sphincter	No	No	No	Yes	tissue	gastroesophageal sphincter	
-germinal center	No	No	No	Yes	tissue	germinal center	
-germinal matrix	No	No	No	Yes	tissue	germinal matrix	
-globus pallidus	No	No	No	Yes	tissue	globus pallidus	
-GM03348	No	Yes	No	Yes	cell line	GM03348	
-GM04503	No	Yes	No	Yes	cell line	GM04503	
-GM04504	No	Yes	No	Yes	cell line	GM04504	
-GM06990	No	Yes	No	Yes	cell line	GM06990	
-GM08714	No	Yes	No	Yes	cell line	GM08714	
-GM10248	No	Yes	No	Yes	cell line	GM10248	
-GM10266	No	Yes	No	Yes	cell line	GM10266	
-GM10847	No	Yes	No	Yes	cell line	GM10847	
-GM12801	No	Yes	No	Yes	cell line	GM12801	
-GM12864	No	Yes	No	Yes	cell line	GM12864	
-GM12865	No	Yes	No	Yes	cell line	GM12865	
-GM12866	No	Yes	No	Yes	cell line	GM12866	
-GM12867	No	Yes	No	Yes	cell line	GM12867	
-GM12868	No	Yes	No	Yes	cell line	GM12868	
-GM12869	No	Yes	No	Yes	cell line	GM12869	
-GM12870	No	Yes	No	Yes	cell line	GM12870	
-GM12871	No	Yes	No	Yes	cell line	GM12871	
-GM12872	No	Yes	No	Yes	cell line	GM12872	
-GM12873	No	Yes	No	Yes	cell line	GM12873	
-GM12874	No	Yes	No	Yes	cell line	GM12874	
-GM12875	No	Yes	No	Yes	cell line	GM12875	
-GM12878	No	Yes	No	Yes	cell line	GM12878	
-GM12891	No	Yes	No	Yes	cell line	GM12891	
-GM12892	No	Yes	No	Yes	cell line	GM12892	
-GM13976	No	Yes	No	Yes	cell line	GM13976	
-GM13977	No	Yes	No	Yes	cell line	GM13977	
-GM15510	No	Yes	No	Yes	cell line	GM15510	
-GM18505	No	Yes	No	Yes	cell line	GM18505	
-GM18507	No	Yes	No	Yes	cell line	GM18507	
-GM18526	No	Yes	No	Yes	cell line	GM18526	
-GM18951	No	Yes	No	Yes	cell line	GM18951	
-GM19099	No	Yes	No	Yes	cell line	GM19099	
-GM19193	No	Yes	No	Yes	cell line	GM19193	
-GM19238	No	Yes	No	Yes	cell line	GM19238	
-GM19239	No	Yes	No	Yes	cell line	GM19239	
-GM19240	No	Yes	No	Yes	cell line	GM19240	
-GM20000	No	Yes	No	Yes	cell line	GM20000	
-GM23248	No	Yes	No	Yes	cell line	GM23248	
-GM23338	No	Yes	No	Yes	cell line	GM23338	
-H4	No	Yes	No	Yes	cell line	H4	
-HAP-1	No	Yes	Yes	Yes	cell line	HAP1	
-HCEC 1CT	No	Yes	No	Yes	cell line	HCEC 1CT	
-HCT116	No	Yes	Yes	Yes	cell line	HCT 116	
-heart	No	No	No	Yes	tissue	heart	
-HEK293	No	Yes	No	Yes	cell line	HEK293	
-HEK293T	No	Yes	No	Yes	cell line	HEK293T	
-HeLa-S3	No	Yes	Yes	Yes	cell line	HeLa S3	
-hematopoietic multipotent progenitor cell	No	No	No	Yes	in vitro differentiated cells	hematopoietic multipotent progenitor cell	
-HepG2	No	Yes	Yes	Yes	cell line	Hep-G2	
-hepatic stellate cell	No	No	No	Yes	primary cell	hepatic stellate cell	
-hepatocyte	No	No	No	Yes	in vitro differentiated cells	hepatocyte	
-hepatocyte	No	No	No	Yes	primary cell	hepatocyte	
-HFFc6	No	Yes	No	Yes	cell line	HFF-hTERT clone 6	
-HFF-Myc	No	Yes	No	Yes	cell line	HFF-Myc	
-layer of hippocampus	No	No	No	Yes	tissue	hippocampus	
-HK-2	No	Yes	Yes	Yes	cell line	HK-2	
-HL-60	No	Yes	Yes	Yes	cell line	HL-60	
-HPDE6-E6E7	No	Yes	No	Yes	cell line	HPDE-6/E6E7	
-HS-27A	No	Yes	No	Yes	cell line	HS-27A	
-HS-5	No	Yes	No	Yes	cell line	HS-5	
-HT1080	No	Yes	Yes	Yes	cell line	HT-1080	
-HT-29	No	Yes	Yes	Yes	cell line	HT-29	
-HTR-8/SVneo	No	Yes	No	Yes	cell line	HTR-8/SVneo	
-HUES48	No	Yes	No	Yes	cell line	HUES 48	
-HUES6	No	Yes	No	Yes	cell line	HUES 6	
-HUES64	No	Yes	No	Yes	cell line	HUES 64	
-HuH-7	No	Yes	Yes	Yes	cell line	Huh-7	
-HuH-7.5	No	Yes	Yes	Yes	cell line	Huh-7.5	
-ES-I3	No	Yes	No	Yes	cell line	I 3	
-IMR-90	No	Yes	No	Yes	cell line	IMR-90	
-left renal cortex interstitium	No	No	No	Yes	tissue	interstitium (renal cortex; left)	
-right renal cortex interstitium	No	No	No	Yes	tissue	interstitium (renal cortex; right)	
-renal cortex interstitium	No	No	No	Yes	tissue	interstitium (renal cortex)	
-CWRU1	No	Yes	No	Yes	cell line	iPS CWRU1	
-iPS-NIHi11	No	Yes	No	Yes	cell line	iPS NIHi11	
-iPS-NIHi7	No	Yes	No	Yes	cell line	iPS NIHi7	
-iPS DF 19.11	No	Yes	No	Yes	cell line	iPS-DF19-9-11T.H	
-iPS DF 19.7	No	Yes	No	Yes	cell line	iPS-DF19-9-7T	
-iPS DF 4.7	No	Yes	No	Yes	cell line	iPS-DF4-3-7T.A	
-iPS DF 6.9	No	Yes	No	Yes	cell line	iPS-DF6-9	
-iris pigment epithelial cell	No	No	No	Yes	primary cell	iris pigment epithelium	
-Ishikawa	No	Yes	Yes	Yes	cell line	Ishikawa	
-Jurkat clone E61	No	Yes	Yes	Yes	cell line	Jurkat	
-K562	No	Yes	Yes	Yes	cell line	K-562	
-Karpas-422	No	Yes	Yes	Yes	cell line	Karpas-422	
-KBM-7	No	Yes	Yes	Yes	cell line	KBM-7	
-keratinocyte	No	No	No	Yes	primary cell	keratinocyte	
-foreskin keratinocyte	No	No	No	Yes	primary cell	keratinocyte (foreskin)	
-kidney	No	No	No	Yes	tissue	kidney	
-left kidney	No	No	No	Yes	tissue	kidney (left)	
-right kidney	No	No	No	Yes	tissue	kidney (right)	
-KMS-11	No	Yes	Yes	Yes	cell line	KMS-11	
-KOPT-K1	No	Yes	Yes	Yes	cell line	KOPT-K1	
-L1-S8	No	Yes	No	Yes	cell line	L1-S8	
-L1-S8R	No	Yes	No	Yes	cell line	L1-S8R	
-large intestine	No	No	No	Yes	tissue	large intestine	
-left cardiac atrium	No	No	No	Yes	tissue	left atrium	
-heart left ventricle	No	No	No	Yes	tissue	left ventricle	
-LHCN-M2	No	Yes	No	Yes	cell line	LHCN-M2	
-limb	No	No	No	Yes	tissue	limb	
-liver	No	No	No	Yes	tissue	liver	
-right lobe of liver	No	No	No	Yes	tissue	liver (right lobe)	
-LNCAP	No	Yes	Yes	Yes	cell line	LNCaP	
-LNCaP clone FGC	No	Yes	Yes	Yes	cell line	LNCaP clone FGC	
-Loucy	No	Yes	Yes	Yes	cell line	Loucy	
-LoVo	No	Yes	Yes	Yes	cell line	LoVo	
-lung	No	No	No	Yes	tissue	lung	
-upper lobe of left lung	No	No	No	Yes	tissue	lung (left; upper lobe)	
-left lung	No	No	No	Yes	tissue	lung (left)	
-right lung	No	No	No	Yes	tissue	lung (right)	
-M059J	No	Yes	Yes	Yes	cell line	M059J	
-MCF 10A	No	Yes	Yes	Yes	cell line	MCF-10A	
-MCF-7	No	Yes	Yes	Yes	cell line	MCF-7	
-medulla oblongata	No	No	No	Yes	tissue	medulla oblongata	
-epidermal melanocyte	No	No	No	Yes	primary cell	melanocyte (epidermis)	
-foreskin melanocyte	No	No	No	Yes	primary cell	melanocyte (foreskin)	
-mesenchymal stem cell	No	No	No	Yes	in vitro differentiated cells	mesenchymal stem cell	
-dedifferentiated amniotic fluid mesenchymal stem cell	No	No	No	Yes	primary cell	mesenchymal stem cell (amniotic fluid)	
-mesendoderm	No	No	No	Yes	in vitro differentiated cells	mesendoderm	
-cardiac mesoderm	No	No	No	Yes	in vitro differentiated cells	mesoderm (heart)	
-mesodermal cell	No	No	No	Yes	in vitro differentiated cells	mesodermal cell	
-MG63	No	Yes	Yes	Yes	cell line	MG-63	
-midbrain	No	No	No	Yes	tissue	midbrain	
-middle frontal gyrus	No	No	No	Yes	tissue	middle frontal gyrus	
-MM.1S	No	Yes	Yes	Yes	cell line	MM1.S	
-CD14-positive monocyte	No	No	No	Yes	primary cell	monocyte (CD14-positive)	
-mononuclear cell	No	No	No	Yes	primary cell	mononuclear cell	
-peripheral blood mononuclear cell	No	No	No	Yes	primary cell	mononuclear cell (peripheral blood)	
-colonic mucosa	No	No	No	Yes	tissue	mucosa (colon)	
-duodenal mucosa	No	No	No	Yes	tissue	mucosa (duodenum)	
-esophagus muscularis mucosa	No	No	No	Yes	tissue	mucosa (esophagus)	
-mucosa of rectum	No	No	No	Yes	tissue	mucosa (rectum)	
-mucosa of stomach	No	No	No	Yes	tissue	mucosa (stomach)	
-common myeloid progenitor, CD34-positive	No	No	No	Yes	primary cell	myeloid progenitor cell (CD34-positive)	
-cardiac myoblast	No	No	No	Yes	in vitro differentiated cells	myoblast (heart)	
-skeletal muscle myoblast	No	No	No	Yes	primary cell	myoblast (skeletal muscle)	
-myocyte	No	No	No	Yes	in vitro differentiated cells	myocyte	
-cardiac muscle cell	No	No	No	Yes	in vitro differentiated cells	myocyte (heart)	
-cardiac muscle cell	No	No	No	Yes	primary cell	myocyte (heart)	
-myoepithelial cell of mammary gland	No	No	No	Yes	primary cell	myoepithelial cell (mammary gland)	
-myotube	No	No	No	Yes	in vitro differentiated cells	myotube	
-NAMALWA	No	Yes	Yes	Yes	cell line	Namalwa	
-natural killer cell	No	No	No	Yes	primary cell	natural killer cell	
-NB4	No	Yes	Yes	Yes	cell line	NB4	
-NCI-H226	No	Yes	Yes	Yes	cell line	NCI-H226	
-NCI-H460	No	Yes	Yes	Yes	cell line	NCI-H460	
-NCI-H929	No	Yes	Yes	Yes	cell line	NCI-H929	
-tibial nerve	No	No	No	Yes	tissue	nerve (tibia)	
-neural cell	No	No	No	Yes	in vitro differentiated cells	neural cell	
-ecto neural progenitor cell	No	No	No	Yes	in vitro differentiated cells	neural progenitor cell	
-neural progenitor cell	No	No	No	Yes	in vitro differentiated cells	neural progenitor cell	
-neurosphere	No	No	No	Yes	primary cell	neural stem cell	
-neural stem progenitor cell	No	No	No	Yes	in vitro differentiated cells	neural stem progenitor cell	
-neuroepithelial stem cell	No	No	No	Yes	in vitro differentiated cells	neuroepithelial stem cell	
-neuron	No	No	No	Yes	in vitro differentiated cells	neuron	
-neutrophil	No	No	No	Yes	primary cell	neutrophil	
-non-pigmented ciliary epithelial cell	No	No	No	Yes	primary cell	non-pigmented ciliary epithelial cell	
-NT2/D1	No	Yes	Yes	Yes	cell line	NT2-D1	
-occipital lobe	No	No	No	Yes	tissue	occipital lobe	
-OCI-LY1	No	Yes	Yes	Yes	cell line	OCI-Ly1	
-OCI-LY3	No	Yes	Yes	Yes	cell line	OCI-Ly3	
-OCI-LY7	No	Yes	Yes	Yes	cell line	OCI-Ly7	
-olfactory neurosphere cell line	No	Yes	No	Yes	in vitro differentiated cells	olfactory neurosphere cell line	
-omental fat pad	No	No	No	Yes	tissue	omentum (fat pad)	
-osteoblast	No	No	No	Yes	primary cell	osteoblast	
-ovary	No	No	No	Yes	tissue	ovary	
-Panc1	No	Yes	Yes	Yes	cell line	PANC-1	
-pancreas	No	No	No	Yes	tissue	pancreas	
-body of pancreas	No	No	No	Yes	tissue	pancreas (body)	
-endocrine pancreas	No	No	No	Yes	tissue	pancreas (endocrine)	
-islet of Langerhans	No	No	No	Yes	tissue	pancreatic islet	
-islet precursor cell	No	No	No	Yes	in vitro differentiated cells	pancreatic islet precursor cell	
-Parathyroid adenoma	No	No	Yes	Yes	tissue	parathyroid adenoma	
-parathyroid adenoma	No	No	Yes	Yes	tissue	parathyroid adenoma	
-inferior parietal cortex	No	No	No	Yes	tissue	parietal cortex (inferior)	
-8988T	No	Yes	Yes	Yes	cell line	PaTu 8988t	
-PC-3	No	Yes	Yes	Yes	cell line	PC-3	
-PC-9	No	Yes	Yes	Yes	cell line	PC-9	
-brain pericyte	No	No	No	Yes	primary cell	pericyte (brain)	
-Peyer's patch	No	No	No	Yes	tissue	Peyer's patches	
-PFSK-1	No	Yes	Yes	Yes	cell line	PFSK-1	
-placenta	No	No	No	Yes	tissue	placenta	
-placental basal plate	No	No	No	Yes	tissue	placenta (basal plate)	
-pons	No	No	No	Yes	tissue	pons	
-posterior cingulate cortex	No	No	No	Yes	tissue	posterior cingulate cortex	
-prostate gland	No	No	No	Yes	tissue	prostate	
-putamen	No	No	No	Yes	tissue	putamen	
-radial glial cell	No	No	No	Yes	in vitro differentiated cells	radial glial cell	
-mid-neurogenesis radial glial cells	No	No	No	Yes	in vitro differentiated cells	radial glial cell (mid-neurogenesis)	
-Raji	No	Yes	Yes	Yes	cell line	Raji	
-RCC	No	Yes	Yes	Yes	cell line	RCC	
-renal cell carcinoma	No	Yes	Yes	Yes	cell line	renal carcinoma cell	
-renal pelvis	No	No	No	Yes	tissue	renal pelvis	
-left renal pelvis	No	No	No	Yes	tissue	renal pelvis (left)	
-right renal pelvis	No	No	No	Yes	tissue	renal pelvis (right)	
-retina	No	No	No	Yes	tissue	retina	
-retinal pigment epithelial cell	No	No	No	Yes	primary cell	retinal pigment epithelium	
-SJCRH30	No	Yes	Yes	Yes	cell line	Rh30	
-right cardiac atrium	No	No	No	Yes	tissue	right atrium	
-right atrium auricular region	No	No	No	Yes	tissue	right atrium (auricle)	
-heart right ventricle	No	No	No	Yes	tissue	right ventricle	
-RKO	No	Yes	Yes	Yes	cell line	RKO	
-RPMI-7951	No	Yes	Yes	Yes	cell line	RPMI-7951	
-RPMI7951	No	Yes	Yes	Yes	cell line	RPMI-7951	
-RPMI8226	No	Yes	Yes	Yes	cell line	RPMI-8226	
-RWPE1	No	Yes	No	Yes	cell line	RWPE-1	
-RWPE2	No	Yes	No	Yes	cell line	RWPE-2	
-SH-SY5Y	No	Yes	Yes	Yes	cell line	SH-SY5Y	
-SJSA1	No	Yes	Yes	Yes	cell line	SJSA-1	
-SK-MEL-5	No	Yes	Yes	Yes	cell line	SK-MEL-5	
-SK-N-DZ	No	Yes	Yes	Yes	cell line	SK-N-DZ	
-SK-N-MC	No	Yes	Yes	Yes	cell line	SK-N-MC	
-SK-N-SH	No	Yes	Yes	Yes	cell line	SK-N-SH	
-skeletal muscle tissue	No	No	No	Yes	tissue	skeletal muscle	
-muscle of arm	No	No	No	Yes	tissue	skeletal muscle (arm)	
-muscle of back	No	No	No	Yes	tissue	skeletal muscle (back)	
-forelimb muscle	No	No	No	Yes	tissue	skeletal muscle (forelimb)	
-gastrocnemius medialis	No	No	No	Yes	tissue	skeletal muscle (gastrocnemius medialis)	
-hindlimb muscle	No	No	No	Yes	tissue	skeletal muscle (hindlimb)	
-muscle of leg	No	No	No	Yes	tissue	skeletal muscle (leg)	
-psoas muscle	No	No	No	Yes	tissue	skeletal muscle (psoas)	
-muscle of trunk	No	No	No	Yes	tissue	skeletal muscle (trunk)	
-skeletal muscle cell	No	No	No	Yes	primary cell	skeletal muscle cell	
-skeletal muscle satellite cell	No	No	No	Yes	primary cell	skeletal muscle satellite cell	
-skin of body	No	No	No	Yes	tissue	skin (body)	
-lower leg skin	No	No	No	Yes	tissue	skin (leg; lower)	
-suprapubic skin	No	No	No	Yes	tissue	skin (suprapubic)	
-small intestine	No	No	No	Yes	tissue	small intestine	
-muscle layer of colon	No	No	No	Yes	tissue	smooth muscle (colon)	
-muscle layer of duodenum	No	No	No	Yes	tissue	smooth muscle (duodenum)	
-rectal smooth muscle tissue	No	No	No	Yes	tissue	smooth muscle (rectum)	
-stomach smooth muscle	No	No	No	Yes	tissue	smooth muscle (stomach)	
-smooth muscle cell	No	No	No	Yes	in vitro differentiated cells	smooth muscle cell	
-smooth muscle cell of the brain vasculature	No	No	No	Yes	primary cell	smooth muscle cell (brain vasculature)	
-spinal cord	No	No	No	Yes	tissue	spinal cord	
-spleen	No	No	No	Yes	tissue	spleen	
-amniotic stem cell	No	No	No	Yes	primary cell	stem cell (amniotic membrane)	
-mammary stem cell	No	No	No	Yes	primary cell	stem cell (breast)	
-stomach	No	No	No	Yes	tissue	stomach	
-stromal cell of bone marrow	No	No	No	Yes	primary cell	stromal cell (bone marrow)	
-SU-DHL-6	No	Yes	Yes	Yes	cell line	SU-DHL-6	
-substantia nigra	No	No	No	Yes	tissue	substantia nigra	
-superior temporal gyrus	No	No	No	Yes	tissue	superior temporal gyrus	
-SW480	No	Yes	Yes	Yes	cell line	SW480	
-T-cell	No	No	No	Yes	primary cell	T cell	
-effector memory CD4-positive, alpha-beta T cell	No	No	No	Yes	primary cell	T cell (CD4-positive alpha/beta effector memory)	
-CD4-positive, alpha-beta memory T cell	No	No	No	Yes	primary cell	T cell (CD4-positive alpha/beta memory)	
-naive thymus-derived CD4-positive, alpha-beta T cell	No	No	No	Yes	primary cell	T cell (CD4-positive alpha/beta naive; thymus)	
-CD4-positive, alpha-beta T cell	No	No	No	Yes	primary cell	T cell (CD4-positive alpha/beta)	
-CD4-positive, CD25-positive, alpha-beta regulatory T cell	No	No	No	Yes	primary cell	T cell (CD4-positive CD25-positive alpha/beta regulatory)	
-CD8-positive, alpha-beta memory T cell	No	No	No	Yes	primary cell	T cell (CD8-positive alpha/beta memory)	
-CD8-positive, alpha-beta T cell	No	No	No	Yes	primary cell	T cell (CD8-positive alpha/beta)	
-regulatory T cell	No	No	No	Yes	primary cell	T cell (regulatory)	
-T-helper 1 cell	No	No	No	Yes	primary cell	T helper cell (1)	
-T-helper 17 cell	No	No	No	Yes	primary cell	T helper cell (17)	
-T-helper 2 cell	No	No	No	Yes	primary cell	T helper cell (2)	
-T47D	No	Yes	Yes	Yes	cell line	T-47D	
-temporal lobe	No	No	No	Yes	tissue	temporal lobe	
-testis	No	No	No	Yes	tissue	testis	
-thymus	No	No	No	Yes	tissue	thymus	
-thyroid gland	No	No	No	Yes	tissue	thyroid gland	
-tongue	No	No	No	Yes	tissue	tongue	
-trophoblast	No	No	No	Yes	tissue	trophoblast	
-trophoblast cell	No	No	No	Yes	in vitro differentiated cells	trophoblast	
-trophoblast cell	No	No	No	Yes	primary cell	trophoblast	
-TTC549	No	Yes	Yes	Yes	cell line	TTC-549	
-kidney tubule cell	No	No	No	Yes	primary cell	tubule cell (kidney)	
-UCSF-4	No	Yes	No	Yes	cell line	UCSF4	
-umbilical cord	No	No	No	Yes	tissue	umbilical cord	
-urinary bladder	No	No	No	Yes	tissue	urinary bladder	
-urothelium cell line	No	Yes	No	Yes	cell line	urothelium cell line	
-uterus	No	No	No	Yes	tissue	uterus	
-vagina	No	No	No	Yes	tissue	vagina	
-VCaP	No	Yes	Yes	Yes	cell line	VCaP	
-H1-hESC	No	Yes	No	Yes	cell line	WA01	
-H1	No	Yes	No	Yes	cell line	WA01	
-H7-hESC	No	Yes	No	Yes	cell line	WA07	
-H7	No	Yes	No	Yes	cell line	WA07	
-H9	No	Yes	No	Yes	cell line	WA09	
-WERI-Rb-1	No	Yes	Yes	Yes	cell line	WERI-Rb-1	
-WI38	No	Yes	No	Yes	cell line	WI-38	
-mesenchymal cell	No	No	No	Yes	in vitro differentiated cells	mesenchymal cell	
+ENCODE_sample_name	treatment	cell_line	cancer	sex	add	OnTarget_cell_or_tissue	comments
+22Rv1	No	No	Yes	male	Yes	22Rv1	Prostate carcinoma
+8988T	No	Yes	Yes	female	Yes	PaTu 8988t	Pancreatic adenocarcinoma
+A172	No	Yes	Yes	male	Yes	A-172	Glioblastoma
+A549	No	Yes	Yes	male	Yes	A-549	Lung adenocarcinoma
+A673	No	Yes	Yes	female	Yes	A-673	Ewing sarcoma
+ACC112	No	Yes	Yes	male	Yes	UTSW-ACC112	Salivary gland adenoid cystic carcinoma
+ACHN	No	Yes	Yes	male	Yes	ACHN	Papillary renal cell carcinoma
+AG04449	No	Yes	No	male	Yes	AG04449	
+AG04450	No	Yes	No	male	Yes	AG04450	
+AG08395	No	Yes	No	female	Yes	AG08395	
+AG08396	No	Yes	No	female	Yes	AG08396	
+AG09309	No	Yes	No	female	Yes	AG09309	
+AG09319	No	Yes	No	female	Yes	AG09319	
+AG10803	No	Yes	No	male	Yes	AG10803	
+AG20443	No	Yes	No	male	Yes	AG20443	
+Ammon's horn male adult (84 years)	No	No	No	male	Yes	Ammon's horn	
+B cell	No	No	No		Yes	B cell	
+B cell female adult (27 years)	No	No	No	female	Yes	B cell	
+B cell female adult (27 years) and female adult (43 years)	No	No	No	female	Yes	B cell	
+B cell female adult (34 years)	No	No	No	female	Yes	B cell	
+B cell female adult (43 years)	No	No	No	female	Yes	B cell	
+B cell male adult (21 years)	No	No	No	male	Yes	B cell	
+B cell male adult (37 years)	No	No	No	male	Yes	B cell	
+BE2C	No	Yes	Yes	male	Yes	SK-N-BE(2)-C	Neuroblastoma
+BJ	No	Yes	No	male	Yes	BJ	Human fibroblast
+C4-2B	No	Yes	Yes	male	Yes	LNCaP C4-2B	Prostate carcinoma
+C803	No	Yes	No	female	Yes	C1 100 08 0003	
+CD14-positive monocyte female	No	No	No	female	Yes	monocyte (CD14-positive)	
+CD14-positive monocyte female adult (34 years)	No	No	No	female	Yes	monocyte (CD14-positive)	
+CD14-positive monocyte male adult (21 years)	No	No	No	male	Yes	monocyte (CD14-positive)	
+CD14-positive monocyte male adult (37 years)	No	No	No	male	Yes	monocyte (CD14-positive)	
+CD1c-positive myeloid dendritic cell	No	No	No		Yes	dendritic cell (CD1c-positive; derived from myeloid cell)	
+CD4-positive, CD25-positive, alpha-beta regulatory T cell	No	No	No		Yes	T cell (CD4-positive CD25-positive alpha/beta regulatory)	
+CD4-positive, alpha-beta T cell	No	No	No		Yes	T cell (CD4-positive alpha/beta)	
+CD4-positive, alpha-beta T cell female adult (33 years)	No	No	No	female	Yes	T cell (CD4-positive alpha/beta)	
+CD4-positive, alpha-beta T cell male adult (21 years)	No	No	No	male	Yes	T cell (CD4-positive alpha/beta)	
+CD4-positive, alpha-beta T cell male adult (37 years)	No	No	No	male	Yes	T cell (CD4-positive alpha/beta)	
+CD4-positive, alpha-beta memory T cell	No	No	No		Yes	T cell (CD4-positive alpha/beta memory)	
+CD4-positive, alpha-beta memory T cell originated from blood cell	No	No	No		Yes	T cell (CD4-positive alpha/beta memory; derived from blood)	
+CD8-positive, alpha-beta T cell	No	No	No		Yes	T cell (CD8-positive alpha/beta)	
+CD8-positive, alpha-beta T cell female adult (33 years)	No	No	No	female	Yes	T cell (CD8-positive alpha/beta)	
+CD8-positive, alpha-beta T cell female adult (34 years)	No	No	No	female	Yes	T cell (CD8-positive alpha/beta)	
+CD8-positive, alpha-beta T cell male adult (21 years)	No	No	No	male	Yes	T cell (CD8-positive alpha/beta)	
+CD8-positive, alpha-beta T cell male adult (28 years)	No	No	No	male	Yes	T cell (CD8-positive alpha/beta)	
+CD8-positive, alpha-beta T cell male adult (37 years)	No	No	No	male	Yes	T cell (CD8-positive alpha/beta)	
+CD8-positive, alpha-beta memory T cell	No	No	No		Yes	T cell (CD8-positive alpha/beta memory)	
+CMK	No	Yes	Yes	male	Yes	CMK	Myeloid leukemia associated with Down syndrome
+COLO829	No	Yes	Yes	male	Yes	COLO 829	Cutaneous melanoma
+CWRU1	No	Yes	No	male	Yes	iPS CWRU1	
+Caco-2	No	Yes	Yes	male	Yes	Caco-2	Colon adenocarcinoma
+Caki2	No	Yes	Yes	male	Yes	Caki-2	Papillary renal cell carcinoma
+D341Med	No	Yes	Yes	male	Yes	D341 Med	Medulloblastoma
+D721Med	No	Yes	Yes	male	Yes	D721 Med	Medulloblastoma
+DND-41	No	Yes	Yes	male	Yes	DND-41	Childhood T acute lymphoblastic leukemia
+DOHH2	No	Yes	Yes	male	Yes	DoHH2	Diffuse large B-cell lymphoma germinal center B-cell type
+Daoy	No	Yes	Yes	male	Yes	Daoy	Medulloblastoma
+EH	No	Yes	Yes	male	Yes	EH	Hairy cell leukemia
+EL					No		
+ELF-1	No	Yes	No	female	Yes	Elf1	Embryonic stem cell
+ELR					No		
+ES-I3	No	Yes	No	female	Yes	I 3	Embryonic stem cell
+G401	No	Yes	Yes	male	Yes	G-401	Rhabdoid tumor of the kidney
+GM03348	No	Yes	No	male	Yes	GM03348	
+GM04503	No	Yes	No	female	Yes	GM04503	
+GM04504	No	Yes	No	female	Yes	GM04504	
+GM06990	No	Yes	No	female	Yes	GM06990	
+GM08714	No	Yes	No	female	Yes	GM08714	Immunodeficiency-centromeric instability-facial anomalies syndrome 1
+GM10248	No	Yes	No	male	Yes	GM10248	Cornelia de Lange syndrome
+GM10266	No	Yes	No	male	Yes	GM10266	Cornelia de Lange syndrome
+GM12801	No	Yes	No	male	Yes	GM12801	
+GM12864	No	Yes	No	male	Yes	GM12864	
+GM12865	No	Yes	No	female	Yes	GM12865	CYP2C19 p.Pro227Pro (c.681G>A); cryptic splice acceptor activation; allele CYP2C19*2 (Coriell)
+GM12873	No	Yes	No	female	Yes	GM12873	
+GM12874	No	Yes	No	male	Yes	GM12874	CYP2C19 p.Pro227Pro (c.681G>A); cryptic splice acceptor activation; allele CYP2C19*2 (Coriell)
+GM12875	No	Yes	No	female	Yes	GM12875	
+GM12878	No	Yes	No	female	Yes	GM12878	
+GM12891	No	Yes	No	male	Yes	GM12891	CYP2C19 p.Pro227Pro (c.681G>A); cryptic splice acceptor activation; allele CYP2C19*2 (Coriell)
+GM12892	No	Yes	No	female	Yes	GM12892	
+GM13976	No	Yes	No	female	Yes	GM13976	
+GM13977	No	Yes	No	female	Yes	GM13977	Cornelia de Lange syndrome
+GM18507	No	Yes	No	male	Yes	GM18507	
+GM19238	No	Yes	No	female	Yes	GM19238	
+GM19239	No	Yes	No	male	Yes	GM19239	
+GM19240	No	Yes	No	female	Yes	GM19240	
+GM20000	No	Yes	No	male	Yes	GM20000	Cornelia de Lange syndrome
+GM23248	No	Yes	No	male	Yes	GM23248	
+GM23338 originated from GM23248	No	Yes	No	male	Yes	GM23338	Induced pluripotent stem cell
+H1	No	Yes	No	male	Yes	WA01	
+H4	No	Yes	Yes	male	Yes	H4	Astrocytoma
+H54	No	Yes	Yes	female	Yes	D54	Glioblastoma
+H7	No	Yes	No	female	Yes	WA07	
+H9	No	Yes	No	female	Yes	WA09	
+H9 G1 phase genetically modified using stable transfection					No		
+H9 G1b phase genetically modified using stable transfection					No		
+H9 G2 phase genetically modified using stable transfection					No		
+H9 S1 phase genetically modified using stable transfection					No		
+H9 genetically modified using stable transfection					No		
+HAP-1	No	Yes	Yes	male	Yes	HAP1	Chronic myelogenous leukemia
+HCEC 1CT	No	Yes	No	male	Yes	HCEC 1CT	
+HCT116	No	Yes	Yes	male	Yes	HCT 116	Colon carcinoma
+HEK293	No	Yes	No	female	Yes	HEK293	
+HEK293 genetically modified using site-specific recombination originated from HEK293					No		
+HEK293T	No	Yes	No	female	Yes	HEK293T	
+HFF-Myc originated from foreskin fibroblast	No	Yes	No	male	Yes	HFF-Myc	
+HFFc6	No	Yes	No	male	Yes	HFF-hTERT clone 6	
+HK-2	No	Yes	No	male	Yes	HK-2	Kidney
+HL-60	No	Yes	Yes	female	Yes	HL-60	Adult acute myeloid leukemia
+HPDE6-E6E7	No	Yes	No	female	Yes	HPDE-6/E6E7	
+HS-27A	No	Yes	No	male	Yes	HS-27A	
+HS-5	No	Yes	No	male	Yes	HS-5	
+HT-29	No	Yes	Yes	female	Yes	HT-29	Colon adenocarcinoma
+HT1080	No	Yes	Yes	male	Yes	HT-1080	Fibrosarcoma
+HTR-8/SVneo	No	Yes	No		Yes	HTR-8/SVneo	
+HUES48	No	Yes	No	female	Yes	HUES 48	Embryonic stem cell
+HUES6	No	Yes	No	female	Yes	HUES 6	Embryonic stem cell
+HUES64	No	Yes	No	male	Yes	HUES 64	Embryonic stem cell
+HeLa-S3	No	Yes	Yes	female	Yes	HeLa S3	Human papillomavirus-related endocervical adenocarcinoma
+HeLa-S3 G1b phase					No		
+HepG2	No	Yes	Yes	male	Yes	Hep-G2	Hepatoblastoma
+HepG2 genetically modified using CRISPR					No		
+HuH-7	No	Yes	Yes	male	Yes	Huh-7	Hepatocellular carcinoma
+HuH-7.5	No	Yes	Yes	male	Yes	Huh-7.5	Hepatocellular carcinoma
+IMR-90	No	Yes	No	female	Yes	IMR-90	
+Jurkat clone E61	No	Yes	Yes	male	Yes	Jurkat E6.1	Childhood T acute lymphoblastic leukemia
+K562	No	Yes	Yes	female	Yes	K-562	Chronic myelogenous leukemia
+K562 G1 phase					No		
+K562 G2 phase					No		
+K562 genetically modified using CRISPR					No		
+K562 genetically modified using stable transfection					No		
+K562 genetically modified using stable transfection originated from K562					No		
+KBM-7	No	Yes	Yes	male	Yes	KBM-7	Chronic myelogenous leukemia
+KMS-11	No	Yes	Yes	female	Yes	KMS-11	Plasma cell myeloma
+KOPT-K1	No	Yes	Yes	male	Yes	KOPT-K1	Childhood T acute lymphoblastic leukemia
+Karpas-422	No	Yes	Yes	female	Yes	Karpas-422        	Diffuse large B-cell lymphoma germinal center B-cell type
+L1-S8	No	Yes	No		Yes	L1-S8	Induced pluripotent stem cell
+L1-S8R	No	Yes	No		Yes	L1-S8R	Induced pluripotent stem cell
+LHCN-M2	No	Yes	No	male	Yes	LHCN-M2	
+LNCAP	No	Yes	Yes	male	Yes	LNCaP	Prostate carcinoma
+LNCaP clone FGC	No	Yes	Yes	male	Yes	LNCaP clone FGC	Prostate carcinoma
+LoVo	No	Yes	Yes	male	Yes	LoVo	Colon adenocarcinoma
+Loucy	No	Yes	Yes	female	Yes	Loucy	Adult T acute lymphoblastic leukemia
+M059J	No	Yes	Yes	male	Yes	M059J	Glioblastoma
+MCF 10A	No	Yes	No	female	Yes	MCF-10A	
+MCF-7	No	Yes	Yes	female	Yes	MCF-7	Invasive ductal carcinoma
+MCF-7 genetically modified using CRISPR					No		
+MCF-7 genetically modified using RNAi					No		
+MCF-7 genetically modified using stable transfection					No		
+MCF-7 originated from MCF-7					No		
+MG63	No	Yes	Yes	male	Yes	MG-63	Osteosarcoma
+MM.1S	No	Yes	Yes	female	Yes	MM1.S	Plasma cell myeloma
+NAMALWA	No	Yes	Yes	female	Yes	Namalwa	Epstein-Barr virus-related Burkitt lymphoma
+NB4	No	Yes	Yes	female	Yes	NB4	Acute promyelocytic leukemia with t(15;17)(q22;q12) PML-RARA
+NCI-H226	No	Yes	Yes	male	Yes	NCI-H226	Pleural epithelioid mesothelioma
+NCI-H460	No	Yes	Yes	male	Yes	NCI-H460	Large cell lung carcinoma
+NCI-H929	No	Yes	Yes	female	Yes	NCI-H929	Plasma cell myeloma
+NT2/D1	No	Yes	Yes	male	Yes	NT2-D1	Embryonal carcinoma
+OCI-LY1	No	Yes	Yes	male	Yes	OCI-Ly1	Diffuse large B-cell lymphoma
+OCI-LY3	No	Yes	Yes	male	Yes	OCI-Ly3	Diffuse large B-cell lymphoma
+OCI-LY7	No	Yes	Yes	male	Yes	OCI-Ly7	Diffuse large B-cell lymphoma germinal center B-cell type
+PC-3	No	Yes	Yes	male	Yes	PC-3	Prostate carcinoma
+PC-9	No	Yes	Yes	male	Yes	PC-9	Lung adenocarcinoma
+PFSK-1	No	Yes	Yes	male	Yes	PFSK-1	Primitive neuroectodermal tumor
+Panc1	No	Yes	Yes	male	Yes	PANC-1	Pancreatic ductal adenocarcinoma
+Peyer's patch female adult (51 years)	No	No	No	female	Yes	Peyer's patch	
+Peyer's patch female adult (53 years)	No	No	No	female	Yes	Peyer's patch	
+Peyer's patch male adult (37 years)	No	No	No	male	Yes	Peyer's patch	
+Peyer's patch male adult (54 years)	No	No	No	male	Yes	Peyer's patch	
+RCC					No		
+RCC 7860	No	Yes	Yes	male	Yes	786-O	Renal cell carcinoma
+RKO	No	Yes	Yes		Yes	RKO	Colon carcinoma
+RPMI7951	No	Yes	Yes	female	Yes	RPMI-7951	Melanoma
+RPMI8226	No	Yes	Yes	male	Yes	RPMI-8226	Plasma cell myeloma
+RWPE1	No	Yes	No	male	Yes	RWPE-1	
+RWPE2	No	Yes	No	male	Yes	RWPE-2	
+Raji	No	Yes	Yes	male	Yes	Raji	Epstein-Barr virus-related Burkitt lymphoma
+SH-SY5Y	No	Yes	Yes	female	Yes	SH-SY5Y	Neuroblastoma
+SJCRH30	No	Yes	Yes	male	Yes	Rh30	Alveolar rhabdomyosarcoma
+SJSA1	No	Yes	Yes	male	Yes	SJSA-1	Osteosarcoma
+SK-MEL-5	No	Yes	Yes	female	Yes	SK-MEL-5	Cutaneous melanoma
+SK-N-DZ	No	Yes	Yes	female	Yes	SK-N-DZ	Neuroblastoma
+SK-N-MC	No	Yes	Yes	female	Yes	SK-N-MC	Askin tumor
+SK-N-SH	No	Yes	Yes	female	Yes	SK-N-SH	Neuroblastoma
+SU-DHL-6	No	Yes	Yes	male	Yes	SU-DHL-6	Diffuse large B-cell lymphoma germinal center B-cell type
+SW480	No	Yes	Yes	male	Yes	SW480	Colon adenocarcinoma
+T-cell	No	No	No		Yes	T cell	
+T-cell male adult (21 years)	No	No	No	male	Yes	T cell	
+T-cell male adult (36 years)	No	No	No	male	Yes	T cell	
+T-cell male adult (37 years)	No	No	No	male	Yes	T cell	
+T-helper 1 cell	No	No	No		Yes	T helper 1 cell	
+T-helper 1 cell female adult (26 years)	No	No	No	female	Yes	T helper 1 cell	
+T-helper 1 cell male adult (33 years)	No	No	No	male	Yes	T helper 1 cell	
+T-helper 17 cell	No	No	No		Yes	T helper 17 cell	
+T-helper 17 cell originated from blood cell	No	No	No		Yes	T helper 17 cell (derived from blood)	
+T-helper 2 cell	No	No	No		Yes	T helper 2 cell	
+T-helper 2 cell female adult (26 years)	No	No	No	female	Yes	T helper 2 cell	
+T-helper 2 cell male adult (33 years)	No	No	No	male	Yes	T helper 2 cell	
+T47D	No	Yes	Yes	female	Yes	T-47D	Invasive ductal carcinoma
+UCSF-4	No	Yes	No	female	Yes	UCSF4	Embryonic stem cell
+VCaP	No	Yes	Yes	male	Yes	VCaP	Prostate carcinoma
+WERI-Rb-1	No	Yes	Yes	female	Yes	WERI-Rb-1        	Retinoblastoma
+WI38	No	Yes	No	female	Yes	WI-38	
+WI38 genetically modified using stable transfection originated from WI38					No		
+adipocyte	No	No	No		Yes	adipocyte	
+adipocyte originated from mesenchymal stem cell	No	No	No		Yes	adipocyte (derived from mesenchymal stem cell)	
+adipose tissue male adult (34 years)	No	No	No	male	Yes	adipose tissue	
+adrenal gland embryo (96 days)	No	No	No		Yes	adrenal gland (embryo)	
+adrenal gland female adult (30 years)	No	No	No	female	Yes	adrenal gland	
+adrenal gland female adult (51 years)	No	No	No	female	Yes	adrenal gland	
+adrenal gland female adult (53 years)	No	No	No	female	Yes	adrenal gland	
+adrenal gland female embryo (108 days)	No	No	No	female	Yes	adrenal gland (embryo)	
+adrenal gland female embryo (113 days)	No	No	No	female	Yes	adrenal gland (embryo)	
+adrenal gland female embryo (85 days)	No	No	No	female	Yes	adrenal gland (embryo)	
+adrenal gland male adult (34 years)	No	No	No	male	Yes	adrenal gland	
+adrenal gland male adult (37 years)	No	No	No	male	Yes	adrenal gland	
+adrenal gland male adult (54 years)	No	No	No	male	Yes	adrenal gland	
+adrenal gland male embryo (101 days)	No	No	No	male	Yes	adrenal gland (embryo)	
+adrenal gland male embryo (108 days)	No	No	No	male	Yes	adrenal gland (embryo)	
+adrenal gland male embryo (85 days)	No	No	No	male	Yes	adrenal gland (embryo)	
+adrenal gland male embryo (97 days)	No	No	No	male	Yes	adrenal gland (embryo)	
+amnion male embryo (16 weeks)	No	No	No	male	Yes	amnion (embryo)	
+amniotic epithelial cell	No	No	No		Yes	amniotic epithelial cell	
+amniotic stem cell male embryo (15 weeks)	No	No	No	male	Yes	amniotic stem cell (embryo)	
+angular gyrus female adult (75 years)	No	No	No	female	Yes	angular gyrus	
+angular gyrus male adult (81 years)	No	No	No	male	Yes	angular gyrus	
+aorta female adult (30 years)	No	No	No	female	Yes	aorta	
+aorta male adult (34 years)	No	No	No	male	Yes	aorta	
+ascending aorta female adult (51 years)	No	No	No	female	Yes	aorta (ascending)	
+ascending aorta female adult (53 years)	No	No	No	female	Yes	aorta (ascending)	
+astrocyte	No	No	No		Yes	astrocyte	
+astrocyte of the cerebellum	No	No	No		Yes	astrocyte (cerebellum)	
+astrocyte of the hippocampus	No	No	No		Yes	astrocyte (hippocampus)	
+astrocyte of the spinal cord	No	No	No		Yes	astrocyte (spinal cord)	
+body of pancreas female adult (51 years)	No	No	No	female	Yes	pancreas	
+body of pancreas female adult (53 years)	No	No	No	female	Yes	pancreas	
+body of pancreas male adult (37 years)	No	No	No	male	Yes	pancreas	
+body of pancreas male adult (54 years)	No	No	No	male	Yes	pancreas	
+brain embryo (112 days)	No	No	No		Yes	brain (embryo)	
+brain embryo (56 days) and male embryo (58 days)	No	No	No		Yes	brain (embryo)	
+brain embryo (80 days)	No	No	No		Yes	brain (embryo)	
+brain female embryo (105 days)	No	No	No	female	Yes	brain (embryo)	
+brain female embryo (109 days)	No	No	No	female	Yes	brain (embryo)	
+brain female embryo (117 days)	No	No	No	female	Yes	brain (embryo)	
+brain female embryo (120 days)	No	No	No	female	Yes	brain (embryo)	
+brain female embryo (142 days)	No	No	No	female	Yes	brain (embryo)	
+brain female embryo (17 weeks)	No	No	No	female	Yes	brain (embryo)	
+brain female embryo (85 days)	No	No	No	female	Yes	brain (embryo)	
+brain female embryo (96 days)	No	No	No	female	Yes	brain (embryo)	
+brain male embryo (101 days)	No	No	No	male	Yes	brain (embryo)	
+brain male embryo (104 days)	No	No	No	male	Yes	brain (embryo)	
+brain male embryo (105 days)	No	No	No	male	Yes	brain (embryo)	
+brain male embryo (122 days)	No	No	No	male	Yes	brain (embryo)	
+brain male embryo (72 days) and male embryo (76 days)	No	No	No	male	Yes	brain (embryo)	
+brain microvascular endothelial cell	No	No	No		Yes	endothelial cell (brain microvasculature)	
+brain pericyte	No	No	No		Yes	pericyte (brain)	
+breast epithelium female adult (51 years)	No	No	No	female	Yes	epithelium (breast)	
+breast epithelium female adult (53 years)	No	No	No	female	Yes	epithelium (breast)	
+breast epithelium male adult (37 years)	No	No	No	male	Yes	epithelium (breast)	
+breast epithelium male adult (54 years)	No	No	No	male	Yes	epithelium (breast)	
+bronchial epithelial cell	No	No	No		Yes	bronchial epithelial cell	
+cardiac fibroblast	No	No	No		Yes	cardiac fibroblast	
+cardiac fibroblast female adult	No	No	No	female	Yes	cardiac fibroblast	
+cardiac fibroblast female embryo (94 days) and female embryo (98 days)	No	No	No	female	Yes	cardiac fibroblast (embryo)	
+cardiac muscle cell	No	No	No		Yes	cardiomyocyte	
+cardiac muscle cell originated from RUES2	No	No	No	female	Yes	cardiomyocyte (derived from RUES2)	
+caudate nucleus female adult (75 years)	No	No	No	female	Yes	caudate nucleus	
+caudate nucleus male adult (78 years)	No	No	No	male	Yes	caudate nucleus	
+caudate nucleus male adult (81 years)	No	No	No	male	Yes	caudate nucleus	
+cerebellar cortex male adult (78 years) and male adult (84 years)	No	No	No	male	Yes	cerebellar cortex	
+cerebellum male adult (27 years) and male adult (35 years)	No	No	No	male	Yes	cerebellum	
+cerebellum male adult (53 years)	No	No	No	male	Yes	cerebellum	
+chorion	No	No	No		Yes	chorion	
+chorion female embryo (40 weeks)	No	No	No	female	Yes	chorion (embryo)	
+chorion male embryo (16 weeks)	No	No	No	male	Yes	chorion (embryo)	
+chorionic villus embryo (16 weeks)	No	No	No		Yes	chorionic villi (embryo)	
+chorionic villus female embryo (40 weeks)	No	No	No	female	Yes	chorionic villi (embryo)	
+chorionic villus male embryo (16 weeks)	No	No	No	male	Yes	chorionic villi (embryo)	
+chorionic villus male embryo (38 weeks)	No	No	No	male	Yes	chorionic villi (embryo)	
+choroid plexus epithelial cell	No	No	No		Yes	choroid plexus epithelial cell	
+cingulate gyrus female adult (75 years)	No	No	No	female	Yes	cingulate gyrus	
+cingulate gyrus male adult (81 years)	No	No	No	male	Yes	cingulate gyrus	
+colonic mucosa female adult (56 years)	No	No	No	female	Yes	mucosa (colon)	
+colonic mucosa female adult (73 years)	No	No	No	female	Yes	mucosa (colon)	
+common myeloid progenitor, CD34-positive	No	No	No		Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive female	No	No	No	female	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive female adult (27 years)	No	No	No	female	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive female adult (33 years)	No	No	No	female	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive female adult (50 years)	No	No	No	female	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive male	No	No	No	male	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive male adult	No	No	No	male	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive male adult (23 years)	No	No	No	male	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive male adult (36 years)	No	No	No	male	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive male adult (37 years)	No	No	No	male	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive male adult (42 years)	No	No	No	male	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive male adult (43 years)	No	No	No	male	Yes	common myeloid progenitor (CD34-positive)	
+common myeloid progenitor, CD34-positive male adult (49 years)	No	No	No	male	Yes	common myeloid progenitor (CD34-positive)	
+coronary artery female adult (51 years)	No	No	No	female	Yes	artery (coronary)	
+coronary artery female adult (53 years)	No	No	No	female	Yes	artery (coronary)	
+dedifferentiated amniotic fluid mesenchymal stem cell male embryo (15 weeks)	No	No	No	male	Yes	mesenchymal stem cell (embryo; derived from amniotic fluid)	
+dermis blood vessel endothelial cell female adult	No	No	No	female	Yes	endothelial cell (dermis blood vessel)	
+dermis blood vessel endothelial cell male newborn	No	No	No	male	Yes	endothelial cell (dermis blood vessel; newborn)	
+dermis microvascular lymphatic vessel endothelial cell female	No	No	No	female	Yes	endothelial cell (dermis microvascular lymphatic vessel)	
+dermis microvascular lymphatic vessel endothelial cell male	No	No	No	male	Yes	endothelial cell (dermis microvascular lymphatic vessel)	
+duodenal mucosa male adult (59 years)	No	No	No	male	Yes	mucosa (duodenum)	
+duodenal mucosa male adult (76 years)	No	No	No	male	Yes	mucosa (duodenum)	
+ecto neural progenitor cell originated from H9	No	No	No	female	Yes	neural progenitor cell (derived from WA09)	
+ectodermal cell originated from HUES64	No	No	No	male	Yes	ectodermal cell (derived from HUES 64)	
+effector memory CD4-positive, alpha-beta T cell	No	No	No		Yes	T cell (CD4-positive alpha/beta effector memory)	
+embryonic facial prominence embryo (53 days) and embryo (58 days)	No	No	No		Yes	facial prominence (embryo)	
+endocrine pancreas adult (59 years)	No	No	No		Yes	pancreas (endocrine)	
+endocrine pancreas male	No	No	No	male	Yes	pancreas (endocrine)	
+endocrine pancreas male adult (45 years)	No	No	No	male	Yes	pancreas (endocrine)	
+endocrine pancreas male adult (46 years)	No	No	No	male	Yes	pancreas (endocrine)	
+endodermal cell	No	No	No		Yes	endodermal cell	
+endodermal cell originated from HUES64	No	No	No	male	Yes	endodermal cell (derived from HUES 64)	
+endothelial cell of umbilical vein male newborn	No	No	No	male	Yes	endothelial cell (umbilical vein; newborn)	
+endothelial cell of umbilical vein newborn	No	No	No		Yes	endothelial cell (umbilical vein; newborn)	
+epidermal melanocyte	No	No	No		Yes	melanocyte (epidermis)	
+epithelial cell of esophagus	No	No	No		Yes	epithelial cell (esophagus)	
+epithelial cell of prostate	No	No	No	male	Yes	epithelial cell (prostate)	
+epithelial cell of prostate male	No	No	No	male	Yes	epithelial cell (prostate)	
+epithelial cell of proximal tubule	No	No	No		Yes	renal proximal tubule cell	
+erythroblast embryo (16-19 weeks)	No	No	No		Yes	erythroblast (embryo)	
+erythroblast male	No	No	No	male	Yes	erythroblast	
+esophagus female adult (30 years)	No	No	No	female	Yes	esophagus	
+esophagus male adult (34 years)	No	No	No	male	Yes	esophagus	
+esophagus muscularis mucosa female adult (51 years)	No	No	No	female	Yes	muscularis mucosa (esophagus)	
+esophagus muscularis mucosa female adult (53 years)	No	No	No	female	Yes	muscularis mucosa (esophagus)	
+esophagus muscularis mucosa male adult (37 years)	No	No	No	male	Yes	muscularis mucosa (esophagus)	
+esophagus muscularis mucosa male adult (54 years)	No	No	No	male	Yes	muscularis mucosa (esophagus)	
+esophagus squamous epithelium female adult (51 years)	No	No	No	female	Yes	squamous epithelium (esophagus)	
+esophagus squamous epithelium female adult (53 years)	No	No	No	female	Yes	squamous epithelium (esophagus)	
+esophagus squamous epithelium male adult (37 years)	No	No	No	male	Yes	squamous epithelium (esophagus)	
+esophagus squamous epithelium male adult (54 years)	No	No	No	male	Yes	squamous epithelium (esophagus)	
+eye embryo (56 days) and male embryo (76 days)	No	No	No		Yes	eye (embryo)	
+eye female embryo (76 days)	No	No	No	female	Yes	eye (embryo)	
+femur female embryo (98 days)	No	No	No	female	Yes	bone (femur; embryo)	
+fibroblast of breast female adult (17 years)	No	No	No	female	Yes	fibroblast (breast)	
+fibroblast of breast female adult (26 years)	No	No	No	female	Yes	fibroblast (breast)	
+fibroblast of dermis	No	No	No		Yes	fibroblast (dermis)	
+fibroblast of dermis NONE and female adult	No	No	No		Yes	fibroblast (dermis)	
+fibroblast of dermis female adult	No	No	No	female	Yes	fibroblast (dermis)	
+fibroblast of gingiva	No	No	No		Yes	fibroblast (gingiva)	
+fibroblast of lung	No	No	No		Yes	fibroblast (lung)	
+fibroblast of lung female child (11 years) and male adult (45 years)	No	No	No		Yes	fibroblast (lung; child)	
+fibroblast of lung male adult (45 years)	No	No	No	male	Yes	fibroblast (lung)	
+fibroblast of mammary gland female	No	No	No	female	Yes	fibroblast (mammary gland)	
+fibroblast of peridontal ligament male	No	No	No	male	Yes	fibroblast (peridontal ligament)	
+fibroblast of pulmonary artery	No	No	No		Yes	fibroblast (pulmonary artery)	
+fibroblast of skin of abdomen male embryo (97 days)	No	No	No	male	Yes	fibroblast (abdominal skin; embryo)	
+fibroblast of skin of back male embryo (97 days)	No	No	No	male	Yes	fibroblast (back skin; embryo)	
+fibroblast of skin of left biceps male embryo (97 days)	No	No	No	male	Yes	fibroblast (left biceps skin; embryo)	
+fibroblast of skin of left quadriceps male embryo (97 days)	No	No	No	male	Yes	fibroblast (left quadriceps skin; embryo)	
+fibroblast of skin of right biceps male embryo (97 days)	No	No	No	male	Yes	fibroblast (right biceps skin; embryo)	
+fibroblast of skin of right quadriceps male embryo (97 days)	No	No	No	male	Yes	fibroblast (right quadriceps skin; embryo)	
+fibroblast of skin of scalp male embryo (97 days)	No	No	No	male	Yes	fibroblast (scalp skin; embryo)	
+fibroblast of skin of upper back male embryo (97 days)	No	No	No	male	Yes	fibroblast (upper back skin; embryo)	
+fibroblast of the aortic adventitia female	No	No	No	female	Yes	fibroblast (aortic adventitia)	
+fibroblast of the conjunctiva	No	No	No		Yes	fibroblast (conjunctiva)	
+fibroblast of villous mesenchyme	No	No	No		Yes	fibroblast (mesenchymal villi)	
+forelimb muscle female embryo (108 days)	No	No	No	female	Yes	skeletal muscle (forelimb; embryo)	
+foreskin fibroblast male newborn	No	No	No	male	Yes	fibroblast (foreskin; newborn)	
+foreskin keratinocyte male newborn	No	No	No	male	Yes	keratinocyte (foreskin; newborn)	
+foreskin keratinocyte male newborn (2-4 days)	No	No	No	male	Yes	keratinocyte (foreskin; newborn)	
+foreskin melanocyte male newborn	No	No	No	male	Yes	melanocyte (foreskin; newborn)	
+frontal cortex female adult (67 years) and female adult (80 years)	No	No	No	female	Yes	frontal cortex	
+frontal cortex male adult (27 years) and male adult (35 years)	No	No	No	male	Yes	frontal cortex	
+gastrocnemius medialis female adult (51 years)	No	No	No	female	Yes	skeletal muscle (gastrocnemius medialis)	
+gastrocnemius medialis female adult (53 years)	No	No	No	female	Yes	skeletal muscle (gastrocnemius medialis)	
+gastrocnemius medialis male adult (37 years)	No	No	No	male	Yes	skeletal muscle (gastrocnemius medialis)	
+gastrocnemius medialis male adult (54 years)	No	No	No	male	Yes	skeletal muscle (gastrocnemius medialis)	
+gastroesophageal sphincter female adult (51 years)	No	No	No	female	Yes	gastroesophageal sphincter	
+gastroesophageal sphincter female adult (53 years)	No	No	No	female	Yes	gastroesophageal sphincter	
+gastroesophageal sphincter male adult (37 years)	No	No	No	male	Yes	gastroesophageal sphincter	
+gastroesophageal sphincter male adult (54 years)	No	No	No	male	Yes	gastroesophageal sphincter	
+germinal center	No	No	No		Yes	germinal center	
+germinal matrix male embryo (20 weeks)	No	No	No	male	Yes	germinal matrix (embryo)	
+globus pallidus male adult (78 years) and male adult (84 years)	No	No	No	male	Yes	globus pallidus	
+glomerular endothelial cell	No	No	No		Yes	glomerular endothelial cell	
+glomerular visceral epithelial cell child (3 years)	No	No	No		Yes	podocyte (child)	
+heart embryo (101 days)	No	No	No		Yes	heart (embryo)	
+heart embryo (59 days) and female embryo (76 days)	No	No	No		Yes	heart (embryo)	
+heart embryo (80 days)	No	No	No		Yes	heart (embryo)	
+heart embryo (96 days)	No	No	No		Yes	heart (embryo)	
+heart female embryo (103 days)	No	No	No	female	Yes	heart (embryo)	
+heart female embryo (105 days)	No	No	No	female	Yes	heart (embryo)	
+heart female embryo (110 days)	No	No	No	female	Yes	heart (embryo)	
+heart female embryo (116 days) and female embryo (98 days)	No	No	No	female	Yes	heart (embryo)	
+heart female embryo (117 days)	No	No	No	female	Yes	heart (embryo)	
+heart female embryo (147 days)	No	No	No	female	Yes	heart (embryo)	
+heart female embryo (91 days)	No	No	No	female	Yes	heart (embryo)	
+heart left ventricle female adult (51 years)	No	No	No	female	Yes	ventricle (left)	
+heart left ventricle female adult (53 years)	No	No	No	female	Yes	ventricle (left)	
+heart left ventricle female embryo (101 days) and female embryo (103 days)	No	No	No	female	Yes	ventricle (left; embryo)	
+heart left ventricle female embryo (136 days)	No	No	No	female	Yes	ventricle (left; embryo)	
+heart left ventricle male adult (34 years)	No	No	No	male	Yes	ventricle (left)	
+heart left ventricle male child (3 years)	No	No	No	male	Yes	ventricle (left; child)	
+heart male adult (27 years) and male adult (35 years)	No	No	No	male	Yes	heart	
+heart male child (3 years)	No	No	No	male	Yes	heart (child)	
+heart male embryo (105 days)	No	No	No	male	Yes	heart (embryo)	
+heart male embryo (110 days)	No	No	No	male	Yes	heart (embryo)	
+heart male embryo (120 days)	No	No	No	male	Yes	heart (embryo)	
+heart male embryo (72 days) and male embryo (76 days)	No	No	No	male	Yes	heart (embryo)	
+heart male embryo (91 days)	No	No	No	male	Yes	heart (embryo)	
+heart male embryo (96 days)	No	No	No	male	Yes	heart (embryo)	
+heart right ventricle female embryo (101 days) and female embryo (103 days)	No	No	No	female	Yes	ventricle (right; embryo)	
+heart right ventricle male adult (34 years)	No	No	No	male	Yes	ventricle (right)	
+heart right ventricle male child (3 years)	No	No	No	male	Yes	ventricle (right; child)	
+hematopoietic multipotent progenitor cell	No	No	No		Yes	hematopoietic stem cell	
+hepatic stellate cell female adult (59 years)	No	No	No	female	Yes	hepatic stellate cell	
+hepatocyte	No	No	No		Yes	hepatocyte	
+hepatocyte originated from H9	No	No	No	female	Yes	hepatocyte (derived from WA09)	
+hindlimb muscle male embryo (120 days)	No	No	No	male	Yes	skeletal musle (hindlimb; embryo)	
+iPS DF 19.11	No	Yes	No	male	Yes	iPS-DF19-9-11T.H	Induced pluripotent stem cell
+iPS DF 19.7	No	Yes	No	male	Yes	iPS-DF19-9-7T	Induced pluripotent stem cell
+iPS DF 4.7	No	Yes	No	male	Yes	iPS-DF4-3-7T.A	Induced pluripotent stem cell
+iPS DF 6.9	No	Yes	No	male	Yes	iPS-DF6-9	Induced pluripotent stem cell
+iPS-11a	No	Yes	No	male	Yes	11a	Induced pluripotent stem cell
+iPS-15b	No	Yes	No	female	Yes	15b        	Induced pluripotent stem cell
+iPS-18a	No	Yes	No	female	Yes	18a	Induced pluripotent stem cell
+iPS-18c	No	Yes	No	female	Yes	18c	Induced pluripotent stem cell
+iPS-20b	No	Yes	No	male	Yes	20b	Induced pluripotent stem cell
+iPS-NIHi11 originated from AG20443	No	Yes	No	male	Yes	iPS NIHi11	Induced pluripotent stem cell
+iPS-NIHi7 originated from AG08395	No	Yes	No	female	Yes	iPS NIHi7	Induced pluripotent stem cell
+inferior parietal cortex male adult (84 years)	No	No	No	male	Yes	inferior parietal cortex	
+iris pigment epithelial cell	No	No	No		Yes	iris pigment epithelial cell	
+islet precursor cell	No	No	No		Yes	islet precursor cell	
+keratinocyte female	No	No	No	female	Yes	keratinocyte	
+kidney capillary endothelial cell female embryo (113 days)	No	No	No	female	Yes	kidney capillary endothelial cell (embryo)	
+kidney embryo (59 days) and female embryo (59 days)	No	No	No		Yes	kidney (embryo)	
+kidney embryo (80 days)	No	No	No		Yes	kidney (embryo)	
+kidney epithelial cell	No	No	No		Yes	kidney epithelial cell	
+kidney female embryo (105 days)	No	No	No	female	Yes	kidney (embryo)	
+kidney female embryo (108 days)	No	No	No	female	Yes	kidney (embryo)	
+kidney female embryo (113 days)	No	No	No	female	Yes	kidney (embryo)	
+kidney female embryo (120 days)	No	No	No	female	Yes	kidney (embryo)	
+kidney female embryo (121 days)	No	No	No	female	Yes	kidney (embryo)	
+kidney female embryo (76 days) and male embryo (76 days)	No	No	No		Yes	kidney (embryo)	
+kidney female embryo (85 days)	No	No	No	female	Yes	kidney (embryo)	
+kidney glomerular epithelial cell male adult (43 years) and male adult (62 years)	No	No	No	male	Yes	podocyte	
+kidney male adult (50 years)	No	No	No	male	Yes	kidney	
+kidney male adult (67 years)	No	No	No	male	Yes	kidney	
+kidney male embryo (105 days)	No	No	No	male	Yes	kidney (embryo)	
+kidney male embryo (85 days)	No	No	No	male	Yes	kidney (embryo)	
+kidney male embryo (87 days)	No	No	No	male	Yes	kidney (embryo)	
+kidney tubule cell female adult (80 years) and male adult (62 years)	No	No	No		Yes	kidney tubule cell	
+large intestine female embryo (103 days)	No	No	No	female	Yes	colon (embryo)	
+large intestine female embryo (105 days)	No	No	No	female	Yes	colon (embryo)	
+large intestine female embryo (107 days)	No	No	No	female	Yes	colon (embryo)	
+large intestine female embryo (108 days)	No	No	No	female	Yes	colon (embryo)	
+large intestine female embryo (110 days)	No	No	No	female	Yes	colon (embryo)	
+large intestine female embryo (120 days)	No	No	No	female	Yes	colon (embryo)	
+large intestine female embryo (91 days)	No	No	No	female	Yes	colon (embryo)	
+large intestine female embryo (98 days)	No	No	No	female	Yes	colon (embryo)	
+large intestine male embryo (105 days)	No	No	No	male	Yes	colon (embryo)	
+large intestine male embryo (108 days)	No	No	No	male	Yes	colon (embryo)	
+large intestine male embryo (113 days)	No	No	No	male	Yes	colon (embryo)	
+large intestine male embryo (115 days)	No	No	No	male	Yes	colon (embryo)	
+large intestine male embryo (91 days)	No	No	No	male	Yes	colon (embryo)	
+layer of hippocampus female adult (75 years)	No	No	No	female	Yes	hippocampus	
+layer of hippocampus male adult (73 years)	No	No	No	male	Yes	hippocampus	
+layer of hippocampus male adult (81 years)	No	No	No	male	Yes	hippocampus	
+left arm bone male embryo (81 days)	No	No	No	male	Yes	bone (left arm; embryo)	
+left cardiac atrium female embryo (101 days)	No	No	No	female	Yes	atrium (left; embryo)	
+left kidney female embryo (107 days)	No	No	No	female	Yes	kidney (left; embryo)	
+left kidney female embryo (110 days)	No	No	No	female	Yes	kidney (left; embryo)	
+left kidney female embryo (147 days)	No	No	No	female	Yes	kidney (left; embryo)	
+left kidney female embryo (59 days) and male embryo (91 days)	No	No	No		Yes	kidney (left; embryo)	
+left kidney female embryo (87 days)	No	No	No	female	Yes	kidney (left; embryo)	
+left kidney female embryo (98 days)	No	No	No	female	Yes	kidney (left; embryo)	
+left kidney male embryo (115 days)	No	No	No	male	Yes	kidney (left; embryo)	
+left kidney male embryo (87 days)	No	No	No	male	Yes	kidney (left; embryo)	
+left kidney male embryo (96 days)	No	No	No	male	Yes	kidney (left; embryo)	
+left leg bone male embryo (81 days)	No	No	No	male	Yes	bone (left leg; embryo)	
+left lung female embryo (105 days)	No	No	No	female	Yes	lung (left; embryo)	
+left lung female embryo (107 days)	No	No	No	female	Yes	lung (left; embryo)	
+left lung female embryo (108 days)	No	No	No	female	Yes	lung (left; embryo)	
+left lung female embryo (110 days)	No	No	No	female	Yes	lung (left; embryo)	
+left lung female embryo (117 days)	No	No	No	female	Yes	lung (left; embryo)	
+left lung female embryo (91 days)	No	No	No	female	Yes	lung (left; embryo)	
+left lung female embryo (98 days)	No	No	No	female	Yes	lung (left; embryo)	
+left lung male embryo (105 days)	No	No	No	male	Yes	lung (left; embryo)	
+left lung male embryo (113 days)	No	No	No	male	Yes	lung (left; embryo)	
+left lung male embryo (115 days)	No	No	No	male	Yes	lung (left; embryo)	
+left lung male embryo (87 days)	No	No	No	male	Yes	lung (left; embryo)	
+left lung male embryo (91 days)	No	No	No	male	Yes	lung (left; embryo)	
+left lung male embryo (96 days)	No	No	No	male	Yes	lung (left; embryo)	
+left renal cortex interstitium male embryo (105 days)	No	No	No	male	Yes	interstitium (left renal cortex; embryo)	
+left renal cortex interstitium male embryo (120 days)	No	No	No	male	Yes	interstitium (left renal cortex; embryo)	
+left renal pelvis male embryo (105 days)	No	No	No	male	Yes	renal pelvis (left; embryo)	
+left renal pelvis male embryo (120 days)	No	No	No	male	Yes	renal pelvis (left; embryo)	
+limb embryo (53 days) and embryo (56 days)	No	No	No		Yes	limb (embryo)	
+limb embryo (58 days) and embryo (59 days)	No	No	No		Yes	limb (embryo)	
+liver embryo (59 days) and embryo (80 days)	No	No	No		Yes	liver (embryo)	
+liver female adult (25 years)	No	No	No	female	Yes	liver	
+liver female child (4 years)	No	No	No	female	Yes	liver (child)	
+liver female child (6 years) and male adult (32 years)	No	No	No		Yes	liver (child)	
+liver female embryo (101 days) and female embryo (113 days)	No	No	No	female	Yes	liver (embryo)	
+liver male adult (31 years)	No	No	No	male	Yes	liver	
+liver male adult (32 years)	No	No	No	male	Yes	liver	
+liver male adult (78 years)	No	No	No	male	Yes	liver	
+lower leg skin female adult (51 years)	No	No	No	female	Yes	skin (lower leg)	
+lower leg skin female adult (53 years)	No	No	No	female	Yes	skin (lower leg)	
+lower leg skin male adult (37 years)	No	No	No	male	Yes	skin (lower leg)	
+lower leg skin male adult (54 years)	No	No	No	male	Yes	skin (lower leg)	
+luminal epithelial cell of mammary gland female adult (33 years)	No	No	No	female	Yes	luminal epithelial cell (mammary gland)	
+lung embryo (101 days)	No	No	No		Yes	lung (embryo)	
+lung embryo (112 days)	No	No	No		Yes	lung (embryo)	
+lung embryo (67 days)	No	No	No		Yes	lung (embryo)	
+lung embryo (80 days) and male embryo (76 days)	No	No	No		Yes	lung (embryo)	
+lung female adult (30 years)	No	No	No	female	Yes	lung	
+lung female embryo (108 days)	No	No	No	female	Yes	lung (embryo)	
+lung female embryo (120 days)	No	No	No	female	Yes	lung (embryo)	
+lung female embryo (76 days)	No	No	No	female	Yes	lung (embryo)	
+lung female embryo (82 days)	No	No	No	female	Yes	lung (embryo)	
+lung female embryo (85 days)	No	No	No	female	Yes	lung (embryo)	
+lung female embryo (96 days)	No	No	No	female	Yes	lung (embryo)	
+lung male adult (27 years) and male adult (35 years)	No	No	No	male	Yes	lung	
+lung male child (3 years)	No	No	No	male	Yes	lung (child)	
+lung male embryo (103 days)	No	No	No	male	Yes	lung (embryo)	
+lung male embryo (108 days)	No	No	No	male	Yes	lung (embryo)	
+lung male embryo (54 days) and male embryo (58 days)	No	No	No	male	Yes	lung (embryo)	
+lung male embryo (82 days)	No	No	No	male	Yes	lung (embryo)	
+lung microvascular endothelial cell female	No	No	No	female	Yes	endothelial cell (lung microvasculature)	
+mammary epithelial cell female	No	No	No	female	Yes	mammary epithelial cell	
+mammary epithelial cell female adult (18 years)	No	No	No	female	Yes	mammary epithelial cell	
+mammary epithelial cell female adult (50 years)	No	No	No	female	Yes	mammary epithelial cell	
+mammary stem cell female adult (33 years)	No	No	No	female	Yes	mammary stem cell	
+medulla oblongata male adult (78 years) and male adult (84 years)	No	No	No	male	Yes	medulla oblongata	
+mesenchymal stem cell female adult and female adult (41 years) and female adult (59 years), originated from adipose tissue	No	No	No	female	Yes	mesenchymal stem cell (derived from adipose tissue)	
+mesenchymal stem cell female adult and female adult (59 years), originated from adipose tissue	No	No	No	female	Yes	mesenchymal stem cell (derived from adipose tissue)	
+mesenchymal stem cell originated from H1	No	No	No	male	Yes	mesenchymal stem cell (derived from WA01)	
+mesendoderm originated from H1	No	No	No	male	Yes	mesendoderm (derived from WA01)	
+mesodermal cell originated from HUES64	No	No	No	male	Yes	mesodermal cell (derived from HUES 64)	
+mid-neurogenesis radial glial cells genetically modified using stable transfection originated from H9					No		
+midbrain male adult (78 years) and male adult (84 years)	No	No	No	male	Yes	midbrain	
+middle frontal area 46 female adult (75 years)	No	No	No	female	Yes	middle frontal area 46	
+middle frontal area 46 male adult (81 years)	No	No	No	male	Yes	middle frontal area 46	
+middle frontal gyrus male adult (78 years)	No	No	No	male	Yes	middle frontal gyrus	
+mononuclear cell male	No	No	No		Yes	mononuclear cell	
+mucosa of rectum female adult (50 years)	No	No	No	female	Yes	mucosa (rectum)	
+mucosa of rectum female adult (61 years)	No	No	No	female	Yes	mucosa (rectum)	
+mucosa of stomach male adult (59 years)	No	No	No	male	Yes	mucosa (stomach)	
+muscle layer of colon female adult (56 years)	No	No	No	female	Yes	smooth muscle (colon)	
+muscle layer of colon female adult (77 years)	No	No	No	female	Yes	smooth muscle (colon)	
+muscle layer of duodenum male adult (59 years)	No	No	No	male	Yes	smooth muscle (duodenum)	
+muscle layer of duodenum male adult (73 years)	No	No	No	male	Yes	smooth muscle (duodenum)	
+muscle of arm embryo (101 days)	No	No	No		Yes	skeletal muscle (arm; embryo)	
+muscle of arm female embryo (105 days)	No	No	No	female	Yes	skeletal muscle (arm; embryo)	
+muscle of arm female embryo (115 days)	No	No	No	female	Yes	skeletal muscle (arm; embryo)	
+muscle of arm female embryo (120 days)	No	No	No	female	Yes	skeletal muscle (arm; embryo)	
+muscle of arm female embryo (85 days)	No	No	No	female	Yes	skeletal muscle (arm; embryo)	
+muscle of arm female embryo (98 days)	No	No	No	female	Yes	skeletal muscle (arm; embryo)	
+muscle of arm male embryo (101 days)	No	No	No	male	Yes	skeletal muscle (arm; embryo)	
+muscle of arm male embryo (104 days)	No	No	No	male	Yes	skeletal muscle (arm; embryo)	
+muscle of arm male embryo (105 days)	No	No	No	male	Yes	skeletal muscle (arm; embryo)	
+muscle of arm male embryo (113 days)	No	No	No	male	Yes	skeletal muscle (arm; embryo)	
+muscle of arm male embryo (115 days)	No	No	No	male	Yes	skeletal muscle (arm; embryo)	
+muscle of arm male embryo (120 days)	No	No	No	male	Yes	skeletal muscle (arm; embryo)	
+muscle of arm male embryo (127 days)	No	No	No	male	Yes	skeletal muscle (arm; embryo)	
+muscle of arm male embryo (96 days)	No	No	No	male	Yes	skeletal muscle (arm; embryo)	
+muscle of arm male embryo (97 days)	No	No	No	male	Yes	skeletal muscle (arm; embryo)	
+muscle of back female embryo (105 days)	No	No	No	female	Yes	skeletal muscle (back; embryo)	
+muscle of back female embryo (113 days)	No	No	No	female	Yes	skeletal muscle (back; embryo)	
+muscle of back female embryo (115 days)	No	No	No	female	Yes	skeletal muscle (back; embryo)	
+muscle of back female embryo (85 days)	No	No	No	female	Yes	skeletal muscle (back; embryo)	
+muscle of back female embryo (98 days)	No	No	No	female	Yes	skeletal muscle (back; embryo)	
+muscle of back male embryo (101 days)	No	No	No	male	Yes	skeletal muscle (back; embryo)	
+muscle of back male embryo (104 days)	No	No	No	male	Yes	skeletal muscle (back; embryo)	
+muscle of back male embryo (105 days)	No	No	No	male	Yes	skeletal muscle (back; embryo)	
+muscle of back male embryo (108 days)	No	No	No	male	Yes	skeletal muscle (back; embryo)	
+muscle of back male embryo (127 days)	No	No	No	male	Yes	skeletal muscle (back; embryo)	
+muscle of back male embryo (91 days)	No	No	No	male	Yes	skeletal muscle (back; embryo)	
+muscle of back male embryo (96 days)	No	No	No	male	Yes	skeletal muscle (back; embryo)	
+muscle of back male embryo (97 days)	No	No	No	male	Yes	skeletal muscle (back; embryo)	
+muscle of leg female embryo (105 days)	No	No	No	female	Yes	skeletal muscle (leg; embryo)	
+muscle of leg female embryo (110 days)	No	No	No	female	Yes	skeletal muscle (leg; embryo)	
+muscle of leg female embryo (113 days)	No	No	No	female	Yes	skeletal muscle (leg; embryo)	
+muscle of leg female embryo (115 days)	No	No	No	female	Yes	skeletal muscle (leg; embryo)	
+muscle of leg female embryo (85 days)	No	No	No	female	Yes	skeletal muscle (leg; embryo)	
+muscle of leg male embryo (101 days)	No	No	No	male	Yes	skeletal muscle (leg; embryo)	
+muscle of leg male embryo (104 days)	No	No	No	male	Yes	skeletal muscle (leg; embryo)	
+muscle of leg male embryo (105 days)	No	No	No	male	Yes	skeletal muscle (leg; embryo)	
+muscle of leg male embryo (115 days)	No	No	No	male	Yes	skeletal muscle (leg; embryo)	
+muscle of leg male embryo (127 days)	No	No	No	male	Yes	skeletal muscle (leg; embryo)	
+muscle of leg male embryo (96 days)	No	No	No	male	Yes	skeletal muscle (leg; embryo)	
+muscle of leg male embryo (97 days)	No	No	No	male	Yes	skeletal muscle (leg; embryo)	
+muscle of trunk female embryo (113 days)	No	No	No	female	Yes	skeletal muscle (trunk; embryo)	
+muscle of trunk female embryo (115 days)	No	No	No	female	Yes	skeletal muscle (trunk; embryo)	
+muscle of trunk female embryo (120 days)	No	No	No	female	Yes	skeletal muscle (trunk; embryo)	
+muscle of trunk female embryo (121 days)	No	No	No	female	Yes	skeletal muscle (trunk; embryo)	
+myocyte originated from LHCN-M2	No	No	No	male	Yes	myocite (derived from LHCN-M2)	
+myoepithelial cell of mammary gland female adult (33 years)	No	No	No	female	Yes	myoepithelial cell (mammary gland)	
+myoepithelial cell of mammary gland female adult (36 years)	No	No	No	female	Yes	myoepithelial cell (mammary gland)	
+myotube originated from skeletal muscle myoblast	No	No	No		Yes	myotube (derived from skeletal muscle myoblast)	
+naive B cell	No	No	No		Yes	B cell (naive)	
+naive thymus-derived CD4-positive, alpha-beta T cell	No	No	No		Yes	T cell (CD4-positive alpha/beta naive; derived from thymus)	
+naive thymus-derived CD4-positive, alpha-beta T cell female adult (35 years)	No	No	No	female	Yes	T cell (CD4-positive alpha/beta naive; derived from thymus)	
+naive thymus-derived CD4-positive, alpha-beta T cell male adult (26 years)	No	No	No	male	Yes	T cell (CD4-positive alpha/beta naive; derived from thymus)	
+natural killer cell female adult (34 years)	No	No	No	female	Yes	natural killer cel	
+natural killer cell male adult (21 years)	No	No	No	male	Yes	natural killer cel	
+natural killer cell male adult (37 years)	No	No	No	male	Yes	natural killer cel	
+neural cell originated from H1	No	No	No	male	Yes	neural cell (derived from WA01)	
+neural progenitor cell originated from H9	No	No	No	female	Yes	neural progenitor cell (derived from WA09)	
+neural stem progenitor cell originated from H1	No	No	No	male	Yes	neural stem cell (derived from WA01)	
+neural stem progenitor cell originated from H9	No	No	No	female	Yes	neural stem cell (derived from WA09)	
+neuroepithelial stem cell genetically modified using stable transfection originated from H9					No		
+neuron originated from H9	No	No	No	female	Yes	neuron (derived from WA09)	
+neurosphere embryo (15 weeks) originated from ganglionic eminence	No	No	No		Yes	neurosphere (embryo; derived from ganglionic eminence)	
+neurosphere female embryo (17 weeks) originated from cortex	No	No	No	female	Yes	neurosphere (embryo; derived from cortex)	
+neurosphere female embryo (17 weeks) originated from ganglionic eminence	No	No	No	female	Yes	neurosphere (embryo; derived from ganglionic eminence)	
+neutrophil	No	No	No		Yes	neutrophil	
+neutrophil male	No	No	No	male	Yes	neutrophil	
+non-pigmented ciliary epithelial cell	No	No	No		Yes	non-pigmented ciliary epithelial cell	
+occipital lobe male adult (84 years)	No	No	No	male	Yes	occipical lobe	
+omental fat pad female adult (51 years)	No	No	No	female	Yes	fat pad (omentum)	
+omental fat pad female adult (53 years)	No	No	No	female	Yes	fat pad (omentum)	
+omental fat pad male adult (37 years)	No	No	No	male	Yes	fat pad (omentum)	
+omental fat pad male adult (54 years)	No	No	No	male	Yes	fat pad (omentum)	
+osteoblast	No	No	No		Yes	osteoblast	
+ovary female adult (30 years)	No	No	No	female	Yes	ovary	
+ovary female adult (51 years)	No	No	No	female	Yes	ovary	
+ovary female adult (53 years)	No	No	No	female	Yes	ovary	
+ovary female embryo	No	No	No	female	Yes	ovary (embryo)	
+pancreas female adult (30 years)	No	No	No	female	Yes	pancreas	
+pancreas male adult (34 years)	No	No	No	male	Yes	pancreas	
+pancreas male adult (54 years) and male adult (60 years)	No	No	No	male	Yes	pancreas	
+parathyroid adenoma male adult (62 years)	No	No	Yes	male	Yes	adenoma (parathyroid)	
+parathyroid adenoma male adult (65 years)	No	No	Yes	male	Yes	adenoma (parathyroid)	
+peripheral blood mononuclear cell female adult (28 years)	No	No	No	female	Yes	peripheral blood mononuclear cell	
+peripheral blood mononuclear cell male adult (27 years)	No	No	No	male	Yes	peripheral blood mononuclear cell	
+peripheral blood mononuclear cell male adult (28 years)	No	No	No	male	Yes	peripheral blood mononuclear cell	
+peripheral blood mononuclear cell male adult (32 years)	No	No	No	male	Yes	peripheral blood mononuclear cell	
+peripheral blood mononuclear cell male adult (39 years)	No	No	No	male	Yes	peripheral blood mononuclear cell	
+placenta embryo (102 days)	No	No	No		Yes	placenta (embryo)	
+placenta embryo (16 weeks)	No	No	No		Yes	placenta (embryo)	
+placenta embryo (53 days)	No	No	No		Yes	placenta (embryo)	
+placenta embryo (56 days) and embryo (59 days)	No	No	No		Yes	placenta (embryo)	
+placenta female embryo (101 days) and male embryo (105 days)	No	No	No		Yes	placenta (embryo)	
+placenta female embryo (105 days)	No	No	No	female	Yes	placenta (embryo)	
+placenta female embryo (108 days)	No	No	No	female	Yes	placenta (embryo)	
+placenta female embryo (113 days)	No	No	No	female	Yes	placenta (embryo)	
+placenta female embryo (85 days)	No	No	No	female	Yes	placenta (embryo)	
+placenta male embryo (16 weeks)	No	No	No	male	Yes	placenta (embryo)	
+placenta male embryo (85 days)	No	No	No	male	Yes	placenta (embryo)	
+placenta male embryo (91 days)	No	No	No	male	Yes	placenta (embryo)	
+placental basal plate female embryo (40 weeks)	No	No	No	female	Yes	basal plate (placenta; embryo)	
+placental basal plate male embryo (38 weeks)	No	No	No	male	Yes	basal plate (placenta; embryo)	
+pons male adult (78 years)	No	No	No	male	Yes	pons	
+prostate gland male adult (37 years)	No	No	No	male	Yes	prostate gland	
+prostate gland male adult (54 years)	No	No	No	male	Yes	prostate gland	
+psoas muscle female adult (30 years)	No	No	No	female	Yes	skeletal muscle (psoas)	
+psoas muscle male adult (27 years) and male adult (35 years)	No	No	No	male	Yes	skeletal muscle (psoas)	
+psoas muscle male adult (34 years)	No	No	No	male	Yes	skeletal muscle (psoas)	
+psoas muscle male child (3 years)	No	No	No	male	Yes	skeletal muscle (psoas; child)	
+pulmonary artery endothelial cell female	No	No	No	female	Yes	endothelial cell (pulmonary artery)	
+putamen male adult (78 years)	No	No	No	male	Yes	putamen	
+radial glial cell genetically modified using stable transfection originated from H9					No		
+rectal smooth muscle tissue female adult (50 years)	No	No	No	female	Yes	smooth muscle (rectum)	
+regulatory T cell female adult (35 years)	No	No	No	female	Yes	T cell (regulatory)	
+regulatory T cell male adult (28 years)	No	No	No	male	Yes	T cell (regulatory)	
+regulatory T cell originated from blood cell	No	No	No		Yes	T cell (regulatory; derived from blood)	
+renal cortex interstitium female embryo (103 days)	No	No	No	female	Yes	interstitium (renal cortex; embryo)	
+renal cortex interstitium female embryo (120 days)	No	No	No	female	Yes	interstitium (renal cortex; embryo)	
+renal cortex interstitium female embryo (89 days)	No	No	No	female	Yes	interstitium (renal cortex; embryo)	
+renal cortex interstitium female embryo (96 days)	No	No	No	female	Yes	interstitium (renal cortex; embryo)	
+renal cortex interstitium male embryo (108 days)	No	No	No	male	Yes	interstitium (renal cortex; embryo)	
+renal cortex interstitium male embryo (113 days)	No	No	No	male	Yes	interstitium (renal cortex; embryo)	
+renal cortex interstitium male embryo (127 days)	No	No	No	male	Yes	interstitium (renal cortex; embryo)	
+renal cortex interstitium male embryo (91 days)	No	No	No	male	Yes	interstitium (renal cortex; embryo)	
+renal cortex interstitium male embryo (97 days)	No	No	No	male	Yes	interstitium (renal cortex; embryo)	
+renal cortical epithelial cell	No	No	No		Yes	renal cortical epithelial cell	
+renal pelvis female embryo (103 days)	No	No	No	female	Yes	renal pelvis (embryo)	
+renal pelvis female embryo (105 days)	No	No	No	female	Yes	renal pelvis (embryo)	
+renal pelvis female embryo (89 days)	No	No	No	female	Yes	renal pelvis (embryo)	
+renal pelvis female embryo (96 days)	No	No	No	female	Yes	renal pelvis (embryo)	
+renal pelvis male embryo (108 days)	No	No	No	male	Yes	renal pelvis (embryo)	
+renal pelvis male embryo (113 days)	No	No	No	male	Yes	renal pelvis (embryo)	
+renal pelvis male embryo (127 days)	No	No	No	male	Yes	renal pelvis (embryo)	
+renal pelvis male embryo (91 days)	No	No	No	male	Yes	renal pelvis (embryo)	
+renal pelvis male embryo (97 days)	No	No	No	male	Yes	renal pelvis (embryo)	
+retina embryo (125 days) and male embryo (103 days)	No	No	No		Yes	retina (embryo)	
+retina embryo (74 days) and embryo (85 days)	No	No	No		Yes	retina (embryo)	
+retina female embryo (89 days)	No	No	No	female	Yes	retina	
+retinal pigment epithelial cell	No	No	No		Yes	retinal pigment epithelium	
+right arm bone male embryo (81 days)	No	No	No	male	Yes	bone (right arm; embryo)	
+right atrium auricular region female adult (51 years)	No	No	No	female	Yes	atrium (right auricular region)	
+right atrium auricular region female adult (53 years)	No	No	No	female	Yes	atrium (right auricular region)	
+right cardiac atrium male adult (34 years)	No	No	No	male	Yes	atrium (right)	
+right kidney female embryo (107 days)	No	No	No	female	Yes	kidney (right; embryo)	
+right kidney female embryo (117 days)	No	No	No	female	Yes	kidney (right; embryo)	
+right kidney female embryo (147 days)	No	No	No	female	Yes	kidney (right; embryo)	
+right kidney female embryo (87 days)	No	No	No	female	Yes	kidney (right; embryo)	
+right kidney female embryo (98 days)	No	No	No	female	Yes	kidney (right; embryo)	
+right kidney male embryo (108 days)	No	No	No	male	Yes	kidney (right; embryo)	
+right kidney male embryo (115 days)	No	No	No	male	Yes	kidney (right; embryo)	
+right kidney male embryo (87 days)	No	No	No	male	Yes	kidney (right; embryo)	
+right kidney male embryo (91 days)	No	No	No	male	Yes	kidney (right; embryo)	
+right kidney male embryo (96 days)	No	No	No	male	Yes	kidney (right; embryo)	
+right leg bone male embryo (81 days)	No	No	No	male	Yes	bone (right leg; embryo)	
+right lobe of liver female adult (53 years)	No	No	No	female	Yes	liver (right lobe)	
+right lung female embryo (105 days)	No	No	No	female	Yes	lung (right; embryo)	
+right lung female embryo (107 days)	No	No	No	female	Yes	lung (right; embryo)	
+right lung female embryo (108 days)	No	No	No	female	Yes	lung (right; embryo)	
+right lung female embryo (110 days)	No	No	No	female	Yes	lung (right; embryo)	
+right lung female embryo (117 days)	No	No	No	female	Yes	lung (right; embryo)	
+right lung female embryo (91 days)	No	No	No	female	Yes	lung (right; embryo)	
+right lung female embryo (98 days)	No	No	No	female	Yes	lung (right; embryo)	
+right lung male embryo (105 days)	No	No	No	male	Yes	lung (right; embryo)	
+right lung male embryo (115 days)	No	No	No	male	Yes	lung (right; embryo)	
+right lung male embryo (87 days)	No	No	No	male	Yes	lung (right; embryo)	
+right lung male embryo (96 days)	No	No	No	male	Yes	lung (right; embryo)	
+right renal cortex interstitium male embryo (105 days)	No	No	No	male	Yes	interstitium (right renal cortex; embryo)	
+right renal cortex interstitium male embryo (120 days)	No	No	No	male	Yes	interstitium (right renal cortex; embryo)	
+right renal pelvis male embryo (105 days)	No	No	No	male	Yes	renal pelvis (right; embryo)	
+right renal pelvis male embryo (120 days)	No	No	No	male	Yes	renal pelvis (right; embryo)	
+sigmoid colon female adult (51 years)	No	No	No	female	Yes	sigmoid colon	
+sigmoid colon female adult (53 years)	No	No	No	female	Yes	sigmoid colon	
+sigmoid colon male adult (34 years)	No	No	No	male	Yes	sigmoid colon	
+sigmoid colon male adult (37 years)	No	No	No	male	Yes	sigmoid colon	
+sigmoid colon male adult (54 years)	No	No	No	male	Yes	sigmoid colon	
+sigmoid colon male child (3 years)	No	No	No	male	Yes	sigmoid colon (child)	
+skeletal muscle cell	No	No	No		Yes	skeletal muscle cell	
+skeletal muscle myoblast	No	No	No		Yes	myoblast (skeletal muscle)	
+skeletal muscle myoblast male adult (22 years)	No	No	No	male	Yes	myoblast (skeletal muscle)	
+skeletal muscle satellite cell female adult originated from mesodermal cell	No	No	No	female	Yes	satellite cell (skeletal muscle; derived from mesodermal cell)	
+skeletal muscle tissue	No	No	No		Yes	skeletal muscle	
+skeletal muscle tissue female adult (72 years)	No	No	No	female	Yes	skeletal muscle	
+skeletal muscle tissue male adult (54 years)	No	No	No	male	Yes	skeletal muscle	
+skin of body female embryo (82 days)	No	No	No	female	Yes	skin (embryo)	
+small intestine female adult (30 years)	No	No	No	female	Yes	small intestine	
+small intestine female embryo (105 days)	No	No	No	female	Yes	small intestine (embryo)	
+small intestine female embryo (107 days)	No	No	No	female	Yes	small intestine (embryo)	
+small intestine female embryo (108 days)	No	No	No	female	Yes	small intestine (embryo)	
+small intestine female embryo (110 days)	No	No	No	female	Yes	small intestine (embryo)	
+small intestine female embryo (120 days)	No	No	No	female	Yes	small intestine (embryo)	
+small intestine female embryo (91 days)	No	No	No	female	Yes	small intestine (embryo)	
+small intestine female embryo (98 days)	No	No	No	female	Yes	small intestine (embryo)	
+small intestine male adult (34 years)	No	No	No	male	Yes	small intestine	
+small intestine male child (3 years)	No	No	No	male	Yes	small intestine (child)	
+small intestine male embryo (105 days)	No	No	No	male	Yes	small intestine (embryo)	
+small intestine male embryo (108 days)	No	No	No	male	Yes	small intestine (embryo)	
+small intestine male embryo (115 days)	No	No	No	male	Yes	small intestine (embryo)	
+small intestine male embryo (87 days)	No	No	No	male	Yes	small intestine (embryo)	
+small intestine male embryo (91 days)	No	No	No	male	Yes	small intestine (embryo)	
+smooth muscle cell of the brain vasculature female	No	No	No	female	Yes	smooth muscle cell (brain vasculature)	
+smooth muscle cell originated from H9	No	No	No	female	Yes	smooth muscle cell (derived from WA09)	
+spinal cord female embryo (108 days)	No	No	No	female	Yes	spinal cord (embryo)	
+spinal cord female embryo (113 days)	No	No	No	female	Yes	spinal cord (embryo)	
+spinal cord female embryo (59 days) and male embryo (72 days)	No	No	No		Yes	spinal cord (embryo)	
+spinal cord female embryo (87 days)	No	No	No	female	Yes	spinal cord (embryo)	
+spinal cord female embryo (89 days)	No	No	No	female	Yes	spinal cord (embryo)	
+spinal cord male embryo (105 days)	No	No	No	male	Yes	spinal cord (embryo)	
+spinal cord male embryo (96 days)	No	No	No	male	Yes	spinal cord (embryo)	
+spleen embryo (112 days)	No	No	No		Yes	spleen (embryo)	
+spleen female adult (20 years) and female adult (30 years)	No	No	No	female	Yes	spleen	
+spleen female adult (30 years)	No	No	No	female	Yes	spleen	
+spleen female adult (51 years)	No	No	No	female	Yes	spleen	
+spleen female adult (53 years)	No	No	No	female	Yes	spleen	
+spleen male adult (34 years)	No	No	No	male	Yes	spleen	
+spleen male adult (37 years)	No	No	No	male	Yes	spleen	
+spleen male adult (54 years)	No	No	No	male	Yes	spleen	
+spleen male child (3 years)	No	No	No	male	Yes	spleen (child)	
+stomach embryo (101 days)	No	No	No		Yes	stomach (embryo)	
+stomach female adult (30 years)	No	No	No	female	Yes	stomach	
+stomach female adult (51 years)	No	No	No	female	Yes	stomach	
+stomach female adult (53 years)	No	No	No	female	Yes	stomach	
+stomach female embryo	No	No	No	female	Yes	stomach (embryo)	
+stomach female embryo (105 days)	No	No	No	female	Yes	stomach (embryo)	
+stomach female embryo (107 days)	No	No	No	female	Yes	stomach (embryo)	
+stomach female embryo (108 days)	No	No	No	female	Yes	stomach (embryo)	
+stomach female embryo (121 days)	No	No	No	female	Yes	stomach (embryo)	
+stomach female embryo (147 days)	No	No	No	female	Yes	stomach (embryo)	
+stomach female embryo (96 days)	No	No	No	female	Yes	stomach (embryo)	
+stomach female embryo (98 days)	No	No	No	female	Yes	stomach (embryo)	
+stomach male adult (34 years)	No	No	No	male	Yes	stomach	
+stomach male adult (37 years)	No	No	No	male	Yes	stomach	
+stomach male adult (54 years)	No	No	No	male	Yes	stomach	
+stomach male child (3 years)	No	No	No	male	Yes	stomach (child)	
+stomach male embryo (108 days)	No	No	No	male	Yes	stomach (embryo)	
+stomach male embryo (127 days)	No	No	No	male	Yes	stomach (embryo)	
+stomach male embryo (58 days) and male embryo (76 days)	No	No	No	male	Yes	stomach (embryo)	
+stomach male embryo (91 days)	No	No	No	male	Yes	stomach (embryo)	
+stomach smooth muscle female adult (84 years)	No	No	No	female	Yes	smooth muscle (stomach)	
+stomach smooth muscle male adult (59 years)	No	No	No	male	Yes	smooth muscle (stomach)	
+stromal cell of bone marrow male	No	No	No	male	Yes	stromal cell (bone marrow)	
+subcutaneous abdominal adipose tissue nuclear fraction female adult (25 years)	No	No	No	female	Yes	adipose tissue (subcutaneous abdominal nuclear fraction)	
+subcutaneous abdominal adipose tissue nuclear fraction female adult (41 years)	No	No	No	female	Yes	adipose tissue (subcutaneous abdominal nuclear fraction)	
+subcutaneous abdominal adipose tissue nuclear fraction female adult (49 years)	No	No	No	female	Yes	adipose tissue (subcutaneous abdominal nuclear fraction)	
+subcutaneous abdominal adipose tissue nuclear fraction female adult (59 years)	No	No	No	female	Yes	adipose tissue (subcutaneous abdominal nuclear fraction)	
+subcutaneous abdominal adipose tissue nuclear fraction female adult (81 years)	No	No	No	female	Yes	adipose tissue (subcutaneous abdominal nuclear fraction)	
+subcutaneous adipose tissue female adult (53 years)	No	No	No	female	Yes	adipose tissue (subcutaneous)	
+substantia nigra female adult (75 years)	No	No	No	female	Yes	substantia nigra	
+substantia nigra male adult (81 years)	No	No	No	male	Yes	substantia nigra	
+superior temporal gyrus male adult (84 years)	No	No	No	male	Yes	superior temporal gyrus	
+suprapubic skin female adult (51 years)	No	No	No	female	Yes	skin (suprapubic)	
+suprapubic skin female adult (53 years)	No	No	No	female	Yes	skin (suprapubic)	
+suprapubic skin male adult (37 years)	No	No	No	male	Yes	skin (suprapubic)	
+suprapubic skin male adult (54 years)	No	No	No	male	Yes	skin (suprapubic)	
+temporal lobe female adult (75 years)	No	No	No	female	Yes	temporal lobe	
+temporal lobe male adult (81 years)	No	No	No	male	Yes	temporal lobe	
+testis male adult (37 years)	No	No	No	male	Yes	testis	
+testis male adult (54 years)	No	No	No	male	Yes	testis	
+testis male embryo	No	No	No	male	Yes	testis (embryo)	
+thoracic aorta male adult (37 years)	No	No	No	male	Yes	aorta (thoracic)	
+thoracic aorta male adult (54 years)	No	No	No	male	Yes	aorta (thoracic)	
+thymus female embryo	No	No	No	female	Yes	thymus (embryo)	
+thymus female embryo (105 days)	No	No	No	female	Yes	thymus (embryo)	
+thymus female embryo (110 days)	No	No	No	female	Yes	thymus (embryo)	
+thymus female embryo (113 days)	No	No	No	female	Yes	thymus (embryo)	
+thymus female embryo (147 days)	No	No	No	female	Yes	thymus (embryo)	
+thymus female embryo (98 days)	No	No	No	female	Yes	thymus (embryo)	
+thymus male child (3 years)	No	No	No	male	Yes	thymus (child)	
+thymus male embryo (104 days)	No	No	No	male	Yes	thymus (embryo)	
+thymus male embryo (108 days)	No	No	No	male	Yes	thymus (embryo)	
+thymus male embryo (113 days)	No	No	No	male	Yes	thymus (embryo)	
+thymus male embryo (127 days)	No	No	No	male	Yes	thymus (embryo)	
+thyroid gland female adult (51 years)	No	No	No	female	Yes	thyroid gland	
+thyroid gland female adult (53 years)	No	No	No	female	Yes	thyroid gland	
+thyroid gland male adult (37 years)	No	No	No	male	Yes	thyroid gland	
+thyroid gland male adult (54 years)	No	No	No	male	Yes	thyroid gland	
+tibial artery female adult (51 years)	No	No	No	female	Yes	artery (tibial)	
+tibial artery female adult (53 years)	No	No	No	female	Yes	artery (tibial)	
+tibial artery male adult (37 years)	No	No	No	male	Yes	artery (tibial)	
+tibial artery male adult (54 years)	No	No	No	male	Yes	artery (tibial)	
+tibial nerve female adult (51 years)	No	No	No	female	Yes	nerve (tibial)	
+tibial nerve female adult (53 years)	No	No	No	female	Yes	nerve (tibial)	
+tibial nerve male adult (37 years)	No	No	No	male	Yes	nerve (tibial)	
+tibial nerve male adult (54 years)	No	No	No	male	Yes	nerve (tibial)	
+tongue female embryo (59 days) and female embryo (76 days)	No	No	No	female	Yes	tongue (embryo)	
+tongue male embryo (72 days)	No	No	No	male	Yes	tongue (embryo)	
+transverse colon female adult (51 years)	No	No	No	female	Yes	colon (transverse)	
+transverse colon female adult (53 years)	No	No	No	female	Yes	colon (transverse)	
+transverse colon male adult (37 years)	No	No	No	male	Yes	colon (transverse)	
+transverse colon male adult (54 years)	No	No	No	male	Yes	colon (transverse)	
+trophoblast cell embryo (17 weeks) and embryo (18 weeks)	No	No	No		Yes	trophoblast (embryo)	
+trophoblast cell embryo (21 weeks)	No	No	No		Yes	trophoblast (embryo)	
+trophoblast cell embryo (23 weeks)	No	No	No		Yes	trophoblast (embryo)	
+trophoblast cell embryo (39 weeks) and embryo (40 weeks)	No	No	No		Yes	trophoblast (embryo)	
+trophoblast cell originated from H1	No	No	No	male	Yes	trophoblast (derived from WA01)	
+trophoblast female embryo (20 weeks)	No	No	No	female	Yes	trophoblast (embryo)	
+trophoblast female embryo (40 weeks)	No	No	No	female	Yes	trophoblast (embryo)	
+umbilical cord embryo (59 days) and male embryo (76 days)	No	No	No		Yes	umbilical cord (embryo)	
+upper lobe of left lung female adult (51 years)	No	No	No	female	Yes	lung (left upper lobe)	
+upper lobe of left lung female adult (53 years)	No	No	No	female	Yes	lung (left upper lobe)	
+upper lobe of left lung male adult (37 years)	No	No	No	male	Yes	lung (left upper lobe)	
+upper lobe of left lung male adult (54 years)	No	No	No	male	Yes	lung (left upper lobe)	
+urinary bladder male adult (34 years)	No	No	No	male	Yes	bladder	
+urinary bladder male embryo (76 days)	No	No	No	male	Yes	bladder (embryo)	
+urothelium cell line	No	Yes	No		Yes	urothelium	
+uterus female adult (51 years)	No	No	No	female	Yes	uterus	
+uterus female adult (53 years)	No	No	No	female	Yes	uterus	
+vagina female adult (51 years)	No	No	No	female	Yes	vagina	
+vagina female adult (53 years)	No	No	No	female	Yes	vagina	

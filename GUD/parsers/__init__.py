@@ -27,6 +27,8 @@ from GUD.ORM.repeat_mask import RepeatMask
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
+from GUD.ORM.tad import TAD
+
 
 class ParseUtililities:
     """
@@ -331,8 +333,8 @@ class ParseUtililities:
     def get_chroms(self, session):
         return(Chrom.chrom_sizes(session))
 
-    def get_experiment(self, session, experiment_type):
-        return(Experiment.select_unique(session, experiment_type))
+    def get_experiment(self, session, name, experiment_metadata=None, metadata_descriptor=None):
+        return(Experiment.select_unique(session, name, experiment_metadata, metadata_descriptor))
 
     def get_region(self, session, chrom, start, end):
         return(Region.select_unique(session, chrom, start, end))
@@ -367,7 +369,7 @@ class ParseUtililities:
 
     def upsert_experiment(self, session, experiment):
 
-        if Experiment.is_unique(session, experiment.name):
+        if Experiment.is_unique(session, experiment.name, experiment.experiment_metadata, experiment.metadata_descriptor):
             session.add(experiment)
             session.commit()
 
@@ -432,6 +434,11 @@ class ParseUtililities:
     def upsert_clinvar(self, session, clinvar):
         if clinvar.is_unique(session, clinvar.clinvar_variation_ID):
             session.add(clinvar)
+            session.commit()
+
+    def upsert_tad(self, session, tad):
+        if TAD.is_unique(session, tad.region_id, tad.sample_id, tad.experiment_id, tad.source_id):
+            session.add(tad)
             session.commit()
 
     #--------------#

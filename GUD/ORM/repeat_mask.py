@@ -13,7 +13,7 @@ class RepeatMask(GFMixin1, Base):
     # table declerations 
     __tablename__ = "rmsk"
 
-    score = Column("score", mysql.INTEGER, nullable=False)
+    score = Column("score", mysql.FLOAT, nullable=False)
     name = Column("name", String(75), nullable=False)
     repeat_class = Column("class", String(75), nullable=False)
     family = Column("family", String(75), nullable=False)

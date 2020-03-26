@@ -91,6 +91,8 @@ class ENCODE:
         # To be initialized later
         self._biosample_sex = None
         self._biosample_summary = None
+        self.cancer = False
+        self.cell_line = False
 
     @property
     def sex(self):
@@ -101,7 +103,8 @@ class ENCODE:
 
     @sex.setter
     def sex(self, value):
-        self._biosample_sex = str(value)
+        if value == "female" or value == "male":
+            self._biosample_sex = str(value)
 
     @property
     def summary(self):
@@ -138,24 +141,12 @@ class ENCODE:
         else:
             return(None)
 
-    def get_metadata_and_descriptor(self):
-
-        # Initialize
-        metadata = []
-        descriptor = [] 
-
-        self.accession = accession
-        self.biosample_name = biosample_name
-        self.biosample_type = biosample_type
-        self.download_url = download_url
-        self.experiment_accession = experiment_accession
-        self.experiment_type = experiment_type
-        self.experiment_target = experiment_target
-        self.genome_assembly = genome_assembly
-        self.output_format = output_format
-        self.output_type = output_type
-        self.status = status
-        self.treatments = treatments
+    @property
+    def treatment(self):
+        """
+        is biosamble treated?
+        """
+        return(self.treatments is not None)
 
 #-------------#
 # Functions   #
@@ -325,9 +316,8 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
     if not os.path.exists(pickle_file):
 
         # Parse metadata
-        # Add experiment metadata (i.e. biosample sex and summary)
-        encodes = _add_experiment_metadata(_parse_metadata(genome, metadata_file))
-
+        # Add biosample summary
+        encodes = _add_biosample_summary(_parse_metadata(genome, metadata_file))
         handle = ParseUtils._get_file_handle(pickle_file, "wb")
         pickle.dump(encodes, handle)
 
@@ -335,6 +325,9 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
 
         handle = ParseUtils._get_file_handle(pickle_file, "rb")
         encodes = pickle.load(handle)
+
+    # Add biosample info (i.e. sex, cancer, cell line)
+    encodes = _add_biosample_info(encodes)
 
     # Filter ENCODE accessions (i.e. for each experiment, keep the accession from the best type of file)
     # Group ENCODE accessions by experiment target and type
@@ -370,7 +363,7 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
 
         # Split data
         data_files = _split_data(data_file, threads)
-
+        
         # Insert samples/sources
         _insert_samples_and_sources(subgrouped_accessions)
 
@@ -433,33 +426,30 @@ def _get_samples(session, file_name):
     # For each line...
     for line in ParseUtils.parse_tsv_file(file_name):
 
-        # If add...
-        if line[4] == "Yes":
+        # Initialize
+        sample_name = line[0]
+        cell_line = False
+        cancer = False
+        sex = None
+        add = False
 
-            # Initialize
-            sample_name = line[0]
-            if line[1] == "Yes":
-                treatment = True
-            else:
-                treatment = False
-            if line[2] == "Yes":
-                cell_line = True
-            else:
-                cell_line = False
-            if line[3] == "Yes":
-                cancer = True
-            else:
-                cancer = False
+        if line[2] == "Yes":
+            cell_line = True
+        if line[3] == "Yes":
+            cancer = True
+        if line[4] == "female" or line[4] == "male":
+            sex = line[4]
+        if line[5] == "Yes":
+            add = True
 
-            # Add sample
-            samples.setdefault(sample_name, (treatment, cell_line, cancer))
+        # Add sample
+        samples.setdefault(sample_name, (cell_line, cancer, sex, add))
 
     return(samples)
 
 def _parse_metadata(genome, metadata_file):
 
     # Initialize
-    i_have_been_warned = False
     accession_idx = None
     encode_objects = {}
     regexp = re.compile("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$")
@@ -491,11 +481,6 @@ def _parse_metadata(genome, metadata_file):
             if type(treatments) is float and isnan(treatments):
                 treatments = None
 
-            # Warn me!
-            if biosample_name not in samples:
-                i_have_been_warned = True
-                warnings.warn("missing sample: %s" % biosample_name, Warning, stacklevel=2)
-
             # Add ENCODE object
             encode = ENCODE(accession, biosample_name, biosample_type, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments)
             if encode.genome_assembly == genome and encode.status == "released" and not encode.treatments:
@@ -516,14 +501,9 @@ def _parse_metadata(genome, metadata_file):
             status_idx = line.index("File Status")
             treatment_idx = line.index("Biosample treatments")
 
-    if i_have_been_warned:
-        error = ["%s" % os.path.basename(__file__), "error", "missing samples"]
-        print(": ".join(error))
-        exit(0)
-
     return(encode_objects)
 
-def _add_experiment_metadata(encode_objects):
+def _add_biosample_summary(encode_objects):
     """
     https://www.encodeproject.org/help/rest-api/
     """
@@ -553,23 +533,40 @@ def _add_experiment_metadata(encode_objects):
     # For each accession...
     for accession in encode_objects:
 
-        # Initialize
-        is_female = False
-        is_male = False
-
         # Update ENCODE object
         encode = encode_objects[accession]
         encode.summary = biosample_summaries[encode.experiment_accession]
-        if re.search(" female ", encode.summary):
-            is_female = True
-        if re.search(" male ", encode.summary):
-            is_male = True
-        if is_female != is_male:
-            if is_female:
-                encode.sex = "female"
-            else:
-                encode.sex = "male"
         updated_encode_objects.setdefault(accession, encode)
+
+    return(updated_encode_objects)
+
+def _add_biosample_info(encode_objects):
+
+    # Initialize
+    i_have_been_warned = False
+    updated_encode_objects = {}
+
+    # For each accession...
+    for accession in encode_objects:
+
+        encode = encode_objects[accession]
+
+        # Warn me!
+        if encode.summary not in samples:
+            warnings.warn("missing sample: %s" % encode.summary, Warning, stacklevel=2)
+            i_have_been_warned = True
+
+        # Update ENCODE object
+        elif samples[encode.summary][3]:
+            encode.cancer = samples[encode.summary][1]
+            encode.cell_line = samples[encode.summary][0]
+            encode.sex = samples[encode.summary][2]
+            updated_encode_objects.setdefault(accession, encode)
+
+    if i_have_been_warned:
+        error = ["%s" % os.path.basename(__file__), "error", "missing samples"]
+        print(": ".join(error))
+        exit(0)
 
     return(updated_encode_objects)
 
@@ -792,12 +789,12 @@ def _insert_samples_and_sources(accessions):
             sample.name = encodes[accession].biosample_name
         else:
             sample.name = encodes[accession].summary
-        sample.treatment = samples[encodes[accession].biosample_name][0]
-        sample.cell_line = samples[encodes[accession].biosample_name][1]
-        sample.cancer = samples[encodes[accession].biosample_name][2]
+        sample.treatment = encodes[accession].treatment
+        sample.cell_line = encodes[accession].cell_line
+        sample.cancer = encodes[accession].cancer
         if encodes[accession].sex is not None:
             sample.X = encodes[accession].X
-            sample.Y = encodes[accession].Y       
+            sample.Y = encodes[accession].Y
         ParseUtils.upsert_sample(session, sample)
 
         # Upsert source
@@ -834,11 +831,13 @@ def _insert_data_file(data_file, test=False):
 
         # Upsert region
         region = Region()
-        region.chrom = line[0][3:]
+        region.chrom = str(line[0])
+        if region.chrom.startswith("chr"):
+            region.chrom = region.chrom[3:]
         if region.chrom not in chroms:
             continue
-        region.start = line[1]
-        region.end = line[2]
+        region.start = int(line[1])
+        region.end = int(line[2])
         region.bin = assign_bin(region.start, region.end)
         ParseUtils.upsert_region(session, region)
 
@@ -852,9 +851,9 @@ def _insert_data_file(data_file, test=False):
                 sample.name = encodes[accession].biosample_name
             else:
                 sample.name = encodes[accession].summary
-            sample.treatment = samples[encodes[accession].biosample_name][0]
-            sample.cell_line = samples[encodes[accession].biosample_name][1]
-            sample.cancer = samples[encodes[accession].biosample_name][2]
+            sample.treatment = encodes[accession].treatment
+            sample.cell_line = encodes[accession].cell_line
+            sample.cancer = encodes[accession].cancer
             if encodes[accession].sex is not None:
                 sample.X = encodes[accession].X
                 sample.Y = encodes[accession].Y
@@ -881,8 +880,8 @@ def _insert_data_file(data_file, test=False):
         feature.sample_id = sample.uid
         feature.experiment_id = experiment.uid
         feature.source_id = source.uid
-        feature.score = line[4]
-        feature.peak = line[5]
+        feature.score = float(line[4])
+        feature.peak = int(line[5])
         if Feature.__tablename__ == "dna_accessibility":
             ParseUtils.upsert_accessibility(session, feature)
         else:

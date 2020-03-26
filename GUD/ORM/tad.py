@@ -23,25 +23,14 @@ class TAD(GFMixin2, Base):
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
         )
 
-    # class methods
-    @classmethod
-    def is_unique(cls, session, regionID, sampleID, experimentID,
-                  sourceID):
-
-        q = session.query(cls).\
-            filter(cls.region_id == regionID, cls.sample_id == sampleID,
-                   cls.experiment_id == experimentID, cls.source_id == sourceID)
-
-        return len(q.all()) == 0
-
     def as_genomic_feature(self, feat):
 
         # Define qualifiers
         qualifiers = {
             "uid": feat.TAD.uid,
-            "source": feat.sourceName,
-            "sample": feat.sampleName,
-            "experiment": feat.experimentName
+            "source": feat.Source.name,
+            "sample": feat.Sample.name,
+            "experiment": feat.Experiment.name
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers
