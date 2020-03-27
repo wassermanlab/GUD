@@ -1,3 +1,5 @@
+from fuzzywuzzy import fuzz
+from numpy import sqrt
 from sqlalchemy import (
     Boolean,
     Column,
@@ -12,42 +14,31 @@ from sqlalchemy_fulltext import (
     FullText,
     FullTextSearch
 )
-import sqlalchemy_fulltext.modes \
-    as FullTextMode
+# import sqlalchemy_fulltext.modes \
+#     as FullTextMode
 
 from .base import Base
 
 class Sample(Base):
-
+    # table declerations
     __tablename__ = "samples"
 
-    uid = Column("uid",mysql.INTEGER(unsigned=True),nullable=False)
-
-    name = Column("name",String(250),nullable=False)
-
+    uid = Column("uid", mysql.INTEGER(unsigned=True), nullable=False)
+    name = Column("name", String(250), nullable=False)
     X = Column("X_chroms", mysql.SMALLINT(unsigned=True))
-
     Y = Column("Y_chroms", mysql.SMALLINT(unsigned=True))
-
     treatment = Column("treatment", Boolean, nullable=False)
-
-    cell_line = Column("cell_line",Boolean,nullable=False)
-
+    cell_line = Column("cell_line", Boolean, nullable=False)
     cancer = Column("cancer",Boolean,nullable=False)
 
-    
     __table_args__ = (
         PrimaryKeyConstraint(uid),
         UniqueConstraint(name, X, Y, treatment, cell_line, cancer),
         Index("ix_name", name),
         Index("ix_uid", uid),
-        Index("ix_name_fulltext", name, mysql_prefix="FULLTEXT"),
         Index("ix_sex", X, Y),
         Index("ix_treatment_cell_line_cancer", treatment, cell_line, cancer),
-        {
-            "mysql_engine": "MyISAM",
-            "mysql_charset": "utf8"
-        }
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
     )
 
     @classmethod
@@ -64,13 +55,6 @@ class Sample(Base):
     def is_unique(cls, session, name, X, Y, treatment,
         cell_line, cancer):
 
-        if X:
-            if X.isdigit():
-                X = int(X)
-        if Y:
-            if Y.isdigit():
-                Y = int(Y)
-    
         q = session.query(cls)\
             .filter(
                 cls.name == name,
@@ -86,13 +70,6 @@ class Sample(Base):
     @classmethod
     def select_unique(cls, session, name, X, Y, treatment,
         cell_line, cancer):
-
-        if X:
-            if X.isdigit():
-                X = int(X)
-        if Y:
-            if Y.isdigit():
-                Y = int(Y)
 
         q = session.query(cls)\
             .filter(
@@ -144,25 +121,22 @@ class Sample(Base):
         return q.all()
 
     @classmethod
-    def select_by_fulltext(
-        cls, session, fulltext):
+    def select_by_fuzzy_string_matching(cls, session, string, threshold=60):
         """
-        Query objects by fulltext. 
+        Returns {Sample}s, and their relevance to the given string, over a
+        given threshold.
         """
 
-        class SampleName(FullText, cls):        
-            __fulltext_columns__ = list(["name"])
+        samples = []
 
-        q = session.query(cls)\
-            .filter(
-                FullTextSearch(
-                    fulltext,
-                    SampleName,
-                    FullTextMode.NATURAL
-                )
-            )
+        for sample in cls.select_all_samples(session).all():
+            ratio = fuzz.ratio(string, sample.name)
+            partial_ratio = fuzz.partial_ratio(string, sample.name)
+            samples.append([sample, sqrt(ratio * partial_ratio)])
 
-        return q.all()
+        samples.sort(key=lambda x: x[-1], reverse=True)
+
+        return([samples[i] for i in range(len(samples)) if samples[i][1] > threshold])
 
     @classmethod
     def select_by_exp_conditions(cls, session,

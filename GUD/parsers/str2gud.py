@@ -23,7 +23,7 @@ import argparse
 # --str_file /space/home/tavshalom/GUD_TABLES/Transfer_GRCh38_190723/Genomic_STR.GUDformatted.tsv \
 # --based 1 -d hg38 -u gud_w 
 usage_msg = """
-usage: %s --genome STR [-h] [options]
+usage: %s --genome STR --str_file FILE [-h] --based INT --source_name STR [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
@@ -147,8 +147,6 @@ def check_args(args):
         print(": ".join(error))
         exit(0)
 
-# str_file, based, source_name
-
 
 def main():
 
@@ -162,16 +160,16 @@ def main():
     GUDUtils.port = args.port
     GUDUtils.db = args.db
 
-    # Insert ENCODE data
+    # Insert short tandem repeats
     str_to_gud(args.genome, args.source_name, args.str_file,
-                  args.based, args.test, args.threads)
+               args.based, args.test, args.threads)
 
 
-# TODO removed m and dummy_dir
 def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     """
-    python -m GUD.parsers.str2gud --genome hg19 --source_name <name> --str_file <FILE> --based <0|1>
+    python -m GUD.parsers.str2gud --genome hg38 --source_name <name> --str_file <FILE> --based <0|1>
     """
+
     # Initialize
     global chroms
     global engine
@@ -187,7 +185,7 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     db_name = GUDUtils._get_db_name()
 
     # Get engine/session
-    engine, Session = GUDUtils._get_engine_session(db_name)
+    engine, Session = GUDUtils.get_engine_session(db_name)
 
     # Initialize parser utilities
     ParseUtils.genome = genome
@@ -206,7 +204,6 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     # Get valid chromosomes
     chroms = ParseUtils.get_chroms(session)
 
-
     # Get source
     source = Source()
     source.name = source_name
@@ -217,11 +214,8 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     session.close()
     engine.dispose()
 
-    # Prepare data
-    data_file = str_file
-
     # Split data
-    data_files = _split_data(data_file, threads)
+    data_files = _split_data(str_file, threads)
 
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(
@@ -235,34 +229,31 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     # Remove session
     Session.remove()
 
-def _split_data(data_file, threads=1):
 
-    # import math
+def _split_data(data_file, threads=1):
 
     # Initialize
     split_files = []
+    split_dir = os.path.dirname(os.path.realpath(data_file))
 
-    # For each chromosome...
-    for chrom in chroms:
+    # Get number of lines
+    output = subprocess.check_output(["wc -l %s" % data_file], shell=True)
+    m = re.search("(\d+)", str(output))
+    L = float(m.group(1))
 
-        # Skip if file already split
-        split_file = "%s.%s" % (data_file, chrom)
-        if not os.path.exists(split_file):
+    # Split
+    prefix = "%s." % data_file.split("/")[-1]
+    cmd = "less %s | split -d -l %s - %s" % (data_file, int(L/threads)+1, os.path.join(split_dir, prefix))
+    subprocess.run(cmd, shell=True)
 
-            # Parallel split
-            cmd = 'parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" < %s > %s' % (
-                threads, chrom, data_file, split_file)
-            subprocess.call(cmd, shell=True)
+    # For each split file...
+    for split_file in os.listdir(split_dir):
 
         # Append split file
-        statinfo = os.stat(split_file)
-        if statinfo.st_size:
-            split_files.append(split_file)
-        else:
-            os.remove(split_file)
+        if split_file.startswith(prefix):
+            split_files.append(os.path.join(split_dir, split_file))
 
     return(split_files)
-
 
 def _insert_data(data_file, based=1, test=False):
 
@@ -277,39 +268,33 @@ def _insert_data(data_file, based=1, test=False):
     # For each line...
     for line in ParseUtils.parse_tsv_file(data_file):
 
-        # Get region
+        # Upsert region
         region = Region()
-        region.chrom = line[0]
-        region.start = int(line[1])
-        if based:
-            region.start -= 1
-        region.end = int(line[2])
-        region.bin = assign_bin(region.start, region.end)
-
-        # Ignore non-standard chroms, scaffolds, etc.
+        region.chrom = str(line[0])
+        if region.chrom.startswith("chr"):
+            region.chrom = region.chrom[3:]
         if region.chrom not in chroms:
             continue
-
-        # Upsert region
+        region.start = int(line[1]) - based
+        region.end = int(line[2])
+        region.bin = assign_bin(region.start, region.end)
         ParseUtils.upsert_region(session, region)
 
-        # Get region ID
-        region = ParseUtils.get_region(
-            session, region.chrom, region.start, region.end, region.strand)
+        # Get region
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
-        # Get feature
+        # Upsert short tandem repeat
         STR = ShortTandemRepeat()
         STR.region_id = region.uid
         STR.source_id = source.uid
         STR.motif = line[3]
         STR.pathogenicity = int(line[4])
-
         ParseUtils.upsert_str(session, STR)
 
         # Testing
         if test:
             lines += 1
-            if lines > 1000:
+            if lines == 1000:
                 break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!

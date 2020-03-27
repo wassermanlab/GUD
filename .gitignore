@@ -1,7 +1,11 @@
 ## extra 
+wsgi.py
+gud.ini
 *.vcf
 GUD/ORM/test.py
 .vscode/*
+*config.py
+GUD/api/static/stats/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,7 @@
+uid,name,experiment_metadata,metadata_descriptor
+2,CAGE,,
+1,ChIP-seq,,
+3,DNase-seq,,
+7,Hi-C,"HindIII,","restriction_enzyme,"
+10,in situ Hi-C,"DpnII,","restriction_enzyme,"
+8,in situ Hi-C,"MboI,","restriction_enzyme,"

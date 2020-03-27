@@ -10,7 +10,6 @@ import os
 import re
 import subprocess
 import sys
-import tarfile
 # Python 3+
 if sys.version_info > (3, 0):
     from urllib.request import urlretrieve
@@ -47,6 +46,7 @@ Mammalian Genome) into GUD.
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
+  -r, --remove        remove downloaded files (default = False)
   -t, --test          limit the total of inserts to ~1K per
                       thread for testing (default = False)
   --threads INT       number of threads to use (default = %s)
@@ -55,7 +55,7 @@ mysql arguments:
   -d STR, --db STR    database name (default = "%s")
   -H STR, --host STR  host name (default = "localhost")
   -p STR, --pwd STR   password (default = ignore this option)
-  -P STR, --port STR  port number (default = %s)
+  -P INT, --port INT  port number (default = %s)
   -u STR, --user STR  user name (default = current user)
 """ % (usage_msg, (cpu_count() - 1), GUDUtils.db, GUDUtils.port)
 
@@ -73,15 +73,16 @@ def parse_args():
     # Mandatory args
     parser.add_argument("--genome")
     parser.add_argument("--samples")
+    parser.add_argument("--feature")
 
     # Optional args
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("-m", "--merge", action="store_true")
+    optional_group.add_argument("-r", "--remove", action="store_true")
     optional_group.add_argument("-t", "--test", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
-
+    
     # MySQL args
     mysql_group = parser.add_argument_group("mysql arguments")
     mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
@@ -111,8 +112,19 @@ def check_args(args):
         error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\" \"--samples\" \"--feature\" are required\n"]
         print(": ".join(error))
         exit(0)
+    if args.genome != "hg38":
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\"", "invalid genome assembly", "\"%s\"\n" % args.genome]
+        print(": ".join(error))
+        exit(0)
 
-    # Check "-t" argument
+    # Check for invalid feature
+    valid_features = ["enhancer", "tss"]
+    if args.feature not in valid_features:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--feature\"", "invalid choice", "\"%s\" (choose from" % args.feature, "%s)\n" % " ".join(["\"%s\"" % i for i in valid_features])]
+        print(": ".join(error))
+        exit(0)
+
+    # Check "--threads" argument
     try:
         args.threads = int(args.threads)
     except:
@@ -124,6 +136,14 @@ def check_args(args):
     if not args.pwd:
         args.pwd = ""
 
+    # Check MySQL port
+    try:
+        args.port = int(args.port)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"-P\" \"--port\"", "invalid int value", "\"%s\"\n" % args.port]
+        print(": ".join(error))
+        exit(0)
+
 def main():
 
     # Parse arguments
@@ -131,27 +151,27 @@ def main():
 
     # Set MySQL options
     GUDUtils.user = args.user
-    GUDUtils.pwd  = args.pwd
+    GUDUtils.pwd = args.pwd
     GUDUtils.host = args.host
     GUDUtils.port = args.port
     GUDUtils.db = args.db
 
     # Insert FANTOM5 data
-    fantom_to_gud(args.genome, args.samples, args.feature, args.dummy_dir, args.test, args.threads)
+    fantom_to_gud(args.genome, args.samples, args.feature, args.dummy_dir, args.remove, args.test, args.threads)
 
-def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", test=False, threads=1):
+def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False, test=False, threads=1):
+    """
+    e.g. python -m GUD.parsers.fantom2gud --genome hg38 --samples ./samples/FANTOM5.tsv --feature tss
+    """
 
     # Initialize
     global chroms
     global engine
     global experiment
+    global samples
     global Feature
     global Session
-    global samples
-    global source
     global tpms_start_at
-    experiment_type = "CAGE"
-    source_name = "FANTOM5"
 
     # Testing
     if test:
@@ -162,7 +182,7 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", test=False
     db_name = GUDUtils._get_db_name()
 
     # Get engine/session
-    engine, Session = GUDUtils._get_engine_session(db_name)
+    engine, Session = GUDUtils.get_engine_session(db_name)
 
     # Initialize parser utilities
     ParseUtils.genome = genome
@@ -179,8 +199,9 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", test=False
     else:
         Feature = TSS
         tpms_start_at = 7
-        ParseUtils.create_table(Expression)
     ParseUtils.create_table(Feature)
+    if Feature.__tablename__ == "transcription_start_sites":
+        ParseUtils.create_table(Expression)
 
     # Start a new session
     session = Session()
@@ -190,16 +211,12 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", test=False
 
     # Get experiment
     experiment = Experiment()
-    experiment.name = experiment_type
+    experiment.name = "CAGE"
     ParseUtils.upsert_experiment(session, experiment)
-    experiment = ParseUtils.get_experiment(session, experiment_type)    
+    experiment = ParseUtils.get_experiment(session, experiment.name)    
 
     # Download data
-    download_file = _download_data(genome, dummy_dir)
-
-    # Get samples
-    samples = _get_samples(session, samples_file)
-    print(samples)
+    download_file, url = _download_data(genome, feat_type, dummy_dir)
 
     # Get source
     source = Source()
@@ -208,42 +225,40 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", test=False
     sources = ParseUtils.get_source(session, source_name)
     source = next(iter(sources))
 
+    # Get samples
+    samples = _get_samples(session, samples_file)
+    print(samples)
+
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
 
 def _download_data(genome, feat_type, dummy_dir="/tmp/"):
 
-    # Python 3+
-    if sys.version_info > (3, 0):
-        from urllib.request import urlretrieve
-    # Python 2.7
-    else:
-        from urllib import urlretrieve
+    import requests
 
     # Initialize
     url = "http://fantom.gsc.riken.jp/5/datafiles/"
 
-    # If latest human/mouse genomes...
-    if genome == "hg38" or genome == "mm10"
-        url += "reprocessed/%s_latest/extra" % genome
-        # Get experiment
+    # If latest genome...
+    if genome == "hg38":
+        url += "reprocessed/%s_latest/extra/" % genome
         if feat_type == "enhancer":
-            ftp_file = "F5.%s.enhancers.expression.usage.matrix.gz" %s genome
+            url += "enhancer"
+            ftp_file = "F5.%s.enhancers.expression.usage.matrix.gz" % genome
         else:
-            
+            url += "CAGE_peaks_expression"
+            ftp_file = "%s_fair+new_CAGE_peaks_phase1and2_tpm_ann.osc.txt.gz" % genome
     else:
-        url += "latest/extra"
+        # Not implemented!
+        pass
 
-
-
-human_permissive_enhancers_phase_1_and_2_expression_tpm_matrix.txt.gz
-
+    # Download data
     dummy_file = os.path.join(dummy_dir, ftp_file)
     if not os.path.exists(dummy_file):
-        f = urlretrieve(os.path.join(url, ftp_file), dummy_file)
+        os.system("curl --silent -o %s %s" % (dummy_file, os.path.join(url, ftp_file)))
 
-    return(dummy_file)
+    return(dummy_file, os.path.join(url, ftp_file))
 
 def _get_samples(session, file_name):
 
@@ -254,31 +269,62 @@ def _get_samples(session, file_name):
     for line in ParseUtils.parse_tsv_file(file_name):
 
         # If add...
-        if line[3] == "Yes":
+        if line[4] == "Yes":
 
-            # Get sample
-            sample = Sample()
-            sample.name = line[2]
-            sample.treatment = False
-            if line[4] == "Yes":
-                sample.treatment = True
-            sample.cell_line = False
-            if line[5] == "Yes":
-                sample.cell_line = True
-            sample.cancer = False
-            if line[6] == "Yes":
-                sample.cancer = True
-
-            # Upsert sample
-            ParseUtils.upsert_sample(session, sample)
-
-            # Get sample ID
-            sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
+            # Initialize
+            sample_name = line[0]
+            if line[1] == "Yes":
+                treatment = True
+            else:
+                treatment = False
+            if line[2] == "Yes":
+                cell_line = True
+            else:
+                cell_line = False
+            if line[3] == "Yes":
+                cancer = True
+            else:
+                cancer = False
 
             # Add sample
-            samples.setdefault(line[0], sample.uid)
+            samples.setdefault(sample_name, (treatment, cell_line, cancer))
 
     return(samples)
+
+# def _get_samples(session, file_name):
+
+#     # Initialize
+#     samples = {}
+
+#     # For each line...
+#     for line in ParseUtils.parse_tsv_file(file_name):
+
+#         # If add...
+#         if line[3] == "Yes":
+
+#             # Get sample
+#             sample = Sample()
+#             sample.name = line[2]
+#             sample.treatment = False
+#             if line[4] == "Yes":
+#                 sample.treatment = True
+#             sample.cell_line = False
+#             if line[5] == "Yes":
+#                 sample.cell_line = True
+#             sample.cancer = False
+#             if line[6] == "Yes":
+#                 sample.cancer = True
+
+#             # Upsert sample
+#             ParseUtils.upsert_sample(session, sample)
+
+#             # Get sample ID
+#             sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
+
+#             # Add sample
+#             samples.setdefault(line[0], sample.uid)
+
+#     return(samples)
 
 
     # # Get samples

@@ -69,7 +69,8 @@ class GUDUtilities:
 
     @pwd.setter
     def pwd(self, value):
-        self._pwd = str(value)
+        if value is not None:
+            self._pwd = str(value)
 
     @property
     def host(self):
@@ -111,6 +112,21 @@ class GUDUtilities:
     # SQLalchemy   #
     #--------------#
 
+    def get_engine(self):
+        """
+        Create an SQLAlchemy {Engine} and bind it to a {Session} factory:
+        @rtype = {Session}
+        """
+
+        db_name = self._get_db_name()
+
+        try:
+            engine, Session = self.get_engine_session(db_name)
+        except:
+            raise ValueError("Could not connect to GUD: %s" % db_name)
+
+        return(engine)
+
     def get_session(self):
         """
         Create an SQLAlchemy {Engine} and bind it to a {Session} factory:
@@ -120,7 +136,7 @@ class GUDUtilities:
         db_name = self._get_db_name()
 
         try:
-            engine, Session = self._get_engine_session(db_name)
+            engine, Session = self.get_engine_session(db_name)
         except:
             raise ValueError("Could not connect to GUD: %s" % db_name)
 
@@ -129,10 +145,10 @@ class GUDUtilities:
     def _get_db_name(self):
         return("mysql+pymysql://{}:{}@{}:{}/{}".format(self.user, self.pwd, self.host, self.port, self.db))
 
-    def _get_engine_session(self, db_name):
+    def get_engine_session(self, db_name):
 
         # Initialize
-        engine = create_engine(db_name, pool_pre_ping=True, pool_size=20, max_overflow=0)
+        engine = create_engine(db_name, pool_pre_ping=True, pool_size=100, max_overflow=0, pool_recycle=360)
         session_factory = sessionmaker(bind=engine)
         Session = scoped_session(session_factory)
 

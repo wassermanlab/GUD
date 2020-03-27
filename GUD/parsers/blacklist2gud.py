@@ -203,6 +203,7 @@ def _insert_data_in_chunks(chunk):
         region.start = int(line[6])
         region.end = int(line[7])
         region.bin = assign_bin(region.start, region.end)
+        # TODO: remove all region.strand
         region.strand = line[9]
 
         # Ignore non-standard chroms, scaffolds, etc.
@@ -213,7 +214,7 @@ def _insert_data_in_chunks(chunk):
         _upsert_region(session, region)
 
         # Get region ID
-        region = _get_region(session, region.chrom, region.start, region.end, region.strand)
+        region = _get_region(session, region.chrom, region.start, region.end)
 
         # Get repeat
         repeat = RepeatMask()

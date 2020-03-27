@@ -102,7 +102,7 @@ def check_args(args):
         print(": ".join(error))
         exit(0)
 
-    # Check "-t" argument
+    # Check "--threads" argument
     try:
         args.threads = int(args.threads)
     except:
@@ -154,7 +154,7 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     db_name = GUDUtils._get_db_name()
 
     # Get engine/session
-    engine, Session = GUDUtils._get_engine_session(db_name)
+    engine, Session = GUDUtils.get_engine_session(db_name)
 
     # Initialize parser utilities
     ParseUtils.genome = genome
@@ -177,7 +177,7 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     experiment = Experiment()
     experiment.name = experiment_type
     ParseUtils.upsert_experiment(session, experiment)
-    experiment = ParseUtils.get_experiment(session, experiment_type)    
+    experiment = ParseUtils.get_experiment(session, experiment_type)
 
     # Get samples
     samples = _get_samples(session, samples_file)
@@ -275,8 +275,8 @@ def _download_data(genome, dummy_dir="/tmp/"):
         from urllib import urlretrieve
 
     # Initialize
-    url = "http://tagc.univ-mrs.fr/remap/download/remap2018/%s/MACS" % genome
-    ftp_file = "remap2018_TF_archive_all_macs2_%s_v1_2.tar.gz" % genome
+    url = "http://remap.univ-amu.fr/storage/remap2020/%s/MACS2" % genome
+    ftp_file = "remap2020_all_macs2_hg38_v1_0.bed.gz" % genome
 
     # Download data
     dummy_file = os.path.join(dummy_dir, ftp_file)
@@ -420,7 +420,7 @@ def _insert_data(data_file, test=False):
         ParseUtils.upsert_region(session, region)
 
         # Get region ID
-        region = ParseUtils.get_region(session, region.chrom, region.start, region.end, region.strand)
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
         # Get TF
         tf = TFBinding()

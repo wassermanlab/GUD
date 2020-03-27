@@ -8,13 +8,13 @@ from ftplib import FTP
 import gzip
 import os
 import pandas
-import re
 from sqlalchemy_utils import create_database, database_exists
 import sys
 from zipfile import ZipFile
 
 from GUD.ORM.chrom import Chrom
 from GUD.ORM.conservation import Conservation
+from GUD.ORM.cpg_island import CpGIsland
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.gene import Gene
@@ -22,26 +22,13 @@ from GUD.ORM.copy_number_variant import CNV
 from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.histone_modification import HistoneModification
-from GUD.ORM.mask import Mask
 from GUD.ORM.region import Region
+from GUD.ORM.repeat_mask import RepeatMask
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
+from GUD.ORM.tad import TAD
 
-# Citation for parallel
-# @article{Tange2011a,
-#   title = {GNU Parallel - The Command-Line Power Tool},
-#   author = {O. Tange},
-#   address = {Frederiksberg, Denmark},
-#   journal = {;login: The USENIX Magazine},
-#   month = {Feb},
-#   number = {1},
-#   volume = {36},
-#   url = {http://www.gnu.org/s/parallel},
-#   year = {2011},
-#   pages = {42-47},
-#   doi = {10.5281/zenodo.16303}
-# }
 
 class ParseUtililities:
     """
@@ -273,6 +260,10 @@ class ParseUtililities:
 
             # Initialize
             chroms = []
+
+            # Get valid chromosomes
+            # chrom_ids = list(map(str, range(1, 23))) + ["X", "Y", "M"]
+            # valid_chroms = set(["".join(z) for z in zip(["chr"] * len(chrom_ids), chrom_ids)])
             valid_chroms = set(list(map(str, range(1, 23))) + ["X", "Y", "M"])
 
             # Create database
@@ -289,12 +280,13 @@ class ParseUtililities:
                 line = line.split("\t")
 
                 # Ignore non-standard chroms, scaffolds, etc.
-                m = re.search("^chr(.+)$", line[0])
-                if not m.group(1) in valid_chroms:
+                # if not line[0] in valid_chroms:
+                if not line[0][3:] in valid_chroms:
                     continue
 
                 # Append chromosome
-                chroms.append({"chrom": line[0], "size": line[1]})
+                # chroms.append({"chrom": line[0], "size": line[1]})
+                chroms.append({"chrom": line[0][3:], "size": line[1]})
 
             # Insert features
             self.engine.execute(Chrom().__table__.insert(), chroms)
@@ -341,17 +333,17 @@ class ParseUtililities:
     def get_chroms(self, session):
         return(Chrom.chrom_sizes(session))
 
-    def get_experiment(self, session, experiment_type):
-        return(Experiment.select_unique(session, experiment_type))
+    def get_experiment(self, session, name, experiment_metadata=None, metadata_descriptor=None):
+        return(Experiment.select_unique(session, name, experiment_metadata, metadata_descriptor))
 
-    def get_region(self, session, chrom, start, end, strand=None):
-        return(Region.select_unique(session, chrom, start, end, strand))
+    def get_region(self, session, chrom, start, end):
+        return(Region.select_unique(session, chrom, start, end))
 
     def get_sample(self, session, name, X, Y, treatment, cell_line, cancer):
         return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
 
-    def get_source(self, session, source_name):
-        return(Source.select_unique(session, source_name))
+    def get_source(self, session, name, source_metadata=None, metadata_descriptor=None, url=None):
+        return(Source.select_unique(session, name, source_metadata, metadata_descriptor, url))
 
     #--------------#
     # Upserts      #
@@ -361,130 +353,124 @@ class ParseUtililities:
 
         if DNAAccessibility.is_unique(session, accessibility.region_id, accessibility.sample_id, accessibility.experiment_id, accessibility.source_id):
             session.add(accessibility)
-            session.flush()
+            session.commit()
 
     def upsert_conservation(self, session, conservation):
 
         if Conservation.is_unique(session, conservation.region_id, conservation.source_id):
             session.add(conservation)
-            session.flush()
+            session.commit()
+
+    def upsert_cpg_island(self, session, cpg_island):
+
+        if CpGIsland.is_unique(session, cpg_island.region_id, cpg_island.source_id):
+            session.add(cpg_island)
+            session.commit()
 
     def upsert_experiment(self, session, experiment):
 
-        if Experiment.is_unique(session, experiment.name):
+        if Experiment.is_unique(session, experiment.name, experiment.experiment_metadata, experiment.metadata_descriptor):
             session.add(experiment)
-            session.flush()
+            session.commit()
 
     def upsert_gene(self, session, gene):
 
-        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name):
+        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name, gene.strand):
             session.add(gene)
-            session.flush()
+            session.commit()
 
     def upsert_histone(self, session, histone):
 
         if HistoneModification.is_unique(session, histone.region_id, histone.sample_id, histone.experiment_id, histone.source_id, histone.histone_type):
             session.add(histone)
-            session.flush()
+            session.commit()
 
-    def upsert_mask(self, session, mask):
+    # def upsert_mask(self, session, mask):
 
-        if Mask.is_unique(session, mask.region_id, mask.source_id):
-            session.add(mask)
-            session.flush()
+    #     if Mask.is_unique(session, mask.region_id, mask.source_id):
+    #         session.add(mask)
+    #         session.commit()
 
     def upsert_region(self, session, region):
 
-        if Region.is_unique(session, region.chrom, region.start, region.end, region.strand):
+        if Region.is_unique(session, region.chrom, region.start, region.end):
             session.add(region)
-            session.flush()
+            session.commit()
+
+    def upsert_rmsk(self, session, repeat):
+
+        if RepeatMask.is_unique(session, repeat.region_id, repeat.source_id, repeat.name, repeat.strand):
+            session.add(repeat)
+            session.commit()
 
     def upsert_sample(self, session, sample):
 
         if Sample.is_unique(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer):
             session.add(sample)
-            session.flush()
+            session.commit()
 
     def upsert_source(self, session, source):
 
-        if Source.is_unique(session, source.name):
+        if Source.is_unique(session, source.name, source.source_metadata, source.metadata_descriptor, source.url):
             session.add(source)
-            session.flush()
+            session.commit()
 
     def upsert_tf(self, session, tf):
 
         if TFBinding.is_unique(session, tf.region_id, tf.sample_id, tf.experiment_id, tf.source_id, tf.tf):
             session.add(tf)
-            session.flush()
+            session.commit()
     
     def upsert_str(self, session, STR):
         if ShortTandemRepeat.is_unique(session, STR.region_id, STR.source_id, STR.pathogenicity):
             session.add(STR)
-            session.flush()
+            session.commit()
     
     def upsert_cnv(self, session, cnv):
         if CNV.is_unique(session, cnv.region_id, cnv.source_id, cnv.copy_number_change):
             session.add(cnv)
-            session.flush()
+            session.commit()
 
     def upsert_clinvar(self, session, clinvar):
         if clinvar.is_unique(session, clinvar.clinvar_variation_ID):
             session.add(clinvar)
-            session.flush()
+            session.commit()
+
+    def upsert_tad(self, session, tad):
+        if TAD.is_unique(session, tad.region_id, tad.sample_id, tad.experiment_id, tad.source_id):
+            session.add(tad)
+            session.commit()
 
     #--------------#
     # Multiprocess #
     #--------------#
 
-    def insert_data_files_in_parallel(self, data_files, insert_function, threads=1):
+    def insert_data_files_in_parallel(self, files, insert_function, threads=1, sleep=0):
 
-        # from itertools import islice
         from multiprocessing import Pool
+        import time
 
-        # Parallelize
-        pool = Pool(processes=threads)
-        pool.map(insert_function, data_files)
-        pool.close()
+        while len(files) > 0:
 
-    #     # Get iterable
-    #     iterable = self.parse_tsv_file(data_file)
+            # Initialize pool
+            pool = Pool(processes=threads)
 
-    #     # Get chunks
-    #     chunks = self._grouper(iterable)
+            for p in range(threads):
 
-    #     while True:
+                if len(files) > 0:
 
-    #         # Groups chunks for multiprocessing
-    #         grouped_chunks = [list(chunk) for chunk in islice(chunks, threads)]
+                    # Submit job
+                    pool.apply_async(insert_function, args=(files.pop(0),))
 
-    #         if grouped_chunks:
-    #             pool.map(insert_function, grouped_chunks)
+                    # Sleep for a number of seconds before submitting the next job
+                    time.sleep(sleep)
 
-    #         else:
-    #             break
+                else:
+                    # Exit for loop
+                    break
 
-    #         if test:
-    #             break
-
-    #     if test:
-    #         for chunk in islice(chunks, threads):
-    #             continue
-
-    #     # Close pool
-    #     pool.close()
-
-    # def _grouper(self, iterable, n=5000, fillvalue=None):
-
-    #     import sys
-    #     # Python 3+
-    #     if sys.version_info > (3, 0):
-    #         from itertools import zip_longest
-    #     # Python 2.7
-    #     else:
-    #         from itertools import izip_longest as zip_longest
-
-    #     args = [iter(iterable)] * n
-
-    #     return(zip_longest(*args, fillvalue=fillvalue))
+            # Close the pool and wait for everything to finish
+            pool.close()
+            pool.join()
 
 ParseUtils = ParseUtililities()

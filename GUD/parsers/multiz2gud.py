@@ -92,7 +92,7 @@ def check_args(args):
         print(": ".join(error))
         exit(0)
 
-    # Check "-t" argument
+    # Check "--threads" argument
     try:
         args.threads = int(args.threads)
     except:
@@ -150,7 +150,7 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     db_name = GUDUtils._get_db_name()
 
     # Get engine/session
-    engine, Session = GUDUtils._get_engine_session(db_name)
+    engine, Session = GUDUtils.get_engine_session(db_name)
 
     # Initialize parser utilities
     ParseUtils.genome = genome
@@ -175,8 +175,7 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     source_name = m.group(1)
     source.name = source_name
     ParseUtils.upsert_source(session, source)
-    sources = ParseUtils.get_source(session, source_name)
-    source = next(iter(sources))
+    source = ParseUtils.get_source(session, source_name)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
@@ -276,7 +275,11 @@ def _insert_data(data_file, test=False):
 
         # Get region
         region = Region()
-        region.chrom = line[1]
+        region.chrom = str(line[1])
+        if region.chrom.startswith("chr"):
+            region.chrom = region.chrom[3:]
+        if region.chrom not in chroms:
+            continue
         region.start = int(line[2])
         region.end = int(line[3])
         region.bin = assign_bin(region.start, region.end)
@@ -289,7 +292,7 @@ def _insert_data(data_file, test=False):
         ParseUtils.upsert_region(session, region)
 
         # Get region ID
-        region = ParseUtils.get_region(session, region.chrom, region.start, region.end, region.strand)
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
         # Get conservation
         conservation = Conservation()

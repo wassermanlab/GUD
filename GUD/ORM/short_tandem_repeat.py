@@ -1,24 +1,14 @@
-from binning import (
-    containing_bins,
-    contained_bins,
-    assign_bin
-)
-from sqlalchemy import (
-    Column, Index, PrimaryKeyConstraint, String, ForeignKey,
-    UniqueConstraint, CheckConstraint, Integer
-)
-from sqlalchemy.dialects import mysql       
-
+from sqlalchemy import (Column, Index, String, UniqueConstraint)
+from sqlalchemy.dialects import mysql
 from .base import Base
 from .region import Region
 from .source import Source
-from .genomic_feature import GenomicFeature
 from .genomicFeatureMixin1 import GFMixin1
 from sqlalchemy.ext.declarative import declared_attr
 
 
 class ShortTandemRepeat(GFMixin1, Base):
-
+    # table declerations
     __tablename__ = "short_tandem_repeats"
 
     # inherits uid, regionID, sourceID
@@ -28,27 +18,20 @@ class ShortTandemRepeat(GFMixin1, Base):
 
     @declared_attr
     def __table_args__(cls):
-        return(
-            UniqueConstraint(cls.region_id, cls.source_id, cls.pathogenicity),
-            Index("ix_source_id", cls.source_id),
-            Index("ix_str", cls.region_id),
-            Index("ix_str_pathogenic", cls.pathogenicity),
-            Index("ix_str_motif", cls.motif),
+        return (
+        UniqueConstraint(cls.region_id, cls.source_id, cls.pathogenicity),
+        Index("ix_join", cls.region_id, cls.source_id),
+        Index("ix_str_pathogenic", cls.pathogenicity),
+        Index("ix_str_motif", cls.motif),
+        {"mysql_engine": "InnoDB", "mysql_charset": "utf8"}
+    )
 
-            {
-                "mysql_engine": "MyISAM",
-                "mysql_charset": "utf8"
-            }
-        )
-
+    #class methods
     @classmethod
-    def select_by_pathogenicity(cls, session):
+    def select_by_pathogenicity(cls, session, query):
         """returns all strs that are pathogenic"""
-        q = session.query(cls, Region, Source).\
-            join().\
-            filter(cls.pathogenicity != 0).\
-            filter(Region.uid == cls.region_id, Source.uid == cls.source_id)
-
+        q = cls.make_query(session, query)
+        q = q.filter(cls.pathogenicity != 0)
         return q
 
     @classmethod
@@ -64,33 +47,32 @@ class ShortTandemRepeat(GFMixin1, Base):
                 motifs.append(motif_temp)
         else:
             motifs = [motif]
-
-        q = query.filter(cls.motif.in_(motifs))
-
+        q = cls.make_query(session, query)
+        q = q.filter(cls.motif.in_(motifs))
         return q
 
     # not in REST API
     @classmethod
     def is_unique(cls, session, regionID, sourceID, pathogenicity):
+        """check uniqueness by region,  source, pathogenicity"""
         q = session.query(cls).filter(cls.region_id == regionID,
-                                      cls.source_id == sourceID, cls.pathogenicity == pathogenicity)
+                                      cls.source_id == sourceID, 
+                                      cls.pathogenicity == pathogenicity)
         q = q.all()
         return len(q) == 0
 
     @classmethod
     def as_genomic_feature(self, feat):
-        # Define qualifiers
+        """
+        extend parent class by adding qualifiers
+        """
         qualifiers = {
             "uid": feat.ShortTandemRepeat.uid,
-            "source": feat.Source.name,
+            "source": feat.sourceName,
             "motif": feat.ShortTandemRepeat.motif,
             "pathogenicity": feat.ShortTandemRepeat.pathogenicity
         }
-        return GenomicFeature(
-            feat.Region.chrom,
-            int(feat.Region.start),
-            int(feat.Region.end),
-            strand=feat.Region.strand,
-            feat_type="ShortTandemRepeat",
-            feat_id="%s_%s" % (self.__tablename__, feat.ShortTandemRepeat.uid),
-            qualifiers=qualifiers)
+        genomic_feature = super().as_genomic_feature(feat)
+        genomic_feature.qualifiers = qualifiers
+        return genomic_feature
+

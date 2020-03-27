@@ -8,36 +8,66 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
-            },
-            "page": {
                 "REQUIRED": false,
-                "DESCRIPTION": "page number"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "clinvar_ids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of clinvar ids separated by (,)"
+                "DESCRIPTION": "list of clinvar ids separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
+            }
+        }
+    },
+    "/api/v1/{genome}/conservation": {
+        "DESCRIPTION": "gets all conservation elements that match specified filtering parameters.",
+        "METHOD": "GET",
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
+            "chrom": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
+            },
+            "start": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
+            },
+            "end": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
+            },
+            "location": {
+                "REQUIRED": false,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by comma(,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by comma(,)"
             }
         }
     },
@@ -50,32 +80,28 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
-            },
-            "page": {
                 "REQUIRED": false,
-                "DESCRIPTION": "page number"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             },
             "clinical_assertion": {
                 "REQUIRED": false,
@@ -91,8 +117,8 @@
             }
         }
     },
-    "/api/v1/{genome}/genes": {
-        "DESCRIPTION": "get list of genes based off filtering parameters",
+    "/api/v1/{genome}/cpg_islands": {
+        "DESCRIPTION": "gets all GpG island elements that match specified filtering parameters.",
         "METHOD": "GET",
         "PARAMS": {
             "genome": {
@@ -100,152 +126,28 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
-            },
-            "page": {
                 "REQUIRED": false,
-                "DESCRIPTION": "page number"
-            },
-            "uids": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
-            },
-            "names": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of gene symbols/names separated by (,)"
-            }
-        }
-    },
-    "/api/v1/{genome}/genes/symbols": {
-        "DESCRIPTION": "get list of all gene symbols",
-        "METHOD": "GET",
-        "PARAMS": {
-            "genome": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify which genome assembly hg19|hg38"
-            },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
-            }
-        }
-    },
-    "/api/v1/{genome}/short_tandem_repeats": {
-        "DESCRIPTION": "get list of short tandem repeats based off filtering parameters",
-        "METHOD": "GET",
-        "PARAMS": {
-            "genome": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify which genome assembly hg19|hg38"
-            },
-            "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
-            },
-            "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
-            },
-            "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
-            },
-            "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
-            },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
-            },
-            "sources": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
-            },
-            "motif": {
-                "REQUIRED": false,
-                "DESCRIPTION": "a motif of bases to be queried"
-            },
-            "rotations": {
-                "REQUIRED": false,
-                "DESCRIPTION": "boolean true or false to whether to check all rotations of specified motif"
-            }
-        }
-    },
-    "/api/v1/{genome}/short_tandem_repeats/pathogenic": {
-        "DESCRIPTION": "get a list of all pathogenic short tandem repeats",
-        "METHOD": "GET",
-        "PARAMS": {
-            "genome": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify which genome assembly hg19|hg38"
-            }
-        }
-    },
-    "/api/v1/{genome}/enhancers": {
-        "DESCRIPTION": "get list of enhancers based off filtering parameters",
-        "METHOD": "GET",
-        "PARAMS": {
-            "genome": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify which genome assembly hg19|hg38"
-            },
-            "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
-            },
-            "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
-            },
-            "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
-            },
-            "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
-            },
-            "page": {
-                "REQUIRED": false,
-                "DESCRIPTION": "page number"
-            },
-            "uids": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
-            },
-            "experiments": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of experiments separated by (,)"
-            },
-            "samples": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of samples separated by (,)"
-            },
-            "sources": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             }
         }
     },
@@ -258,40 +160,116 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
-            },
-            "page": {
                 "REQUIRED": false,
-                "DESCRIPTION": "page number"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "experiments": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of experiments separated by (,)"
+                "DESCRIPTION": "list of experiments separated by comma(,)"
             },
             "samples": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of samples separated by (,)"
+                "DESCRIPTION": "list of samples separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
+            }
+        }
+    },
+    "/api/v1/{genome}/enhancers": {
+        "DESCRIPTION": "get list of enhancers based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
+            "chrom": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
+            },
+            "start": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
+            },
+            "end": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
+            },
+            "location": {
+                "REQUIRED": false,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by comma(,)"
+            },
+            "experiments": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of experiments separated by comma(,)"
+            },
+            "samples": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of samples separated by comma(,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by comma(,)"
+            }
+        }
+    },
+    "/api/v1/{genome}/genes": {
+        "DESCRIPTION": "get list of genes based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
+            "chrom": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
+            },
+            "start": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
+            },
+            "end": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
+            },
+            "location": {
+                "REQUIRED": false,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by comma(,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by comma(,)"
+            },
+            "names": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of gene symbols/names separated by comma(,)"
             }
         }
     },
@@ -304,44 +282,120 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
-            },
-            "page": {
                 "REQUIRED": false,
-                "DESCRIPTION": "page number"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "histone_types": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of histone types separated by (,)"
+                "DESCRIPTION": "list of histone types separated by comma(,)"
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "experiments": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of experiments separated by (,)"
+                "DESCRIPTION": "list of experiments separated by comma(,)"
             },
             "samples": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of samples separated by (,)"
+                "DESCRIPTION": "list of samples separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
+            }
+        }
+    },
+    "/api/v1/{genome}/rmsk": {
+        "DESCRIPTION": "gets all repeat mask elements that match specified filtering parameters.",
+        "METHOD": "GET",
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
+            "chrom": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
+            },
+            "start": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
+            },
+            "end": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
+            },
+            "location": {
+                "REQUIRED": false,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by comma(,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by comma(,)"
+            }
+        }
+    },
+    "/api/v1/{genome}/short_tandem_repeats": {
+        "DESCRIPTION": "get list of short tandem repeats based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
+            "chrom": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
+            },
+            "start": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
+            },
+            "end": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
+            },
+            "location": {
+                "REQUIRED": false,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by comma(,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by comma(,)"
+            },
+            "motif": {
+                "REQUIRED": false,
+                "DESCRIPTION": "a motif of bases to be queried"
+            },
+            "rotations": {
+                "REQUIRED": false,
+                "DESCRIPTION": "boolean true or false to whether to check all rotations of specified motif"
+            },
+            "pathogenicity": {
+                "REQUIRED": false,
+                "DESCRIPTION": "boolean true or false to whether to check all rotations of specified motif"
             }
         }
     },
@@ -354,48 +408,44 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
-            },
-            "page": {
                 "REQUIRED": false,
-                "DESCRIPTION": "page number"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
             "restriction_enzymes": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of restriction enzymes separated by (,)"
+                "DESCRIPTION": "list of restriction enzymes separated by comma(,)"
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "experiments": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of experiments separated by (,)"
+                "DESCRIPTION": "list of experiments separated by comma(,)"
             },
             "samples": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of samples separated by (,)"
+                "DESCRIPTION": "list of samples separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             }
         }
     },
-    "/api/v1/{genome}/tss": {
+    "/api/v1/{genome}/tf_binding": {
         "DESCRIPTION": "get list of tf binding sites based off filtering parameters",
         "METHOD": "GET",
         "PARAMS": {
@@ -404,40 +454,78 @@
                 "DESCRIPTION": "specify which genome assembly hg19|hg38"
             },
             "chrom": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify chromosome name for data in the format of chr1-22|chrX|chrY"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
             },
             "start": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based start coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
             },
             "end": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify 1-based end coordinate for data"
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
             },
             "location": {
-                "REQUIRED": true,
-                "DESCRIPTION": "location = within | overlapping | exact , where within"
-            },
-            "page": {
                 "REQUIRED": false,
-                "DESCRIPTION": "page number"
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
             },
-            "genes": {
+            "tfs": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of genes separated by (,)"
+                "DESCRIPTION": "list of tfs separated by comma(,)"
             },
             "uids": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             },
             "experiments": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of experiments separated by (,)"
+                "DESCRIPTION": "list of experiments separated by comma(,)"
             },
             "sources": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
+            }
+        }
+    },
+    "/api/v1/{genome}/tss": {
+        "DESCRIPTION": "get list of transcription start sites binding sites based off filtering parameters",
+        "METHOD": "GET",
+        "PARAMS": {
+            "genome": {
+                "REQUIRED": true,
+                "DESCRIPTION": "specify which genome assembly hg19|hg38"
+            },
+            "chrom": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
+            },
+            "start": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
+            },
+            "end": {
+                "REQUIRED": false,
+                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
+            },
+            "location": {
+                "REQUIRED": false,
+                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
+            },
+            "genes": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of genes separated by comma(,)"
+            },
+            "uids": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of uids separated by comma(,)"
+            },
+            "experiments": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of experiments separated by comma(,)"
+            },
+            "sources": {
+                "REQUIRED": false,
+                "DESCRIPTION": "list of sources separated by comma(,)"
             }
         }
     },
@@ -491,15 +579,15 @@
             },
             "samples": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of clinvar ids separated by (,)"
+                "DESCRIPTION": "list of clinvar ids separated by comma(,)"
             },
             "max_tpm": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by (,)"
+                "DESCRIPTION": "list of sources separated by comma(,)"
             },
             "min_tpm": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by (,)"
+                "DESCRIPTION": "list of uids separated by comma(,)"
             }
         }
     }

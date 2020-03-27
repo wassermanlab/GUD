@@ -29,13 +29,14 @@ from .chrom import Chrom
 from .clinvar import ClinVar
 from .conservation import Conservation
 from .copy_number_variant import CNV
+from .cpg_island import CpGIsland
 from .dna_accessibility import DNAAccessibility
 from .enhancer import Enhancer
 from .experiment import Experiment
 from .expression import Expression
 from .gene import Gene
 from .histone_modification import HistoneModification
-from .mask import Mask
+from .repeat_mask import RepeatMask
 from .region import Region
 from .sample import Sample
 from .short_tandem_repeat import ShortTandemRepeat
