@@ -7,6 +7,7 @@ import getpass
 from multiprocessing import cpu_count
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -300,7 +301,7 @@ def _insert_data(data_file, test=False):
         # Testing
         if test:
             lines += 1
-            if lines > 1000:
+            if lines == 1000:
                 break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!

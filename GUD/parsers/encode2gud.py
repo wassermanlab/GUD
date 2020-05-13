@@ -69,7 +69,9 @@ mysql arguments:
 
 class ENCODE:
 
-    def __init__(self, accession, biosample_name, biosample_type, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments):
+    def __init__(self, accession, biosample_name, biosample_type, download_url,
+        experiment_accession, experiment_type, experiment_target, genome_assembly,
+        output_format, output_type, status, treatments, genetic_modifications):
 
         # Fix hg38
         if genome_assembly == "GRCh38":
@@ -87,6 +89,7 @@ class ENCODE:
         self.output_type = output_type
         self.status = status
         self.treatments = treatments
+        self.genetic_modifications = genetic_modifications
 
         # To be initialized later
         self._biosample_sex = None
@@ -147,6 +150,13 @@ class ENCODE:
         is biosamble treated?
         """
         return(self.treatments is not None)
+
+    @property
+    def genetic_modification(self):
+        """
+        has biosample been genetically modified?
+        """
+        return(self.genetic_modifications is not None)
 
 #-------------#
 # Functions   #
@@ -449,7 +459,7 @@ def _parse_metadata(genome, metadata_file):
     # Initialize
     accession_idx = None
     encode_objects = {}
-    regexp = re.compile("^(3xFLAG|eGFP)?-?(.+)-(human|mouse)$")
+    regexp = re.compile("^(3xFLAG|eGFP)?-?(.+)-(human|mouse|dmelanogaster)$")
 
     # For each line...
     for line in ParseUtils.parse_tsv_file(metadata_file):
@@ -477,10 +487,16 @@ def _parse_metadata(genome, metadata_file):
             treatments = line[treatment_idx]
             if type(treatments) is float and isnan(treatments):
                 treatments = None
+            genetic_modifications = line[genetic_modifications_idx]
+            if type(genetic_modifications) is float and isnan(genetic_modifications):
+                genetic_modifications = None
 
             # Add ENCODE object
-            encode = ENCODE(accession, biosample_name, biosample_type, download_url, experiment_accession, experiment_type, experiment_target, genome_assembly, output_format, output_type, status, treatments)
-            if encode.genome_assembly == genome and encode.status == "released" and not encode.treatments:
+            encode = ENCODE(accession, biosample_name, biosample_type, download_url,
+                experiment_accession, experiment_type, experiment_target, genome_assembly,
+                output_format, output_type, status, treatments, genetic_modifications)
+            if encode.genome_assembly == genome and encode.status == "released" and \
+               not encode.treatment and not encode.genetic_modification:
                 encode_objects.setdefault(encode.accession, encode)
 
         else:
@@ -492,11 +508,12 @@ def _parse_metadata(genome, metadata_file):
             experiment_acc_idx = line.index("Experiment accession")
             experiment_type_idx = line.index("Assay")
             experiment_target_idx = line.index("Experiment target")
-            genome_assembly_idx = line.index("Assembly")
+            genome_assembly_idx = line.index("File assembly")
             output_format_idx = line.index("File format")
             output_type_idx = line.index("Output type")
-            status_idx = line.index("File Status")
+            status_idx = line.index("File Status") - 1
             treatment_idx = line.index("Biosample treatments")
+            genetic_modifications_idx = line.index("Biosample genetic modifications methods")
 
     return(encode_objects)
 

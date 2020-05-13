@@ -7,6 +7,7 @@ import getpass
 from multiprocessing import cpu_count
 import os
 import re
+import shutil
 import subprocess
 import sys
 

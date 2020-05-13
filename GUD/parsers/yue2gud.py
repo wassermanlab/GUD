@@ -199,7 +199,7 @@ def main():
 
 def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
-    e.g. python -m GUD.parsers.yue2gud --genome hg38 --feature abcd --test -P 3306
+    e.g. python -m GUD.parsers.yue2gud --genome hg38 --samples ./samples/3dGenomeBrowser.tsv --feature tad --test -P 3306
     """
 
     # Initialize
