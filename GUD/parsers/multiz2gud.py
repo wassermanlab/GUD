@@ -143,6 +143,12 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
         global current_process
         from multiprocessing import current_process
 
+    # Create dummy dir
+    subdir = "%s.%s" % (genome, os.path.basename(__file__))
+    dummy_dir = os.path.join(dummy_dir, subdir)
+    if not os.path.isdir(dummy_dir):
+        os.makedirs(dummy_dir)
+
     # Download data
     data_file = _download_data(genome, dummy_dir)
 
@@ -191,10 +197,9 @@ def conservation_to_gud(genome, dummy_dir="/tmp/", test=False, threads=1):
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
 
-    # Remove data files
-    for data_file in data_files:
-        if not test and os.path.exists(data_file):
-            os.remove(data_file)
+    # Remove files
+    if remove:
+        shutil.rmtree(dummy_dir)
 
     # Dispose session
     Session.remove()

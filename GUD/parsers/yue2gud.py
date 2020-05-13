@@ -213,6 +213,12 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
         global current_process
         from multiprocessing import current_process
 
+    # Create dummy dir
+    subdir = "%s.%s" % (genome, os.path.basename(__file__))
+    dummy_dir = os.path.join(dummy_dir, subdir)
+    if not os.path.isdir(dummy_dir):
+        os.makedirs(dummy_dir)
+
     # Get database name
     db_name = GUDUtils._get_db_name()
 
@@ -304,13 +310,9 @@ def yue_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False,
             # Parallelize inserts to the database
             ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, experiment=experiment, sample=sample, source=source, test=test), threads)
 
-        # Remove data files
-        if remove:
-            if os.path.exists(extracted_file):
-                os.remove(extracted_file)
-            for data_file in data_files:
-                if os.path.exists(data_file):
-                    os.remove(data_file)
+    # Remove files
+    if remove:
+        shutil.rmtree(dummy_dir)
 
     # Remove session
     Session.remove()

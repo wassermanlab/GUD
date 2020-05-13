@@ -147,6 +147,12 @@ def rmsk_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False, th
         global current_process
         from multiprocessing import current_process
 
+    # Create dummy dir
+    subdir = "%s.%s" % (genome, os.path.basename(__file__))
+    dummy_dir = os.path.join(dummy_dir, subdir)
+    if not os.path.isdir(dummy_dir):
+        os.makedirs(dummy_dir)
+
     # Download data
     data_file, url = _download_data(genome, dummy_dir)
 
@@ -193,13 +199,9 @@ def rmsk_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False, th
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
 
-    # Remove data files
+    # Remove files
     if remove:
-        if os.path.exists(data_file):
-            os.remove(data_file)
-        for data_file in data_files:
-            if os.path.exists(data_file):
-                os.remove(data_file)
+        shutil.rmtree(dummy_dir)
 
     # Remove session
     Session.remove()

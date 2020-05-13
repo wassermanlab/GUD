@@ -272,6 +272,12 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         global current_process
         from multiprocessing import current_process
 
+    # Create dummy dir
+    subdir = "%s.%s" % (genome, os.path.basename(__file__))
+    dummy_dir = os.path.join(dummy_dir, subdir)
+    if not os.path.isdir(dummy_dir):
+        os.makedirs(dummy_dir)
+
     # Download metadata
     metadata_file = _download_metadata(genome, feat_type, dummy_dir)
 
@@ -370,18 +376,9 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         # Parallelize inserts to the database
         ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data_file, test=test), threads)
 
-        # Remove data files
-        if remove:
-            if os.path.exists(data_file):
-                os.remove(data_file)
-            for data_file in data_files:
-                if os.path.exists(data_file):
-                    os.remove(data_file)
-
-    # Remove downloaded file
+    # Remove files
     if remove:
-        if os.path.exists(metadata_file):
-            os.remove(metadata_file)
+        shutil.rmtree(dummy_dir)
 
     # Dispose session
     Session.remove()
