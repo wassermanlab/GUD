@@ -13,6 +13,7 @@ from numpy import isnan
 import os
 import sys
 import re
+import shutil
 import subprocess
 import warnings
 import argparse
@@ -164,6 +165,12 @@ def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
         global current_process
         from multiprocessing import current_process
 
+    # Create dummy dir
+    subdir = "%s.%s" % (genome, os.path.basename(__file__))
+    dummy_dir = os.path.join(dummy_dir, subdir)
+    if not os.path.isdir(dummy_dir):
+        os.makedirs(dummy_dir)
+
     # Get database name
     db_name = GUDUtils._get_db_name()
 
@@ -204,10 +211,9 @@ def cnv_to_gud(genome, source_name, cnv_file, test=False, threads=1):
     ParseUtils.insert_data_files_in_parallel(
         data_files, partial(_insert_data, test=test), threads)
 
-    # Remove data file
-    for df in data_files:
-        if os.path.exists(df):
-            os.remove(df)
+    # Remove files
+    if remove:
+        shutil.rmtree(dummy_dir)
 
     # Remove session
     Session.remove()

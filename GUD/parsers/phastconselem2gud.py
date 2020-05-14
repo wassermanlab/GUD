@@ -189,7 +189,8 @@ def conservation_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=F
     source.metadata_descriptor = "version,"
     source.url = url
     ParseUtils.upsert_source(session, source)
-    source = ParseUtils.get_source(session, source.name, source.source_metadata, source.metadata_descriptor, url)
+    source = ParseUtils.get_source(session, source.name, source.source_metadata,
+                                   source.metadata_descriptor, url)
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
@@ -307,7 +308,7 @@ def _insert_data(data_file, test=False):
         # Testing
         if test:
             lines += 1
-            if lines > 1000:
+            if lines == 1000:
                 break
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
