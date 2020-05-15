@@ -241,6 +241,10 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     # Get samples
     samples = _get_samples(session, samples_file)
 
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
+
     # Prepare data
     bed_file, idx = _preprocess_data(data_files, feat_type, dummy_dir, test, threads)
 
