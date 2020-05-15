@@ -2,12 +2,12 @@
 
 import argparse
 from binning import assign_bin
-from copy import copy
 from functools import partial
 import getpass
-from multiprocessing import cpu_count
+from multiprocessing import Pool, cpu_count
 import os
 import re
+import shutil
 import subprocess
 import sys
 # Python 3+
@@ -23,7 +23,6 @@ else:
 from GUD import GUDUtils
 from GUD.ORM.enhancer import Enhancer
 from GUD.ORM.experiment import Experiment
-from GUD.ORM.expression import Expression
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
@@ -36,12 +35,12 @@ usage: %s --genome STR --samples FILE --feature STR [-h] [options]
 
 help_msg = """%s
 inserts features from FANTOM5 (Functional Annotation of the
-Mammalian Genome) into GUD.
+Mammalian Genome 5) into GUD.
 
   --genome STR        genome assembly
   --samples FILE      FANTOM5 samples (manually-curated)
   --feature STR       type of genomic feature ("enhancer"
-                      "tss")
+                      or "tss")
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -112,10 +111,6 @@ def check_args(args):
         error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\" \"--samples\" \"--feature\" are required\n"]
         print(": ".join(error))
         exit(0)
-    if args.genome != "hg38":
-        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--genome\"", "invalid genome assembly", "\"%s\"\n" % args.genome]
-        print(": ".join(error))
-        exit(0)
 
     # Check for invalid feature
     valid_features = ["enhancer", "tss"]
@@ -169,14 +164,24 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     global engine
     global experiment
     global samples
+    global source
     global Feature
     global Session
-    global tpms_start_at
+    global idx
 
     # Testing
     if test:
         global current_process
         from multiprocessing import current_process
+
+    # Create dummy dir
+    subdir = "%s.%s" % (genome, os.path.basename(__file__))
+    dummy_dir = os.path.join(dummy_dir, subdir)
+    if not os.path.isdir(dummy_dir):
+        os.makedirs(dummy_dir)
+
+    # Download data
+    data_files, url = _download_data(genome, feat_type, dummy_dir)
 
     # Get database name
     db_name = GUDUtils._get_db_name()
@@ -195,13 +200,14 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     # Create table
     if feat_type == "enhancer":
         Feature = Enhancer
-        tpms_start_at = 1
     else:
         Feature = TSS
-        tpms_start_at = 7
     ParseUtils.create_table(Feature)
     if Feature.__tablename__ == "transcription_start_sites":
+        global Feature2
+        from GUD.ORM.expression import Expression
         ParseUtils.create_table(Expression)
+        Feature2 = Expression
 
     # Start a new session
     session = Session()
@@ -209,56 +215,86 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     # Get valid chromosomes
     chroms = ParseUtils.get_chroms(session)
 
+    # Get all genes
+    if Feature.__tablename__ == "transcription_start_sites":
+        global genes
+        from GUD.ORM.gene import Gene
+        q = Gene().get_all_gene_symbols(session)
+        genes = set([g[0] for g in q.all()])
+
     # Get experiment
     experiment = Experiment()
     experiment.name = "CAGE"
     ParseUtils.upsert_experiment(session, experiment)
     experiment = ParseUtils.get_experiment(session, experiment.name)    
 
-    # Download data
-    download_file, url = _download_data(genome, feat_type, dummy_dir)
-
     # Get source
     source = Source()
-    source.name = source_name
+    source.name = "FANTOM5"
+    source.source_metadata = "%s,%s," % (genome, feat_type)
+    source.metadata_descriptor = "genome,feature,"
+    source.url = url
     ParseUtils.upsert_source(session, source)
-    sources = ParseUtils.get_source(session, source_name)
-    source = next(iter(sources))
+    source = ParseUtils.get_source(session, source.name, source.source_metadata,
+                                   source.metadata_descriptor, url)
 
     # Get samples
     samples = _get_samples(session, samples_file)
-    print(samples)
 
-    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
-    session.close()
-    engine.dispose()
+    # Prepare data
+    bed_file, idx = _preprocess_data(data_files, feat_type, dummy_dir, test, threads)
+
+    # Split data
+    data_files = _split_data(bed_file, threads)
+
+    # Parallelize inserts to the database
+    ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
+
+    # Remove files
+    if remove:
+        shutil.rmtree(dummy_dir)
+
+    # Remove session
+    Session.remove()
 
 def _download_data(genome, feat_type, dummy_dir="/tmp/"):
 
-    import requests
-
     # Initialize
     url = "http://fantom.gsc.riken.jp/5/datafiles/"
+    ftp_files = []
 
-    # If latest genome...
-    if genome == "hg38":
+    if genome == "hg38" or genome == "mm10":
         url += "reprocessed/%s_latest/extra/" % genome
         if feat_type == "enhancer":
+            ftp_files.append("F5.%s.enhancers.expression.usage.matrix.gz" % genome)
             url += "enhancer"
-            ftp_file = "F5.%s.enhancers.expression.usage.matrix.gz" % genome
         else:
+            ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2_tpm_ann.osc.txt.gz" % genome)
+            ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2.bed.gz" % genome)
+            dummy_file = os.path.join(dummy_dir, ftp_files[-1])
+            if not os.path.exists(dummy_file):
+                urlretrieve(os.path.join(url, "CAGE_peaks", ftp_files[-1]), dummy_file)
             url += "CAGE_peaks_expression"
-            ftp_file = "%s_fair+new_CAGE_peaks_phase1and2_tpm_ann.osc.txt.gz" % genome
     else:
-        # Not implemented!
-        pass
+        url += "latest/extra/"
+        if feat_type == "enhancer":
+            if genome == "hg19":
+                ftp_files.append("human_permissive_enhancers_phase_1_and_2_expression_tpm_matrix.txt.gz")
+            elif genome == "mm9":
+                ftp_files.append("mouse_permissive_enhancers_phase_1_and_2_expression_tpm_matrix.txt.gz")
+            url += "Enhancers"
+        else:
+            ftp_files.append("%s.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz" % genome)
+            url += "CAGE_peaks"
 
     # Download data
-    dummy_file = os.path.join(dummy_dir, ftp_file)
-    if not os.path.exists(dummy_file):
-        os.system("curl --silent -o %s %s" % (dummy_file, os.path.join(url, ftp_file)))
+    dummy_files = []
+    for ftp_file in ftp_files:
+        dummy_files.append(os.path.join(dummy_dir, ftp_file))
+        if not os.path.exists(dummy_files[-1]):
+            urlretrieve(os.path.join(url, ftp_file), dummy_files[-1])
 
-    return(dummy_file, os.path.join(url, ftp_file))
+    return(dummy_files, os.path.join(url, ftp_files[0]))
 
 def _get_samples(session, file_name):
 
@@ -269,27 +305,217 @@ def _get_samples(session, file_name):
     for line in ParseUtils.parse_tsv_file(file_name):
 
         # If add...
-        if line[4] == "Yes":
+        if line[6] == "Yes":
 
-            # Initialize
-            sample_name = line[0]
-            if line[1] == "Yes":
-                treatment = True
-            else:
-                treatment = False
+            # Upsert sample
+            sample = Sample()
+            sample_id = line[0]
+            sample.name = line[1]
             if line[2] == "Yes":
-                cell_line = True
+                sample.treatment = True
             else:
-                cell_line = False
+                sample.treatment = False
             if line[3] == "Yes":
-                cancer = True
+                sample.cell_line = True
             else:
-                cancer = False
+                sample.cell_line = False
+            if line[4] == "Yes":
+                sample.cancer = True
+            else:
+                sample.cancer = False
+            if line[5] == "female":
+                sample.X = 2
+                sample.Y = 0
+            elif line[6] == "male":
+                sample.X = 1
+                sample.Y = 1
+            ParseUtils.upsert_sample(session, sample)
+
+            # Get sample
+            sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
 
             # Add sample
-            samples.setdefault(sample_name, (treatment, cell_line, cancer))
+            samples.setdefault(sample_id, sample)
 
     return(samples)
+
+def _preprocess_data(data_files, feat_type, dummy_dir="/tmp/", test=False, threads=1):
+
+    # Initialize
+    idx = []
+    dummy_files = []
+    if feat_type == "enhancer":
+        start = 1
+    else:
+        start = 7
+
+    # If two files...
+    if len(data_files) == 2:
+
+        # Initialize
+        coords = {}
+
+        for line in ParseUtils.parse_tsv_file(data_files[1]):
+            coords.setdefault(line[3], line[:3] + [line[5]])
+
+    # Get index
+    for line in ParseUtils.parse_tsv_file(data_files[0]):
+
+        if line[0] == "00Annotation":
+            for sample in line[start:]:
+                m = re.search("(CNhs\d{5})", sample)
+                if m:
+                    idx.append(m.group(1))
+            break
+
+    # Skip if BED file exists
+    bed_file = os.path.join(dummy_dir, "CAGE.%s.bed" % feat_type)
+    if not os.path.exists(bed_file):
+
+        # Skip if BED file exists
+        dummy_file = os.path.join(dummy_dir, "dummy.bed")
+        if not os.path.exists(dummy_file):
+
+            for line in ParseUtils.parse_tsv_file(data_files[0]):
+
+                if line[0].startswith("#") or \
+                   line[0] == "00Annotation" or \
+                   line[0] == "01STAT:MAPPED" or \
+                   line[0] == "02STAT:NORM_FACTOR":
+                    continue
+
+                else:
+                    if len(data_files) == 2:
+                        txt = "\t".join(map(str, coords[line[0]]+[line[1]]+line[start:]))
+                        ParseUtils.write(dummy_file, txt)
+
+        # Add dummy file
+        dummy_files.append(dummy_file)
+
+        # Sort BED
+        dummy_file = os.path.join(dummy_dir, "dummy.sorted.bed")
+        if not os.path.exists(dummy_file):
+
+            # UNIX parallel sort is more efficient than bedtools
+            cmd = "LC_ALL=C sort --parallel=%s -T %s -k1,1 -k2,2n %s > %s" % (str(threads), dummy_dir, dummy_files[0], dummy_file)
+            subprocess.call(cmd, shell=True)
+
+        # Add dummy file
+        dummy_files.append(dummy_file)
+
+        # Copy file
+        shutil.copy(dummy_files[1], bed_file)
+
+        # Remove ALL dummy files
+        for dummy_file in dummy_files:
+            os.remove(dummy_file)
+
+    return(bed_file, idx)
+
+def _split_data(data_file, threads=1):
+
+    # Initialize
+    split_files = []
+    split_dir = os.path.dirname(os.path.realpath(data_file))
+
+    # Get number of lines
+    output = subprocess.check_output(["wc -l %s" % data_file], shell=True)
+    m = re.search("(\d+)", str(output))
+    L = float(m.group(1))
+
+    # Split
+    prefix = "%s." % data_file.split("/")[-1]
+    cmd = "split -d -l %s %s %s" % (int(L/threads)+1, data_file, os.path.join(split_dir, prefix))
+    subprocess.run(cmd, shell=True)
+
+    # For each split file...
+    for split_file in os.listdir(split_dir):
+
+        # Append split file
+        if split_file.startswith(prefix):
+            split_files.append(os.path.join(split_dir, split_file))
+
+    return(split_files)
+
+def _insert_data(data_file, test=False):
+
+    # Initialize
+    session = Session()
+
+    # Testing
+    if test:
+        lines = 0
+        print(current_process().name)
+
+    # For each line...
+    for line in ParseUtils.parse_tsv_file(data_file):
+
+        # Skip empty lines
+        if not line:
+            continue
+
+        # Upsert region
+        region = Region()
+        region.chrom = str(line.pop(0))
+        if region.chrom.startswith("chr"):
+            region.chrom = region.chrom[3:]
+        if region.chrom not in chroms:
+            continue
+        region.start = int(line.pop(0))
+        region.end = int(line.pop(0))
+        region.bin = assign_bin(region.start, region.end)
+        ParseUtils.upsert_region(session, region)
+
+        # Get region
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
+
+        # Upsert/get feature
+        feature = Feature()
+        feature.region_id = region.uid
+        feature.experiment_id = experiment.uid
+        feature.source_id = source.uid
+        if Feature.__tablename__ == "transcription_start_sites":
+            sample_ids = []
+            expression_levels = []
+            feature.strand = line.pop(0)
+            feature.tss = 1
+            feature.gene = None
+            m = re.search("p(\d+)@(\w+)", line.pop(0))
+            if m:
+                if m.group(2) in genes:
+                    feature.tss = int(m.group(1))
+                    feature.gene = m.group(2)
+            for i in range(len(idx)):
+                expression_level = float("{:.3f}".format(line[i]))
+                if expression_level > 0 and idx[i] in samples:
+                    sample_ids.append(samples[idx[i]].uid)
+                    expression_levels.append(expression_level)
+            sample_id = "%s," % ",".join(map(str, sample_ids))
+            feature.sample_id = sample_id.encode("utf-8")
+            expression_level = "%s," % ",".join(map(str, expression_levels))
+            feature.expression_level = expression_level.encode("utf-8")
+            ParseUtils.upsert_tss(session, feature)
+            feature = ParseUtils.get_tss(session, feature.region_id, feature.experiment_id,
+                                         feature.source_id, feature.gene, feature.tss)
+            # Upsert feature2
+            if feature.gene:
+                for i in range(len(sample_ids)):
+                    feature2 = Feature2()
+                    feature2.expression_level = expression_levels[i]
+                    feature2.tss_id = feature.uid
+                    feature2.sample_id = sample_ids[i]
+                    ParseUtils.upsert_expression(session, feature2)
+
+        # Testing
+        if test:
+            lines += 1
+            if lines == 1000:
+                break
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
+
 
 # def _get_samples(session, file_name):
 
@@ -651,4 +877,5 @@ def _get_samples(session, file_name):
 # Main        #
 #-------------#
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()

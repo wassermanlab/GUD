@@ -17,6 +17,7 @@ from GUD.ORM.conservation import Conservation
 from GUD.ORM.cpg_island import CpGIsland
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.experiment import Experiment
+from GUD.ORM.expression import Expression
 from GUD.ORM.gene import Gene
 from GUD.ORM.copy_number_variant import CNV
 from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
@@ -28,7 +29,7 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
 from GUD.ORM.tad import TAD
-
+from GUD.ORM.tss import TSS
 
 class ParseUtililities:
     """
@@ -101,7 +102,7 @@ class ParseUtililities:
         # Open file handle
         if file_name.endswith(".gz"):
             try:
-                handle = gzip.open(file_name, mode)
+                handle = gzip.open(file_name, mode+"b")
             except:
                 raiseValueError = True
 
@@ -142,6 +143,11 @@ class ParseUtililities:
         # For each line...
         for line in handle:
 
+            try:
+                line = line.decode()
+            except:
+                pass
+
             yield(line.strip("\n"))
 
         handle.close()
@@ -157,17 +163,19 @@ class ParseUtililities:
         @yield: {list}
         """
 
-        # Get file handle
-        handle = self._get_file_handle(file_name)
+        # Get compression (if any)
+        compression = None
+        if file_name.endswith(".gz"):
+            compression = "gzip"
+        if file_name.endswith(".zip"):
+            compression = "zip"
 
         # Read in chunks
-        for chunk in pandas.read_csv(handle, header=None, encoding="utf8",
-                                     sep=delimiter, chunksize=1024, comment="#",
-                                     engine="python"):
+        for chunk in pandas.read_csv(file_name, compression=compression, header=None,
+                                     encoding="utf8", sep=delimiter, chunksize=1024,
+                                     comment="#", engine="python"):
             for index, row in chunk.iterrows():
                 yield(row.tolist())
-
-        handle.close()
 
     def parse_tsv_file(self, file_name):
         """
@@ -347,6 +355,9 @@ class ParseUtililities:
     def get_source(self, session, name, source_metadata=None, metadata_descriptor=None, url=None):
         return(Source.select_unique(session, name, source_metadata, metadata_descriptor, url))
 
+    def get_tss(self, session, region_id, experiment_id, source_id, gene=None, tss=1):
+        return(TSS.select_unique(session, region_id, experiment_id, source_id, gene, tss))
+
     #--------------#
     # Upserts      #
     #--------------#
@@ -373,6 +384,12 @@ class ParseUtililities:
 
         if Experiment.is_unique(session, experiment.name, experiment.experiment_metadata, experiment.metadata_descriptor):
             session.add(experiment)
+            session.commit()
+
+    def upsert_expression(self, session, expression):
+
+        if Expression.is_unique(session, expression.tss_id, expression.sample_id):
+            session.add(expression)
             session.commit()
 
     def upsert_gene(self, session, gene):
@@ -441,6 +458,11 @@ class ParseUtililities:
     def upsert_tad(self, session, tad):
         if TAD.is_unique(session, tad.region_id, tad.sample_id, tad.experiment_id, tad.source_id):
             session.add(tad)
+            session.commit()
+
+    def upsert_tss(self, session, tss):
+        if TSS.is_unique(session, tss.region_id, tss.experiment_id, tss.source_id, tss.gene, tss.tss):
+            session.add(tss)
             session.commit()
 
     #--------------#
