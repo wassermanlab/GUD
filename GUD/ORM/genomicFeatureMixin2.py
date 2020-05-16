@@ -72,14 +72,14 @@ class GFMixin2(GFMixin1):
         return q
 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID, sampleID, experimentID):
+    def is_unique(cls, session, regionID, sampleID, experimentID, sourceID):
         """
         Check by unique condition. Minimum condition is is regionID and sourceID.
         Additional conditions require overriding of method in child class.
         """
         q = session.query(cls).filter(cls.region_id == regionID,
-                                      cls.source_id == sourceID,
                                       cls.sample_id == sampleID,
-                                      cls.experiment_id == experimentID)
+                                      cls.experiment_id == experimentID,
+                                      cls.source_id == sourceID)
         q = q.all()
         return len(q) == 0

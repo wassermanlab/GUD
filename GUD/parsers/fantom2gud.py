@@ -271,6 +271,7 @@ def _download_data(genome, feat_type, dummy_dir="/tmp/"):
         url += "reprocessed/%s_latest/extra/" % genome
         if feat_type == "enhancer":
             ftp_files.append("F5.%s.enhancers.expression.usage.matrix.gz" % genome)
+            ftp_files.append("F5.%s.enhancers.bed.gz" % genome)
             url += "enhancer"
         else:
             ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2_tpm_ann.osc.txt.gz" % genome)
@@ -279,17 +280,17 @@ def _download_data(genome, feat_type, dummy_dir="/tmp/"):
             if not os.path.exists(dummy_file):
                 urlretrieve(os.path.join(url, "CAGE_peaks", ftp_files[-1]), dummy_file)
             url += "CAGE_peaks_expression"
-    else:
-        url += "latest/extra/"
-        if feat_type == "enhancer":
-            if genome == "hg19":
-                ftp_files.append("human_permissive_enhancers_phase_1_and_2_expression_tpm_matrix.txt.gz")
-            elif genome == "mm9":
-                ftp_files.append("mouse_permissive_enhancers_phase_1_and_2_expression_tpm_matrix.txt.gz")
-            url += "Enhancers"
-        else:
-            ftp_files.append("%s.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz" % genome)
-            url += "CAGE_peaks"
+    # else:
+    #     url += "latest/extra/"
+    #     if feat_type == "enhancer":
+    #         if genome == "hg19":
+    #             ftp_files.append("human_permissive_enhancers_phase_1_and_2_expression_tpm_matrix.txt.gz")
+    #         elif genome == "mm9":
+    #             ftp_files.append("mouse_permissive_enhancers_phase_1_and_2_expression_tpm_matrix.txt.gz")
+    #         url += "Enhancers"
+    #     else:
+    #         ftp_files.append("%s.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz" % genome)
+    #         url += "CAGE_peaks"
 
     # Download data
     dummy_files = []
@@ -362,15 +363,17 @@ def _preprocess_data(data_files, feat_type, dummy_dir="/tmp/", test=False, threa
         for line in ParseUtils.parse_tsv_file(data_files[1]):
             coords.setdefault(line[3], line[:3] + [line[5]])
 
-    # Get index
-    for line in ParseUtils.parse_tsv_file(data_files[0]):
+    # Enhancer file is weird: rows have different number of cols;
+    # Read as a normal file and split by tabs
+    for line in ParseUtils.parse_file(data_files[0]):
 
-        if line[0] == "00Annotation":
-            for sample in line[start:]:
-                m = re.search("(CNhs\d{5})", sample)
-                if m:
-                    idx.append(m.group(1))
+        if feat_type == "enhancer":
+            idx = re.findall("CNhs\d{5}", str(line))
             break
+        else:
+            if line.startswith("00Annotation"):
+                idx = re.findall("CNhs\d{5}", str(line))
+                break
 
     # Skip if BED file exists
     bed_file = os.path.join(dummy_dir, "CAGE.%s.bed" % feat_type)
@@ -380,18 +383,25 @@ def _preprocess_data(data_files, feat_type, dummy_dir="/tmp/", test=False, threa
         dummy_file = os.path.join(dummy_dir, "dummy.bed")
         if not os.path.exists(dummy_file):
 
-            for line in ParseUtils.parse_tsv_file(data_files[0]):
+            # Enhancer file is weird: rows have different number of cols;
+            # Read as a normal file and split by tabs
+            for line in ParseUtils.parse_file(data_files[0]):
+
+                line = line.split("\t")
 
                 if line[0].startswith("#") or \
+                   line[0].startswith("CNhs") or \
                    line[0] == "00Annotation" or \
                    line[0] == "01STAT:MAPPED" or \
                    line[0] == "02STAT:NORM_FACTOR":
                     continue
 
                 else:
-                    if len(data_files) == 2:
+                    if feat_type == "enhancer":
+                        txt = "\t".join(map(str, coords[line[0]]+line[start:]))
+                    else:
                         txt = "\t".join(map(str, coords[line[0]]+[line[1]]+line[start:]))
-                        ParseUtils.write(dummy_file, txt)
+                    ParseUtils.write(dummy_file, txt)
 
         # Add dummy file
         dummy_files.append(dummy_file)
@@ -474,13 +484,13 @@ def _insert_data(data_file, test=False):
         region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
 
         # Upsert/get feature
-        feature = Feature()
-        feature.region_id = region.uid
-        feature.experiment_id = experiment.uid
-        feature.source_id = source.uid
         if Feature.__tablename__ == "transcription_start_sites":
             sample_ids = []
             expression_levels = []
+            feature = Feature()
+            feature.region_id = region.uid
+            feature.experiment_id = experiment.uid
+            feature.source_id = source.uid
             feature.strand = line.pop(0)
             feature.tss = 1
             feature.gene = None
@@ -509,6 +519,16 @@ def _insert_data(data_file, test=False):
                     feature2.tss_id = feature.uid
                     feature2.sample_id = sample_ids[i]
                     ParseUtils.upsert_expression(session, feature2)
+        else:
+            strand = line.pop(0)
+            for i in range(len(idx)):
+                if int(line[i]) > 0 and idx[i] in samples:
+                    feature = Feature()
+                    feature.region_id = region.uid
+                    feature.experiment_id = experiment.uid
+                    feature.source_id = source.uid
+                    feature.sample_id = samples[idx[i]].uid
+                    ParseUtils.upsert_enhancer(session, feature)
 
         # Testing
         if test:

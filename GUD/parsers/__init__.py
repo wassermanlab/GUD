@@ -16,6 +16,7 @@ from GUD.ORM.chrom import Chrom
 from GUD.ORM.conservation import Conservation
 from GUD.ORM.cpg_island import CpGIsland
 from GUD.ORM.dna_accessibility import DNAAccessibility
+from GUD.ORM.enhancer import Enhancer
 from GUD.ORM.experiment import Experiment
 from GUD.ORM.expression import Expression
 from GUD.ORM.gene import Gene
@@ -378,6 +379,12 @@ class ParseUtililities:
 
         if CpGIsland.is_unique(session, cpg_island.region_id, cpg_island.source_id):
             session.add(cpg_island)
+            session.commit()
+
+    def upsert_enhancer(self, session, enhancer):
+
+        if Enhancer.is_unique(session, enhancer.region_id, enhancer.sample_id, enhancer.experiment_id, enhancer.source_id):
+            session.add(enhancer)
             session.commit()
 
     def upsert_experiment(self, session, experiment):
