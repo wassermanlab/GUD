@@ -193,7 +193,7 @@ class ParseUtililities:
 
             yield(line)
 
-    def parse_fasta_file(self, file_name):
+    def parse_fasta_file(self, file_name, as_seq_record=False):
         """
         Parses a FASTA file and yields sequences one by one  as a list of
         length 2 (i.e. [{header}, {sequence}]).
@@ -209,11 +209,10 @@ class ParseUtililities:
 
         # For each SeqRecord...
         for seq_record in SeqIO.parse(handle, "fasta"):
-            # Initialize
-            header = seq_record.id
-            sequence = str(seq_record.seq).upper()
-
-            yield(header, sequence)
+            if as_seq_record:
+                yield(seq_record)
+            else:
+                yield(seq_record.id, str(seq_record.seq).upper())
 
         handle.close()
 
