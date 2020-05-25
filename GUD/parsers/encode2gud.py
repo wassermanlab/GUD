@@ -42,7 +42,7 @@ into GUD.
 
   --genome STR        genome assembly
   --samples FILE      ENCODE samples (manually-curated)
-  --feature STR       type of genomic feature ("atac-seq"
+  --feature STR       type of genomic feature ("atac-seq",
                       "accessibility", "histone" or "tf")
   --sample-type STR   restrict to samples of speficied type
                       ("cell" or "tissue"; default = ignore)

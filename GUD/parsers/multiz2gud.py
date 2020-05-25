@@ -180,7 +180,7 @@ def conservation_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=F
     # Get valid chromosomes
     chroms = ParseUtils.get_chroms(session)
 
-# Get source
+    # Get source
     source = Source()
     m = re.search("^%s/*(.+).txt.gz$" % dummy_dir, data_file) 
     source.name = m.group(1)
@@ -282,7 +282,7 @@ def _insert_data(data_file, test=False):
         if not line:
             continue
 
-        # Get region
+        # Upsert region
         region = Region()
         region.chrom = str(line[1])
         if region.chrom.startswith("chr"):

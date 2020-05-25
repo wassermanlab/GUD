@@ -39,8 +39,8 @@ class TSS(GFMixin2, Base):
 
     # class methods 
     @classmethod
-    def is_unique(cls, session, regionID, sourceID,
-                  experimentID, gene, tss):
+    def is_unique(cls, session, regionID, experimentID, 
+                  sourceID, gene, tss):
 
         q = session.query(cls)\
             .filter(cls.region_id == regionID, cls.source_id == sourceID,
@@ -48,6 +48,17 @@ class TSS(GFMixin2, Base):
                     cls.gene == gene, cls.tss == tss)
 
         return len(q.all()) == 0
+
+    @classmethod
+    def select_unique(cls, session, regionID, experimentID, 
+                      sourceID, gene, tss):
+        """
+        returns selects first by region 
+        """
+        q = session.query(cls).filter(cls.region_id == regionID, cls.source_id == sourceID,
+                                      cls.experiment_id == experimentID, cls.gene == gene, cls.tss == tss)
+
+        return q.first()
 
     @classmethod
     def select_by_genes(cls, session, query, genes):

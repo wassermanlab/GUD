@@ -2,13 +2,12 @@
 
 import argparse
 from binning import assign_bin
-from copy import copy
 from functools import partial
 import getpass
 from multiprocessing import cpu_count
 import os
-from pybedtools import BedTool, cleanup, set_tempdir
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
