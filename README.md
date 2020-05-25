@@ -10,7 +10,6 @@ test
 ## Requirements
 GUD requires the following dependencies:
 * [`MySQL`](https://www.mysql.com)
-* [`Parallel`](https://www.gnu.org/software/parallel/)
 * [`Python`](https://www.python.org) `≥2.7` or `3.x` with:
     - [`Biopython`](https://biopython.org)
     - [`interval-binning`](https://interval-binning.readthedocs.io/en/latest/)
