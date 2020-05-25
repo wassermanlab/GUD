@@ -9,9 +9,13 @@ test
 
 ## Requirements
 GUD requires the following dependencies:
+* [`GNU Core Utilities`](https://www.gnu.org/software/coreutils/)
 * [`MySQL`](https://www.mysql.com)
 * [`Python`](https://www.python.org) `≥2.7` or `3.x` with:
     - [`Biopython`](https://biopython.org)
+    - [`flask`](https://flask.palletsprojects.com/en/1.0.x/)
+    - [`Flask-SQLAlchemy`](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)
+    - [`FuzzyWuzzy`](https://chairnerd.seatgeek.com/fuzzywuzzy-fuzzy-string-matching-in-python/)
     - [`interval-binning`](https://interval-binning.readthedocs.io/en/latest/)
     - [`pandas`](https://pandas.pydata.org/)
     - [`PyMySQL`](https://pymysql.readthedocs.io/en/latest/)
@@ -22,21 +26,15 @@ GUD requires the following dependencies:
 
 ## INSTALLATION
 
-```bash
-conda create -n gud -c bioconda python=3.7 pybedtools biopython pymysql
-pip install interval-binning SQLAlchemy-FullText-Search sqlalchemy-utils
 ```
-
-## SETUP
-
-```bash
-conda env create -f environment.yml
+conda create -n gud -c bioconda -c conda-forge python=3.7 biopython coreutils flask flask-sqlalchemy fuzzywuzzy pandas pymysql pyliftover
+pip install flask-limiter interval-binning python-Levenshtein SQLAlchemy-FullText-Search sqlalchemy-utils
 ```
 
 ## START UP SERVER
 
-```bash
-conda activate GUD
+```
 export FLASK_APP=GUD/api
 export FLASK_ENV=development
+flask run
 ```
