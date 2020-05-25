@@ -13,12 +13,12 @@ GUD requires the following dependencies:
 * [`Python`](https://www.python.org) `≥2.7` or `3.x` with:
     - [`Biopython`](https://biopython.org)
     - [`interval-binning`](https://interval-binning.readthedocs.io/en/latest/)
-    - [`macs2`](https://github.com/taoliu/MACS/)
     - [`pandas`](https://pandas.pydata.org/)
     - [`PyMySQL`](https://pymysql.readthedocs.io/en/latest/)
+    - [`pyliftover`](https://github.com/konstantint/pyliftover)
     - [`SQLAlchemy`](https://www.sqlalchemy.org)
-    - `SQLAlchemy-FullText-Search`
-    - `sqlalchemy-utils`
+    - [`SQLAlchemy-FullText-Search`](https://github.com/mengzhuo/sqlalchemy-fulltext-search)
+    - [`SQLAlchemy-Utils`](https://sqlalchemy-utils.readthedocs.io/en/latest/)
 
 ## INSTALLATION
 
