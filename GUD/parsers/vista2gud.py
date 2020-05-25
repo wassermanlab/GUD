@@ -307,8 +307,6 @@ def _insert_data(genome, data_file, chains_file=None):
                 sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
                 samples.setdefault(s, sample)
     
-            sample = samples[s]
-
             # Upsert enhancer
             enhancer = Enhancer()
             enhancer.region_id = region.uid
@@ -316,6 +314,7 @@ def _insert_data(genome, data_file, chains_file=None):
             enhancer.source_id = source.uid
             enhancer.sample_id = samples[s].uid
             ParseUtils.upsert_enhancer(session, enhancer)
+            print("here")
 
 #-------------#
 # Main        #

@@ -232,10 +232,10 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     source = Source()
     source.name = "FANTOM5"
     if genome == "hg19" or genome == "mm9":
-        source.source_metadata = "%s,True," % feat_type
+        source.source_metadata = "True,"
     else:
-        source.source_metadata = "%s,False," % feat_type
-    source.metadata_descriptor = "feature,liftOver,"
+        source.source_metadata = "False,"
+    source.metadata_descriptor = "liftOver,"
     source.url = url
     ParseUtils.upsert_source(session, source)
     source = ParseUtils.get_source(session, source.name, source.source_metadata,
