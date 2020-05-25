@@ -314,7 +314,6 @@ def _insert_data(genome, data_file, chains_file=None):
             enhancer.source_id = source.uid
             enhancer.sample_id = samples[s].uid
             ParseUtils.upsert_enhancer(session, enhancer)
-            print("here")
 
 #-------------#
 # Main        #
