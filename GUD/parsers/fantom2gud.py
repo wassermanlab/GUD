@@ -10,14 +10,6 @@ import re
 import shutil
 import subprocess
 import sys
-# Python 3+
-if sys.version_info > (3, 0):
-    from urllib.request import urlretrieve
-    from urllib.parse import unquote
-# Python 2.7
-else:
-    from urllib import urlretrieve
-    from urllib2 import unquote
 
 # Import from GUD module
 from GUD import GUDUtils
@@ -248,6 +240,8 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     session.close()
     engine.dispose()
 
+    exit(0)
+
     # Prepare data
     bed_file, idx = _preprocess_data(data_files, feat_type, dummy_dir, test, threads)
 
@@ -270,30 +264,31 @@ def _download_data(genome, feat_type, dummy_dir="/tmp/"):
     url = "http://fantom.gsc.riken.jp/5/datafiles/"
     ftp_files = []
 
-    if genome == "hg38" or genome == "mm10":
-        url += "reprocessed/%s_latest/extra/" % genome
-        if feat_type == "enhancer":
-            ftp_files.append("F5.%s.enhancers.expression.usage.matrix.gz" % genome)
-            ftp_files.append("F5.%s.enhancers.bed.gz" % genome)
-            url += "enhancer"
-        else:
-            ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2_tpm_ann.osc.txt.gz" % genome)
-            ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2.bed.gz" % genome)
-            dummy_file = os.path.join(dummy_dir, ftp_files[-1])
-            if not os.path.exists(dummy_file):
-                urlretrieve(os.path.join(url, "CAGE_peaks", ftp_files[-1]), dummy_file)
-            url += "CAGE_peaks_expression"
-    # else:
-    #     url += "latest/extra/"
-    #     if feat_type == "enhancer":
-    #         if genome == "hg19":
-    #             ftp_files.append("human_permissive_enhancers_phase_1_and_2_expression_tpm_matrix.txt.gz")
-    #         elif genome == "mm9":
-    #             ftp_files.append("mouse_permissive_enhancers_phase_1_and_2_expression_tpm_matrix.txt.gz")
-    #         url += "Enhancers"
-    #     else:
-    #         ftp_files.append("%s.cage_peak_phase1and2combined_tpm_ann.osc.txt.gz" % genome)
-    #         url += "CAGE_peaks"
+    # Python 3+
+    if sys.version_info > (3, 0):
+        from urllib.request import urlretrieve
+        from urllib.parse import unquote
+    # Python 2.7
+    else:
+        from urllib import urlretrieve
+        from urllib2 import unquote
+
+    if genome == "hg19" or genome == "hg38":
+        genome = "hg38"
+    else:
+        genome = "mm10"
+    url += "reprocessed/%s_latest/extra/" % genome
+    if feat_type == "enhancer":
+        ftp_files.append("F5.%s.enhancers.expression.usage.matrix.gz" % genome)
+        ftp_files.append("F5.%s.enhancers.bed.gz" % genome)
+        url += "enhancer"
+    else:
+        ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2_tpm_ann.osc.txt.gz" % genome)
+        ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2.bed.gz" % genome)
+        dummy_file = os.path.join(dummy_dir, ftp_files[-1])
+        if not os.path.exists(dummy_file):
+            urlretrieve(os.path.join(url, "CAGE_peaks", ftp_files[-1]), dummy_file)
+        url += "CAGE_peaks_expression"
 
     # Download data
     dummy_files = []
