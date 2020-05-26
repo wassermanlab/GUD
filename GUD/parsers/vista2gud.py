@@ -9,12 +9,6 @@ import shutil
 import subprocess
 import sys
 import warnings
-# Python 3+
-if sys.version_info > (3, 0):
-    from urllib.request import urlretrieve
-# Python 2.7
-else:
-    from urllib import urlretrieve
 
 # Import from GUD module
 from GUD import GUDUtils

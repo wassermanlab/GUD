@@ -18,6 +18,7 @@ GUD requires the following dependencies:
     - [`FuzzyWuzzy`](https://chairnerd.seatgeek.com/fuzzywuzzy-fuzzy-string-matching-in-python/)
     - [`interval-binning`](https://interval-binning.readthedocs.io/en/latest/)
     - [`pandas`](https://pandas.pydata.org/)
+    - [`pybedtools`](https://daler.github.io/pybedtools/)
     - [`PyMySQL`](https://pymysql.readthedocs.io/en/latest/)
     - [`pyliftover`](https://github.com/konstantint/pyliftover)
     - [`SQLAlchemy`](https://www.sqlalchemy.org)
