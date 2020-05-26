@@ -240,8 +240,6 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     session.close()
     engine.dispose()
 
-    exit(0)
-
     # Prepare data
     bed_file, idx = _preprocess_data(data_files, feat_type, dummy_dir, test, threads)
 
@@ -249,7 +247,7 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     data_files = _split_data(bed_file, threads)
 
     # Parallelize inserts to the database
-    ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
+    ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, genome=genome, test=test), threads)
 
     # Remove files
     if remove:
@@ -261,7 +259,7 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
 def _download_data(genome, feat_type, dummy_dir="/tmp/"):
 
     # Initialize
-    url = "http://fantom.gsc.riken.jp/5/datafiles/"
+    dummy_files = []
     ftp_files = []
 
     # Python 3+
@@ -273,31 +271,47 @@ def _download_data(genome, feat_type, dummy_dir="/tmp/"):
         from urllib import urlretrieve
         from urllib2 import unquote
 
-    if genome == "hg19" or genome == "hg38":
-        genome = "hg38"
+    if genome == "hg19" or genome == "mm9":
+
+        if genome == "hg19":
+            url = "http://hgdownload.soe.ucsc.edu/goldenPath/hg38/liftOver/"
+            chains_file = "hg38ToHg19.over.chain.gz"
+            genome = "hg38"
+        else:
+            url = "http://hgdownload.soe.ucsc.edu/goldenPath/mm10/liftOver/"
+            chains_file = "mm10ToMm9.over.chain.gz"
+            genome = "mm10"
+
+        dummy_files.append(os.path.join(dummy_dir, chains_file))
+
+        # Download data
+        if not os.path.exists(dummy_files[-1]):
+            f = urlretrieve(os.path.join(url, chains_file), dummy_files[-1])
+
     else:
-        genome = "mm10"
-    url += "reprocessed/%s_latest/extra/" % genome
+        dummy_files.append(None)
+
+    url = "http://fantom.gsc.riken.jp/5/datafiles/reprocessed/%s_latest/extra/" % genome
     if feat_type == "enhancer":
-        ftp_files.append("F5.%s.enhancers.expression.usage.matrix.gz" % genome)
-        ftp_files.append("F5.%s.enhancers.bed.gz" % genome)
         url += "enhancer"
+        ftp_files.append("F5.%s.enhancers.bed.gz" % genome)
+        ftp_files.append("F5.%s.enhancers.expression.usage.matrix.gz" % genome)
     else:
-        ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2_tpm_ann.osc.txt.gz" % genome)
-        ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2.bed.gz" % genome)
+        ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2.bed.gz" % genome) 
         dummy_file = os.path.join(dummy_dir, ftp_files[-1])
+        # Download data
         if not os.path.exists(dummy_file):
             urlretrieve(os.path.join(url, "CAGE_peaks", ftp_files[-1]), dummy_file)
         url += "CAGE_peaks_expression"
+        ftp_files.append("%s_fair+new_CAGE_peaks_phase1and2_tpm_ann.osc.txt.gz" % genome)
 
     # Download data
-    dummy_files = []
     for ftp_file in ftp_files:
         dummy_files.append(os.path.join(dummy_dir, ftp_file))
         if not os.path.exists(dummy_files[-1]):
             urlretrieve(os.path.join(url, ftp_file), dummy_files[-1])
 
-    return(dummy_files, os.path.join(url, ftp_files[0]))
+    return(dummy_files[::-1], os.path.join(url, ftp_files[0]))
 
 def _get_samples(session, file_name):
 
@@ -345,21 +359,21 @@ def _get_samples(session, file_name):
 def _preprocess_data(data_files, feat_type, dummy_dir="/tmp/", test=False, threads=1):
 
     # Initialize
-    idx = []
+    coords = {}
     dummy_files = []
     if feat_type == "enhancer":
         start = 1
     else:
         start = 7
 
-    # If two files...
-    if len(data_files) == 2:
+    # If chains file...
+    if data_files[-1] is not None:
+        from pyliftover import LiftOver
+        lo = LiftOver(chains_file)        
 
-        # Initialize
-        coords = {}
-
-        for line in ParseUtils.parse_tsv_file(data_files[1]):
-            coords.setdefault(line[3], line[:3] + [line[5]])
+    # For each line...
+    for line in ParseUtils.parse_tsv_file(data_files[1]):
+        coords.setdefault(line[3], line[:3] + [line[5]])
 
     # Enhancer file is weird: rows have different number of cols;
     # Read as a normal file and split by tabs

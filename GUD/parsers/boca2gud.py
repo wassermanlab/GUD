@@ -235,7 +235,7 @@ def _download_data(genome, dummy_dir="/tmp/"):
     if genome == "hg19":
         ftp_files.append("boca_peaks.zip")
         ftp_files.append("boca_peaks_consensus_no_blacklisted_regions.bed")
-    elif genome == "hg38":
+    else:
         ftp_files.append("boca_peaks_hg38_lifted.zip")
         ftp_files.append("boca_peaks_consensus_no_blacklisted_regions_hg38_lifted.bed")
 
