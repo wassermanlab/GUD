@@ -21,6 +21,7 @@ GUD requires the following dependencies:
     - [`pybedtools`](https://daler.github.io/pybedtools/)
     - [`PyMySQL`](https://pymysql.readthedocs.io/en/latest/)
     - [`pyliftover`](https://github.com/konstantint/pyliftover)
+    - [`requests`]()
     - [`SQLAlchemy`](https://www.sqlalchemy.org)
     - [`SQLAlchemy-FullText-Search`](https://github.com/mengzhuo/sqlalchemy-fulltext-search)
     - [`SQLAlchemy-Utils`](https://sqlalchemy-utils.readthedocs.io/en/latest/)
@@ -28,7 +29,7 @@ GUD requires the following dependencies:
 ## INSTALLATION
 
 ```
-conda create -n gud -c bioconda -c conda-forge python=3.7 biopython coreutils flask flask-sqlalchemy fuzzywuzzy pandas pymysql pyliftover
+conda create -n gud -c bioconda -c conda-forge python=3.7 biopython coreutils flask flask-sqlalchemy fuzzywuzzy pandas pymysql pyliftover requests
 pip install flask-limiter interval-binning python-Levenshtein SQLAlchemy-FullText-Search sqlalchemy-utils
 ```
 

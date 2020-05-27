@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+import warnings
 
 # Import from GUD module
 from GUD import GUDUtils
@@ -247,7 +248,7 @@ def fantom_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     data_files = _split_data(bed_file, threads)
 
     # Parallelize inserts to the database
-    ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, genome=genome, test=test), threads)
+    ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
 
     # Remove files
     if remove:
@@ -343,7 +344,7 @@ def _get_samples(session, file_name):
             if line[5] == "female":
                 sample.X = 2
                 sample.Y = 0
-            elif line[6] == "male":
+            if line[5] == "male":
                 sample.X = 1
                 sample.Y = 1
             ParseUtils.upsert_sample(session, sample)
@@ -362,18 +363,29 @@ def _preprocess_data(data_files, feat_type, dummy_dir="/tmp/", test=False, threa
     coords = {}
     dummy_files = []
     if feat_type == "enhancer":
-        start = 1
+        start_idx = 1
     else:
-        start = 7
+        start_idx = 7
 
     # If chains file...
     if data_files[-1] is not None:
         from pyliftover import LiftOver
-        lo = LiftOver(chains_file)        
+        lo = LiftOver(data_files[-1])        
 
     # For each line...
     for line in ParseUtils.parse_tsv_file(data_files[1]):
-        coords.setdefault(line[3], line[:3] + [line[5]])
+        chrom, start, end = line[:3]
+        if data_files[-1] is not None:
+            try:
+                l = lo.convert_coordinate(chrom, start) # i.e. already 0-based
+                start = l[0][1]
+                l = lo.convert_coordinate(chrom, end - 1)  # i.e. requires 0-based
+                end = l[0][1] + 1
+            except:
+                msg = "position could not be found in new assembly"
+                warnings.warn("%s: %s:%s-%s" % (msg, chrom, start, end), Warning, stacklevel=2)
+                continue
+        coords.setdefault(line[3], [chrom, start, end, line[5]])
 
     # Enhancer file is weird: rows have different number of cols;
     # Read as a normal file and split by tabs
@@ -401,18 +413,14 @@ def _preprocess_data(data_files, feat_type, dummy_dir="/tmp/", test=False, threa
 
                 line = line.split("\t")
 
-                if line[0].startswith("#") or \
-                   line[0].startswith("CNhs") or \
-                   line[0] == "00Annotation" or \
-                   line[0] == "01STAT:MAPPED" or \
-                   line[0] == "02STAT:NORM_FACTOR":
+                if line[0] not in coords:
                     continue
 
                 else:
                     if feat_type == "enhancer":
-                        txt = "\t".join(map(str, coords[line[0]]+line[start:]))
+                        txt = "\t".join(map(str, coords[line[0]]+line[start_idx:]))
                     else:
-                        txt = "\t".join(map(str, coords[line[0]]+[line[1]]+line[start:]))
+                        txt = "\t".join(map(str, coords[line[0]]+[line[1]]+line[start_idx:]))
                     ParseUtils.write(dummy_file, txt)
 
         # Add dummy file
@@ -504,22 +512,22 @@ def _insert_data(data_file, test=False):
             feature.experiment_id = experiment.uid
             feature.source_id = source.uid
             feature.strand = line.pop(0)
-            feature.tss = 1
-            feature.gene = None
-            m = re.search("p(\d+)@(\w+)", line.pop(0))
-            if m:
+            try:
+                m = re.search("p(\d+)@(\w+)", line.pop(0))
                 if m.group(2) in genes:
                     feature.tss = int(m.group(1))
                     feature.gene = m.group(2)
+            except:
+                feature.tss = 1
+                feature.gene = None
             for i in range(len(idx)):
-                expression_level = float("{:.3f}".format(line[i]))
-                if expression_level > 0 and idx[i] in samples:
+                if float(line[i]) > 0 and idx[i] in samples:
                     sample_ids.append(samples[idx[i]].uid)
-                    expression_levels.append(expression_level)
+                    expression_levels.append(float("{:.3f}".format(line[i])))
             sample_id = "%s," % ",".join(map(str, sample_ids))
-            feature.sample_id = sample_id.encode("utf-8")
+            feature.sample_id = sample_id.encode(encoding="UTF-8")
             expression_level = "%s," % ",".join(map(str, expression_levels))
-            feature.expression_level = expression_level.encode("utf-8")
+            feature.expression_level = expression_level.encode(encoding="UTF-8")
             ParseUtils.upsert_tss(session, feature)
             feature = ParseUtils.get_tss(session, feature.region_id, feature.experiment_id,
                                          feature.source_id, feature.gene, feature.tss)
@@ -551,363 +559,6 @@ def _insert_data(data_file, test=False):
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
-
-
-# def _get_samples(session, file_name):
-
-#     # Initialize
-#     samples = {}
-
-#     # For each line...
-#     for line in ParseUtils.parse_tsv_file(file_name):
-
-#         # If add...
-#         if line[3] == "Yes":
-
-#             # Get sample
-#             sample = Sample()
-#             sample.name = line[2]
-#             sample.treatment = False
-#             if line[4] == "Yes":
-#                 sample.treatment = True
-#             sample.cell_line = False
-#             if line[5] == "Yes":
-#                 sample.cell_line = True
-#             sample.cancer = False
-#             if line[6] == "Yes":
-#                 sample.cancer = True
-
-#             # Upsert sample
-#             ParseUtils.upsert_sample(session, sample)
-
-#             # Get sample ID
-#             sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
-
-#             # Add sample
-#             samples.setdefault(line[0], sample.uid)
-
-#     return(samples)
-
-
-    # # Get samples
-    # for line in GUDglobals.parse_tsv_file(
-    #     samples_file
-    # ):
-    #     # Initialize 
-    #     sample_id = line[0]
-    #     sample_name = line[1]
-    #     cell_or_tissue = line[2]
-    #     if line[3] == "Yes": add = True
-    #     else: add = False
-    #     if line[4] == "Yes": treatment = True
-    #     else: treatment = False
-    #     if line[5] == "Yes": cell_line = True
-    #     else: cell_line = False
-    #     if line[6] == "Yes": cancer = True
-    #     else: cancer = False
-    #     # Get sample
-    #     samples.setdefault(sample_id,
-    #         {
-    #             "sample_name": sample_name,
-    #             "cell_or_tissue": cell_or_tissue,
-    #             "add": add,
-    #             "treatment": treatment,
-    #             "cell_line": cell_line,
-    #             "cancer": cancer
-    #         }
-    #     )
-
-    # # Get experiment
-    # experiment = Experiment()
-    # if experiment.is_unique(session, "CAGE"):    
-    #     experiment.name = "CAGE"
-    #     session.add(experiment)
-    #     session.commit()
-    # exp = experiment.select_by_name(
-    #     session,
-    #     "CAGE"
-    # )
-
-    # # Get source
-    # source = Source()
-    # if source.is_unique(session, source_name):    
-    #     source.name = source_name
-    #     session.add(source)
-    #     session.commit()
-    # sou = source.select_by_name(
-    #     session,
-    #     source_name
-    # )
-
-    # # Create table
-    # if feat_type == "enhancer":
-    #     tpms_start_at = 1
-    #     table = Enhancer()
-    #     if not engine.has_table(
-    #         table.__tablename__
-    #     ):
-    #         # Create table
-    #         table.__table__.create(
-    #             bind=engine
-    #         )
-    #     lines = GUDglobals.parse_csv_file(
-    #         matrix_file
-    #     )
-
-    # if feat_type == "tss":
-    #     tpms_start_at = 7
-    #     table = TSS()
-    #     if not engine.has_table(
-    #         table.__tablename__
-    #     ):
-    #         # Create table
-    #         table.__table__.create(
-    #             bind=engine
-    #         )
-    #     table = Expression()
-    #     if not engine.has_table(
-    #         table.__tablename__
-    #     ):
-    #         # Create table
-    #         table.__table__.create(
-    #             bind=engine
-    #         )
-    #     lines = GUDglobals.parse_tsv_file(
-    #         matrix_file
-    #     )
-
-    # # Get valid chromosomes
-    # chroms = Chrom.chrom_sizes(session)
-
-    # # For each line...
-    # for line in lines:
-    #     # Skip comments
-    #     if line[0].startswith("#"): continue
-    #     # Get sample IDs
-    #     if len(sample_ids) == 0:
-    #         for sample in line[tpms_start_at:]:
-    #             m = re.search(
-    #                 "(CNhs\d+)",
-    #                 unquote(sample)
-    #             )
-    #             sample_ids.append(m.group(1))
-    #     # If enhancer/TSS...
-    #     elif line[0].startswith("chr") or\
-    #          line[0].startswith("\"chr"):
-    #         # Initialize
-    #         data = {}
-    #         features = []
-    #         sampleIDs = []
-    #         avg_expression_levels = []
-    #         # Get coordinates
-    #         if feat_type == "enhancer":
-    #             m = re.search(
-    #                 "(chr\S+)\:(\d+)\-(\d+)",
-    #                 line[0]
-    #             )
-    #             chrom = m.group(1)
-    #             start = int(m.group(2))
-    #             end = int(m.group(3))
-    #             strand = None
-    #         if feat_type == "tss":
-    #             # Initialize
-    #             peak_ids = set()
-    #             m = re.search(
-    #                 "(chr\S+)\:(\d+)\.\.(\d+),(\S)",
-    #                 line[0]
-    #             )
-    #             chrom = m.group(1)
-    #             start = int(m.group(2))
-    #             end = int(m.group(3))
-    #             strand = m.group(4)
-    #             for peak in line[1].split(","):
-    #                 m = re.search(
-    #                     "p(\d+)@(\w+)",
-    #                     peak
-    #                 )
-    #                 if m:
-    #                     peak_ids.add((
-    #                         m.group(2), m.group(1)
-    #                     ))
-    #                 else:
-    #                     peak_ids.add((None, 1))
-    #         # Ignore non-standard chroms,
-    #         # scaffolds, etc.
-    #         if chrom not in chroms:
-    #             continue
-    #         # Get region
-    #         region = Region()
-    #         if region.is_unique(
-    #             session,
-    #             chrom,
-    #             start,
-    #             end,
-    #             strand
-    #         ):
-    #             # Insert region
-    #             region.bin = assign_bin(start, end)
-    #             region.chrom = chrom
-    #             region.start = start
-    #             region.end = end
-    #             region.strand = strand
-    #             session.add(region)
-    #             session.commit()
-    #         reg = region.select_unique(
-    #             session,
-    #             chrom,
-    #             start,
-    #             end,
-    #             strand
-    #         )
-    #         # For each sample...
-    #         for i in range(tpms_start_at, len(line)):
-    #             # Skip sample
-    #             sample_id = sample_ids[
-    #                 i - tpms_start_at
-    #             ]
-    #             if not samples[sample_id]["add"]:
-    #                 continue
-    #             # Get data
-    #             name =\
-    #                 samples[sample_id]["cell_or_tissue"]
-    #             treatment =\
-    #                 samples[sample_id]["treatment"]
-    #             cell_line =\
-    #                 samples[sample_id]["cell_line"]
-    #             cancer =\
-    #                 samples[sample_id]["cancer"]
-    #             data.setdefault((
-    #                     name,
-    #                     treatment,
-    #                     cell_line,
-    #                     cancer
-    #                 ), []
-    #             )
-    #             data[(
-    #                     name,
-    #                     treatment,
-    #                     cell_line,
-    #                     cancer
-    #                 )
-    #             ].append(float(line[i]))
-    #         # For each sample...
-    #         for s in data:
-    #             # Initialize
-    #             name = s[0]
-    #             treatment = s[1]
-    #             cell_line = s[2]
-    #             cancer = s[3]
-    #             # Get sample
-    #             sample = Sample()
-    #             if sample.is_unique(
-    #                 session,
-    #                 name,
-    #                 treatment,
-    #                 cell_line,
-    #                 cancer
-    #             ):
-    #                 sample.name = name
-    #                 sample.treatment = treatment
-    #                 sample.cell_line = cell_line
-    #                 sample.cancer = cancer
-    #                 session.add(sample)
-    #                 session.commit()
-    #             sam = sample.select_unique(
-    #                 session,
-    #                 name,
-    #                 treatment,
-    #                 cell_line,
-    #                 cancer
-    #             )
-    #             # Skip if feature not expressed in sample
-    #             avg_expression_level = float(
-    #                 sum(data[
-    #                     name,
-    #                     treatment,
-    #                     cell_line,
-    #                     cancer
-    #                 ]) / len(data[
-    #                     name,
-    #                     treatment,
-    #                     cell_line,
-    #                     cancer
-    #                 ])
-    #             )
-    #             if avg_expression_level > 0:
-    #                 sampleIDs.append(sam.uid)
-    #                 avg_expression_levels.append(
-    #                     "%.3f" % avg_expression_level
-    #                 )
-    #         # Get TSS
-    #         if feat_type == "tss":
-    #             # Initialize
-    #             tss_ids = set()
-    #             for gene, tss_id in peak_ids:
-    #                 tss = TSS()
-    #                 if tss.is_unique(
-    #                     session,
-    #                     reg.uid,
-    #                     sou.uid,
-    #                     exp.uid,
-    #                     gene,
-    #                     tss_id
-    #                 ):
-    #                     tss.regionID = reg.uid
-    #                     tss.sourceID = sou.uid
-    #                     tss.experimentID = exp.uid
-    #                     tss.gene = gene
-    #                     tss.tss = tss_id
-    #                     tss.sampleIDs = "{},".format(
-    #                         ",".join(map(str, sampleIDs))
-    #                     )
-    #                     tss.avg_expression_levels = "{},".format(
-    #                         ",".join(avg_expression_levels)
-    #                     )
-    #                     session.add(tss)
-    #                     session.commit()
-    #                 tss = tss.select_unique(
-    #                     session,
-    #                     reg.uid,
-    #                     sou.uid,
-    #                     exp.uid,
-    #                     gene,
-    #                     tss_id
-    #                 )
-    #                 tss_ids.add(tss)
-    #         # For each sample...
-    #         for i in range(len(sampleIDs)):
-    #             if feat_type == "enhancer":
-    #                 enhancer = Enhancer()
-    #                 if enhancer.is_unique(
-    #                     session,
-    #                     reg.uid,
-    #                     sou.uid,
-    #                     sampleIDs[i],
-    #                     exp.uid
-    #                 ):
-    #                     enhancer.regionID = reg.uid
-    #                     enhancer.sourceID = sou.uid
-    #                     enhancer.sampleID = sampleIDs[i]
-    #                     enhancer.experimentID = exp.uid
-    #                     # Append to features
-    #                     features.append(enhancer)
-    #             if feat_type == "tss":
-    #                 for tss in tss_ids:
-    #                     expression = Expression()
-    #                     if expression.is_unique(
-    #                         session,
-    #                         tss.uid,
-    #                         sampleIDs[i]
-    #                     ):
-    #                         expression.tssID = tss.uid
-    #                         expression.sampleID = sampleIDs[i]
-    #                         expression.avg_expression_level =\
-    #                             avg_expression_levels[i]
-    #                         # Append to features
-    #                         features.append(expression)
-    #         # Insert features
-    #         session.add_all(features)
-    #         session.commit()
 
 #-------------#
 # Main        #

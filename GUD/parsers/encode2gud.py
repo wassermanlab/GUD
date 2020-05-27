@@ -33,7 +33,8 @@ from GUD.ORM.tf_binding import TFBinding
 from . import ParseUtils
 
 usage_msg = """
-usage: %s --genome STR --samples FILE --feature STR [-h] [options]
+usage: %s --genome STR --samples FILE --feature STR
+                     [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
@@ -42,10 +43,8 @@ into GUD.
 
   --genome STR        genome assembly
   --samples FILE      ENCODE samples (manually-curated)
-  --feature STR       type of genomic feature ("atac-seq",
-                      "accessibility", "histone" or "tf")
-  --sample-type STR   restrict to samples of speficied type
-                      ("cell" or "tissue"; default = ignore)
+  --feature STR       type of genomic feature ("accessibility",
+                      "histone" or "tf")
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -173,7 +172,6 @@ def parse_args():
     parser.add_argument("--genome")
     parser.add_argument("--samples")
     parser.add_argument("--feature")
-    parser.add_argument("--sample-type")
 
     # Optional args
     optional_group = parser.add_argument_group("optional arguments")
@@ -214,19 +212,11 @@ def check_args(args):
         exit(0)
 
     # Check for invalid feature
-    valid_features = ["atac-seq", "accessibility", "histone", "tf"]
+    valid_features = ["accessibility", "histone", "tf"]
     if args.feature not in valid_features:
         error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--feature\"", "invalid choice", "\"%s\" (choose from" % args.feature, "%s)\n" % " ".join(["\"%s\"" % i for i in valid_features])]
         print(": ".join(error))
         exit(0)
-
-    # Check for sample types
-    valid_sample_types = ["cell", "tissue"]
-    if args.sample_type is not None:
-        if args.sample_type not in valid_sample_types:
-            error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--sample-type\"", "invalid choice", "\"%s\" (choose from" % args.sample_type, "%s or ignore this option)\n" % " ".join(["\"%s\"" % i for i in valid_sample_types])]
-            print(": ".join(error))
-            exit(0)
 
     # Check "--threads" argument
     try:
@@ -261,9 +251,9 @@ def main():
     GUDUtils.db = args.db
 
     # Insert ENCODE data
-    encode_to_gud(args.genome, args.samples, args.feature, args.sample_type, args.dummy_dir, args.remove, args.test, args.threads)
+    encode_to_gud(args.genome, args.samples, args.feature, args.dummy_dir, args.remove, args.test, args.threads)
 
-def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="/tmp/", remove=False, test=False, threads=1):
+def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
     e.g. python -m GUD.parsers.encode2gud --genome hg38 --samples ./samples/ENCODE.tsv --feature accessibility
     """
@@ -306,7 +296,7 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
     ParseUtils.initialize_gud_db()
 
     # Create table
-    if feat_type == "accessibility" or feat_type == "atac-seq":
+    if feat_type == "accessibility":
         Feature = DNAAccessibility
     elif feat_type == "histone":
         Feature = HistoneModification
@@ -330,7 +320,6 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
     # Unless pickle file exists
     pickle_file = "%s.pickle" % metadata_file
     if not os.path.exists(pickle_file):
-
         # Parse metadata
         # Add biosample summary
         encodes = _add_biosample_summary(_parse_metadata(genome, metadata_file))
@@ -338,7 +327,6 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
         pickle.dump(encodes, handle)
 
     else:
-
         handle = ParseUtils._get_file_handle(pickle_file, "rb")
         encodes = pickle.load(handle)
 
@@ -347,7 +335,7 @@ def encode_to_gud(genome, samples_file, feat_type, sample_type=None, dummy_dir="
 
     # Filter ENCODE accessions (i.e. for each experiment, keep the accession from the best type of file)
     # Group ENCODE accessions by experiment target and type
-    grouped_accessions = _group_ENCODE_accessions(_filter_ENCODE_accessions(feat_type, sample_type))
+    grouped_accessions = _group_ENCODE_accessions(_filter_ENCODE_accessions(feat_type))
 
     # For each experiment target/type...
     for experiment_target, experiment_type in sorted(grouped_accessions):
@@ -473,7 +461,8 @@ def _parse_metadata(genome, metadata_file):
             biosample_type = line[biosample_type_idx]
             download_url = line[download_idx]
             experiment_accession = line[experiment_acc_idx]
-            experiment_type = line[experiment_type_idx]
+            m = re.search("^(\S+)",line[experiment_type_idx])
+            experiment_type = m.group(1)
             experiment_target = line[experiment_target_idx]
             if type(experiment_target) is float and isnan(experiment_target):
                 experiment_target = None
@@ -584,7 +573,7 @@ def _add_biosample_info(encode_objects):
 
     return(updated_encode_objects)
 
-def _filter_ENCODE_accessions(feat_type, sample_type=None):
+def _filter_ENCODE_accessions(feat_type):
 
     # Initialize
     done = set()
@@ -592,13 +581,11 @@ def _filter_ENCODE_accessions(feat_type, sample_type=None):
     filtered_accessions = set()
 
     # Possible output files (from ENCODE pipelines)
-    # https://www.encodeproject.org/atac-seq/
     # https://www.encodeproject.org/data-standards/dnase-seq/
     # https://www.encodeproject.org/chip-seq/histone/
     # https://www.encodeproject.org/chip-seq/transcription_factor/
     output_types = {
         "accessibility": ["peaks"],
-        "atac-seq": [],
         "histone": ["peaks"],
         "tf": ["optimal idr thresholded peaks", "conservative idr thresholded peaks", "pseudoreplicated idr thresholded peaks", "peaks"]
     }
@@ -608,10 +595,6 @@ def _filter_ENCODE_accessions(feat_type, sample_type=None):
 
         # Group ENCODE objects by experiment accession
         encode = encodes[accession]
-        if sample_type == "tissue" and encode.biosample_type != "tissue":
-            continue
-        elif sample_type == "cell" and encode.biosample_type == "tissue":
-            continue
         grouped_accessions.setdefault(encode.experiment_accession, [])
         grouped_accessions[encode.experiment_accession].append(accession)
 
@@ -664,6 +647,10 @@ def _preprocess_data(accessions, dummy_dir="/tmp/", test=False, threads=1):
     label = encode.experiment_type
     if encode.experiment_target is not None:
         label += ".%s" % encode.experiment_target
+    print(encode.experiment_type)
+    print(encode.experiment_target)
+    print(label)
+    exit(0)
 
     # Skip if BED file exists
     bed_file = os.path.join(dummy_dir, "%s.bed" % label)
@@ -722,6 +709,8 @@ def _split_data(data_file, threads=1):
     # Initialize
     split_files = []
     split_dir = os.path.dirname(os.path.realpath(data_file))
+    print(data_file)
+    exit(0)
 
     # Get number of lines
     output = subprocess.check_output(["wc -l %s" % data_file], shell=True)
