@@ -374,6 +374,10 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
         # Parallelize inserts to the database
         ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data_file, test=test), threads)
 
+        # Testing
+        if test:
+            break
+
     # Remove files
     if remove:
         shutil.rmtree(dummy_dir)
@@ -647,10 +651,6 @@ def _preprocess_data(accessions, dummy_dir="/tmp/", test=False, threads=1):
     label = encode.experiment_type
     if encode.experiment_target is not None:
         label += ".%s" % encode.experiment_target
-    print(encode.experiment_type)
-    print(encode.experiment_target)
-    print(label)
-    exit(0)
 
     # Skip if BED file exists
     bed_file = os.path.join(dummy_dir, "%s.bed" % label)
@@ -709,8 +709,6 @@ def _split_data(data_file, threads=1):
     # Initialize
     split_files = []
     split_dir = os.path.dirname(os.path.realpath(data_file))
-    print(data_file)
-    exit(0)
 
     # Get number of lines
     output = subprocess.check_output(["wc -l %s" % data_file], shell=True)
@@ -768,8 +766,6 @@ def _download_ENCODE_bed_file(encode, dummy_dir="/tmp/", test=False):
 
     #         # Set peaks file as download file
     #         shutil.move(peaks_file, download_file)
-
-    # else:
 
     # Download BED file
     download_file += ".bed.gz"
