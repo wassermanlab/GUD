@@ -13,6 +13,7 @@ GUD requires the following dependencies:
 * [`MySQL`](https://www.mysql.com)
 * [`Python`](https://www.python.org) `≥2.7` or `3.x` with:
     - [`Biopython`](https://biopython.org)
+    - [`Core API`](https://www.coreapi.org/)
     - [`flask`](https://flask.palletsprojects.com/en/1.0.x/)
     - [`Flask-SQLAlchemy`](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)
     - [`FuzzyWuzzy`](https://chairnerd.seatgeek.com/fuzzywuzzy-fuzzy-string-matching-in-python/)
@@ -29,8 +30,10 @@ GUD requires the following dependencies:
 ## INSTALLATION
 
 ```
-conda create -n gud -c bioconda -c conda-forge python=3.7 biopython coreutils flask flask-sqlalchemy fuzzywuzzy pandas pymysql pyliftover requests
-pip install flask-limiter interval-binning python-Levenshtein SQLAlchemy-FullText-Search sqlalchemy-utils
+conda create -n gud -c bioconda -c conda-forge python=3.7 biopython coreapi coreutils \
+    flask flask-sqlalchemy fuzzywuzzy pandas pymysql pyliftover requests
+pip install flask-limiter interval-binning python-Levenshtein SQLAlchemy-FullText-Search \
+    sqlalchemy-utils
 ```
 
 ## START UP SERVER
