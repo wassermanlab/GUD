@@ -1,0 +1,607 @@
+ReMap_sample_name	datasets	treatment	cell_line	cancer	sex	add	OnTarget_cell_or_tissue	comments
+K-562	560	No	Yes	Yes	female	Yes	K-562	Chronic myelogenous leukemia
+MCF-7	478	No	Yes	Yes	female	Yes	MCF-7	Invasive ductal carcinoma
+HEK293	345	No	Yes	No	female	Yes	HEK293	
+Hep-G2	293	No	Yes	Yes	male	Yes	Hep-G2	Hepatoblastoma
+HEK293T	256	No	Yes	No	female	Yes	HEK293T	
+GM12878	204	No	Yes	No	female	Yes	GM12878	
+LNCaP	155	No	Yes	Yes	male	Yes	LNCaP	Prostate carcinoma
+THP-1	105	No	Yes	Yes	male	Yes	THP-1	Childhood acute monocytic leukemia
+WA01	97	No	Yes	No	male	Yes	WA01	
+A-549	92	No	Yes	Yes	male	Yes	A-549	Lung adenocarcinoma
+HCT-116	88	No	Yes	Yes	male	Yes	HCT 116	Colon carcinoma
+breast	80	No	No	Yes		Yes	breast	Mix of cancer and not cancer samples
+HeLa	79	No	Yes	Yes	female	Yes	HeLa	Human papillomavirus-related endocervical adenocarcinoma
+VCaP	79	No	Yes	Yes	male	Yes	VCaP	Prostate carcinoma
+HUVEC-C	77	No	Yes	No	male	Yes	HUVEC-C	
+HeLa-S3	73	No	Yes	Yes	female	Yes	HeLa S3	Human papillomavirus-related endocervical adenocarcinoma
+T-47D	68	No	Yes	Yes	female	Yes	T-47D	Invasive ductal carcinoma, not otherwise specified
+U2OS	67	No	Yes	Yes	female	Yes	U2OS	Osteosarcoma 
+hESC	55	No	No	No		Yes	human embryonic stem cell	
+SK-N-SH	47	No	Yes	Yes	female	Yes	SK-N-SH	Neuroblastoma
+IMR-90	44	No	Yes	No	female	Yes	IMR-90	
+liver	41	No	No	No		Yes	liver	
+CD34	40	No	No	No		Yes	CD34-positive cell	
+MCF-10A	38	No	Yes	No	female	Yes	MCF-10A	
+MDA-MB-231	38	No	Yes	Yes	female	Yes	MDA-MB-231	Breast adenocarcinoma
+MM1-S	36	No	Yes	Yes	female	Yes	MM1.S	Plasma cell myeloma
+Ishikawa	32	No	Yes	Yes	female	Yes	Ishikawa	Endometrial adenocarcinoma
+Jurkat	31	No	Yes	Yes	male	Yes	Jurkat	Childhood T acute lymphoblastic leukemia
+keratinocyte	31	No	No	No		Yes	keratinocyte	
+Kasumi-1	30	No	Yes	Yes	male	Yes	Kasumi-1	Childhood acute myeloid leukemia with maturation
+SUM159PT	28	No	Yes	Yes	female	Yes	SUM159PT	Pleomorphic breast carcinoma
+WA09	26	No	Yes	No	female	Yes	WA09	
+CD4	25	No	No	No		Yes	T cell (CD4-positive)	
+fibroblast	24	No	No	No		Yes	fibroblast	
+HL-60	24	No	Yes	Yes	female	Yes	HL-60	Adult acute myeloid leukemia
+P493-6	23	No	Yes	No		Yes	P493-6	P493-6
+LS180	22	No	Yes	Yes	female	Yes	LS180	Colon adenocarcinoma
+GP5D	20	No	Yes	Yes	female	Yes	GP5d	Colon adenocarcinoma
+22Rv1	19	No	Yes	Yes	male	Yes	22Rv1	Prostate carcinoma
+macrophage	19	No	No	No		Yes	macrophage (derived from monocyte)	
+monocyte	19	No	No	No		Yes	monocyte	
+MV4-11	19	No	Yes	Yes	male	Yes	MV4-11	Childhood acute monocytic leukemia
+prostate	19	No	No	No	male	Yes	prostate	
+SH-SY5Y	19	No	Yes	Yes	female	Yes	SH-SY5Y	Neuroblastoma 
+A-375	18	No	Yes	Yes	female	Yes	A-375	Amelanotic melanoma
+DU145	18	No	Yes	Yes	male	Yes	DU145	Prostate carcinoma
+SKH1	18	No	Yes	Yes		Yes	SKH1	Chronic myelogenous leukemia
+BJ1-hTERT	16	No	Yes	No	male	Yes	BJ1-hTERT	Human fibroblast
+CLL	16	No	No	Yes		Yes	chronic lymphocytic leukemia	
+HeLa-B2	16	No	Yes	Yes	female	Yes	SGC-7901/B2	Human papillomavirus-related endocervical adenocarcinoma
+MDA-MB-453	16	No	Yes	Yes	female	Yes	MDA-MB-453	Breast adenocarcinoma
+retina	16	No	No	No		Yes	retinal pigment epithelium	
+hiPSC	15	No	No	No		Yes	induced pluripotent stem cell	
+H9	14	No	Yes	No	female	Yes	WA09	
+HAEC	14	No	No	No		Yes	endothelial cell (aorta)	
+ZR751	14	No	Yes	Yes	female	Yes	ZR-75-1	Invasive ductal carcinoma, not otherwise specified
+BT-474	13	No	Yes	Yes	female	Yes	BT-474	Invasive ductal carcinoma, not otherwise specified
+OCI-Ly3	13	No	Yes	Yes	male	Yes	OCI-Ly3	Diffuse large B-cell lymphoma
+SK-N-MC	13	No	Yes	Yes	female	Yes	SK-N-MC	Askin tumor
+SW480	13	No	Yes	Yes	male	Yes	SW480	Colon adenocarcinoma
+cardiomyocyte	12	No	No	No		Yes	cardiomyocyte	
+colon	12	No	No	No		Yes	colon	
+LNCaP-abl	12	No	Yes	Yes	male	Yes	LNCaP-abl	Prostate carcinoma
+LNCaP-C4-2B	12	No	Yes	Yes	male	Yes	LNCaP C4-2B	Prostate carcinoma
+lymphocyte	12	No	No	No		Yes	lymphocyte	
+MDM	12	No	No	No		Yes	macrophage (derived from monocyte)	
+neural	12	No	No	No		Yes	neural cell (derived from WA01)	
+HUDEP-2	11	No	Yes	No		Yes	HUDEP-2	
+LCL	11	No	Yes	No		Yes	lymphoblastoid cell line	
+ME-1	11	No	Yes	Yes	male	Yes	ME-1	Adult acute myeloid leukemia
+OCI-Ly1	11	No	Yes	Yes	male	Yes	OCI-Ly1	Diffuse large B-cell lymphoma
+OCI-Ly7	11	No	Yes	Yes	male	Yes	OCI-Ly7	Diffuse large B-cell lymphoma germinal center B-cell type
+PDAC	11	No	No	Yes		Yes	pancreatic ductal adenocarcinoma	
+U-937	11	No	Yes	Yes	male	Yes	U-937	Adult acute monocytic leukemia
+B-cell	10	No	No	No		Yes	B cell	
+endometrioid-adenocarcinoma	10	No	No	Yes	female	Yes	endometrial adenocarcinoma	
+endothelial	10	No	No	No		Yes	endothelial cell (umbilical vein)	
+KB	10	No	Yes	Yes	female	Yes	KB	Human papillomavirus-related endocervical adenocarcinoma
+MCF10A-Er-Src	10	No	Yes	No	female	Yes	MCF10A-Er-Src	
+MRC-5	10	No	Yes	No	male	Yes	MRC-5	
+PC-3	10	No	Yes	Yes	male	Yes	PC-3	Prostate carcinoma
+ProEs	10	No	No	No		Yes	proerythroblast	
+TSU-1621MT	10	No	Yes	Yes	female	Yes	TSU-1621MT	Adult acute myeloid leukemia
+U-87MG	10	No	Yes	Yes	female	Yes	U-87MG Uppsala	Glioblastoma 
+Aska-SS	9	No	Yes	Yes	male	Yes	Aska-SS	Biphasic synovial sarcoma
+BE2C	9	No	Yes	Yes	male	Yes	SK-N-BE(2)-C	Neuroblastoma
+D341-Med	9	No	Yes	Yes	male	Yes	D341 Med	Medulloblastoma 
+erythroid	9	No	No	No		Yes	erythroblast	
+G296S	9	Yes	No	No		Yes	cardiomyocyte (GATA4-G296S mutation)	GATA4 G296S mutation cardiomyocytes
+LTAD	9	No	No	No		Yes	long-term androgen deprivation cell	
+NCI-H2171	9	No	Yes	Yes	male	Yes	NCI-H2171	Small cell lung carcinoma
+RWPE-1	9	No	Yes	No	male	Yes	RWPE-1	
+SGBS	9	No	Yes	No	male	Yes	SGBS	Simpson Golabi Behmel syndrome type 1
+SK-N-BE2-C	9	No	Yes	Yes	male	Yes	SK-N-BE(2)-C	Neuroblastoma 
+786-O	8	No	Yes	Yes	male	Yes	786-O	Renal cell carcinoma
+A-673	8	No	Yes	Yes	female	Yes	A-673	Ewing sarcoma
+A1A3	8	No	Yes	Yes	female	Yes	A1A3 (derived from T-47D)	Invasive ductal carcinoma, not otherwise specified
+CACO2	8	No	Yes	Yes	male	Yes	Caco-2	Colon adenocarcinoma
+esophagus	8	No	No	No		Yes	esophagus	
+H3396	8	No	Yes	Yes	female	Yes	H3396	Breast carcinoma
+HAP1	8	No	Yes	Yes	male	Yes	HAP1	Chronic myelogenous leukemia
+HeLa-Kyoto	8	No	Yes	Yes	female	Yes	HeLa Kyoto	Human papillomavirus-related endocervical adenocarcinoma
+HMEC-1	8	No	Yes	No	male	Yes	HMEC-1	
+HT29	8	No	Yes	Yes	female	Yes	HT-29	Colon adenocarcinoma
+islet	8	No	No	No		Yes	pancreatic islet	
+Kelly	8	No	Yes	Yes	female	Yes	Kelly	Neuroblastoma 
+LNCaP-C4-2	8	No	Yes	Yes	male	Yes	LNCaP C4-2	Prostate carcinoma
+LoVo	8	No	Yes	Yes	male	Yes	LoVo	Colon adenocarcinoma
+pancreas	8	No	No	No		Yes	pancreas	
+SEM	8	No	Yes	Yes	female	Yes	SEM	Childhood B acute lymphoblastic leukemia
+SHEP-21N	8	No	Yes	Yes	female	Yes	Tet21N 	Neuroblastoma 
+BGO3	7	No	Yes	No	female	Yes	BG03	Embryonic stem cell
+BJ	7	No	Yes	No	male	Yes	BJ	Human fibroblast
+CCRF-CEM	7	No	Yes	Yes		Yes	CCRF-CEM	Childhood T acute lymphoblastic leukemia
+CD14	7	No	No	No		Yes	macrophage (CD14-positive; derived from monocyte)	
+D283-Med	7	No	Yes	Yes	male	Yes	D283 Med	Medulloblastoma 
+epithelial	7	No	No	No		Yes	epithelial cell	
+GM12891	7	No	Yes	No	male	Yes	GM12891	
+HMLE	7	No	No	No		Yes	mammary epithelial cell	
+MOLM-14	7	No	Yes	Yes	male	Yes	MOLM-14	Adult acute myeloid leukemia
+NB4	7	No	Yes	Yes	female	Yes	NB4	Acute promyelocytic leukemia with t(15;17)(q22;q12) PML-RARA
+PANC-1	7	No	Yes	Yes	male	Yes	PANC-1	Pancreatic ductal adenocarcinoma
+RH4	7	No	Yes	No	male	Yes	RH4	Embryonic stem cell
+SaOS-2	7	No	Yes	Yes	female	Yes	SaOS-2	Osteosarcoma 
+SKNO1	7	No	Yes	Yes	male	Yes	SKNO-1	Adult acute myeloid leukemia with maturation
+501MEL	6	No	Yes	Yes	female	Yes	501-mel	Melanoma
+AML	6	No	Yes	Yes	male	Yes	THP-1	Childhood acute monocytic leukemia
+BJAB	6	No	Yes	Yes	female	Yes	BJAB	Burkitt lymphoma
+CHRF28811	6	No	Yes	Yes	male	Yes	CHRF-288-11	Childhood acute megakaryoblastic leukemia
+DOHH2	6	No	Yes	Yes	male	Yes	DoHH2	Diffuse large B-cell lymphoma germinal center B-cell type
+epididymis	6	No	No	No		Yes	epididymis	
+GM23338	6	No	Yes	No	male	Yes	GM23338	Induced pluripotent stem cell
+HBTEC	6	No	No	No		Yes	bronchial/tracheal epithelial cell	
+hMSC-TERT4	6	No	Yes	No	male	Yes	hMSC-TERT4	
+HUES-64	6	No	Yes	No	male	Yes	HUES 64	Embryonic stem cell
+lung	6	No	No	No		Yes	lung	
+MDA-MB-134	6	No	Yes	Yes	female	Yes	MDA-MB-134-VI        	Invasive lobular breast carcinoma
+MOLT-4	6	No	Yes	Yes	male	Yes	MOLT-4	Adult T acute lymphoblastic leukemia
+NCCIT	6	No	Yes	Yes	male	Yes	NCC-IT	Testicular embryonal carcinoma
+neuron	6	No	No	No		Yes	neuron	
+OCI-Ly10	6	No	Yes	Yes	female	Yes	OCI-Ly10	Diffuse large B-cell lymphoma
+primary-epidermal-keratinocyte	6	No	No	No		Yes	keratinocyte (epidermis)	
+SK-MEL-147	6	No	Yes	Yes		Yes	SK-MEL-147	Melanoma
+skin	6	No	No	No		Yes	skin	
+SU-DHL-6	6	No	Yes	Yes	male	Yes	SU-DHL-6	Diffuse large B-cell lymphoma germinal center B-cell type
+T-47D-B	6	Yes	Yes	Yes	female	Yes	T-47D	PRB expression; Invasive ductal carcinoma, not otherwise specified
+A-673-clone-Asp114	5	No	Yes	Yes	female	Yes	A-673 clone Asp114	Ewing sarcoma
+adrenal-gland	5	No	No	No		Yes	adrenal gland	
+AGS	5	No	Yes	Yes	female	Yes	AGS	Gastric adenocarcinoma
+BA10-neocortex	5	No	No	No		Yes	Brodmann area 10	
+BA40-neocortex	5	No	No	No		Yes	Brodmann area 40	
+BCBL-1	5	No	Yes	Yes	male	Yes	BCBL-1	Primary effusion lymphoma
+BT-549	5	No	Yes	Yes	female	Yes	BT-549	Invasive ductal carcinoma, not otherwise specified
+CD8	5	No	No	No		Yes	T cell (CD8-positive)	
+CUTLL1	5	No	Yes	Yes	male	Yes	CUTLL1 	Childhood T lymphoblastic lymphoma
+Detroit-562	5	No	Yes	Yes	female	Yes	Detroit 562	Pharyngeal squamous cell carcinoma
+G-401	5	No	Yes	Yes	male	Yes	G-401	Rhabdoid tumor of the kidney
+GM12892	5	No	Yes	No	female	Yes	GM12892	
+GSC8-11	5	No	Yes	Yes		Yes	GSC8-11	Glioblastoma 
+HCC1954	5	No	Yes	Yes	female	Yes	HCC1954	Ductal breast carcinoma
+hepatocyte	5	No	No	No		Yes	hepatocyte	
+HFOB	5	No	Yes	No	female	Yes	hFOB 1.19	
+hMSC	5	No	No	No		Yes	mesenchymal stem cell (derived from adipose tissue)	
+HSPC	5	No	No	No		Yes	hematopoietic stem cell	
+IMR-5	5	No	Yes	Yes	male	Yes	IMR-5	Neuroblastoma 
+KG-1	5	No	Yes	Yes	male	Yes	KG-1	Adult acute myeloid leukemia
+LX2	5	No	Yes	No	male	Yes	LX-2	
+MCF-7-TAMR-1	5	No	Yes	Yes	female	Yes	MCF-7/TAMR-1	Invasive ductal carcinoma, not otherwise specified
+NALM-6	5	No	Yes	Yes	male	Yes	NALM-6	Adult B acute lymphoblastic leukemia
+NT2-D1	5	No	Yes	Yes	male	Yes	NT2-D1	Embryonal carcinoma
+PFSK1	5	No	Yes	Yes	male	Yes	PFSK-1	Primitive neuroectodermal tumor
+RPMI8402	5	No	Yes	Yes	female	Yes	RPMI-8402	Childhood T acute lymphoblastic leukemia
+RS4-11	5	No	Yes	Yes	female	Yes	RS4;11	Adult B acute lymphoblastic leukemia
+SKBR3	5	No	Yes	Yes	female	Yes	SK-BR-3	Breast adenocarcinoma
+spleen	5	No	No	No		Yes	spleen	
+T-REx-293	5	No	Yes	No	female	Yes	T-REx-293	
+T47D-A1-2	5	No	Yes	Yes	female	Yes	A1-2 (derived from T-47D)	Invasive ductal carcinoma, not otherwise specified
+WI-38VA13	5	No	Yes	No	female	Yes	WI-38 VA13 subline 2RA	
+astrocyte	4	No	No	No		Yes	astrocyte	
+BC3	4	No	Yes	Yes	male	Yes	BC-3	Primary effusion lymphoma
+DND41	4	No	Yes	Yes	male	Yes	DND-41	Childhood T acute lymphoblastic leukemia
+fetal	4					No		Mix of testis and erythroblast
+gastroesophageal-sphincter	4	No	No	No		Yes	gastroesophageal sphincter	
+GIST48	4	No	Yes	Yes		Yes	GIST48	Gastrointestinal stromal tumor
+HaCaT	4	No	Yes	No	male	Yes	HaCaT	
+HASM2	4	No	No	No		Yes	airway smooth muscle cell	
+HCC1806	4	No	Yes	Yes	female	Yes	HCC1806	Squamous cell breast carcinoma, acantholytic variant
+Hs-352-Sk	4	No	Yes	No	male	Yes	Hs 352.Sk	
+HT-1080	4	No	Yes	Yes	male	Yes	HT-1080	Fibrosarcoma
+KK-1	4	No	Yes	Yes	male	Yes	KK-1	Adult T acute lymphoblastic leukemia
+L1236	4	No	Yes	Yes	male	Yes	L-1236	Hodgkin lymphoma
+Loucy	4	No	Yes	Yes	female	Yes	Loucy	Adult T acute lymphoblastic leukemia
+MO91	4	No	Yes	Yes		Yes	M0-91	Acute myeloid leukemia with minimal differentiation
+MOLM-13	4	No	Yes	Yes	male	Yes	MOLM-13	Adult acute myeloid leukemia
+MV4-11-B	4	No	Yes	Yes	male	Yes	MV4-11	Childhood acute monocytic leukemia
+myoblast	4	No	No	No		Yes	myoblast	
+OCI-AML3	4	No	Yes	Yes	male	Yes	OCI-AML3	Adult acute myeloid leukemia
+Peyers-patch	4	No	No	No		Yes	Peyer's patch	
+RH30	4	No	Yes	Yes	male	Yes	Rh30	Alveolar rhabdomyosarcoma
+SET-2	4	No	Yes	Yes	female	Yes	SET-2	Adult acute megakaryoblastic leukemia
+stomach	4	No	No	No		Yes	stomach	
+SUM159	4	No	Yes	Yes	female	Yes	SUM159PT 	Pleomorphic breast carcinoma
+SUM229PE	4	No	Yes	Yes	female	Yes	SUM229PE	Breast carcinoma
+SYO-1	4	No	Yes	Yes	female	Yes	SYO-1	Biphasic synovial sarcoma
+T-47D-A	4	Yes	Yes	Yes	female	Yes	T-47D	PRA expression; Invasive ductal carcinoma, not otherwise specified
+T-47D-MTVL	4	Yes	Yes	Yes	female	Yes	T-47D	MMTV promoter; Invasive ductal carcinoma, not otherwise specified
+thyroid-gland	4	No	No	No		Yes	thyroid gland	
+TTC-549	4	No	Yes	Yes	female	Yes	TTC-549	Extrarenal rhabdoid tumor
+uterus	4	No	No	No	female	Yes	uterus	
+ASC	3	No	No	No		Yes	adipose stem cell	
+BT-16	3	No	Yes	Yes	male	Yes	BT-16	Atypical teratoid/rhabdoid tumor
+Calu-3	3	No	Yes	Yes	male	Yes	Calu-3	Lung adenocarcinoma
+CHL-1	3	No	Yes	Yes	female	Yes	CHL-1	Melanoma 
+CLB-Ga	3	No	Yes	Yes	male	Yes	CLB-Ga	Neuroblastoma 
+DLD-1	3	No	Yes	Yes	male	Yes	DLD-1	Colon adenocarcinoma
+endoderm	3	No	No	No		Yes	endoderm (derived from hESC)	
+erythroblast	3	No	No	No		Yes	erythroblast	
+gastrocnemius-medialis	3	No	No	No		Yes	skeletal muscle (gastrocnemius medialis)	
+GEN2-2	3	No	Yes	Yes	male	Yes	GEN2.2	Blastic plasmacytoid dendritic cell neoplasm
+GIST-T1	3	No	Yes	Yes	female	Yes	GIST-T1	Gastrointestinal stromal tumor
+GM15850	3	No	Yes	No	female	Yes	GM15850	Friedreich ataxia
+H128	3	No	Yes	Yes	male	Yes	NCI-H128	Small cell lung carcinoma
+HCAEC	3	No	No	No		Yes	endothelial cell (heart)  	
+HCC95	3	No	Yes	Yes	male	Yes	HCC95	Squamous cell lung carcinoma
+heart	3	No	No	No		Yes	heart	
+HFF	3	No	Yes	No	male	Yes	HFF	
+HIES	3					No	lymphoblastoid cell line	Cell line does not exist on cellosaurus
+hMSC-TERT	3	No	Yes	No	male	Yes	hMSC-TERT	
+HUCCT1	3	No	Yes	Yes	male	Yes	HuCC-T1	Intrahepatic cholangiocarcinoma
+Huh-7	3	No	Yes	Yes	male	Yes	Huh-7	Hepatocellular carcinoma
+IMEC	3	No	Yes	No	female	Yes	IMEC	Immortalized Mammary Epithelial Cells
+KARPAS422	3	No	Yes	Yes	female	Yes	Karpas-422        	Diffuse large B-cell lymphoma germinal center B-cell type
+KATOIII	3	No	Yes	Yes	male	Yes	KATO III	Signet ring cell gastric adenocarcinoma
+kidney	3	No	No	No		Yes	kidney	
+LP1	3	No	Yes	Yes	female	Yes	LP-1	Plasma cell myeloma
+LS174T	3	No	Yes	Yes	female	Yes	LS174T	Colon adenocarcinoma
+MCF-7-WS8	3	No	Yes	Yes	female	Yes	MCF-7/TAMR-1	
+MDA-MB-157	3	No	Yes	Yes	female	Yes	MDA-MB-157	Breast carcinoma
+MIA-PaCa-2	3	No	Yes	Yes	male	Yes	MIA PaCa-2	Pancreatic ductal adenocarcinoma
+myotube	3	No	No	No		Yes	myotube	
+NCI-H441	3	No	Yes	Yes	male	Yes	NCI-H441	Papillary lung adenocarcinoma
+NCI-H929	3	No	Yes	Yes	female	Yes	NCI-H929	Plasma cell myeloma
+nerve	3	No	No	No		Yes	nerve	
+NGP	3	No	Yes	Yes	male	Yes	NGP	Neuroblastoma 
+NMC24335	3	No	No	Yes		Yes	NUT midline carcinoma	
+OSK	3	Yes	No	No		Yes	induced pluripotent stem cell (TRA1-81-positive; derived from fetal lung fibroblast)	Yamanaka mix with SOX2 replaced
+OSKM	3	No	No	No		Yes	induced pluripotent stem cell (TRA1-81-positive; derived from fetal lung fibroblast)	
+OVCAR-3	3	No	Yes	Yes	female	Yes	OVCAR-3	High grade ovarian serous adenocarcinoma
+OVCAR-8	3	No	Yes	Yes	female	Yes	OVCAR-8	High grade ovarian serous adenocarcinoma
+Raji	3	No	Yes	Yes	male	Yes	Raji	Epstein-Barr virus-related Burkitt lymphoma
+RCH-ACV	3	No	Yes	Yes	female	Yes	RCH-ACV	B acute lymphoblastic leukemia with t(1;19)(q23;p13.3) E2A-PBX1 (TCF3-PBX1)
+REC-1	3	No	Yes	Yes	male	Yes	REC-1	Mantle cell lymphoma
+SCLC	3	No	No	Yes		Yes	small cell lung cancer	
+SUM185	3	No	Yes	Yes	female	Yes	SUM185PE 	Ductal breast carcinoma
+tonsil	3	No	No	No		Yes	tonsil	
+UCLA1-hESCs	3	No	Yes	No		Yes	UCLA 1	Embryonic stem cell
+UM-RC-6	3	No	Yes	Yes	male	Yes	UM-RC-6	Renal cell carcinoma
+YCC-3	3	No	Yes	Yes	male	Yes	YCC-3	Gastric adenocarcinoma
+786-M1A	2	No	Yes	Yes	male	Yes	786-M1A	Renal cell carcinoma
+A-1847	2	No	Yes	Yes	female	Yes	A-1847	Ovarian carcinoma
+AC16	2	No	Yes	No		Yes	AC16	Cardiomyocyte
+ALL-SIL	2	No	Yes	Yes	male	Yes	ALL-SIL	Childhood T acute lymphoblastic leukemia
+aorta	2	No	No	No		Yes	aorta	
+BCR-ABL1	2	No	No	Yes		Yes	precursor B cell acute lymphoblastic leukemia (BCR-ABL1-positive)	
+BeWo	2	No	Yes	Yes	male	Yes	BeWo	Gestational choriocarcinoma
+BG01V	2	No	Yes	No	male	Yes	BG01V	Embryonic stem cell
+BL41	2	No	Yes	Yes	male	Yes	BL-41	Burkitt lymphoma
+BPE	2	No	Yes	No		Yes	BPE	Immortalized breast primary epithelial cell
+CAL-1	2	No	Yes	Yes	male	Yes	CAL-1	Blastic plasmacytoid dendritic cell neoplasm
+cardiac	2	No	No	No		Yes	cardiomyocyte	
+CCLP1	2	No	Yes	Yes	female	Yes	CC-LP-1	Intrahepatic cholangiocarcinoma
+ccRCC	2	No	No	Yes		Yes	clear cell renal cell carcinoma	
+CD4-pos	2	No	No	No		Yes	T cell (CD4-positive)	
+COLO-320	2	No	Yes	Yes	female	Yes	COLO 320	Colon adenocarcinoma
+CRL-7250	2					No		Discontinued by ATCC
+delta-47	2	No	Yes	Yes	male	Yes	delta-47	Plasma cell myeloma
+DUCAP	2	No	Yes	Yes	male	Yes	DuCaP 	Prostate carcinoma
+ECFC	2	No	No	No		Yes	endothelial colony forming cell	
+FLP143HA	2					No		Cell line does not exist on cellosaurus
+GM00739	2	No	Yes	No	female	Yes	GM00739	Cockayne syndrome type B
+GM01310	2	No	Yes	No	male	Yes	GM01310	
+GM23248	2	No	Yes	No	male	Yes	GM23248	
+H1299	2	No	Yes	Yes	male	Yes	NCI-H1299	Large cell lung carcinoma
+H69	2	No	Yes	No		Yes	H69	
+HASMC	2	No	No	No		Yes	smooth muscle cell (aorta)	
+HBL1	2	No	Yes	Yes	male	Yes	HBL-1	Diffuse large B-cell lymphoma activated B-cell type
+HCC1395	2	No	Yes	Yes	female	Yes	HCC1395	Ductal breast carcinoma
+HCT15	2	No	Yes	Yes	male	Yes	HCT 15	Colon carcinoma
+HDF	2	No	No	No		Yes	fibroblast (dermis)	
+HEE	2	No				Yes	epididymal epithelial cell	
+HEK293-FT	2	No	Yes	No	female	Yes	HEK293-FT	
+HepaRG	2	No	Yes	Yes	female	Yes	HepaRG	Hepatocellular carcinoma
+hiF-T	2					No		Cell line does not exist on cellosaurus
+HME1	2	No	Yes	No	female	Yes	hTERT-HME1	
+HMELBRAF	2	No	No	No		Yes	melanocyte	
+HMLER	2	No	Yes	No	female	Yes	PHMLER 	
+HNPC	2	No	No	No		Yes	neural progenitor cell	
+HNSC	2	No	No	No		Yes	neural stem cell	
+HPBALL	2	No	Yes	Yes	male	Yes	HPB-ALL	Childhood T acute lymphoblastic leukemia
+HS-SY-2	2	No	Yes	Yes	male	Yes	HS-SY-2	Monophasic synovial sarcoma
+HSPC-CD34pos	2	No	No	No		Yes	hematopoietic stem cell (CD34-positive)	
+HUES-8	2	No	Yes	No	male	Yes	HUES 8	Embryonic stem cell
+J-Lat	2	No	Yes	Yes	male	Yes	J-Lat GFP Clone A72	Childhood T acute lymphoblastic leukemia
+JMSU-1	2	No	Yes	Yes	male	Yes	JMSU-1	Bladder carcinoma
+KOPTK1	2	No	Yes	Yes	male	Yes	KOPT-K1	Childhood T acute lymphoblastic leukemia
+KYSE70	2	No	Yes	Yes	male	Yes	KYSE-70	Esophageal squamous cell carcinoma
+L826	2	No				Yes		
+LHSAR	2	No				Yes		
+LOX-IMVI	2	No	Yes	Yes	male	Yes	LOX-IMVI	Amelanotic melanoma
+MCF-7-Luc	2	No	Yes	Yes	female	Yes	MCF-7-Luc	Invasive ductal carcinoma, not otherwise specified
+MCF-7-Luc-Y537S	2	Yes	Yes	Yes	female	Yes	MCF-7-Luc	Invasive ductal carcinoma, not otherwise specified
+MDA-MB-134-VI	2	No	Yes	Yes	female	Yes	MDA-MB-134-VI        	Invasive lobular breast carcinoma
+MDA-MB-468	2	No	Yes	Yes	female	Yes	MDA-MB-468	Breast adenocarcinoma
+melanocyte	2	No	No	No		Yes	melanocyte	
+MG-63-3	2	No				Yes		
+ML-2	2	No	Yes	Yes	male	Yes	ML-2	Adult acute myeloid leukemia
+MNNG-HOS	2	No	Yes	Yes	female	Yes	MNNG/HOS Cl #5	Osteosarcoma
+MOLT-3	2	No	Yes	Yes	male	Yes	MOLT-3	Adult T acute lymphoblastic leukemia
+MPNST	2	No				Yes		
+MSTO	2	No	Yes	Yes	male	Yes	MSTO-211H	Pleural biphasic mesothelioma
+Mutu-1	2	No	Yes	Yes		Yes	Mutu-1	Epstein-Barr virus-related Burkitt lymphoma
+MUTUL	2	No	Yes	Yes		Yes	Mutu-1	Epstein-Barr virus-related Burkitt lymphoma
+MYCN-3	2	No	Yes	Yes	female	Yes	MYCN-3 Tet-on	Neuroblastoma 
+NCI-H1975	2	No	Yes	Yes	female	Yes	NCI-H1975	Lung adenocarcinoma 
+NCI-H23	2	No	Yes	Yes	male	Yes	NCI-H23	Lung adenocarcinoma 
+NCI-H295R	2	No	Yes	Yes	female	Yes	NCI-H295R	Adrenal cortex carcinoma
+NCI-H3122	2	No	Yes	Yes		Yes	NCI-H3122	Lung adenocarcinoma 
+NCI-H358	2	No	Yes	Yes	male	Yes	NCI-H358	Minimally invasive lung adenocarcinoma
+NCI-H460	2	No	Yes	Yes	male	Yes	NCI-H460	Large cell lung carcinoma
+NHEK	2	No	Yes	No		Yes	IB-4	
+omental-fat-pad	2	No	No	No		Yes	fat pad (omentum)	
+osteoblast	2	No	No	No		Yes	osteoblast	
+OSvK	2	Yes	No	No		Yes	induced pluripotent stem cell (TRA1-81-positive; derived from fetal lung fibroblast)	
+OSvKM	2	Yes	No	No		Yes	induced pluripotent stem cell (TRA1-81-positive; derived from fetal lung fibroblast)	
+ovary	2	No	No	No	female	Yes	ovary	
+PC-9	2	No	Yes	Yes	male	Yes	PC-9	Lung adenocarcinoma 
+RCC10	2	No	Yes	Yes		Yes	RCC10	Renal cell carcinoma
+RENVM	2	No	Yes	No	male	Yes	ReNcell VM	
+RKO	2	No	Yes	Yes		Yes	RKO	Colon carcinoma
+SCC-9	2	No	Yes	Yes	male	Yes	SCC-9	Tongue squamous cell carcinoma
+SH-EP	2	No	Yes	Yes	female	Yes	SH-EP	Neuroblastoma 
+SJSA-1	2	No	Yes	Yes	male	Yes	SJSA-1	Osteosarcoma 
+SK-MEL-239	2	No	Yes	Yes		Yes	SK-MEL-239	Melanoma
+SU-DHL-4	2	No	Yes	Yes	male	Yes	SU-DHL-4	Diffuse large B-cell lymphoma germinal center B-cell type
+SUM44PE	2	No	Yes	Yes	female	Yes	SUM44PE	Invasive lobular breast carcinoma
+T778	2	No	Yes	Yes	female	Yes	T778	Well differentiated liposarcoma
+TALL-1	2	No	Yes	Yes		Yes	TALL-1	T acute lymphoblastic leukemia
+testis	2	No	No	No	male	Yes	testis	
+thymus	2	No	No	No		Yes	thymus	
+TMD8	2	No	Yes	Yes	male	Yes	TMD8	Diffuse large B-cell lymphoma activated B-cell type
+TT	2	No	Yes	Yes	female	Yes	TT	Hereditary thyroid gland medullary carcinoma
+U266	2	No	Yes	Yes	male	Yes	U266B1	Multiple myeloma
+U2932	2	No	Yes	Yes	female	Yes	U-2932	Diffuse large B-cell lymphoma activated B-cell type
+UACC-257	2	No	Yes	Yes		Yes	UACC-257	Melanoma
+UAE	2	No	Yes	Yes	male	Yes	U-937	Adult acute monocytic leukemia
+vagina	2	No	No	No	female	Yes	vagina	
+VCaP-LTAD	2					No		Mix of cells
+WIBR3	2	No	Yes	No	female	Yes	WIBR3	Embryonic stem cell
+143B	1	No	Yes	Yes	female	Yes	143B	Osteosarcoma
+226LDM	1	No	Yes	No	female	Yes	226LDM	Non-cancer breast cells; Cell line does not exist on cellosaurus
+451Lu	1	No	Yes	Yes	male	Yes	451Lu	Cutaneous melanoma
+81-3	1	No	Yes	No		Yes	81.3	
+A-137	1	No	No	Yes		Yes	tumor cell	
+A-498	1	No	Yes	Yes	male	Yes	A-498	Renal cell carcinoma
+A139	1	No	No	Yes		Yes	tumor cell	
+AB-LCL	1	No	Yes	No		Yes	lymphoblastoid cell line	
+AB32	1	No	Yes	No	female	Yes	MCF-10A	A stable PR expressing clone of the MCF-10A immortalized normal breast cell line
+AF22	1	No	No	No		Yes	neural progenitor cell (derived from induced pluripotent stem cell)	Cell line does not exist on cellosaurus
+AMIPS6	1	No	Yes	No	female	Yes	AM-iPS-6	Induced pluripotent stem cell
+AMIPS8	1	No	Yes	No	female	Yes	AM-iPS-8	Induced pluripotent stem cell
+AMLBLAST	1	No	No	Yes		Yes	acute myeloid leukemia blast (CD34-positive)	Cell line does not exist on cellosaurus
+AMLPZ12	1	No	No	Yes		Yes	hematopoietic cell	Cell line does not exist on cellosaurus
+artery	1	No	No	No		Yes	artery (coronary)	
+BCP-ALL	1	No	No	Yes		Yes	B cell precursor	acute lymphoblastic leukemia
+BEAS-2B	1	No	Yes	No	male	Yes	BEAS-2B	
+BH-LCLs	1	No	Yes	No		Yes	lymphoblastoid cell line	
+BICR	1	No	Yes	Yes	male	Yes	BICR 31	Tongue squamous cell carcinoma
+BLM	1	No	Yes	Yes	male	Yes	BLM	Amelanotic melanoma
+blood	1	No	No	No		Yes	mononuclear cell (CD34-positive; derived from cord blood)	
+BLUE1	1	No	Yes	Yes	male	Yes	BLUE-1	Burkitt lymphoma
+bonchial	1	No	No	No		Yes	bronchial epithelial cell	
+BONE	1	No	No	No		Yes	bone marrow	
+bone-marrow	1	No	No	No		Yes	bone marrow	
+BPLER	1	No	Yes	Yes		Yes		BPE-derived tumorigenic breast cell line
+BT-20	1	No	Yes	Yes	female	Yes	BT-20	Invasive ductal carcinoma, not otherwise specified
+CA46	1	No	Yes	Yes	male	Yes	CA46	Burkitt lymphoma
+cardiac-muscle	1	No	No	No	female	Yes	cardiomyocyte (derived from RUES2)	
+cartilage	1	No	No	No		Yes	cartilage	
+choroid-plexus	1	No	No	No		Yes	choroid plexus epithelial cell	
+COLO-205	1	No	Yes	Yes	male	Yes	COLO 205	Colon adenocarcinoma
+COLO-741	1	No	Yes	Yes	female	Yes	COLO 741	Melanoma 
+COLO-800	1	No	Yes	Yes	male	Yes	COLO 800	Cutaneous melanoma
+COLO-829	1	No	Yes	Yes	male	Yes	COLO 829	Cutaneous melanoma
+coronary-artery	1	No	No	No		Yes	artery (coronary)	
+DAOY	1	No	Yes	Yes	male	Yes	Daoy	Medulloblastoma 
+dendrite	1	No	No	No		Yes	dendritic cell	
+dermal	1	No	No	No		Yes	keratinocyte	
+DLBCL	1	No	No	Yes		Yes	diffuse large B cell lymphoma	
+dopaminergic-neuron	1	No	Yes	No	female	Yes	dopaminergic neuron (derived from WA09)	
+DU528	1	No	Yes	Yes	male	Yes	DU528	Childhood T acute lymphoblastic leukemia
+EDOMIPS2	1	No	Yes	No	female	Yes	Edom-iPS-2	Induced pluripotent stem cell
+EndoC-betaH2	1	No	Yes	No		Yes	EndoC-betaH2	
+EP156T	1	No	Yes	No	male	Yes	hTERT EP156T	
+ESF	1	No	No	No		Yes	endometrial stromal fibroblast	
+farage	1	No	Yes	Yes	female	Yes	Farage	Diffuse large B-cell lymphoma germinal center B-cell type
+FLP76	1	No	Yes	No	female	Yes	T-REx-293	Cell line does not exist on cellosaurus
+foreskin	1	No	No	No		Yes	melanocyte	
+FT194	1	No	Yes	No	female	Yes	FT194	
+FT246	1	No	Yes	No	female	Yes	FT246	
+FT33	1	No	Yes	No	female	Yes	FT33-shp53-R24C	
+G523NS	1	No	Yes	Yes		Yes	glioblastoma stem cell	
+GBM1A	1	No	Yes	Yes		Yes	HSR-GBM1A	Glioblastoma stem cell line
+GIC	1					No		Cell line does not exist on cellosaurus
+GIST	1	No	Yes	Yes		Yes	GIST48	Gastrointestinal stromal tumor
+GIST882	1	No	Yes	Yes		Yes	GIST882	Gastrointestinal stromal tumor
+glioma	1	No	No	Yes		Yes	glioma	
+GM00011	1	No	Yes	No	male	Yes	GM00011	
+GM04025	1	No	Yes	No	male	Yes	GM04025	Fragile X syndrome
+GM06170	1	No	Yes	No	male	Yes	GM06170	
+GM06990	1	No	Yes	No	female	Yes	GM06990	
+GM08714	1	No	Yes	No	female	Yes	GM08714	Immunodeficiency-centromeric instability-facial anomalies syndrome 1
+GM09236	1	No	Yes	No	male	Yes	GM09236	
+GM09237	1	No	Yes	No	male	Yes	GM09237	Fragile X syndrome
+GM10248	1	No	Yes	No	male	Yes	GM10248	Cornelia de Lange syndrome
+GM10266	1	No	Yes	No	male	Yes	GM10266	Cornelia de Lange syndrome
+GM10847	1	No	Yes	No	female	Yes	GM10847	
+GM12801	1	No	Yes	No	male	Yes	GM12801	
+GM12864	1	No	Yes	No	male	Yes	GM12864	
+GM12865	1	No	Yes	No	female	Yes	GM12865	
+GM12866	1	No	Yes	No	male	Yes	GM12866	
+GM12867	1	No	Yes	No	female	Yes	GM12867	
+GM12868	1	No	Yes	No	female	Yes	GM12868	
+GM12869	1	No	Yes	No	female	Yes	GM12869	
+GM12870	1	No	Yes	No	male	Yes	GM12870	
+GM12871	1	No	Yes	No	male	Yes	GM12871	
+GM12872	1	No	Yes	No	male	Yes	GM12872	
+GM12873	1	No	Yes	No	female	Yes	GM12873	
+GM12874	1	No	Yes	No	male	Yes	GM12874	
+GM12875	1	No	Yes	No	female	Yes	GM12875	
+GM13976	1	No	Yes	No	female	Yes	GM13976	
+GM13977	1	No	Yes	No	female	Yes	GM13977	Cornelia de Lange syndrome
+GM15510	1	No	Yes	No	female	Yes	GM15510	
+GM17942	1	No	Yes	No	male	Yes	GM17942	DiGeorge syndrome
+GM18505	1	No	Yes	No	female	Yes	GM18505	
+GM18526	1	No	Yes	No	female	Yes	GM18526	
+GM18951	1	No	Yes	No	female	Yes	GM18951	
+GM19099	1	No	Yes	No	female	Yes	GM19099	
+GM19193	1	No	Yes	No	female	Yes	GM19193	
+GM19238	1	No	Yes	No	female	Yes	GM19238	
+GM19239	1	No	Yes	No	male	Yes	GM19239	
+GM19240	1	No	Yes	No	female	Yes	GM19240	
+GM20000	1	No	Yes	No	male	Yes	GM20000	Cornelia de Lange syndrome
+GRANT-A519	1	No	Yes	Yes	female	Yes	Granta-519        	Mantle cell lymphoma
+H54	1	No	Yes	Yes	female	Yes	D54	Glioblastoma
+HBE	1	No	No	No		Yes	bronchial epithelial cell	
+HCASMC	1	No	No	No		Yes	smooth muscle cell (coronary artery)	
+HCC1143	1	No	Yes	Yes	female	Yes	HCC1143	Ductal breast carcinoma
+HCC1428	1	No	Yes	Yes	female	Yes	HCC1428	Breast adenocarcinoma
+HCC2157	1	No	Yes	Yes	female	Yes	HCC2157	Ductal breast carcinoma
+HCC70	1	No	Yes	Yes	female	Yes	HCC70	Ductal breast carcinoma
+HCEC	1	No	No	No		Yes	corneal epithelial cell	
+HCET	1	No	Yes	No	female	Yes	HCE-T	
+HEK	1	No	Yes	Yes	female	Yes	HEK	Human papillomavirus-related endocervical adenocarcinoma
+HeLa-Tet-On	1	No	Yes	Yes	female	Yes	HeLa Tet-On	Human papillomavirus-related endocervical adenocarcinoma
+HEP	1	No	No	No		Yes	erythroid progenitor cell	
+HEP10-01008-LCLs	1	No	Yes	No		Yes	lymphoblastoid cell line	
+HEP14-00120-LCLs	1	No	Yes	No		Yes	lymphoblastoid cell line	
+HEP14-0079-LCLs	1	No	Yes	No		Yes	lymphoblastoid cell line	
+HEP14-0080-LCLs	1	No	Yes	No		Yes	lymphoblastoid cell line	
+hESC-1	1					No		Cell line does not exist on cellosaurus
+HEY-A8	1	No	Yes	Yes	female	Yes	HEY A8	High grade ovarian serous adenocarcinoma
+HKC	1	No	Yes	No	male	Yes	HKC	
+HMLE-Twist-ER	1	No				Yes		
+HS578T	1	No	Yes	Yes	female	Yes	Hs 578T	Invasive ductal carcinoma, not otherwise specified
+HSPC-CD34	1	No				Yes		
+HUG1N	1	No	Yes	Yes	male	Yes	HuG1-N	Gastric tubular adenocarcinoma
+ID00014	1	No	Yes	No	female	Yes	ID00014	DiGeorge syndrome
+ID00015	1	No	Yes	No	female	Yes	ID00015	
+ID00016	1	No	Yes	No	male	Yes	ID00016	DiGeorge syndrome
+iMEC	1	No	Yes	No	female	Yes	IMEC	
+IMSC3	1	No	Yes	No		Yes	iMSC3	Immortalized human bone marrow mesenchymal stromal cells
+JD-LCLs	1	No	Yes	No		Yes	lymphoblastoid cell line	
+JHOS4	1	No	Yes	Yes	female	Yes	JHOS-4	High grade ovarian serous adenocarcinoma
+JHU-029	1	No	Yes	Yes	male	Yes	JHU-029	Laryngeal squamous cell carcinoma
+JL-LCLs	1	No	Yes	No		Yes	lymphoblastoid cell line	
+KerCT	1	No	No	No		Yes	keratinocyte	
+KOPN-8	1	No	Yes	Yes	female	Yes	KOPN-8	Childhood B acute lymphoblastic leukemia
+Kuramochi	1	No	Yes	Yes	female	Yes	Kuramochi	High grade ovarian serous adenocarcinoma
+KYSE150	1	No	Yes	Yes	female	Yes	KYSE150	Esophageal squamous cell carcinoma
+LAL-B	1	No	No	Yes		Yes	B cell acute lymphoblastic leukemia	
+LAN6	1	No	Yes	Yes	male	Yes	LA-N-6	Neuroblastoma
+LBCL	1	No	Yes	No		Yes	lymphoblastoid cell line (B cell)	
+LCLGM10861	1	No	Yes	No	female	Yes	GM10861	
+Leiomyoma	1	No	No	Yes		Yes	leiomyoma	
+LNAR	1					No		Cell line does not exist on cellosaurus
+LREX	1	No	Yes	Yes	male	Yes	LREX'	Prostate carcinoma
+Lu-130	1	No	Yes	Yes	male	Yes	Lu-130	Small cell lung carcinoma
+LUHMES	1	No	Yes	No	female	Yes	LUHMES	
+lymphoblastoid	1	No	No	No		Yes	lymphoblastoid cell	
+MALME-3	1	No	Yes	No	male	Yes	Malme-3	
+MCF-10AT1	1	No	Yes	Yes	female	Yes	MCF-10A	Premalignant
+MCF-10CA1a	1	No	Yes	Yes	female	Yes	MCF-10A	Metastatic
+MCF7-Tet-On	1	No	Yes	Yes	female	Yes	MCF7 Tet-On	Invasive ductal carcinoma, not otherwise specified
+MDA-MB-436	1	No	Yes	Yes	female	Yes	MDA-MB-436	Invasive ductal carcinoma, not otherwise specified
+MDA-Pca-2b	1	No	Yes	Yes	male	Yes	MDA-PCa-2b	Prostate carcinoma
+medulloblastoma	1	No	No	Yes		Yes	medulloblastoma	
+mesenchymal	1	No	No	No		Yes	mesenchymal stem cell (Wharton's jelly)	
+MKL-1	1	No	Yes	Yes	male	Yes	MKL-1	Merkel cell carcinoma
+MKN28	1	No	Yes	Yes	male	Yes	MKN28	Gastric tubular adenocarcinoma
+MSF-7	1	No	Yes	Yes	female	Yes	MCF-7	Invasive ductal carcinoma, not otherwise specified
+myofibroblast	1	No	No	No		Yes	myofibroblast	
+Namalwa	1	No	Yes	Yes	female	Yes	Namalwa	Epstein-Barr virus-related Burkitt lymphoma
+NB-1643	1	No	Yes	Yes	male	Yes	NB-1643	Neuroblastoma
+NB69	1	No	Yes	Yes	male	Yes	NB69	Neuroblastoma
+NCI-H1048	1	No	Yes	Yes	female	Yes	NCI-H1048	Small cell lung carcinoma
+NCI-H1299	1	No	Yes	Yes	male	Yes	NCI-H1299	Large cell lung carcinoma
+NCI-H1703	1	No	Yes	Yes	male	Yes	NCI-H1703	Squamous cell lung carcinoma
+NCI-H1819	1	No	Yes	Yes	female	Yes	NCI-H1819	Lung adenocarcinoma
+NCI-H2087	1	No	Yes	Yes	male	Yes	NCI-H2087	Lung adenocarcinoma
+NCI-H2107	1	No	Yes	Yes	male	Yes	NCI-H2107	Small cell lung carcinoma
+NCI-H524	1	No	Yes	Yes	male	Yes	NCI-H524	Small cell lung carcinoma
+NCI-H526	1	No	Yes	Yes	male	Yes	NCI-H526	Small cell lung carcinoma
+NCI-H82	1	No	Yes	Yes	male	Yes	NCI-H82	Small cell lung carcinoma
+NCI-H838	1	No	Yes	Yes	male	Yes	NCI-H838	Lung adenocarcinoma
+NCI-H889	1	No	Yes	Yes	female	Yes	NCI-H889	Small cell lung carcinoma
+neural-progenitor	1	No	No	No		Yes	neural progenitor cell	
+neutrophil	1	No	No	No		Yes	neutrophil	
+NHDF	1	No	No	No		Yes	fibroblast (dermis)	
+NHEKSV3	1	No	No	No		Yes	keratinocyte	
+NOMO1	1	No	Yes	Yes	female	Yes	NOMO-1	Adult acute monocytic leukemia
+NPCS	1	No	No	No		Yes	neural progenitor cell	
+NSC	1	No	No	No		Yes	neural stem cell	
+NTERA2	1	No	Yes	Yes	male	Yes	NTERA-2	Embryonal carcinoma
+NY15	1	No	Yes	Yes		Yes	NY15	Pancreatic cancer cell line
+NY8	1	No	Yes	Yes		Yes	NY8	Pancreatic cancer cell line
+OCI-Ly19	1	No	Yes	Yes	female	Yes	OCI-Ly19	Diffuse large B-cell lymphoma germinal center B-cell type
+OE33	1	No	Yes	Yes	female	Yes	Barrett adenocarcinoma	
+OVCA429	1	No	Yes	Yes	female	Yes	OVCA429	Ovarian cystadenocarcinoma
+OVCAR-5	1	No	Yes	Yes	female	Yes	OVCAR-5	High grade ovarian serous adenocarcinoma
+OVSAHO	1	No	Yes	Yes	female	Yes	OVSAHO	High grade ovarian serous adenocarcinoma
+P12	1					No		Mus musculus
+PATU8988	1	No	Yes	Yes	female	Yes	PaTu 8988s	Pancreatic adenocarcinoma
+PAVE	1	No	No	No		Yes	endothelial cell (aortic valve)	
+PBMC	1	No	No	No		Yes	peripheral blood mononuclear cell	
+PEO1	1	No	Yes	Yes	female	Yes	PEO1	Ovarian cystadenocarcinoma
+PF-382	1	No	Yes	Yes	female	Yes	PF-382	Childhood T acute lymphoblastic leukemia
+Pfeiffer	1	No	Yes	Yes	male	Yes	Pfeiffer	Diffuse large B-cell lymphoma germinal center B-cell type
+PK-LCLs	1	No	Yes	No		Yes	lymphoblastoid cell line	
+pleural-effusion	1	No	No	No		Yes	pleural effusion	
+PLHSAR	1					No		Cell line does not exist on cellosaurus
+PrEC	1	No	No	No		Yes	epithelial cell (prostate)	
+PRIMA2	1	No	No	Yes		Yes	T cell acute lymphoblastic leukemia	
+PRIMA5	1	No	No	Yes		Yes	T cell acute lymphoblastic leukemia	
+primary-bronchial-epithelial	1	No	No	No		Yes	bronchial epithelial cell	
+primary-dermal-fibroblasts	1	No	No	No		Yes	fibroblast (dermis)	
+Primary-epidermal-keratinocyte	1	No	No	No		Yes	keratinocyte (epidermis)	
+Ramos	1	No	Yes	Yes	male	Yes	Ramos	Burkitt lymphoma
+RCK8	1	No	Yes	Yes	male	Yes	RC-K8	Diffuse large B-cell lymphoma germinal center B-cell type
+Reh	1	No	Yes	Yes	female	Yes	Reh	Childhood B acute lymphoblastic leukemia
+Rh18	1	No	Yes	Yes	female	Yes	Rh18	Alveolar rhabdomyosarcoma
+RH3	1	No	Yes	No	female	Yes	RH3 	Embryonic stem cell
+RHABDOMYOSARCOMA	1	No	No	Yes		Yes	rhabdomyosarcoma	
+RMG-I	1	No	Yes	Yes	female	Yes	RMG-I	Ovarian clear cell adenocarcinoma
+RPE	1	No	Yes	No	female	Yes	hTERT-RPE1	
+RWPE-2	1	No	Yes	No	male	Yes	RWPE-2	
+SF8628	1	No	Yes	Yes	female	Yes	SF8628	Diffuse intrinsic pontine glioma
+SHI-1	1	No	Yes	Yes	male	Yes	SHI-1	Adult acute monocytic leukemia
+SK-MEL-5	1	No	Yes	Yes	female	Yes	SK-MEL-5	Cutaneous melanoma
+SK-N-AS	1	No	Yes	Yes	female	Yes	SK-N-AS	Neuroblastoma
+SK-N-BE2	1	No	Yes	Yes	male	Yes	SK-N-BE(2)-C	Neuroblastoma
+smooth-muscle-cell	1	No	No	No		Yes	smooth muscle cell	
+SMS-KCN	1	No	Yes	Yes	male	Yes	SMS-KCN	Neuroblastoma
+SMS-KCNR	1	No	Yes	Yes	male	Yes	SMS-KCNR	Neuroblastoma
+SNU-216	1	No	Yes	Yes	female	Yes	SNU-216	Gastric tubular adenocarcinoma
+SNU-398	1	No	Yes	Yes	male	Yes	SNU-398	Adult hepatocellular carcinoma
+SP-49	1	No	Yes	Yes	female	Yes	SP-49	Mantle cell lymphoma
+ST-1	1	No	Yes	Yes	female	Yes	ST-1	Adult T acute lymphoblastic leukemia
+SU-DHL-10	1	No	Yes	Yes	male	Yes	SU-DHL-10	Diffuse large B-cell lymphoma
+SU-DHL-2	1	No	Yes	Yes	female	Yes	SU-DHL-2	Diffuse large B-cell lymphoma activated B-cell type
+SU-DHL-5	1	No	Yes	Yes	female	Yes	SU-DHL-5	Diffuse large B-cell lymphoma germinal center B-cell type
+subcutaneous-adipose-tissue	1	No	No	No		Yes	adipose tissue (subcutaneous)	
+SUM1315	1	No	Yes	Yes	female	Yes	SUM1315MO2	Invasive ductal carcinoma, not otherwise specified
+SUM149	1	No	Yes	Yes	female	Yes	SUM149PT	Inflammatory breast carcinoma
+SW1353	1	No	Yes	Yes	female	Yes	SW1353	Primary central chondrosarcoma
+SW620	1	No	Yes	Yes	male	Yes	SW620	Colon adenocarcinoma
+TB40E	1	No	No	No		Yes	CD34-positive cell (derived from cord blood)	
+TC-32	1	No	Yes	Yes	female	Yes	TC-32	Primitive neuroectodermal tumor
+TE-5	1	No	Yes	Yes	female	Yes	TE-5	Esophageal squamous cell carcinoma
+TF1	1	No	Yes	Yes	male	Yes	TF-1	Erythroleukemia
+TH1	1	No	Yes	No		Yes	TH1	
+Th17	1	No	No	No		Yes	T helper 17 cell	
+thymocyte	1	No	No	No		Yes	thymocyte	
+tlymphocyte	1	No	No	No		Yes	T cell	
+U266B1	1	No	Yes	Yes	male	Yes	U266B1	Multiple myeloma
+UACC-62	1	No	Yes	Yes		Yes	UACC-62	Melanoma
+UO-31	1	No	Yes	Yes	female	Yes	UO-31	Renal cell carcinoma
+UTEIPS11	1	No	Yes	No	female	Yes	UtE-iPS-11	Induced pluripotent stem cell
+UTEIPS4	1	No	Yes	No	female	Yes	UtE-iPS-4	Induced pluripotent stem cell
+UTEIPS6	1	No	Yes	No	female	Yes	UtE-iPS-6	Induced pluripotent stem cell
+UTEIPS7	1	No	Yes	No	female	Yes	UtE-iPS-7	Induced pluripotent stem cell
+WERI-Rb-1	1	No	Yes	Yes	female	Yes	WERI-Rb-1	Retinoblastoma 
+WHIM12	1					No		Cell line does not exist on cellosaurus
+WI-38	1	No	Yes	No	female	Yes	WI-38	
+WN8532	1	No	Yes	Yes	male	Yes	WM853-2	Melanoma 
+WPMY-1	1	No	Yes	No	male	Yes	WPMY-1	
+WSU-DLCL2	1	No	Yes	Yes	male	Yes	WSU-DLCL2	Diffuse large B-cell lymphoma germinal center B-cell type

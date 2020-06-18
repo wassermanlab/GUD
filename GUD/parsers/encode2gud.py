@@ -310,6 +310,13 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
     # Get valid chromosomes
     chroms = ParseUtils.get_chroms(session)
 
+    # Get all genes
+    if Feature.__tablename__ == "tf_binding":
+        global genes
+        from GUD.ORM.gene import Gene
+        q = Gene().get_all_gene_symbols(session)
+        genes = set([g[0] for g in q.all()])
+
     # Get samples
     samples = _get_samples(session, samples_file)
 

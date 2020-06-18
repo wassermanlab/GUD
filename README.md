@@ -18,6 +18,7 @@ GUD requires the following dependencies:
     - [`Flask-SQLAlchemy`](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)
     - [`FuzzyWuzzy`](https://chairnerd.seatgeek.com/fuzzywuzzy-fuzzy-string-matching-in-python/)
     - [`interval-binning`](https://interval-binning.readthedocs.io/en/latest/)
+    - [`NumPy`](https://numpy.org/)
     - [`pandas`](https://pandas.pydata.org/)
     - [`pybedtools`](https://daler.github.io/pybedtools/)
     - [`PyMySQL`](https://pymysql.readthedocs.io/en/latest/)
@@ -27,7 +28,7 @@ GUD requires the following dependencies:
     - [`SQLAlchemy-FullText-Search`](https://github.com/mengzhuo/sqlalchemy-fulltext-search)
     - [`SQLAlchemy-Utils`](https://sqlalchemy-utils.readthedocs.io/en/latest/)
 
-## INSTALLATION
+## Configuration
 
 ```
 conda create -n gud -c bioconda -c conda-forge python=3.7 biopython coreapi coreutils \

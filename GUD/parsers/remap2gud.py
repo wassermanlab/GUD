@@ -6,6 +6,7 @@ from functools import partial
 import getpass
 from multiprocessing import cpu_count
 import os
+import pickle
 import re
 import shutil
 import subprocess
@@ -15,6 +16,7 @@ import tarfile
 # Import from GUD module
 from GUD import GUDUtils
 from GUD.ORM.experiment import Experiment
+from GUD.ORM.gene import Gene
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
@@ -26,7 +28,7 @@ usage: %s --genome STR --samples FILE [-h] [options]
 """ % os.path.basename(__file__)
 
 help_msg = """%s
-inserts ReMap transcription factor ChIP-seq data into GUD.
+inserts ReMap 2020 transcription factor ChIP-seq data into GUD.
 
   --genome STR        genome assembly
   --samples FILE      ReMap samples (manually-curated)
@@ -34,8 +36,7 @@ inserts ReMap transcription factor ChIP-seq data into GUD.
 optional arguments:
   -h, --help          show this help message and exit
   --dummy-dir DIR     dummy directory (default = "/tmp/")
-  -m, --merge         merge genomic regions using bedtools
-                      (default = False)
+  -r, --remove        remove downloaded files (default = False)
   -t, --test          limit the total of inserts to ~1K per
                       thread for testing (default = False)
   --threads INT       number of threads to use (default = %s)
@@ -44,7 +45,7 @@ mysql arguments:
   -d STR, --db STR    database name (default = "%s")
   -H STR, --host STR  host name (default = "localhost")
   -p STR, --pwd STR   password (default = ignore this option)
-  -P STR, --port STR  port number (default = %s)
+  -P INT, --port INT  port number (default = %s)
   -u STR, --user STR  user name (default = current user)
 """ % (usage_msg, (cpu_count() - 1), GUDUtils.db, GUDUtils.port)
 
@@ -67,7 +68,7 @@ def parse_args():
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
     optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("-m", "--merge", action="store_true")
+    optional_group.add_argument("-r", "--remove", action="store_true")
     optional_group.add_argument("-t", "--test", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
 
@@ -113,6 +114,14 @@ def check_args(args):
     if not args.pwd:
         args.pwd = ""
 
+    # Check MySQL port
+    try:
+        args.port = int(args.port)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"-P\" \"--port\"", "invalid int value", "\"%s\"\n" % args.port]
+        print(": ".join(error))
+        exit(0)
+
 def main():
 
     # Parse arguments
@@ -126,28 +135,49 @@ def main():
     GUDUtils.db = args.db
 
     # Insert ReMap data
-    remap_to_gud(args.genome, args.samples, args.dummy_dir, args.merge, args.test, args.threads)
+    remap_to_gud(args.genome, args.samples, args.dummy_dir, args.remove, args.test, args.threads)
 
-def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=False, threads=1):
+def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
-    e.g. python -m GUD.parsers.remap2gud --genome hg38 --samples ./samples/ReMap.tsv --dummy-dir ./tmp/ --merge --test -P 3306
+    e.g. python -m GUD.parsers.remap2gud --genome hg38 --samples ./samples/ReMap.tsv
     """
 
     # Initialize
     global chroms
     global engine
     global experiment
+    global genes
     global Session
     global samples
     global source
     experiment_type = "ChIP-seq"
     source_name = "ReMap"
-    set_tempdir(dummy_dir) # i.e. for pyBedTools
 
     # Testing
     if test:
         global current_process
         from multiprocessing import current_process
+
+    # Create dummy dir
+    subdir = "%s.%s" % (genome, os.path.basename(__file__))
+    dummy_dir = os.path.join(dummy_dir, subdir)
+    if not os.path.isdir(dummy_dir):
+        os.makedirs(dummy_dir)
+
+    # Unless pickle file exists
+    pickle_file = os.path.join(dummy_dir, "datasets.pickle")
+    if not os.path.exists(pickle_file):
+        # Get ReMap datasets
+        datasets = _get_ReMap_datasets()
+        handle = ParseUtils._get_file_handle(pickle_file, "wb")
+        pickle.dump(datasets, handle)
+
+    else:
+        handle = ParseUtils._get_file_handle(pickle_file, "rb")
+        datasets = pickle.load(handle)
+
+    # Group ReMap datasets by target name
+    grouped_datasets = _group_ReMap_datasets(datasets)
 
     # Get database name
     db_name = GUDUtils._get_db_name()
@@ -172,28 +202,34 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     # Get valid chromosomes
     chroms = ParseUtils.get_chroms(session)
 
+    # Get all genes
+    q = Gene().get_all_gene_symbols(session)
+    genes = set([g[0] for g in q.all()])
+
     # Get experiment
     experiment = Experiment()
     experiment.name = experiment_type
     ParseUtils.upsert_experiment(session, experiment)
     experiment = ParseUtils.get_experiment(session, experiment_type)
 
-    # Get samples
-    samples = _get_samples(session, samples_file)
-
-    # Get source
-    source = Source()
-    source.name = source_name
-    ParseUtils.upsert_source(session, source)
-    sources = ParseUtils.get_source(session, source_name)
-    source = next(iter(sources))
-
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
     engine.dispose()
 
-    # Download data
-    download_file = _download_data(genome, dummy_dir)
+    # Get samples
+    samples = _get_samples(samples_file)
+
+    # Insert samples/sources
+    _insert_samples_and_sources(samples, datasets)
+
+    # # Get source
+    # source = Source()
+    # source.name = source_name
+    # ParseUtils.upsert_source(session, source)
+    # sources = ParseUtils.get_source(session, source_name)
+    # source = next(iter(sources))
+
+
 
     # For each BED file...
     for bed_file in _unwind_bed_files(download_file, dummy_dir):
@@ -222,67 +258,173 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", merge=False, test=Fals
     # Dispose session
     Session.remove()
 
-def _get_samples(session, file_name):
+def _get_ReMap_datasets():
+
+    # Initialize
+    datasets = {}
+
+    import coreapi
+    import json
+
+    client = coreapi.Client()
+    codec = coreapi.codecs.CoreJSONCodec()
+
+    url = "http://remap.univ-amu.fr:80/api/v1/datasets/findByTaxid/taxid=9606"
+
+    for dataset in json.loads(codec.encode(client.get(url)))["datasets"]:
+        datasets.setdefault(dataset["dataset_name"], dataset)
+
+    return(datasets)
+
+def _group_ReMap_datasets(datasets):
+
+    # Initialize
+    grouped_datasets = {}
+
+    # For each accession...
+    for dataset in datasets:
+
+        # Initialize
+        target_name = datasets[dataset]["target_name"]
+
+        # Group datasets
+        grouped_datasets.setdefault(target_name, set())
+        grouped_datasets[target_name].add(dataset)
+
+    return(grouped_datasets)
+
+# def _download_data(genome, dummy_dir="/tmp/"):
+
+#     # Initialize
+#     dummy_files = []
+
+#     # Python 3+
+#     if sys.version_info > (3, 0):
+#         from urllib.request import urlretrieve
+#     # Python 2.7
+#     else:
+#         from urllib import urlretrieve
+
+#     if genome == "hg19":
+
+#         url = "http://hgdownload.soe.ucsc.edu/goldenPath/hg38/liftOver/"
+#         chains_file = "hg38ToHg19.over.chain.gz"
+#         dummy_files.append(os.path.join(dummy_dir, chains_file))
+
+#         # Download data
+#         if not os.path.exists(dummy_files[-1]):
+#             f = urlretrieve(os.path.join(url, chains_file), dummy_files[-1])
+
+#     else:
+#         dummy_files.append(None)
+
+#     # Download data
+#     url = "http://remap.univ-amu.fr/storage/remap2020/hg38/MACS2"
+#     ftp_file = "remap2020_all_macs2_hg38_v1_0.bed.gz"
+#     dummy_files.append(os.path.join(dummy_dir, ftp_file))
+#     if not os.path.exists(dummy_files[-1]):
+#         f = urlretrieve(os.path.join(url, ftp_file), dummy_files[-1])
+
+#     return(dummy_files[::-1], url)
+
+def _get_samples(file_name):
 
     # Initialize
     samples = {}
-    bugged_samples = {
-        "LNCAPABL": "LNCAP"
-    }
 
     # For each line...
     for line in ParseUtils.parse_tsv_file(file_name):
 
-        # If add...
-        if line[7] == "Yes":
+        # Initialize
+        sample_name = line[0]
+        treatment = False
+        cell_line = False
+        cancer = False
+        sex = None
+        add = False
 
-            # Get sample
-            sample = Sample()
-            sample.name = line[6]
-            sample.treatment = False
-            if line[8] == "Yes":
-                sample.treatment = True
-            sample.cell_line = False
-            if line[9] == "Yes":
-                sample.cell_line = True
-            sample.cancer = False
-            if line[10] == "Yes":
-                sample.cancer = True
+        if line[2] == "Yes":
+            treatment = True
+        if line[3] == "Yes":
+            cell_line = True
+        if line[4] == "Yes":
+            cancer = True
+        if line[5] == "female" or line[5] == "male":
+            sex = line[5]
+        if line[6] == "Yes":
+            add = True
 
-            # Upsert sample
-            ParseUtils.upsert_sample(session, sample)
-
-            # Get sample ID
-            sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
-
-            # Add sample
-            samples.setdefault(line[0], sample.uid)
-
-    # For each bugged sample...
-    for sample in bugged_samples:
-        samples[sample] = samples[bugged_samples[sample]]
+        # Add sample
+        samples.setdefault(sample_name, (treatment, cell_line, cancer, sex, add))
 
     return(samples)
 
-def _download_data(genome, dummy_dir="/tmp/"):
-
-    # Python 3+
-    if sys.version_info > (3, 0):
-        from urllib.request import urlretrieve
-    # Python 2.7
-    else:
-        from urllib import urlretrieve
+def _insert_samples_and_sources(samples, datasets):
 
     # Initialize
-    url = "http://remap.univ-amu.fr/storage/remap2020/%s/MACS2" % genome
-    ftp_file = "remap2020_all_macs2_hg38_v1_0.bed.gz" % genome
+    session = Session()
+    i_have_been_warned = False
 
-    # Download data
-    dummy_file = os.path.join(dummy_dir, ftp_file)
-    if not os.path.exists(dummy_file):
-        f = urlretrieve(os.path.join(url, ftp_file), dummy_file)
+    # For each dataset...
+    for dataset in sorted(datasets):
 
-    return(dummy_file)
+        # Initialize
+        biotype_name = datasets[dataset]["biotype_name"]
+
+        if biotype_name not in samples:
+            warnings.warn("missing sample: %s" % biotype_name, Warning, stacklevel=2)
+            i_have_been_warned = True
+            continue
+
+        if not samples[biotype_name][-1]:
+            continue
+
+        # Upsert sample
+        sample = Sample()
+        sample.name = biotype_name
+        sample.treatment = samples[biotype_name][0]
+        sample.cell_line = samples[biotype_name][1]
+        sample.cancer = samples[biotype_name][2]
+        if samples[biotype_name][3] == "female":
+            sample.X = 2
+            sample.Y = 0
+        if samples[biotype_name][3] == "male":
+            sample.X = 1
+            sample.Y = 1
+        ParseUtils.upsert_sample(session, sample)
+
+    if i_have_been_warned:
+        error = ["%s" % os.path.basename(__file__), "error", "missing samples"]
+        print(": ".join(error))
+        exit(0)
+
+    exit(0)
+        # # Upsert sample
+        # sample = Sample()
+        # if not encodes[accession].summary:
+        #     sample.name = encodes[accession].biosample_name
+        # else:
+        #     sample.name = encodes[accession].summary
+        # sample.treatment = encodes[accession].treatment
+        # sample.cell_line = encodes[accession].cell_line
+        # sample.cancer = encodes[accession].cancer
+        # if encodes[accession].sex is not None:
+        #     sample.X = encodes[accession].X
+        #     sample.Y = encodes[accession].Y
+        # ParseUtils.upsert_sample(session, sample)
+
+        # # Upsert source
+        # source = Source()
+        # source.name = "ENCODE"
+        # # This is to satisfy ENCODE's citing guidelines:
+        # # https://www.encodeproject.org/help/citing-encode/
+        # source.source_metadata = "%s," % accession
+        # source.metadata_descriptor = "accession,"
+        # source.url = encodes[accession].download_url
+        # ParseUtils.upsert_source(session, source)
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
 
 def _unwind_bed_files(file_name, dummy_dir="/tmp/"):
     """

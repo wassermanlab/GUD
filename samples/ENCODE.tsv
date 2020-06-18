@@ -1,5 +1,5 @@
 ENCODE_sample_name	treatment	cell_line	cancer	sex	add	OnTarget_cell_or_tissue	comments
-22Rv1	No	No	Yes	male	Yes	22Rv1	Prostate carcinoma
+22Rv1	No	Yes	Yes	male	Yes	22Rv1	Prostate carcinoma
 8988T	No	Yes	Yes	female	Yes	PaTu 8988t	Pancreatic adenocarcinoma
 A172	No	Yes	Yes	male	Yes	A-172	Glioblastoma
 A204.1	No	Yes	Yes	female	Yes	A204.1	Embryonal rhabdomyosarcoma
@@ -73,16 +73,16 @@ GM10266	No	Yes	No	male	Yes	GM10266	Cornelia de Lange syndrome
 GM10847	No	Yes	No	female	Yes	GM10847	
 GM12801	No	Yes	No	male	Yes	GM12801	
 GM12864	No	Yes	No	male	Yes	GM12864	
-GM12865	No	Yes	No	female	Yes	GM12865	CYP2C19 p.Pro227Pro (c.681G>A); cryptic splice acceptor activation; allele CYP2C19*2 (Coriell)
+GM12865	No	Yes	No	female	Yes	GM12865	
 GM12873	No	Yes	No	female	Yes	GM12873	
-GM12874	No	Yes	No	male	Yes	GM12874	CYP2C19 p.Pro227Pro (c.681G>A); cryptic splice acceptor activation; allele CYP2C19*2 (Coriell)
+GM12874	No	Yes	No	male	Yes	GM12874	
 GM12875	No	Yes	No	female	Yes	GM12875	
 GM12878	No	Yes	No	female	Yes	GM12878	
-GM12891	No	Yes	No	male	Yes	GM12891	CYP2C19 p.Pro227Pro (c.681G>A); cryptic splice acceptor activation; allele CYP2C19*2 (Coriell)
+GM12891	No	Yes	No	male	Yes	GM12891	
 GM12892	No	Yes	No	female	Yes	GM12892	
 GM13976	No	Yes	No	female	Yes	GM13976	
 GM13977	No	Yes	No	female	Yes	GM13977	Cornelia de Lange syndrome
-GM15510	No	Yes	No	female	Yes	GM15510	Heterozygous for CYP2C9 p.Arg144Cys (c.416C>T); allele CYP2C9*2 (Coriell).
+GM15510	No	Yes	No	female	Yes	GM15510	
 GM18505	No	Yes	No	female	Yes	GM18505	
 GM18507	No	Yes	No	male	Yes	GM18507	
 GM18526	No	Yes	No	female	Yes	GM18526	
