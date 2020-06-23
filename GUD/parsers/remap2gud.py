@@ -4,7 +4,7 @@ import argparse
 from binning import assign_bin
 from functools import partial
 import getpass
-from multiprocessing import cpu_count
+from multiprocessing import Pool, cpu_count
 import os
 import pickle
 import re
@@ -12,6 +12,12 @@ import shutil
 import subprocess
 import sys
 import tarfile
+# Python 3+
+if sys.version_info > (3, 0):
+    from urllib.request import urlretrieve
+# Python 2.7
+else:
+    from urllib import urlretrieve
 
 # Import from GUD module
 from GUD import GUDUtils
@@ -144,14 +150,13 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", remove=False, test=Fal
 
     # Initialize
     global chroms
+    global dataset2samplesNsourcesNtfs
     global engine
     global experiment
     global genes
     global Session
     global samples
     global source
-    experiment_type = "ChIP-seq"
-    source_name = "ReMap"
 
     # Testing
     if test:
@@ -176,8 +181,13 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", remove=False, test=Fal
         handle = ParseUtils._get_file_handle(pickle_file, "rb")
         datasets = pickle.load(handle)
 
-    # Group ReMap datasets by target name
-    grouped_datasets = _group_ReMap_datasets(datasets)
+    # LiftOver
+    if genome == "hg19":
+        liftOver = True
+        chains_file = _get_chains_file(dummy_dir)
+    else:
+        liftOver = False
+        chains_file = None
 
     # Get database name
     db_name = GUDUtils._get_db_name()
@@ -208,9 +218,9 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", remove=False, test=Fal
 
     # Get experiment
     experiment = Experiment()
-    experiment.name = experiment_type
+    experiment.name = "ChIP-seq"
     ParseUtils.upsert_experiment(session, experiment)
-    experiment = ParseUtils.get_experiment(session, experiment_type)
+    experiment = ParseUtils.get_experiment(session, "ChIP-seq")
 
     # This is ABSOLUTELY necessary to prevent MySQL from crashing!
     session.close()
@@ -220,40 +230,35 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", remove=False, test=Fal
     samples = _get_samples(samples_file)
 
     # Insert samples/sources
-    _insert_samples_and_sources(samples, datasets)
+    dataset2samplesNsourcesNtfs = _insert_samples_and_sources_and_tfs(samples, datasets, liftOver)
+    exit(0)
 
-    # # Get source
-    # source = Source()
-    # source.name = source_name
-    # ParseUtils.upsert_source(session, source)
-    # sources = ParseUtils.get_source(session, source_name)
-    # source = next(iter(sources))
+    # Group ReMap datasets by target name
+    grouped_datasets = _group_ReMap_datasets(datasets)
 
+    # Partial function to enable parallelization
+    partial_func = partial(_insert_data, test=test, chains_file=chains_file)
 
-
-    # For each BED file...
-    for bed_file in _unwind_bed_files(download_file, dummy_dir):
+    # For each TF...
+    for tf in sorted(grouped_datasets):
 
         # Prepare data
-        data_file = _preprocess_data(bed_file, dummy_dir, merge)
+        data_file = _preprocess_data(tf, grouped_datasets, datasets, dummy_dir,
+            test, threads)
+
+        # Skip
+        if not os.path.exists(data_file):
+            continue
 
         # Split data
         data_files = _split_data(data_file, threads)
 
         # Parallelize inserts to the database
-        ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
+        ParseUtils.insert_data_files_in_parallel(data_files, partial_func, threads)
 
-        # Remove data files
-        if not test:
-            if os.path.exists(data_file):
-                os.remove(data_file)
-            for data_file in data_files:
-                if os.path.exists(data_file):
-                    os.remove(data_file)
-
-    # Remove downloaded file
-    if os.path.exists(download_file) and not test:
-        os.remove(download_file)
+    # Remove files
+    if remove:
+        shutil.rmtree(dummy_dir)
 
     # Dispose session
     Session.remove()
@@ -276,6 +281,127 @@ def _get_ReMap_datasets():
 
     return(datasets)
 
+def _get_chains_file(dummy_dir="/tmp/"):
+
+    # Initialize
+    url = "http://hgdownload.soe.ucsc.edu/goldenPath/hg38/liftOver/"
+    chains_file = "hg38ToHg19.over.chain.gz"
+    dummy_file = os.path.join(dummy_dir, chains_file)
+
+    # Download data
+    if not os.path.exists(dummy_file):
+        f = urlretrieve(os.path.join(url, chains_file), dummy_file)
+
+    return(dummy_file)
+
+def _get_samples(file_name):
+
+    # Initialize
+    samples = {}
+
+    # For each line...
+    for line in ParseUtils.parse_tsv_file(file_name):
+
+        # Initialize
+        sample_name = line[0]
+        treatment = False
+        cell_line = False
+        cancer = False
+        sex = None
+        add = False
+
+        if line[2] == "Yes":
+            treatment = True
+        if line[3] == "Yes":
+            cell_line = True
+        if line[4] == "Yes":
+            cancer = True
+        if line[5] == "female" or line[5] == "male":
+            sex = line[5]
+        if line[6] == "Yes":
+            add = True
+
+        # Add sample
+        samples.setdefault(sample_name, (treatment, cell_line, cancer, sex, add))
+
+    return(samples)
+
+def _insert_samples_and_sources_and_tfs(samples, datasets, liftOver=False):
+
+    # Initialize
+    dataset2samplesNsourcesNtfs = {}
+    i_have_been_warned = False
+    session = Session()
+    source_name = "ReMap"
+
+    # For each dataset...
+    for dataset in sorted(datasets):
+
+        # Initialize
+        biotype_name = datasets[dataset]["biotype_name"]
+        dataset_name = datasets[dataset]["dataset_name"]
+        target_name = datasets[dataset]["target_name"]
+
+        # Skip if non-valid sample
+        if biotype_name not in samples:
+            warnings.warn("missing sample: %s" % biotype_name, Warning, stacklevel=2)
+            i_have_been_warned = True
+            continue
+        if not samples[biotype_name][-1]:
+            print(biotype_name)
+            continue
+
+        # Skip if non-valid target
+        if target_name not in genes:
+            continue
+
+        # Skip if target has been modified
+        if datasets[dataset]["target_modification"] != "":
+            continue
+
+        # Upsert sample
+        sample = Sample()
+        sample.name = biotype_name
+        sample.treatment = samples[biotype_name][0]
+        if datasets[dataset]["biotype_modification"] != "":
+            sample.treatment = True
+        sample.cell_line = samples[biotype_name][1]
+        sample.cancer = samples[biotype_name][2]
+        if samples[biotype_name][3] == "female":
+            sample.X = 2
+            sample.Y = 0
+        if samples[biotype_name][3] == "male":
+            sample.X = 1
+            sample.Y = 1
+        ParseUtils.upsert_sample(session, sample)
+        sample = ParseUtils.get_sample(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer)
+        dataset2samplesNsourcesNtfs.setdefault(dataset_name, [])
+        dataset2samplesNsourcesNtfs[dataset_name].append(sample)
+
+        # Upsert source
+        source = Source()
+        source.name = source_name
+        source.source_metadata = "%s,%s," % (dataset_name, liftOver)
+        source.metadata_descriptor = "dataset,liftOver,"
+        source.url = datasets[dataset]["bed_url"]
+        ParseUtils.upsert_source(session, source)
+        source = ParseUtils.get_source(session, source.name, source.source_metadata, source.metadata_descriptor, source.url)
+        dataset2samplesNsourcesNtfs[dataset_name].append(source)
+
+        # Add TF
+        dataset2samplesNsourcesNtfs[dataset_name].append(target_name)
+
+    if i_have_been_warned:
+        error = ["%s" % os.path.basename(__file__), "error", "missing samples"]
+        print(": ".join(error))
+        exit(0)
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
+
+    return(dataset2samplesNsourcesNtfs)
+
 def _group_ReMap_datasets(datasets):
 
     # Initialize
@@ -287,11 +413,211 @@ def _group_ReMap_datasets(datasets):
         # Initialize
         target_name = datasets[dataset]["target_name"]
 
+        # Skip if non-valid target
+        if target_name not in genes:
+            continue
+
+        # Skip if target has been modified
+        if datasets[dataset]["target_modification"] != "":
+            continue
+
         # Group datasets
         grouped_datasets.setdefault(target_name, set())
         grouped_datasets[target_name].add(dataset)
 
     return(grouped_datasets)
+
+def _preprocess_data(tf, grouped_datasets, datasets, dummy_dir="/tmp/",
+    test=False, threads=1):
+
+    # Initialize
+    dummy_files = []
+    label = "ChIP-seq.%s" % tf
+    tf_datasets = []
+
+    # Skip if BED file exists
+    bed_file = os.path.join(dummy_dir, "%s.bed" % label)
+    if not os.path.exists(bed_file):
+
+        # Skip if BED file exists
+        dummy_file = os.path.join(dummy_dir, "dummy.bed")
+        if not os.path.exists(dummy_file):
+
+            # Get TF datasets
+            for dataset in grouped_datasets[tf]:
+                tf_datasets.append(datasets[dataset])
+
+            # Get ENCODE BED files
+            pool = Pool(processes=threads)
+            partial_function = partial(_download_ReMap_bed_file, dummy_dir=dummy_dir, test=test)
+            for download_file in pool.imap(partial_function, tf_datasets):
+
+                # Skip
+                if download_file is None:
+                    continue
+
+                # Initialize
+                m = re.search("%s/(\S+).bed.gz$" % dummy_dir, download_file)
+                dataset = m.group(1)
+
+                # Concatenate
+                cmd = "zless %s | awk '{print $1\"\t\"$2\"\t\"$3\"\t%s\t\"$7\"\t\"$10}' >> %s" % (download_file, dataset, dummy_file)
+                subprocess.call(cmd, shell=True)
+
+                # Remove downloaded file
+                os.remove(download_file)
+
+            pool.close()
+
+        if os.path.exists(dummy_file):
+
+            # Add dummy file
+            dummy_files.append(dummy_file)
+
+            # Sort BED
+            dummy_file = os.path.join(dummy_dir, "dummy.sorted.bed")
+            if not os.path.exists(dummy_file):
+
+                # UNIX parallel sort is more efficient than bedtools
+                cmd = "LC_ALL=C sort --parallel=%s -T %s -k1,1 -k2,2n %s > %s" % (str(threads), dummy_dir, dummy_files[0], dummy_file)
+                subprocess.call(cmd, shell=True)
+
+            # Add dummy file
+            dummy_files.append(dummy_file)
+
+            # Copy file
+            shutil.copy(dummy_files[1], bed_file)
+
+            # Remove ALL dummy files
+            for dummy_file in dummy_files:
+                os.remove(dummy_file)
+
+    return(bed_file)
+
+def _split_data(data_file, threads=1):
+
+    # Initialize
+    split_files = []
+    split_dir = os.path.dirname(os.path.realpath(data_file))
+
+    # Get number of lines
+    output = subprocess.check_output(["wc -l %s" % data_file], shell=True)
+    m = re.search("(\d+)", str(output))
+    L = float(m.group(1))
+
+    # Split
+    prefix = "%s." % data_file.split("/")[-1]
+    cmd = "split -d -l %s %s %s" % (int(L/threads)+1, data_file, os.path.join(split_dir, prefix))
+    subprocess.run(cmd, shell=True)
+
+    # For each split file...
+    for split_file in os.listdir(split_dir):
+
+        # Append split file
+        if split_file.startswith(prefix):
+            split_files.append(os.path.join(split_dir, split_file))
+
+    return(split_files)
+
+def _download_ReMap_bed_file(dataset, dummy_dir="/tmp/", test=False):
+
+    try:
+
+        # Initialize
+        download_file = os.path.join(dummy_dir, dataset["dataset_name"])
+
+        # Testing
+        if test:
+            print(current_process().name)
+
+        # Download BED file
+        download_file += ".bed.gz"
+        if not os.path.exists(download_file):
+            urlretrieve(dataset["bed_url"], download_file)
+
+        return(download_file)
+
+    except:
+        return(None)
+
+def _insert_data(data_file, test=False, chains_file=None):
+
+    # Initialize
+    session = Session()
+    if chains_file is not None:
+        from pyliftover import LiftOver
+        lo = LiftOver(chains_file)
+
+    # Testing
+    if test:
+        lines = 0
+        print(current_process().name)
+
+    # For each line...
+    for line in ParseUtils.parse_tsv_file(data_file):
+
+        # Initialize
+        dataset_name = line[3]
+
+        # Upsert region
+        region = Region()
+        region.chrom = str(line[0])
+        if region.chrom.startswith("chr"):
+            region.chrom = region.chrom[3:]
+        if region.chrom not in chroms:
+            continue
+        region.start = int(line[1])
+        region.end = int(line[2])
+        if chains_file:
+            try:
+                chrom = "chr%s" % region.chrom
+                start = lo.convert_coordinate(chrom, region.start) # i.e. already 0-based
+                region.start = start[0][1]
+                end = lo.convert_coordinate(chrom, region.end - 1) # i.e. requires 0-based
+                region.end = end[0][1] + 1
+            except:
+                msg = "position could not be found in new assembly"
+                warnings.warn("%s: %s" % (msg, line[1]), Warning, stacklevel=2)
+                continue
+        region.bin = assign_bin(region.start, region.end)
+        ParseUtils.upsert_region(session, region)
+
+        # Get region
+        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
+
+        # Get sample
+        sample = dataset2samplesNsourcesNtfs[dataset_name][0]
+
+        # Get source
+        source = dataset2samplesNsourcesNtfs[dataset_name][1]
+
+        # Upsert tf
+        tf = TFBinding()
+        tf.region_id = region.uid
+        tf.sample_id = sample.uid
+        tf.experiment_id = experiment.uid
+        tf.source_id = source.uid
+        tf.score = float(line[4])
+        tf.peak = int(line[5])
+        tf.tf = dataset2samplesNsourcesNtfs[dataset_name][2]
+        ParseUtils.upsert_tf(session, tf)
+
+        # Testing
+        if test:
+            lines += 1
+            if lines == 1000:
+                break
+
+    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
+    session.close()
+    engine.dispose()
+
+#-------------#
+# Main        #
+#-------------#
+
+if __name__ == "__main__":
+    main()
 
 # def _download_data(genome, dummy_dir="/tmp/"):
 
@@ -327,265 +653,19 @@ def _group_ReMap_datasets(datasets):
 
 #     return(dummy_files[::-1], url)
 
-def _get_samples(file_name):
+# def _unwind_bed_files(file_name, dummy_dir="/tmp/"):
+#     """
+#     Unwinds tarball into 1x BED file per TF.
+#     """
 
-    # Initialize
-    samples = {}
+#     with tarfile.open(file_name) as tar:
 
-    # For each line...
-    for line in ParseUtils.parse_tsv_file(file_name):
+#         # For each member...
+#         for member in tar.getmembers():
 
-        # Initialize
-        sample_name = line[0]
-        treatment = False
-        cell_line = False
-        cancer = False
-        sex = None
-        add = False
+#             # Skip if BED file already exists
+#             bed_file = os.path.join(dummy_dir, member.name)
+#             if not os.path.exists(bed_file):
+#                 tar.extract(member, dummy_dir)
 
-        if line[2] == "Yes":
-            treatment = True
-        if line[3] == "Yes":
-            cell_line = True
-        if line[4] == "Yes":
-            cancer = True
-        if line[5] == "female" or line[5] == "male":
-            sex = line[5]
-        if line[6] == "Yes":
-            add = True
-
-        # Add sample
-        samples.setdefault(sample_name, (treatment, cell_line, cancer, sex, add))
-
-    return(samples)
-
-def _insert_samples_and_sources(samples, datasets):
-
-    # Initialize
-    session = Session()
-    i_have_been_warned = False
-
-    # For each dataset...
-    for dataset in sorted(datasets):
-
-        # Initialize
-        biotype_name = datasets[dataset]["biotype_name"]
-
-        if biotype_name not in samples:
-            warnings.warn("missing sample: %s" % biotype_name, Warning, stacklevel=2)
-            i_have_been_warned = True
-            continue
-
-        if not samples[biotype_name][-1]:
-            continue
-
-        # Upsert sample
-        sample = Sample()
-        sample.name = biotype_name
-        sample.treatment = samples[biotype_name][0]
-        sample.cell_line = samples[biotype_name][1]
-        sample.cancer = samples[biotype_name][2]
-        if samples[biotype_name][3] == "female":
-            sample.X = 2
-            sample.Y = 0
-        if samples[biotype_name][3] == "male":
-            sample.X = 1
-            sample.Y = 1
-        ParseUtils.upsert_sample(session, sample)
-
-    if i_have_been_warned:
-        error = ["%s" % os.path.basename(__file__), "error", "missing samples"]
-        print(": ".join(error))
-        exit(0)
-
-    exit(0)
-        # # Upsert sample
-        # sample = Sample()
-        # if not encodes[accession].summary:
-        #     sample.name = encodes[accession].biosample_name
-        # else:
-        #     sample.name = encodes[accession].summary
-        # sample.treatment = encodes[accession].treatment
-        # sample.cell_line = encodes[accession].cell_line
-        # sample.cancer = encodes[accession].cancer
-        # if encodes[accession].sex is not None:
-        #     sample.X = encodes[accession].X
-        #     sample.Y = encodes[accession].Y
-        # ParseUtils.upsert_sample(session, sample)
-
-        # # Upsert source
-        # source = Source()
-        # source.name = "ENCODE"
-        # # This is to satisfy ENCODE's citing guidelines:
-        # # https://www.encodeproject.org/help/citing-encode/
-        # source.source_metadata = "%s," % accession
-        # source.metadata_descriptor = "accession,"
-        # source.url = encodes[accession].download_url
-        # ParseUtils.upsert_source(session, source)
-
-    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
-    session.close()
-
-def _unwind_bed_files(file_name, dummy_dir="/tmp/"):
-    """
-    Unwinds tarball into 1x BED file per TF.
-    """
-
-    with tarfile.open(file_name) as tar:
-
-        # For each member...
-        for member in tar.getmembers():
-
-            # Skip if BED file already exists
-            bed_file = os.path.join(dummy_dir, member.name)
-            if not os.path.exists(bed_file):
-                tar.extract(member, dummy_dir)
-
-            yield(bed_file)
-
-def _preprocess_data(file_name, dummy_dir="/tmp/", merge=False):
-
-    # Initialize
-    dummy_files = []
-    m = re.search("remap2018_(.+)_all_macs2", file_name)
-    tf = m.group(1)
-
-    # Skip if intersection file already exists
-    bed_file = os.path.join(dummy_dir, "%s.bed" % tf)
-    if not os.path.exists(bed_file):
-
-        # Sort BED
-        dummy_file = os.path.join(dummy_dir, "dummy.sorted.bed")
-        if not os.path.exists(dummy_file):
-
-            # UNIX sort is more efficient than bedtools
-            cmd = "zless %s | cut -f 1-4 | sort -T %s -k1,1 -k2,2n > %s" % (file_name, dummy_dir, dummy_file)
-            subprocess.call(cmd, shell=True)
-
-        # Add dummy file
-        dummy_files.append(dummy_file)
-
-        # Merge BED
-        if merge:
-
-            # Initialize
-            a = BedTool(dummy_file)
-
-            # Skip if already merged
-            dummy_file = os.path.join(dummy_dir, "dummy.merged.bed")
-            if not os.path.exists(dummy_file):
-                a.merge(stream=True).saveas(dummy_file)
-
-            # Add dummy file
-            dummy_files.append(dummy_file)
-
-        # Intersect
-        a = BedTool(dummy_files[0])
-        b = BedTool(dummy_files[-1])
-        a.intersect(b, wa=True, wb=True, stream=True).saveas(bed_file)
-
-        # Clean PyBedTools files
-        cleanup(remove_all=True)
-
-        # Remove ALL dummy files
-        for dummy_file in dummy_files:
-            os.remove(dummy_file)
-
-    return(bed_file)
-
-def _split_data(data_file, threads=1):
-
-    # Initialize
-    split_files = []
-
-    # For each chromosome...
-    for chrom in chroms:
-
-        # Skip if file already split
-        split_file = "%s.%s" % (data_file, chrom)
-        if not os.path.exists(split_file):
-
-            # Parallel split
-            cmd = 'zless %s | parallel -j %s --pipe --block 2M -k grep "^%s[[:space:]]" > %s' % (data_file, threads, chrom, split_file)
-            subprocess.call(cmd, shell=True)
-
-        # Append split file
-        statinfo = os.stat(split_file)
-        if statinfo.st_size:
-            split_files.append(split_file)
-        else:
-            os.remove(split_file)
-
-    return(split_files)
-
-def _insert_data(data_file, test=False):
-
-    # Initialize
-    session = Session()
-
-    # Testing
-    if test:
-        lines = 0
-        print(current_process().name)
-
-    # For each line...
-    for line in ParseUtils.parse_tsv_file(data_file):
-
-        # Skip empty lines
-        if not line:
-            continue
-
-        # Get region
-        region = Region()
-        region.chrom = line[-3]
-        region.start = int(line[-2])
-        region.end = int(line[-1])
-        region.bin = assign_bin(region.start, region.end)
-
-        # Ignore non-standard chroms, scaffolds, etc.
-        if region.chrom not in chroms:
-            continue
-
-        # Get TF, sample
-        m = re.search("^\S+\.(\S+)\.(\S+)$", line[3])
-        n = re.search("^([^_]+)", m.group(1))
-        tf_name = n.group(1)
-        n = re.search("^([^_]+)", m.group(2))
-        sample_name = n.group(1)
-
-        # Ignore samples
-        if sample_name not in samples:
-            continue
-
-        # Upsert region
-        ParseUtils.upsert_region(session, region)
-
-        # Get region ID
-        region = ParseUtils.get_region(session, region.chrom, region.start, region.end)
-
-        # Get TF
-        tf = TFBinding()
-        tf.region_id = region.uid
-        tf.sample_id = samples[sample_name]
-        tf.experiment_id = experiment.uid
-        tf.source_id = source.uid
-        tf.tf = tf_name
-
-        # Upsert tf
-        ParseUtils.upsert_tf(session, tf)
-
-        # Testing
-        if test:
-            lines += 1
-            if lines > 1000:
-                break
-
-    # This is ABSOLUTELY necessary to prevent MySQL from crashing!
-    session.close()
-    engine.dispose()
-
-#-------------#
-# Main        #
-#-------------#
-
-if __name__ == "__main__": main()
+#             yield(bed_file)

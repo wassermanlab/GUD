@@ -370,7 +370,7 @@ def _preprocess_data(data_files, feat_type, dummy_dir="/tmp/", test=False, threa
     # If chains file...
     if data_files[-1] is not None:
         from pyliftover import LiftOver
-        lo = LiftOver(data_files[-1])        
+        lo = LiftOver(data_files[-1])
 
     # For each line...
     for line in ParseUtils.parse_tsv_file(data_files[1]):
