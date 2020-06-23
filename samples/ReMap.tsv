@@ -179,7 +179,7 @@ T47D-A1-2	5	No	Yes	Yes	female	Yes	A1-2 (derived from T-47D)	Invasive ductal carc
 WI-38VA13	5	No	Yes	No	female	Yes	WI-38 VA13 subline 2RA	
 astrocyte	4	No	No	No		Yes	astrocyte	
 BC3	4	No	Yes	Yes	male	Yes	BC-3	Primary effusion lymphoma
-DND41	4	No	Yes	Yes	male	Yes	DND-41	Childhood T acute lymphoblastic leukemia
+DND-41	4	No	Yes	Yes	male	Yes	DND-41	Childhood T acute lymphoblastic leukemia
 fetal	4					No		Mix of testis and erythroblast
 gastroesophageal-sphincter	4	No	No	No		Yes	gastroesophageal sphincter	
 GIST48	4	No	Yes	Yes		Yes	GIST48	Gastrointestinal stromal tumor
@@ -225,7 +225,7 @@ HCAEC	3	No	No	No		Yes	endothelial cell (heart)
 HCC95	3	No	Yes	Yes	male	Yes	HCC95	Squamous cell lung carcinoma
 heart	3	No	No	No		Yes	heart	
 HFF	3	No	Yes	No	male	Yes	HFF	
-HIES	3					No	lymphoblastoid cell line	Cell line does not exist on cellosaurus
+HIES	3					No		hyper-IgE syndrome
 hMSC-TERT	3	No	Yes	No	male	Yes	hMSC-TERT	
 HUCCT1	3	No	Yes	Yes	male	Yes	HuCC-T1	Intrahepatic cholangiocarcinoma
 Huh-7	3	No	Yes	Yes	male	Yes	Huh-7	Hepatocellular carcinoma
@@ -288,7 +288,7 @@ HBL1	2	No	Yes	Yes	male	Yes	HBL-1	Diffuse large B-cell lymphoma activated B-cell 
 HCC1395	2	No	Yes	Yes	female	Yes	HCC1395	Ductal breast carcinoma
 HCT15	2	No	Yes	Yes	male	Yes	HCT 15	Colon carcinoma
 HDF	2	No	No	No		Yes	fibroblast (dermis)	
-HEE	2	No				Yes	epididymal epithelial cell	
+HEE	2	No	No	No		Yes	epididymal epithelial cell	
 HEK293-FT	2	No	Yes	No	female	Yes	HEK293-FT	
 HepaRG	2	No	Yes	Yes	female	Yes	HepaRG	Hepatocellular carcinoma
 hiF-T	2					No		Cell line does not exist on cellosaurus
@@ -305,19 +305,19 @@ J-Lat	2	No	Yes	Yes	male	Yes	J-Lat GFP Clone A72	Childhood T acute lymphoblastic 
 JMSU-1	2	No	Yes	Yes	male	Yes	JMSU-1	Bladder carcinoma
 KOPTK1	2	No	Yes	Yes	male	Yes	KOPT-K1	Childhood T acute lymphoblastic leukemia
 KYSE70	2	No	Yes	Yes	male	Yes	KYSE-70	Esophageal squamous cell carcinoma
-L826	2	No				Yes		
-LHSAR	2	No				Yes		
+L826	2					No		Cell line does not exist on cellosaurus
+LHSAR	2					No		Cell line does not exist on cellosaurus
 LOX-IMVI	2	No	Yes	Yes	male	Yes	LOX-IMVI	Amelanotic melanoma
 MCF-7-Luc	2	No	Yes	Yes	female	Yes	MCF-7-Luc	Invasive ductal carcinoma, not otherwise specified
 MCF-7-Luc-Y537S	2	Yes	Yes	Yes	female	Yes	MCF-7-Luc	Invasive ductal carcinoma, not otherwise specified
 MDA-MB-134-VI	2	No	Yes	Yes	female	Yes	MDA-MB-134-VI        	Invasive lobular breast carcinoma
 MDA-MB-468	2	No	Yes	Yes	female	Yes	MDA-MB-468	Breast adenocarcinoma
 melanocyte	2	No	No	No		Yes	melanocyte	
-MG-63-3	2	No				Yes		
+MG-63-3	2	No	Yes	Yes	male	Yes	MG-63	Osteosarcoma
 ML-2	2	No	Yes	Yes	male	Yes	ML-2	Adult acute myeloid leukemia
 MNNG-HOS	2	No	Yes	Yes	female	Yes	MNNG/HOS Cl #5	Osteosarcoma
 MOLT-3	2	No	Yes	Yes	male	Yes	MOLT-3	Adult T acute lymphoblastic leukemia
-MPNST	2	No				Yes		
+MPNST	2	No	No	Yes		Yes	malignant peripheral nerve sheath tumour	
 MSTO	2	No	Yes	Yes	male	Yes	MSTO-211H	Pleural biphasic mesothelioma
 Mutu-1	2	No	Yes	Yes		Yes	Mutu-1	Epstein-Barr virus-related Burkitt lymphoma
 MUTUL	2	No	Yes	Yes		Yes	Mutu-1	Epstein-Barr virus-related Burkitt lymphoma
@@ -397,7 +397,7 @@ DAOY	1	No	Yes	Yes	male	Yes	Daoy	Medulloblastoma
 dendrite	1	No	No	No		Yes	dendritic cell	
 dermal	1	No	No	No		Yes	keratinocyte	
 DLBCL	1	No	No	Yes		Yes	diffuse large B cell lymphoma	
-dopaminergic-neuron	1	No	Yes	No	female	Yes	dopaminergic neuron (derived from WA09)	
+dopaminergic-neuron	1	No	No	No	female	Yes	dopaminergic neuron (derived from WA09)	
 DU528	1	No	Yes	Yes	male	Yes	DU528	Childhood T acute lymphoblastic leukemia
 EDOMIPS2	1	No	Yes	No	female	Yes	Edom-iPS-2	Induced pluripotent stem cell
 EndoC-betaH2	1	No	Yes	No		Yes	EndoC-betaH2	
@@ -471,9 +471,9 @@ HEP14-0080-LCLs	1	No	Yes	No		Yes	lymphoblastoid cell line
 hESC-1	1					No		Cell line does not exist on cellosaurus
 HEY-A8	1	No	Yes	Yes	female	Yes	HEY A8	High grade ovarian serous adenocarcinoma
 HKC	1	No	Yes	No	male	Yes	HKC	
-HMLE-Twist-ER	1	No				Yes		
+HMLE-Twist-ER	1	No	Yes	No	female	Yes	PHMLER 	
 HS578T	1	No	Yes	Yes	female	Yes	Hs 578T	Invasive ductal carcinoma, not otherwise specified
-HSPC-CD34	1	No				Yes		
+HSPC-CD34	1	No	No	No		Yes	hematopoietic stem cell (CD34-positive)	
 HUG1N	1	No	Yes	Yes	male	Yes	HuG1-N	Gastric tubular adenocarcinoma
 ID00014	1	No	Yes	No	female	Yes	ID00014	DiGeorge syndrome
 ID00015	1	No	Yes	No	female	Yes	ID00015	

@@ -229,7 +229,7 @@ CNhs11932	basal cell carcinoma cell line:TE 354.T	No	Yes	Yes	female	Yes	TE 354.T
 CNhs12546	Basophils, donor1	No	No	No		Yes	basophil	
 CNhs12563	Basophils, donor2	No	No	No		Yes	basophil	
 CNhs12575	Basophils, donor3	No	No	No		Yes	basophil	
-CNhs10750	bile duct carcinoma cell line:HuCCT1	No	Yes	Yes		Yes	HuCC-T1	Intrahepatic cholangiocarcinoma
+CNhs10750	bile duct carcinoma cell line:HuCCT1	No	Yes	Yes	male	Yes	HuCC-T1	Intrahepatic cholangiocarcinoma
 CNhs11265	bile duct carcinoma cell line:TFK-1	No	Yes	Yes	male	Yes	TFK-1	Cholangiocarcinoma
 CNhs11845	biphenotypic B myelomonocytic leukemia cell line:MV-4-11	No	Yes	Yes	male	Yes	MV4-11	Childhood acute monocytic leukemia
 CNhs10616	bladder, adult, pool1	No	No	No		Yes	bladder	

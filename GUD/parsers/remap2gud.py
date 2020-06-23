@@ -231,7 +231,6 @@ def remap_to_gud(genome, samples_file, dummy_dir="/tmp/", remove=False, test=Fal
 
     # Insert samples/sources
     dataset2samplesNsourcesNtfs = _insert_samples_and_sources_and_tfs(samples, datasets, liftOver)
-    exit(0)
 
     # Group ReMap datasets by target name
     grouped_datasets = _group_ReMap_datasets(datasets)
@@ -348,7 +347,6 @@ def _insert_samples_and_sources_and_tfs(samples, datasets, liftOver=False):
             i_have_been_warned = True
             continue
         if not samples[biotype_name][-1]:
-            print(biotype_name)
             continue
 
         # Skip if non-valid target
@@ -362,6 +360,9 @@ def _insert_samples_and_sources_and_tfs(samples, datasets, liftOver=False):
         # Upsert sample
         sample = Sample()
         sample.name = biotype_name
+        # Fix typo
+        if sample.name == "bonchial":
+            sample.name = "bronchial"
         sample.treatment = samples[biotype_name][0]
         if datasets[dataset]["biotype_modification"] != "":
             sample.treatment = True
@@ -413,14 +414,6 @@ def _group_ReMap_datasets(datasets):
         # Initialize
         target_name = datasets[dataset]["target_name"]
 
-        # Skip if non-valid target
-        if target_name not in genes:
-            continue
-
-        # Skip if target has been modified
-        if datasets[dataset]["target_modification"] != "":
-            continue
-
         # Group datasets
         grouped_datasets.setdefault(target_name, set())
         grouped_datasets[target_name].add(dataset)
@@ -445,7 +438,8 @@ def _preprocess_data(tf, grouped_datasets, datasets, dummy_dir="/tmp/",
 
             # Get TF datasets
             for dataset in grouped_datasets[tf]:
-                tf_datasets.append(datasets[dataset])
+                if dataset in dataset2samplesNsourcesNtfs:
+                    tf_datasets.append(datasets[dataset])
 
             # Get ENCODE BED files
             pool = Pool(processes=threads)
