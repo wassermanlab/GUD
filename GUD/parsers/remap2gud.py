@@ -412,6 +412,10 @@ def _group_ReMap_datasets(datasets):
     # For each accession...
     for dataset in datasets:
 
+        # Skip
+        if dataset not in dataset2samplesNsourcesNtfs:
+            continue
+
         # Initialize
         target_name = datasets[dataset]["target_name"]
 
@@ -427,7 +431,6 @@ def _preprocess_data(tf, grouped_datasets, datasets, dummy_dir="/tmp/",
     # Initialize
     dummy_files = []
     label = "ChIP-seq.%s" % tf
-    tf_datasets = []
 
     # Skip if BED file exists
     bed_file = os.path.join(dummy_dir, "%s.bed" % label)
@@ -437,15 +440,10 @@ def _preprocess_data(tf, grouped_datasets, datasets, dummy_dir="/tmp/",
         dummy_file = os.path.join(dummy_dir, "dummy.bed")
         if not os.path.exists(dummy_file):
 
-            # Get TF datasets
-            for dataset in grouped_datasets[tf]:
-                if dataset in dataset2samplesNsourcesNtfs:
-                    tf_datasets.append(datasets[dataset])
-
             # Get ENCODE BED files
             pool = Pool(processes=threads)
             partial_function = partial(_download_ReMap_bed_file, dummy_dir=dummy_dir, test=test)
-            for download_file in pool.imap(partial_function, tf_datasets):
+            for download_file in pool.imap(partial_function, grouped_datasets[tf]):
 
                 # Skip
                 if download_file is None:
