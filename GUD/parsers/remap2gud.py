@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import warnings
 # Python 3+
 if sys.version_info > (3, 0):
     from urllib.request import urlretrieve

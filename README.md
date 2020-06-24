@@ -11,7 +11,7 @@ test
 GUD requires the following dependencies:
 * [`GNU Core Utilities`](https://www.gnu.org/software/coreutils/)
 * [`MySQL`](https://www.mysql.com)
-* [`Python`](https://www.python.org) `≥2.7` or `3.x` with:
+* [`Python`](https://www.python.org) `≥2.7` or `3.x` (recommended) with:
     - [`Biopython`](https://biopython.org)
     - [`Core API`](https://www.coreapi.org/)
     - [`flask`](https://flask.palletsprojects.com/en/1.0.x/)
@@ -23,7 +23,7 @@ GUD requires the following dependencies:
     - [`pybedtools`](https://daler.github.io/pybedtools/)
     - [`PyMySQL`](https://pymysql.readthedocs.io/en/latest/)
     - [`pyliftover`](https://github.com/konstantint/pyliftover)
-    - [`requests`]()
+    - [`requests`](https://requests.readthedocs.io/en/master/)
     - [`SQLAlchemy`](https://www.sqlalchemy.org)
     - [`SQLAlchemy-FullText-Search`](https://github.com/mengzhuo/sqlalchemy-fulltext-search)
     - [`SQLAlchemy-Utils`](https://sqlalchemy-utils.readthedocs.io/en/latest/)
@@ -31,10 +31,10 @@ GUD requires the following dependencies:
 ## Configuration
 
 ```
-conda create -n gud -c bioconda -c conda-forge python=3.7 biopython coreapi coreutils \
-    flask flask-sqlalchemy fuzzywuzzy pandas pymysql pyliftover requests
+conda create -n gud -c bioconda -c conda-forge python=3.7 biopython coreutils flask \
+    flask-sqlalchemy fuzzywuzzy pandas pymysql pyliftover python-coreapi requests
 pip install flask-limiter interval-binning python-Levenshtein SQLAlchemy-FullText-Search \
-    sqlalchemy-utils
+    sqlalchemy-utils warnings
 ```
 
 ## START UP SERVER
