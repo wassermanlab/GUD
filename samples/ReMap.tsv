@@ -179,7 +179,7 @@ T47D-A1-2	5	No	Yes	Yes	female	Yes	A1-2 (derived from T-47D)	Invasive ductal carc
 WI-38VA13	5	No	Yes	No	female	Yes	WI-38 VA13 subline 2RA	
 astrocyte	4	No	No	No		Yes	astrocyte	
 BC3	4	No	Yes	Yes	male	Yes	BC-3	Primary effusion lymphoma
-DND-41	4	No	Yes	Yes	male	Yes	DND-41	Childhood T acute lymphoblastic leukemia
+DND41	4	No	Yes	Yes	male	Yes	DND-41	Childhood T acute lymphoblastic leukemia
 fetal	4					No		Mix of testis and erythroblast
 gastroesophageal-sphincter	4	No	No	No		Yes	gastroesophageal sphincter	
 GIST48	4	No	Yes	Yes		Yes	GIST48	Gastrointestinal stromal tumor
