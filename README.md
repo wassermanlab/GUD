@@ -34,7 +34,7 @@ GUD requires the following dependencies:
 conda create -n gud -c bioconda -c conda-forge python=3.7 biopython coreutils flask \
     flask-sqlalchemy fuzzywuzzy pandas pymysql pyliftover python-coreapi requests
 pip install flask-limiter interval-binning python-Levenshtein SQLAlchemy-FullText-Search \
-    sqlalchemy-utils warnings
+    sqlalchemy-utils
 ```
 
 ## START UP SERVER
