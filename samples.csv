@@ -1,0 +1,218 @@
+uid,name,X_chroms,Y_chroms,treatment,cell_line,cancer
+674,MCF 10A,2,0,0,1,0
+584,H4,1,1,0,1,1
+19,adrenal gland female adult (51 years),2,0,0,0,0
+362,adrenal gland male embryo (101 days),1,1,0,0,0
+111,angular gyrus male adult (81 years),1,1,0,0,0
+25,ascending aorta female adult (51 years),2,0,0,0,0
+647,B cell male adult (21 years),1,1,0,0,0
+46,body of pancreas female adult (51 years),2,0,0,0,0
+403,brain male embryo (101 days),1,1,0,0,0
+80,breast epithelium female adult (51 years),2,0,0,0,0
+133,caudate nucleus male adult (81 years),1,1,0,0,0
+706,CD14-positive monocyte male adult (21 years),1,1,0,0,0
+637,"CD4-positive, alpha-beta T cell male adult (21 years)",1,1,0,0,0
+655,"CD8-positive, alpha-beta T cell male adult (21 years)",1,1,0,0,0
+166,cingulate gyrus male adult (81 years),1,1,0,0,0
+47,coronary artery female adult (51 years),2,0,0,0,0
+13,esophagus muscularis mucosa female adult (51 years),2,0,0,0,0
+40,esophagus squamous epithelium female adult (51 years),2,0,0,0,0
+9,gastrocnemius medialis female adult (51 years),2,0,0,0,0
+18,gastroesophageal sphincter female adult (51 years),2,0,0,0,0
+191,heart embryo (101 days),NA,NA,0,0,0
+465,heart female embryo (91 days),2,0,0,0,0
+23,heart left ventricle female adult (51 years),2,0,0,0,0
+245,heart left ventricle female embryo (101 days) and female embryo (103 days),2,0,0,0,0
+541,heart male embryo (91 days),1,1,0,0,0
+222,heart right ventricle female embryo (101 days) and female embryo (103 days),2,0,0,0,0
+438,kidney female embryo (121 days),2,0,0,0,0
+278,large intestine female embryo (91 days),2,0,0,0,0
+242,large intestine male embryo (91 days),1,1,0,0,0
+108,layer of hippocampus male adult (81 years),1,1,0,0,0
+314,left arm bone male embryo (81 days),1,1,0,0,0
+337,left cardiac atrium female embryo (101 days),2,0,0,0,0
+368,left kidney female embryo (59 days) and male embryo (91 days),NA,NA,0,0,0
+422,left leg bone male embryo (81 days),1,1,0,0,0
+276,left lung female embryo (91 days),2,0,0,0,0
+424,left lung male embryo (91 days),1,1,0,0,0
+249,liver female embryo (101 days) and female embryo (113 days),2,0,0,0,0
+163,liver male adult (31 years),1,1,0,0,0
+71,lower leg skin female adult (51 years),2,0,0,0,0
+273,lung embryo (101 days),NA,NA,0,0,0
+168,middle frontal area 46 male adult (81 years),1,1,0,0,0
+118,mucosa of rectum female adult (61 years),2,0,0,0,0
+369,muscle of arm embryo (101 days),NA,NA,0,0,0
+304,muscle of arm male embryo (101 days),1,1,0,0,0
+331,muscle of back male embryo (101 days),1,1,0,0,0
+428,muscle of back male embryo (91 days),1,1,0,0,0
+290,muscle of leg male embryo (101 days),1,1,0,0,0
+485,muscle of trunk female embryo (121 days),2,0,0,0,0
+740,natural killer cell male adult (21 years),1,1,0,0,0
+7,omental fat pad female adult (51 years),2,0,0,0,0
+57,ovary female adult (51 years),2,0,0,0,0
+45,Peyer's patch female adult (51 years),2,0,0,0,0
+268,placenta female embryo (101 days) and male embryo (105 days),NA,NA,0,0,0
+385,placenta male embryo (91 days),1,1,0,0,0
+306,renal cortex interstitium male embryo (91 days),1,1,0,0,0
+371,renal pelvis male embryo (91 days),1,1,0,0,0
+313,right arm bone male embryo (81 days),1,1,0,0,0
+55,right atrium auricular region female adult (51 years),2,0,0,0,0
+488,right kidney male embryo (91 days),1,1,0,0,0
+481,right leg bone male embryo (81 days),1,1,0,0,0
+352,right lung female embryo (91 days),2,0,0,0,0
+771,8988T,2,0,0,1,1
+764,A172,1,1,0,1,1
+576,A549,1,1,0,1,1
+693,A673,2,0,0,1,1
+737,ACHN,1,1,0,1,1
+630,AG04449,1,1,0,1,0
+657,AG04450,1,1,0,1,0
+785,AG08395,2,0,0,1,0
+708,AG08396,2,0,0,1,0
+639,AG09309,2,0,0,1,0
+550,AG09319,2,0,0,1,0
+705,AG10803,1,1,0,1,0
+659,AG20443,1,1,0,1,0
+360,brain embryo (56 days) and male embryo (58 days),NA,NA,0,0,0
+680,C803,2,0,0,1,0
+660,Caco-2,1,1,0,1,1
+707,Caki2,1,1,0,1,1
+557,cardiac muscle cell originated from RUES2,2,0,0,0,0
+570,CD14-positive monocyte female,2,0,0,0,0
+795,CMK,1,1,0,1,1
+778,COLO829,1,1,0,1,1
+787,"common myeloid progenitor, CD34-positive female",2,0,0,0,0
+667,"common myeloid progenitor, CD34-positive male",1,1,0,0,0
+800,CWRU1,1,1,0,1,0
+797,D341Med,1,1,0,1,1
+773,D721Med,1,1,0,1,1
+691,Daoy,1,1,0,1,1
+548,dermis microvascular lymphatic vessel endothelial cell female,2,0,0,0,0
+562,dermis microvascular lymphatic vessel endothelial cell male,1,1,0,0,0
+782,ecto neural progenitor cell originated from H9,2,0,0,0,0
+617,EH,1,1,0,1,1
+715,ELF-1,2,0,0,1,0
+544,endocrine pancreas male,1,1,0,0,0
+592,epithelial cell of prostate,1,1,0,0,0
+272,eye embryo (56 days) and male embryo (76 days),NA,NA,0,0,0
+702,fibroblast of mammary gland female,2,0,0,0,0
+625,fibroblast of peridontal ligament male,1,1,0,0,0
+598,fibroblast of the aortic adventitia female,2,0,0,0,0
+678,G401,1,1,0,1,1
+682,GM03348,1,1,0,1,0
+768,GM04503,2,0,0,1,0
+563,GM04504,2,0,0,1,0
+619,GM06990,2,0,0,1,0
+653,GM10248,1,1,0,1,0
+701,GM10266,1,1,0,1,0
+661,GM12864,1,1,0,1,0
+545,GM12865,2,0,0,1,0
+610,GM12878,2,0,0,1,0
+552,GM12891,1,1,0,1,0
+571,GM12892,2,0,0,1,0
+781,GM18507,1,1,0,1,0
+726,GM19238,2,0,0,1,0
+574,GM19239,1,1,0,1,0
+791,GM19240,2,0,0,1,0
+590,GM23248,1,1,0,1,0
+718,GM23338 originated from GM23248,1,1,0,1,0
+729,H1,1,1,0,1,0
+586,H54,2,0,0,1,1
+561,H7,2,0,0,1,0
+609,H9,2,0,0,1,0
+618,HAP-1,1,1,0,1,1
+622,HCEC 1CT,1,1,0,1,0
+558,HCT116,1,1,0,1,1
+279,heart embryo (59 days) and female embryo (76 days),NA,NA,0,0,0
+587,HEK293T,2,0,0,1,0
+666,HeLa-S3,2,0,0,1,1
+669,hepatocyte originated from H9,2,0,0,0,0
+628,HepG2,1,1,0,1,1
+739,HFF-Myc originated from foreskin fibroblast,1,1,0,1,0
+567,HFFc6,1,1,0,1,0
+714,HK-2,1,1,0,1,1
+564,HL-60,2,0,0,1,1
+688,HPDE6-E6E7,2,0,0,1,0
+760,HS-27A,1,1,0,1,0
+765,HS-5,1,1,0,1,0
+716,HT-29,2,0,0,1,1
+634,HT1080,1,1,0,1,1
+799,HuH-7,1,1,0,1,1
+621,HuH-7.5,1,1,0,1,1
+671,IMR-90,2,0,0,1,0
+796,iPS DF 19.11,1,1,0,1,0
+556,iPS DF 19.7,1,1,0,1,0
+769,iPS DF 4.7,1,1,0,1,0
+733,iPS DF 6.9,1,1,0,1,0
+772,iPS-NIHi11 originated from AG20443,1,1,0,1,0
+648,iPS-NIHi7 originated from AG08395,2,0,0,1,0
+700,Jurkat clone E61,1,1,0,1,1
+704,K562,2,0,0,1,1
+580,Karpas-422,2,0,0,1,1
+577,KBM-7,1,1,0,1,1
+679,keratinocyte female,2,0,0,0,0
+260,kidney embryo (59 days) and female embryo (59 days),NA,NA,0,0,0
+585,LHCN-M2,1,1,0,1,0
+683,LNCaP clone FGC,1,1,0,1,1
+710,LoVo,1,1,0,1,1
+297,lung embryo (80 days) and male embryo (76 days),NA,NA,0,0,0
+595,lung microvascular endothelial cell female,2,0,0,0,0
+681,M059J,1,1,0,1,1
+620,mammary epithelial cell female,2,0,0,0,0
+713,MCF-7,2,0,0,1,1
+755,mesendoderm originated from H1,1,1,0,0,0
+605,MG63,1,1,0,1,1
+748,MM.1S,2,0,0,1,1
+604,NAMALWA,2,0,0,1,1
+569,NB4,2,0,0,1,1
+664,NCI-H226,1,1,0,1,1
+568,NCI-H460,1,1,0,1,1
+789,neural progenitor cell originated from H9,2,0,0,0,0
+756,neural stem progenitor cell originated from H1,1,1,0,0,0
+546,NT2/D1,1,1,0,1,1
+582,OCI-LY7,1,1,0,1,1
+728,Panc1,1,1,0,1,1
+673,PC-3,1,1,0,1,1
+632,PC-9,1,1,0,1,1
+575,pulmonary artery endothelial cell female,2,0,0,0,0
+675,RCC 7860,1,1,0,1,1
+430,retina embryo (125 days) and male embryo (103 days),NA,NA,0,0,0
+611,RPMI7951,2,0,0,1,1
+656,RPMI8226,1,1,0,1,1
+779,RWPE1,1,1,0,1,0
+665,SJCRH30,1,1,0,1,1
+627,SJSA1,1,1,0,1,1
+690,SK-MEL-5,2,0,0,1,1
+689,SK-N-DZ,2,0,0,1,1
+603,SK-N-MC,2,0,0,1,1
+721,smooth muscle cell of the brain vasculature female,2,0,0,0,0
+686,stromal cell of bone marrow male,1,1,0,0,0
+651,SW480,1,1,0,1,1
+547,T47D,2,0,0,1,1
+766,trophoblast cell originated from H1,1,1,0,0,0
+257,umbilical cord embryo (59 days) and male embryo (76 days),NA,NA,0,0,0
+735,WERI-Rb-1,2,0,0,1,1
+100,sigmoid colon female adult (51 years),2,0,0,0,0
+402,small intestine female embryo (91 days),2,0,0,0,0
+349,small intestine male embryo (91 days),1,1,0,0,0
+6,spleen female adult (51 years),2,0,0,0,0
+330,stomach embryo (101 days),NA,NA,0,0,0
+65,stomach female adult (51 years),2,0,0,0,0
+274,stomach female embryo (121 days),2,0,0,0,0
+329,stomach male embryo (91 days),1,1,0,0,0
+200,subcutaneous abdominal adipose tissue nuclear fraction female adult (41 years),2,0,0,0,0
+207,subcutaneous abdominal adipose tissue nuclear fraction female adult (81 years),2,0,0,0,0
+116,substantia nigra male adult (81 years),1,1,0,0,0
+53,suprapubic skin female adult (51 years),2,0,0,0,0
+640,T-cell male adult (21 years),1,1,0,0,0
+125,temporal lobe male adult (81 years),1,1,0,0,0
+59,thyroid gland female adult (51 years),2,0,0,0,0
+540,tibial artery female adult (51 years),2,0,0,0,0
+26,tibial nerve female adult (51 years),2,0,0,0,0
+60,transverse colon female adult (51 years),2,0,0,0,0
+722,trophoblast cell embryo (21 weeks),NA,NA,0,0,0
+78,upper lobe of left lung female adult (51 years),2,0,0,0,0
+14,uterus female adult (51 years),2,0,0,0,0
+44,vagina female adult (51 years),2,0,0,0,0
+573,BE2C,1,1,0,1,1
+633,BJ,1,1,0,1,0
