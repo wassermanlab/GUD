@@ -1,7 +1,8 @@
 ENCODE_sample_name	treatment	cell_line	cancer	sex	add	OnTarget_cell_or_tissue	comments
-22Rv1	No	No	Yes	male	Yes	22Rv1	Prostate carcinoma
+22Rv1	No	Yes	Yes	male	Yes	22Rv1	Prostate carcinoma
 8988T	No	Yes	Yes	female	Yes	PaTu 8988t	Pancreatic adenocarcinoma
 A172	No	Yes	Yes	male	Yes	A-172	Glioblastoma
+A204.1	No	Yes	Yes	female	Yes	A204.1	Embryonal rhabdomyosarcoma
 A549	No	Yes	Yes	male	Yes	A-549	Lung adenocarcinoma
 A673	No	Yes	Yes	female	Yes	A-673	Ewing sarcoma
 ACC112	No	Yes	Yes	male	Yes	UTSW-ACC112	Salivary gland adenoid cystic carcinoma
@@ -61,6 +62,7 @@ ELF-1	No	Yes	No	female	Yes	Elf1	Embryonic stem cell
 ELR					No		
 ES-I3	No	Yes	No	female	Yes	I 3	Embryonic stem cell
 G401	No	Yes	Yes	male	Yes	G-401	Rhabdoid tumor of the kidney
+G401.6	No	Yes	Yes	male	Yes	G401.6	Rhabdoid tumor of the kidney
 GM03348	No	Yes	No	male	Yes	GM03348	
 GM04503	No	Yes	No	female	Yes	GM04503	
 GM04504	No	Yes	No	female	Yes	GM04504	
@@ -68,18 +70,25 @@ GM06990	No	Yes	No	female	Yes	GM06990
 GM08714	No	Yes	No	female	Yes	GM08714	Immunodeficiency-centromeric instability-facial anomalies syndrome 1
 GM10248	No	Yes	No	male	Yes	GM10248	Cornelia de Lange syndrome
 GM10266	No	Yes	No	male	Yes	GM10266	Cornelia de Lange syndrome
+GM10847	No	Yes	No	female	Yes	GM10847	
 GM12801	No	Yes	No	male	Yes	GM12801	
 GM12864	No	Yes	No	male	Yes	GM12864	
-GM12865	No	Yes	No	female	Yes	GM12865	CYP2C19 p.Pro227Pro (c.681G>A); cryptic splice acceptor activation; allele CYP2C19*2 (Coriell)
+GM12865	No	Yes	No	female	Yes	GM12865	
 GM12873	No	Yes	No	female	Yes	GM12873	
-GM12874	No	Yes	No	male	Yes	GM12874	CYP2C19 p.Pro227Pro (c.681G>A); cryptic splice acceptor activation; allele CYP2C19*2 (Coriell)
+GM12874	No	Yes	No	male	Yes	GM12874	
 GM12875	No	Yes	No	female	Yes	GM12875	
 GM12878	No	Yes	No	female	Yes	GM12878	
-GM12891	No	Yes	No	male	Yes	GM12891	CYP2C19 p.Pro227Pro (c.681G>A); cryptic splice acceptor activation; allele CYP2C19*2 (Coriell)
+GM12891	No	Yes	No	male	Yes	GM12891	
 GM12892	No	Yes	No	female	Yes	GM12892	
 GM13976	No	Yes	No	female	Yes	GM13976	
 GM13977	No	Yes	No	female	Yes	GM13977	Cornelia de Lange syndrome
+GM15510	No	Yes	No	female	Yes	GM15510	
+GM18505	No	Yes	No	female	Yes	GM18505	
 GM18507	No	Yes	No	male	Yes	GM18507	
+GM18526	No	Yes	No	female	Yes	GM18526	
+GM18951	No	Yes	No	female	Yes	GM18951	
+GM19099	No	Yes	No	female	Yes	GM19099	
+GM19193	No	Yes	No	female	Yes	GM19193	
 GM19238	No	Yes	No	female	Yes	GM19238	
 GM19239	No	Yes	No	male	Yes	GM19239	
 GM19240	No	Yes	No	female	Yes	GM19240	
@@ -196,6 +205,7 @@ T-helper 2 cell	No	No	No		Yes	T helper 2 cell
 T-helper 2 cell female adult (26 years)	No	No	No	female	Yes	T helper 2 cell	
 T-helper 2 cell male adult (33 years)	No	No	No	male	Yes	T helper 2 cell	
 T47D	No	Yes	Yes	female	Yes	T-47D	Invasive ductal carcinoma
+TTC549	No	Yes	Yes	female	Yes	TTC-549	Extrarenal rhabdoid tumor
 UCSF-4	No	Yes	No	female	Yes	UCSF4	Embryonic stem cell
 VCaP	No	Yes	Yes	male	Yes	VCaP	Prostate carcinoma
 WERI-Rb-1	No	Yes	Yes	female	Yes	WERI-Rb-1        	Retinoblastoma
@@ -258,6 +268,7 @@ breast epithelium female adult (53 years)	No	No	No	female	Yes	epithelium (breast
 breast epithelium male adult (37 years)	No	No	No	male	Yes	epithelium (breast)	
 breast epithelium male adult (54 years)	No	No	No	male	Yes	epithelium (breast)	
 bronchial epithelial cell	No	No	No		Yes	bronchial epithelial cell	
+bronchial epithelial cell female	No	No	No	female	Yes	bronchial epithelial cell	
 cardiac fibroblast	No	No	No		Yes	cardiac fibroblast	
 cardiac fibroblast female adult	No	No	No	female	Yes	cardiac fibroblast	
 cardiac fibroblast female embryo (94 days) and female embryo (98 days)	No	No	No	female	Yes	cardiac fibroblast (embryo)	
@@ -279,6 +290,7 @@ chorionic villus male embryo (38 weeks)	No	No	No	male	Yes	chorionic villi (embry
 choroid plexus epithelial cell	No	No	No		Yes	choroid plexus epithelial cell	
 cingulate gyrus female adult (75 years)	No	No	No	female	Yes	cingulate gyrus	
 cingulate gyrus male adult (81 years)	No	No	No	male	Yes	cingulate gyrus	
+colon female adult (72 years) and male adult (43 years)	No	No	No		Yes	colon	
 colonic mucosa female adult (56 years)	No	No	No	female	Yes	mucosa (colon)	
 colonic mucosa female adult (73 years)	No	No	No	female	Yes	mucosa (colon)	
 common myeloid progenitor, CD34-positive	No	No	No		Yes	common myeloid progenitor (CD34-positive)	
@@ -313,6 +325,7 @@ endocrine pancreas male adult (45 years)	No	No	No	male	Yes	pancreas (endocrine)
 endocrine pancreas male adult (46 years)	No	No	No	male	Yes	pancreas (endocrine)	
 endodermal cell	No	No	No		Yes	endodermal cell	
 endodermal cell originated from HUES64	No	No	No	male	Yes	endodermal cell (derived from HUES 64)	
+endometrium female adult (22 years) and female adult (28 years)	No	No	No	female	Yes	endometrium	
 endothelial cell of umbilical vein male newborn	No	No	No	male	Yes	endothelial cell (umbilical vein; newborn)	
 endothelial cell of umbilical vein newborn	No	No	No		Yes	endothelial cell (umbilical vein; newborn)	
 epidermal melanocyte	No	No	No		Yes	melanocyte (epidermis)	
@@ -424,12 +437,14 @@ iPS-NIHi11 originated from AG20443	No	Yes	No	male	Yes	iPS NIHi11	Induced pluripo
 iPS-NIHi7 originated from AG08395	No	Yes	No	female	Yes	iPS NIHi7	Induced pluripotent stem cell
 inferior parietal cortex male adult (84 years)	No	No	No	male	Yes	inferior parietal cortex	
 iris pigment epithelial cell	No	No	No		Yes	iris pigment epithelial cell	
+islet of Langerhans	No	No	No		Yes	pancreatic islet	
 islet precursor cell	No	No	No		Yes	islet precursor cell	
 keratinocyte female	No	No	No	female	Yes	keratinocyte	
 kidney capillary endothelial cell female embryo (113 days)	No	No	No	female	Yes	kidney capillary endothelial cell (embryo)	
 kidney embryo (59 days) and female embryo (59 days)	No	No	No		Yes	kidney (embryo)	
 kidney embryo (80 days)	No	No	No		Yes	kidney (embryo)	
 kidney epithelial cell	No	No	No		Yes	kidney epithelial cell	
+kidney female adult (30 years) and male adult (54 years)	No	No	No		Yes	kidney	
 kidney female embryo (105 days)	No	No	No	female	Yes	kidney (embryo)	
 kidney female embryo (108 days)	No	No	No	female	Yes	kidney (embryo)	
 kidney female embryo (113 days)	No	No	No	female	Yes	kidney (embryo)	
@@ -537,7 +552,7 @@ midbrain male adult (78 years) and male adult (84 years)	No	No	No	male	Yes	midbr
 middle frontal area 46 female adult (75 years)	No	No	No	female	Yes	middle frontal area 46	
 middle frontal area 46 male adult (81 years)	No	No	No	male	Yes	middle frontal area 46	
 middle frontal gyrus male adult (78 years)	No	No	No	male	Yes	middle frontal gyrus	
-mononuclear cell male	No	No	No		Yes	mononuclear cell	
+mononuclear cell male	No	No	No	male	Yes	mononuclear cell	
 mucosa of rectum female adult (50 years)	No	No	No	female	Yes	mucosa (rectum)	
 mucosa of rectum female adult (61 years)	No	No	No	female	Yes	mucosa (rectum)	
 mucosa of stomach male adult (59 years)	No	No	No	male	Yes	mucosa (stomach)	
@@ -737,6 +752,7 @@ small intestine female embryo (120 days)	No	No	No	female	Yes	small intestine (em
 small intestine female embryo (91 days)	No	No	No	female	Yes	small intestine (embryo)	
 small intestine female embryo (98 days)	No	No	No	female	Yes	small intestine (embryo)	
 small intestine male adult (34 years)	No	No	No	male	Yes	small intestine	
+small intestine male adult (60 years) and male adult (84 years)	No	No	No	male	Yes	small intestine	
 small intestine male child (3 years)	No	No	No	male	Yes	small intestine (child)	
 small intestine male embryo (105 days)	No	No	No	male	Yes	small intestine (embryo)	
 small intestine male embryo (108 days)	No	No	No	male	Yes	small intestine (embryo)	

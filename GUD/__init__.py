@@ -6,10 +6,8 @@ __author__ = "Oriol Fornes"
 __credits__ = [
     "Oriol Fornes",
     "Tamar V. Av-Shalom",
-    "Rachelle A. Farkas",
-    "David J. Arenillas",
-    "Michelle Kang",
-    "Phillip A. Richmond",
+    # "Rachelle A. Farkas", only coded for OnTarget
+    # "David J. Arenillas", any code he wrote for GUD has been re-written
     "Wyeth W. Wasserman"
 ]
 __email__ = "oriol@cmmt.ubc.ca"

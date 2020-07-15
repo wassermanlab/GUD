@@ -9,12 +9,6 @@ import shutil
 import subprocess
 import sys
 import warnings
-# Python 3+
-if sys.version_info > (3, 0):
-    from urllib.request import urlretrieve
-# Python 2.7
-else:
-    from urllib import urlretrieve
 
 # Import from GUD module
 from GUD import GUDUtils
@@ -204,7 +198,7 @@ def vista_to_gud(genome, dummy_dir="/tmp/", remove=False):
 def _download_data(genome, dummy_dir="/tmp/"):
 
     # Initialize
-    data_files = []
+    dummy_files = []
 
     # Python 3+
     if sys.version_info > (3, 0):
@@ -222,22 +216,22 @@ def _download_data(genome, dummy_dir="/tmp/"):
             url = "http://hgdownload.soe.ucsc.edu/goldenPath/mm9/liftOver/"
             chains_file = "mm9ToMm10.over.chain.gz"
 
-        data_files.append(os.path.join(dummy_dir, chains_file))
+        dummy_files.append(os.path.join(dummy_dir, chains_file))
 
         # Download data
-        if not os.path.exists(data_files[-1]):
-            f = urlretrieve(os.path.join(url, chains_file), data_files[-1])
+        if not os.path.exists(dummy_files[-1]):
+            f = urlretrieve(os.path.join(url, chains_file), dummy_files[-1])
 
     else:
-        data_files.append(None)
+        dummy_files.append(None)
 
     # Download data
     url = "https://enhancer.lbl.gov/cgi-bin/imagedb3.pl?page_size=20000;show=1;search.result=yes;page=1;form=search;search.form=no;action=search;search.sequence=1"
-    data_files.append(os.path.join(dummy_dir, "vista.fa"))
-    if not os.path.exists(data_files[-1]):
-        f = urlretrieve(url, data_files[-1])
+    dummy_files.append(os.path.join(dummy_dir, "vista.fa"))
+    if not os.path.exists(dummy_files[-1]):
+        f = urlretrieve(url, dummy_files[-1])
 
-    return(data_files[::-1], url)
+    return(dummy_files[::-1], url)
 
 def _insert_data(genome, data_file, chains_file=None):
 
@@ -275,10 +269,10 @@ def _insert_data(genome, data_file, chains_file=None):
         if chains_file:
             try:
                 chrom = "chr%s" % region.chrom
-                start = lo.convert_coordinate(chrom, region.start)
+                start = lo.convert_coordinate(chrom, region.start) # i.e. already 0-based
                 region.start = start[0][1]
-                end = lo.convert_coordinate(chrom, region.end)
-                region.end = end[0][1]
+                end = lo.convert_coordinate(chrom, region.end - 1) # i.e. requires 0-based
+                region.end = end[0][1] + 1
             except:
                 msg = "position could not be found in new assembly"
                 warnings.warn("%s: %s" % (msg, line[1]), Warning, stacklevel=2)
@@ -314,7 +308,6 @@ def _insert_data(genome, data_file, chains_file=None):
             enhancer.source_id = source.uid
             enhancer.sample_id = samples[s].uid
             ParseUtils.upsert_enhancer(session, enhancer)
-            print("here")
 
 #-------------#
 # Main        #
