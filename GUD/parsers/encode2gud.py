@@ -355,6 +355,11 @@ def encode_to_gud(genome, samples_file, feat_type, dummy_dir="/tmp/", remove=Fal
             if feat_type == "histone" or feat_type == "tf":
                 continue
 
+        # Skip if non-valid target
+        if feat_type == "tf":
+            if experiment_target not in genes:
+                continue
+
         # Start a new session
         session = Session()
 
