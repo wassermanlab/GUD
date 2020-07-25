@@ -1,43 +1,26 @@
 #!/usr/bin/env python
 
 import argparse
+import coreapi
+import json
 import os
-import shutil
 
-# Import from GUD module
-from GUD import GUDUtils
-from GUD.ORM.sample import Sample
-from GUD.parsers import ParseUtils
+# Import from OnTarget module
+from . import OnTargetUtils
 
 usage_msg = """
-usage: name2sample.py --name STR [-h] [--dummy-dir DIR] [-o FILE]
-                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
-"""
+usage: %s --name STR [-h] [options]
+""" % os.path.basename(__file__)
 
 help_msg = """%s
-identifies one or more samples in GUD that match the given name.
+fuzzy search for samples.
 
-  --name STR          name to match (e.g. "B cell")
+  --name STR          sample name for string matching
 
 optional arguments:
   -h, --help          show this help message and exit
-  --dummy-dir DIR     dummy directory (default = "/tmp/")
-  -o FILE             output file (default = stdout)
-
-mysql arguments:
-  -d STR, --db STR    database name (default = "%s")
-  -H STR, --host STR  host name (default = "%s")
-  -p STR, --pwd STR   password (default = ignore this option)
-  -P STR, --port STR  port number (default = %s)
-  -u STR, --user STR  user name (default = "%s")
-""" % \
-(
-    usage_msg,
-    GUDUtils.db,
-    GUDUtils.host,
-    GUDUtils.port,
-    GUDUtils.user
-)
+  -j, --json          output in JSON format
+""" % usage_msg
 
 #-------------#
 # Functions   #
@@ -45,34 +28,24 @@ mysql arguments:
 
 def parse_args():
     """
-    This function parses arguments provided via the command line and returns
-    an {argparse} object.
+    This function parses arguments provided via the command line and returns an {argparse} object.
     """
 
     parser = argparse.ArgumentParser(add_help=False)
 
-    # Mandatory arguments
+    # Mandatory args
     parser.add_argument("--name")
 
     # Optional args
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
-    optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("-o")
-
-    # MySQL args
-    mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
-    mysql_group.add_argument("-H", "--host", default=GUDUtils.host)
-    mysql_group.add_argument("-p", "--pwd")
-    mysql_group.add_argument("-P", "--port", default=GUDUtils.port)
-    mysql_group.add_argument("-u", "--user", default=GUDUtils.user)
-
+    optional_group.add_argument("-j", "--json", action="store_true")
+    
     args = parser.parse_args()
 
     check_args(args)
 
-    return args
+    return(args)
 
 def check_args(args):
     """
@@ -83,18 +56,11 @@ def check_args(args):
     if args.help:
         print(help_msg)
         exit(0)
-    
+
     # Check mandatory arguments
     if not args.name:
-        print(": "\
-            .join(
-                [
-                    "%s\nname2sample.py" % usage_msg,
-                    "error",
-                    "argument \"--name\" is required\n"
-                ]
-            )
-        )
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"--name\" is required\n"]
+        print(": ".join(error))
         exit(0)
 
 def main():
@@ -102,53 +68,81 @@ def main():
     # Parse arguments
     args = parse_args()
 
+    # Fuzzy search for samples
+    s = search(args.name, args.json)
+
+    print(s)
+
+def search(name, as_json=False):
+    """
+    e.g. python -m GUD.scripts.name2samples --name "endothelial cells"
+    """
+
     # Initialize
-    samples = set()
-    dummy_file = os.path.join(
-        os.path.abspath(args.dummy_dir),
-        "%s.%s.txt" % (os.path.basename(__file__), os.getpid())
-    )
+    answers = []
+    client = coreapi.Client()
+    codec = coreapi.codecs.CoreJSONCodec()
+    params = "name=%s" % name # I assume it's going to be name
 
-    # Set MySQL options
-    GUDUtils.user = args.user
-    GUDUtils.pwd = args.pwd
-    GUDUtils.host = args.host
-    GUDUtils.port = args.port
-    GUDUtils.db = args.db
+    # i.e. expected output for endothelial cells
+    tmp_answers = [
+        ("endothelial cell (microvasculature)", 90.),
+        ("endothelial cell (thorax)", 95.),
+        ("endothelial cell (vein)", 97.),
+        ("endothelial cell (artery)", 95.),
+        ("endothelial cell (aorta)", 96.),
+        ("endothelial cell (glomerulus)", 93.),
+        ("endothelial cell (renal glomerulus)", 90.),
+        ("endothelial cell (pulmonary artery)", 90.),
+        ("endothelial cell (lung microvasculature)", 87.),
+        ("endothelial cell (umbilical vein)", 91.),
+        ("endothelial cell (liver sinusoid)", 91.),
+        ("endothelial cell (lymph node)", 93.),
+        ("endothelial cell (brain microvasculature)", 86.),
+        ("endothelial cell (blood vessel dermis)", 89.),
+        ("endothelial cell (microvascular lymphatic vessel dermis)", 79.),
+        ("endothelial progenitor cell (derived from CD14-positive monocyte)", 75.)
+    ]
 
-    # Get database name
-    db_name = GUDUtils._get_db_name()
+    try:
 
-    # Get engine/session
-    engine, Session = GUDUtils.get_engine_session(db_name)
+        # ------------------- #
+        # Here GUD is queried #
+        # ------------------- #
 
-    # Start a new session
-    session = Session()
+        # Get first page
+        response = client.get(os.path.join(OnTargetUtils.gud, parameters))
+        page = json.loads(codec.encode(response))
 
-    # For each sample...
-    for sample, score in Sample.select_by_fuzzy_string_matching(session, args.name):
+        # While there are more pages...
+        while page["url_of_next_page"]:
 
-        # If sample not in samples...
-        if sample not in samples:
+            # For each feature in page...
+            for feat in page["features"]:
+                # I don't know how they look like, but should return name + score from fuzzy search
+                answers.append(feat.name, feat.score)
 
-            # Write
-            ParseUtils.write(dummy_file, "%s\t%s" % (sample.name, score))
+            # Go to next page
+            response = client.get(page["url_of_next_page"])
+            page = json.loads(codec.encode(response))
 
-        # Add sample
-        samples.add(sample)
+        # Do last page...
+        for feat in page["features"]:
+            answers.append((feat.name, feat.score))
 
-    if samples:
+    except:
 
-        # If output file...
-        if args.o:
-            shutil.copy(dummy_file, os.path.abspath(args.o))
-        # ... Else, print on stdout...
+        answers = tmp_answers
+
+    # Sort
+    answers.sort(key=lambda x: x[-1], reverse=True)
+
+    if answers:
+
+        if as_json:
+            return(json.dumps(answers, indent=4))
         else:
-            for line in ParseUtils.parse_file(dummy_file):
-                ParseUtils.write(None, line)
-
-        # Delete dummy file
-        os.remove(dummy_file)
+            return("\n".join("%s\t%s" % (a, s) for a, s in answers))
 
     else:
         raise ValueError("No samples found!!!")
