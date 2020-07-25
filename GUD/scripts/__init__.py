@@ -2,6 +2,16 @@
 Contains OnTarget scripts
 """
 
+from Bio import SeqIO
+from io import BytesIO
+from ftplib import FTP
+import gzip
+import os
+import pandas
+from sqlalchemy_utils import create_database, database_exists
+import sys
+from zipfile import ZipFile
+
 class OnTargetUtilities:
     """
     Contains functions designed to work through the entire module.
@@ -14,12 +24,10 @@ class OnTargetUtilities:
     def __init__(self):
         """
         OnTarget options:
-        @param user = User for login (i.e. option "-u")
-        @param pwd  = Password to use when connecting (i.e. option "-p")
-        @param host = Server host (i.e. option "-h")
-        @param port = Port number to use for connection (i.e. option "-P")
-        @param db   = Database to use (i.e. option "-D")
         """
+
+        # GUD @ the Wasserman Lab
+        self.gud = "http://gud.cmmt.ubc.ca:8080/"
 
         # i.e. defaults for sample2gene.py
         self._max_tss = 100
