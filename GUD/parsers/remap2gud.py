@@ -62,7 +62,8 @@ mysql arguments:
 
 def parse_args():
     """
-    This function parses arguments provided via the command line and returns an {argparse} object.
+    This function parses arguments provided via the command line and returns an
+    {argparse} object.
     """
 
     parser = argparse.ArgumentParser(add_help=False)

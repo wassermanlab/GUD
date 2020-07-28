@@ -5,68 +5,42 @@ from functools import partial
 from multiprocessing import Pool, cpu_count
 import os
 import re
-import shutil
 import sys
 
-# Import from GUD module
-from GUD import GUDUtils
-from GUD.ORM.expression import Expression
-from GUD.ORM.gene import Gene
-from GUD.ORM.sample import Sample
-from GUD.ORM.tss import TSS
-from GUD.parsers import ParseUtils
+# Import from OnTarget module
 from . import OnTargetUtils, human_TFs
 
 usage_msg = """
-usage: sample2gene.py (--sample [STR ...] | --sample-file FILE)
-                      [-h] [--dummy-dir DIR] [-g] [-o FILE]
-                      [-a] [--percent FLT] [--tpm FLT] [--tss INT]
-                      [-d STR] [-H STR] [-p STR] [-P STR] [-u STR]
-"""
+usage: %s (--sample [STR ...] | --sample-file FILE)
+                      [-h] [options]
+""" % os.path.basename(__file__)
 
 help_msg = """%s
-identifies one or more genes selectively expressed in samples.
+searches one or more genes selectively expressed in samples.
 
   --sample [STR ...]  sample(s) (e.g. "B cell")
   --sample-file FILE  file containing a list of samples
 
 optional arguments:
   -h, --help          show this help message and exit
-  --dummy-dir DIR     dummy directory (default = "/tmp/")
-  -o FILE             output file (default = stdout)
+  -j, --json          output in JSON format
   --threads INT       number of threads to use (default = %s)
 
 expression arguments:
   -a, --all           return TSSs with expression in all samples
                       (default = False)
-  -b, --best          return the best TSS for each gene (i.e. the
-                      most selectively expressed; default = False)
-  --percent FLT       min. percentile of expression for TSS in
-                      input samples (default = %s)
-  -t, --tfs           return transcription factor TSSs (default = False)
-  --tpm FLT           min. expression levels (in TPM) for TSS in
-                      input samples (default = %s)
-  --tss INT           max. number of TSSs to return (if 0, return
+  -b, --best          return the most selectively expressed TSS
+                      for each gene (i.e. the best; default = False)
+  --max-tss INT       max. number of TSSs to return (if 0, return
                       all TSSs; default = %s)
-
-mysql arguments:
-  -d STR, --db STR    database name (default = "%s")
-  -H STR, --host STR  host name (default = "%s")
-  -p STR, --pwd STR   password (default = ignore this option)
-  -P STR, --port STR  port number (default = %s)
-  -u STR, --user STR  user name (default = "%s")
-""" % \
-(
-    usage_msg,
-    (cpu_count() - 1),
-    OnTargetUtils.min_percent,
-    OnTargetUtils.min_tpm,
-    OnTargetUtils.max_tss,
-    GUDUtils.db,
-    GUDUtils.host,
-    GUDUtils.port,
-    GUDUtils.user
-)
+  --min-percent FLT   min. percentile of expression for TSS in
+                      samples (default = %s)
+  --min-tpm FLT       min. expression levels (in TPM) for TSS in
+                      input samples (default = %s)
+  -t, --tfs           only return TSSs of transcription factors
+                      (default = False)
+""" % (usage_msg, (cpu_count() - 1), , OnTargetUtils.max_tss,
+    OnTargetUtils.min_percent, OnTargetUtils.min_tpm)
 
 #-------------#
 # Functions   #
@@ -74,45 +48,36 @@ mysql arguments:
 
 def parse_args():
     """
-    This function parses arguments provided via the command line and returns
-    an {argparse} object.
+    This function parses arguments provided via the command line and returns an
+    {argparse} object.
     """
 
     parser = argparse.ArgumentParser(add_help=False)
 
-    # Mandatory arguments
+    # Mandatory args
     parser.add_argument("--sample", nargs="*")
     parser.add_argument("--sample-file")
 
     # Optional args
     optional_group = parser.add_argument_group("optional arguments")
     optional_group.add_argument("-h", "--help", action="store_true")
-    optional_group.add_argument("--dummy-dir", default="/tmp/")
-    optional_group.add_argument("-o")
+    optional_group.add_argument("-j", "--json", action="store_true")
     optional_group.add_argument("--threads", default=(cpu_count() - 1))
 
     # Expression args
     exp_group = parser.add_argument_group("expression arguments")
     exp_group.add_argument("-a", "--all", action="store_true")
     exp_group.add_argument("-b", "--best", action="store_true")
-    exp_group.add_argument("--percent", default=OnTargetUtils.min_percent)
+    exp_group.add_argument("--max-tss", default=OnTargetUtils.max_tss)    
+    exp_group.add_argument("--min-percent", default=OnTargetUtils.min_percent)
+    exp_group.add_argument("--min-tpm", default=OnTargetUtils.min_tpm)
     exp_group.add_argument("-t", "--tfs", action="store_true")
-    exp_group.add_argument("--tpm", default=OnTargetUtils.min_tpm)
-    exp_group.add_argument("--tss", default=OnTargetUtils.max_tss)
-
-    # MySQL args
-    mysql_group = parser.add_argument_group("mysql arguments")
-    mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
-    mysql_group.add_argument("-H", "--host", default=GUDUtils.host)
-    mysql_group.add_argument("-p", "--pwd")
-    mysql_group.add_argument("-P", "--port", default=GUDUtils.port)
-    mysql_group.add_argument("-u", "--user", default=GUDUtils.user)
 
     args = parser.parse_args()
 
     check_args(args)
 
-    return args
+    return(args)
 
 def check_args(args):
     """
@@ -125,94 +90,105 @@ def check_args(args):
         exit(0)
     
     # Check mandatory arguments
-    if (
-        not args.sample and \
-        not args.sample_file
-    ):
-        print(": "\
-            .join(
-                [
-                    "%s\nsample2gene.py" % usage_msg,
-                    "error",
-                    "one of the arguments \"--sample\" \"--sample-file\" is required\n"
-                ]
-            )
-        )
+    if not args.sample and not args.sample_file:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
+            "arguments \"--sample\" \"--sample-file\"", "expected one argument\n"]
+        print(": ".join(error))
         exit(0)
-
     if args.sample and args.sample_file:
-        print(": "\
-            .join(
-                [
-                    "%s\nsample2gene.py" % usage_msg,
-                    "error",
-                    "arguments \"--sample\" \"--sample-file\"",
-                    "expected one argument\n"
-                ]
-            )
-        )
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
+            "arguments \"--sample\" \"--sample-file\"", "expected one argument\n"]
+        print(": ".join(error))
         exit(0)
 
     # Check "--threads" argument
     try:
         args.threads = int(args.threads)
     except:
-        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error", "argument \"-t\" \"--threads\"", "invalid int value", "\"%s\"\n" % args.threads]
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
+            "argument \"--threads\"", "invalid int value", "\"%s\"\n" % args.threads]
         print(": ".join(error))
         exit(0)
 
-    # Check for invalid percent
+    # Check "--max-tss" argument
     try:
-        args.percent = float(args.percent)
+        args.max_tss = int(args.max_tss)
     except:
-        print(": "\
-            .join(
-                [
-                    "%s\nsample2gene.py" % usage_msg,
-                    "error",
-                    "argument \"--percent\"",
-                    "invalid float value",
-                    "\"%s\"\n" % args.percent
-                ]
-            )
-        )
-        exit(0)
-        
-    # Check for invalid TPM
-    try:
-        args.tpm = float(args.tpm)
-    except:
-        print(": "\
-            .join(
-                [
-                    "%s\nsample2gene.py" % usage_msg,
-                    "error",
-                    "argument \"--tpm\"",
-                    "invalid float value",
-                    "\"%s\"\n" % args.tpm
-                ]
-            )
-        )
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
+            "argument \"--max-tss\"", "invalid int value", "\"%s\"\n" % args.max_tss]
+        print(": ".join(error))
         exit(0)
 
-    # Check for invalid TSS
+    # Check "--min-percent" argument
     try:
-        args.tss = int(args.tss)
+        args.min_percent = float(args.min_percent)
     except:
-        print(": "\
-            .join(
-                [
-                    "%s\nsample2gene.py" % usage_msg,
-                    "error",
-                    "argument \"--tss\"",
-                    "invalid int value",
-                    "\"%s\"\n" % args.tss
-                ]
-            )
-        )
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
+            "argument \"--min-percent\"", "invalid float value", "\"%s\"\n" % args.min_percent]
+        print(": ".join(error))
+        exit(0)
+
+    # Check "--min-tpm" argument
+    try:
+        args.min_tpm = float(args.min_tpm)
+    except:
+        error = ["%s\n%s" % (usage_msg, os.path.basename(__file__)), "error",
+            "argument \"--min-tpm\"", "invalid float value", "\"%s\"\n" % args.min_tpm]
+        print(": ".join(error))
         exit(0)
 
 def main():
+
+    # Parse arguments
+    args = parse_args()
+
+    # Fetch samples
+    samples = []
+    if args.sample:
+        samples = args.sample
+    elif args.sample_file:
+        with open(args.sample_file, "r") as f:
+            for line in f:
+                line = line.strip("\n").split("\t")
+                samples.append(line[0])
+    else:
+        raise ValueError("No samples were provided!!!")
+
+    # i.e. endothelial cells
+    tmp_answers = [
+        "endothelial cell (microvasculature)",
+        "endothelial cell (thorax)",
+        "endothelial cell (vein)",
+        "endothelial cell (artery)",
+        "endothelial cell (aorta)",
+        "endothelial cell (glomerulus)",
+        "endothelial cell (renal glomerulus)",
+        "endothelial cell (pulmonary artery)",
+        "endothelial cell (lung microvasculature)",
+        "endothelial cell (umbilical vein)",
+        "endothelial cell (liver sinusoid)",
+        "endothelial cell (lymph node)",
+        "endothelial cell (brain microvasculature)",
+        "endothelial cell (blood vessel dermis)",
+        "endothelial cell (microvascular lymphatic vessel dermis)",
+        "endothelial progenitor cell (derived from CD14-positive monocyte)"
+    ]
+
+    # Identify selectively expressed genes (or TFs)
+    g = sample_to_gene(samples, args.json, args.threads, args.all, args.best,
+        args.max_tss, args.min_percent, args.min_tpm, args.tfs)
+
+    print(g)
+
+def sample_to_gene(samples, as_json=False, threads=1, all=False, best=False,
+    max_tss=OnTargetUtils.max_tss, min_percent=OnTargetUtils.min_percent,
+    min_tpm=OnTargetUtils.min_tpm, tfs=False):
+    """
+    e.g. python -m GUD.scripts.name2samples --name "GM12878"
+    """
+
+
+    print(s)
 
     # Parse arguments
     global genes
@@ -222,15 +198,7 @@ def main():
     dummy_file = "%s.%s.txt" % (os.path.basename(__file__), os.getpid())
     dummy_file = os.path.join(os.path.abspath(args.dummy_dir), dummy_file)
 
-    # Fetch samples
-    samples = []
-    if args.sample:
-        samples = args.sample
-    elif args.sample_file:
-        for line in ParseUtils.parse_tsv_file(args.sample_file):
-            samples.append(line[0])
-    else:
-        raise ValueError("No samples were provided!!!")
+
 
     # Set MySQL options
     GUDUtils.user = args.user
