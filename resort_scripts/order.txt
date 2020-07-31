@@ -1,0 +1,15 @@
++---------------------------+
+| Tables_in_hg38            |
++---------------------------+
+| cpg_islands               | d
+| tads                      | d
+| genes                     | d
+| enhancers                 | d
+| rmsk                      | d
+| conservation              | ++
+| dna_accessibility         | ++
+| tf_binding                | ++
+| histone_modifications     | ++
++---------------------------+
+
+mysql -u gud_w hg38 < gene_sort;

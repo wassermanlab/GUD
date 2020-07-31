@@ -118,10 +118,17 @@ def cpg_islands(request, session):
 def genes(request, session):                                           
     """retrieves genes"""
     resource = Gene()
-    q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
+
+    keys = get_mixin1_keys(request)
     names = check_split(request.args.get('names', default=None))
-    if names is not None:
+    if keys["chrom"] == '' and keys.start == '' and keys.end == '' and \
+     keys.location == '' and keys.sources == [] and \
+     keys.last_uid == '' and names is not None: 
         q = resource.select_by_names(session, q, names)
+    else: 
+        q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
+        if names is not None:
+            q = resource.select_by_names(session, q, names)
     return get_result_from_query(q, request, resource, page_size=1000, result_tuple_type="genomic_feature", luid=last_uid)
 
 def rmsk(request, session): 

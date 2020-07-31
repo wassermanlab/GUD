@@ -73,11 +73,14 @@ def set_db(db):
             'database must be hg19 or hg38 or test or test_hg38_chr22')
 
 
-def genomic_feature_mixin1_queries(session, resource, request):
+def genomic_feature_mixin1_queries(session, resource, request, query=None):
     """make genomic feature 1 queries"""
     keys = get_mixin1_keys(request)
     # location query
-    q = resource.select_all(session, None)
+    if (query == None):
+        q = resource.select_all(session, None)
+    else: 
+        q = query 
     # all location
     if (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
         q = resource.select_by_location(
