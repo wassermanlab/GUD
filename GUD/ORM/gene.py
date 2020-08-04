@@ -25,7 +25,7 @@ class Gene(GFMixin1, Base):
         return (
             UniqueConstraint(cls.region_id, cls.name, cls.source_id, cls.strand),
             # query by bin range
-            Index("ix_source_join", cls.source_id, cls.region_id),
+            Index("ix_join", cls.source_id, cls.region_id),
             Index("ix_name", cls.name),
             Index("ix_gene_symbol", cls.gene_symbol),
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8", }
