@@ -136,19 +136,12 @@ def genes(request, session):
             len(request.args) == 2 and request.args.get('names') is not None and request.args.get(
             'last_uid') is not None):
         q = resource.select_all(session, None)
-        keys = {'chrom': '',
-                'start': '',
-                'end': '',
-                'location': '',
-                'sources': [],
-                'last_uid': ''}
-        keys['chrom'] = request.args.get('chrom', default=None, type=str)
-        keys['end'] = request.args.get('end', default=None)
-        keys['location'] = request.args.get('location', default=None, type=str)
-        keys['start'] = request.args.get('start', default=None)
-        keys['sources'] = check_split(request.args.get('sources', default=None))
-        keys['uids'] = check_split(request.args.get('uids', default=None))
-        keys['last_uid'] = request.args.get('last_uid', default=0, type=int)
+        keys = {'chrom': request.args.get('chrom', default=None, type=str),
+                'start': request.args.get('start', default=None), 'end': request.args.get('end', default=None),
+                'location': request.args.get('location', default=None, type=str),
+                'sources': check_split(request.args.get('sources', default=None)),
+                'last_uid': request.args.get('last_uid', default=0, type=int),
+                'uids': check_split(request.args.get('uids', default=None))}
         last_uid = 0
         if (keys["last_uid"] == 0):
             last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
