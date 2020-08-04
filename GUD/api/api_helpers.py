@@ -73,19 +73,17 @@ def set_db(db):
             'database must be hg19 or hg38 or test or test_hg38_chr22')
 
 
-def genomic_feature_mixin1_queries(session, resource, request, query=None):
+def genomic_feature_mixin1_queries(session, resource, request):
     """make genomic feature 1 queries"""
-    keys = get_mixin1_keys(request)
+    # this is the line that prevents non complete requests
     # location query
-    if (query == None):
-        q = resource.select_all(session, None)
-    else: 
-        q = query 
-    # all location
+    keys = get_mixin1_keys(request)
+    q = resource.select_all(session,None)
+# all location
     if (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
         q = resource.select_by_location(
                 session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
-    # partial location 
+    # partial location
     elif (keys['start'] is not None or keys['end'] is not None or keys['location'] is not None or keys["chrom"] is not None):
         raise BadRequest("To filter by location you must specify location, chrom, start, and end or just a chrom.")
     # uid query
@@ -94,7 +92,7 @@ def genomic_feature_mixin1_queries(session, resource, request, query=None):
     # sources query
     if keys['sources'] is not None:
         q = resource.select_by_sources(session, q, keys['sources'])
-    
+
     last_uid = 0
     if (keys["last_uid"] == 0): 
         last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
