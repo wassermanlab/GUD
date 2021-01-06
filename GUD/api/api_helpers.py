@@ -4,7 +4,6 @@ from werkzeug.exceptions import NotFound, BadRequest
 import math
 import re
 from sqlalchemy import func
-from GUD.ORM import ShortTandemRepeat
 import time
 
 ## HELPER FUNCTIONS ##

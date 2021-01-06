@@ -2,7 +2,7 @@
 from GUD.api import app, get_engine_session
 from flask import request, jsonify
 # API_ADDITION(1): import feature that you would like to add
-from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation, CpGIsland,
+from GUD.ORM import (Gene, Conservation, CpGIsland,
                      DNAAccessibility, Enhancer, HistoneModification, RepeatMask, TAD,
                      TFBinding, TSS, Chrom, Sample, Experiment, Source, Expression)
 from GUD.api.api_helpers import *
@@ -84,41 +84,12 @@ def sources(request, session):
 #     return jsonify(result)
 
 # GF1 queries
-def clinvar(request, session):
-    """retrieves clinvar variants"""
-    resource = ClinVar()
-    clinvarIDs = check_split(request.args.get('clinvar_ids', default=None), True)
-    q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
-    if clinvarIDs is not None:
-        q = resource.select_by_clinvarID(session, q, clinvarIDs)
-    return get_result_from_query(q, request, resource, page_size=1000, result_tuple_type="genomic_feature",
-                                 luid=last_uid)
-
-
 def conservation(request, session):
     """retrieves conserved elements"""
     resource = Conservation()
     q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
     return get_result_from_query(q, request, resource, page_size=1000, result_tuple_type="genomic_feature",
                                  luid=last_uid)
-
-
-def copy_number_variants(request, session):
-    """retrieves copy number variants"""
-    clinical_assertion = request.args.get('clinical_assertion', default=None)
-    clinvar_accession = request.args.get('clinvar_accession', default=None)
-    dbVar_accession = request.args.get('dbVar_accession', default=None)
-    resource = CNV()
-    q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
-    if clinical_assertion is not None:
-        q = resource.select_by_clinical_assertion(session, q, clinical_assertion)
-    if clinvar_accession is not None:
-        q = resource.select_by_clinvar_accession(session, q, clinvar_accession)
-    if dbVar_accession is not None:
-        q = resource.select_by_dbvar_accession(session, q, dbVar_accession)
-    return get_result_from_query(q, request, resource, page_size=1000, result_tuple_type="genomic_feature",
-                                 luid=last_uid)
-
 
 def cpg_islands(request, session):
     """retrieves conserved elements"""
@@ -159,26 +130,6 @@ def rmsk(request, session):
     q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
     return get_result_from_query(q, request, resource, page_size=1000, result_tuple_type="genomic_feature",
                                  luid=last_uid)
-
-
-def short_tandem_repeats(request, session):
-    """retrieves all STRs"""
-    resource = ShortTandemRepeat()
-    q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
-    try:
-        pathogenic = request.args.get('pathogenicity', default=False, type=bool)
-        motif = request.args.get('motif', default=None, type=str)
-        rotations = request.args.get('rotations', default=False, type=bool)
-    except:
-        raise BadRequest(
-            'rotation must be set to True or False if motif is given')
-    if pathogenic:
-        q = resource.select_by_pathogenicity(session, q)
-    if motif is not None:
-        q = resource.select_by_motif(session, motif, q, rotations)
-    return get_result_from_query(q, request, resource, page_size=1000, result_tuple_type="genomic_feature",
-                                 luid=last_uid)
-
 
 # GF2 queries
 def dna_accessibility(request, session):
@@ -250,8 +201,6 @@ def resource_query(db, resource):
     # API_ADDITION(2): add feature method to switch for querying feature 
     switch = {
         "chroms": chroms,
-        "clinvar": clinvar,
-        "copy_number_variants": copy_number_variants,
         "conservation": conservation,
         "cpg_islands": cpg_islands,
         "dna_accessibility": dna_accessibility,
@@ -261,7 +210,6 @@ def resource_query(db, resource):
         "genes": genes,
         "histone_modifications": histone_modifications,
         "samples": samples,
-        "short_tandem_repeats": short_tandem_repeats,
         "sources": sources,
         "rmsk": rmsk,
         "tads": tads,

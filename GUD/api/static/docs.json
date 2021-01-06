@@ -1,42 +1,4 @@
 {
-    "/api/v1/{genome}/clinvar": {
-        "DESCRIPTION": "gets all clinvar variants that match specified filtering parameters.",
-        "METHOD": "GET",
-        "PARAMS": {
-            "genome": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify which genome assembly hg19|hg38"
-            },
-            "chrom": {
-                "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
-            },
-            "start": {
-                "REQUIRED": false,
-                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
-            },
-            "end": {
-                "REQUIRED": false,
-                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
-            },
-            "location": {
-                "REQUIRED": false,
-                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
-            },
-            "clinvar_ids": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of clinvar ids separated by comma(,)"
-            },
-            "sources": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by comma(,)"
-            },
-            "uids": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by comma(,)"
-            }
-        }
-    },
     "/api/v1/{genome}/conservation": {
         "DESCRIPTION": "gets all conservation elements that match specified filtering parameters.",
         "METHOD": "GET",
@@ -68,52 +30,6 @@
             "uids": {
                 "REQUIRED": false,
                 "DESCRIPTION": "list of uids separated by comma(,)"
-            }
-        }
-    },
-    "/api/v1/{genome}/copy_number_variants": {
-        "DESCRIPTION": "gets all copy number variants that match specified filtering parameters.",
-        "METHOD": "GET",
-        "PARAMS": {
-            "genome": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify which genome assembly hg19|hg38"
-            },
-            "chrom": {
-                "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
-            },
-            "start": {
-                "REQUIRED": false,
-                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
-            },
-            "end": {
-                "REQUIRED": false,
-                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
-            },
-            "location": {
-                "REQUIRED": false,
-                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
-            },
-            "uids": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by comma(,)"
-            },
-            "sources": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by comma(,)"
-            },
-            "clinical_assertion": {
-                "REQUIRED": false,
-                "DESCRIPTION": "string matching clinical assertion to filter by"
-            },
-            "clinvar_accession": {
-                "REQUIRED": false,
-                "DESCRIPTION": "string matching clinvar accession code to filter by"
-            },
-            "dbVar_accession": {
-                "REQUIRED": false,
-                "DESCRIPTION": "string matching dbVar accession code to filter by"
             }
         }
     },
@@ -353,52 +269,6 @@
             }
         }
     },
-    "/api/v1/{genome}/short_tandem_repeats": {
-        "DESCRIPTION": "get list of short tandem repeats based off filtering parameters",
-        "METHOD": "GET",
-        "PARAMS": {
-            "genome": {
-                "REQUIRED": true,
-                "DESCRIPTION": "specify which genome assembly hg19|hg38"
-            },
-            "chrom": {
-                "REQUIRED": false,
-                "DESCRIPTION": "specify chromosome 1-22, X, Y, or M. Can be used alone or with start, end, and location parameters"
-            },
-            "start": {
-                "REQUIRED": false,
-                "DESCRIPTION": "specify 1-based start coordinate for data, must be used with chrom, end , and location"
-            },
-            "end": {
-                "REQUIRED": false,
-                "DESCRIPTION": "specify 1-based end coordinate for data, must be used with chrom, start, and location"
-            },
-            "location": {
-                "REQUIRED": false,
-                "DESCRIPTION": "location = within | overlapping | exact . Must be used with chrom, start, and end."
-            },
-            "sources": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of sources separated by comma(,)"
-            },
-            "uids": {
-                "REQUIRED": false,
-                "DESCRIPTION": "list of uids separated by comma(,)"
-            },
-            "motif": {
-                "REQUIRED": false,
-                "DESCRIPTION": "a motif of bases to be queried"
-            },
-            "rotations": {
-                "REQUIRED": false,
-                "DESCRIPTION": "boolean true or false to whether to check all rotations of specified motif"
-            },
-            "pathogenicity": {
-                "REQUIRED": false,
-                "DESCRIPTION": "boolean true or false to whether to check all rotations of specified motif"
-            }
-        }
-    },
     "/api/v1/{genome}/tads": {
         "DESCRIPTION": "get list of tads based off filtering parameters",
         "METHOD": "GET",
@@ -579,7 +449,7 @@
             },
             "samples": {
                 "REQUIRED": false,
-                "DESCRIPTION": "list of clinvar ids separated by comma(,)"
+                "DESCRIPTION": "list of sample ids separated by comma(,)"
             },
             "max_tpm": {
                 "REQUIRED": false,

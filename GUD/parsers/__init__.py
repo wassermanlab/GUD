@@ -445,21 +445,6 @@ class ParseUtililities:
         if TFBinding.is_unique(session, tf.region_id, tf.sample_id, tf.experiment_id, tf.source_id, tf.tf):
             session.add(tf)
             session.commit()
-    
-    def upsert_str(self, session, STR):
-        if ShortTandemRepeat.is_unique(session, STR.region_id, STR.source_id, STR.pathogenicity):
-            session.add(STR)
-            session.commit()
-    
-    def upsert_cnv(self, session, cnv):
-        if CNV.is_unique(session, cnv.region_id, cnv.source_id, cnv.copy_number_change):
-            session.add(cnv)
-            session.commit()
-
-    def upsert_clinvar(self, session, clinvar):
-        if clinvar.is_unique(session, clinvar.clinvar_variation_ID):
-            session.add(clinvar)
-            session.commit()
 
     def upsert_tad(self, session, tad):
         if TAD.is_unique(session, tad.region_id, tad.sample_id, tad.experiment_id, tad.source_id):

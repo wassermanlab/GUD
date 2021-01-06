@@ -1,9 +1,6 @@
 {
-    "Clinvar": ["/api/v1/{genome}/clinvar"],
     "Conservation":["/api/v1/{genome}/conservation"],
-    "Copy Number Variants": ["/api/v1/{genome}/copy_number_variants"],
     "Genes": ["/api/v1/{genome}/genes"],
-    "Short Tandem Repeats": ["/api/v1/{genome}/short_tandem_repeats"],
     "Enhancers": ["/api/v1/{genome}/enhancers"],
     "DNA Accessibility": ["/api/v1/{genome}/dna_accessibility"],
     "Histone Modifications": [ "/api/v1/{genome}/histone_modifications"],

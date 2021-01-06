@@ -1,6 +1,6 @@
 from GUD import GUDUtils
 from GUD.api.api_helpers import set_db
-from GUD.ORM import (Gene, ShortTandemRepeat, CNV, ClinVar, Conservation, CpGIsland,
+from GUD.ORM import (Gene, Conservation, CpGIsland,
                      DNAAccessibility, Enhancer, HistoneModification, RepeatMask, TAD,
                      TFBinding, TSS, Chrom, Sample, Experiment, Source, Expression)
 import pandas as pd
@@ -9,8 +9,6 @@ from matplotlib import cm
 
 switch = {
     "chroms": Chrom(),
-    "clinvar": ClinVar(),
-    "copy_number_variants": CNV(),
     "conservation": Conservation(),
     "cpg_islands": CpGIsland(),
     "dna_accessibility": DNAAccessibility(),
@@ -20,7 +18,6 @@ switch = {
     "genes": Gene(),
     "histone_modifications": HistoneModification(),
     "samples": Sample(),
-    "short_tandem_repeats": ShortTandemRepeat(),
     "sources": Source(),
     "rmsk": RepeatMask(),
     "tads": TAD(),
@@ -31,7 +28,7 @@ switch = {
 
 def is_gf1(table):
     """returns True if table is gf1 and False if not"""
-    if table in ['clinvar', 'conservation', 'copy_number_variants', 'cpg_islands', 'genes', 'rmsk', 'short_tandem_repeats', 'dna_accessibility', 'histone_modifications', 'tads', 'tf_binding']:
+    if table in ['conservation','cpg_islands', 'genes', 'rmsk', 'dna_accessibility', 'histone_modifications', 'tads', 'tf_binding']:
         return True
     return False
 
@@ -157,9 +154,3 @@ output_stats()
 # d = {"total_rows": [total_rows]}
 # df = pd.DataFrame(data=d)
 # df.to_csv('GUD/api/static/stats/chrom.csv')
-
-# #clinvar
-# total_rows = session.query(ClinVar).count()
-# d = {"total_rows": [total_rows]}
-# df = pd.DataFrame(data=d)
-# df.to_csv('GUD/api/static/stats/clinvar.csv')

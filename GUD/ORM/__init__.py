@@ -5,9 +5,7 @@ Object-Relational Mapping (ORM) classes
 __all__ = [
     "base",
     "chrom",
-    "clinvar",
     "conservation",
-    "copy_number_variant",
     "dna_accessibility",
     "enhancer",
     "experiment",
@@ -17,7 +15,6 @@ __all__ = [
     "region",
     "repeat_mask",
     "sample",
-    "short_tandem_repeat",
     "source",
     "tad",
     "tf_binding",
@@ -26,9 +23,7 @@ __all__ = [
 
 from .base import Base
 from .chrom import Chrom
-from .clinvar import ClinVar
 from .conservation import Conservation
-from .copy_number_variant import CNV
 from .cpg_island import CpGIsland
 from .dna_accessibility import DNAAccessibility
 from .enhancer import Enhancer
@@ -39,7 +34,6 @@ from .histone_modification import HistoneModification
 from .repeat_mask import RepeatMask
 from .region import Region
 from .sample import Sample
-from .short_tandem_repeat import ShortTandemRepeat
 from .source import Source
 from .tad import TAD
 from .tf_binding import TFBinding
