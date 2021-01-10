@@ -27,7 +27,7 @@ class GFMixin1(object):
 
     # methods
     @classmethod
-    def get_last_uid_region(cls, session, chrom, start, end):
+    def get_last_uid_region(cls, session, chrom, start=None, end=None):
         # returns last uid from region
         if (chrom is None and start is None and end is None):
             return 0
@@ -35,9 +35,9 @@ class GFMixin1(object):
         q = session.query(cls)\
             .join(Region, Region.uid == cls.region_id)\
             .filter(Region.chrom == chrom)
-
-        bins = Region._compute_bins(start, end)
-        q = q.filter(Region.bin.in_(bins))
+        if (start is not None and end is not None):
+            bins = Region._compute_bins(start, end)
+            q = q.filter(Region.bin.in_(bins))
         print(q.order_by(cls.uid).limit(1).statement.compile(compile_kwargs={"literal_binds": True}))
     
         res = q.order_by(cls.uid).limit(1).first()
@@ -109,6 +109,15 @@ class GFMixin1(object):
             .filter(Region.chrom == chrom,
                     Region.start == start,
                     Region.end == end)
+        return q
+
+    @classmethod
+    def select_by_chrom(cls, session, query, chrom):
+        """
+        Query objects by genomic location.
+        """
+        q = cls.make_query(session, query)
+        q = q.filter(Region.chrom == chrom)
         return q
 
     @classmethod

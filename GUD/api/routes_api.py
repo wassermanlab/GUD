@@ -102,27 +102,12 @@ def cpg_islands(request, session):
 def genes(request, session):
     """retrieves genes"""
     resource = Gene()
+    q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
     names = check_split(request.args.get('names', default=None))
-    if (len(request.args) == 1 and request.args.get('names') is not None) | (
-            len(request.args) == 2 and request.args.get('names') is not None and request.args.get(
-            'last_uid') is not None):
-        q = resource.select_all(session, None)
-        keys = {'chrom': request.args.get('chrom', default=None, type=str),
-                'start': request.args.get('start', default=None), 'end': request.args.get('end', default=None),
-                'location': request.args.get('location', default=None, type=str),
-                'sources': check_split(request.args.get('sources', default=None)),
-                'last_uid': request.args.get('last_uid', default=0, type=int),
-                'uids': check_split(request.args.get('uids', default=None))}
-        last_uid = 0
-        if (keys["last_uid"] == 0):
-            last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
-    else:
-        q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
     if names is not None:
         q = resource.select_by_names(session, q, names)
     return get_result_from_query(q, request, resource, page_size=1000, result_tuple_type="genomic_feature",
-                                 luid=last_uid)
-
+                             luid=last_uid)
 
 def rmsk(request, session):
     """retrieves conserved elements"""

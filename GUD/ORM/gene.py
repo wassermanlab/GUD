@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 class Gene(GFMixin1, Base):
     # table declerations
-    __tablename__ = "genes"
+    __tablename__ = "genes_sorted"
 
     # inherits uid, regionID, sourceID
     name = Column("name", String(75), nullable=False)

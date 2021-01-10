@@ -76,15 +76,17 @@ def genomic_feature_mixin1_queries(session, resource, request):
     """make genomic feature 1 queries"""
     # this is the line that prevents non complete requests
     # location query
+    last_uid = 0
     keys = get_mixin1_keys(request)
     q = resource.select_all(session,None)
-# all location
+    # all location
     if (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
-        q = resource.select_by_location(
-                session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
-    # partial location
-    elif (keys['start'] is not None or keys['end'] is not None or keys['location'] is not None or keys["chrom"] is not None):
-        raise BadRequest("To filter by location you must specify location, chrom, start, and end or just a chrom.")
+        q = resource.select_by_location(session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
+        last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
+    # chrom only 
+    elif (keys['start'] is None and keys['end'] is None and keys['location'] is None and keys["chrom"] is not None):
+        q = resource.select_by_chrom(session, q, keys['chrom'])      
+        last_uid = resource.get_last_uid_region(session, keys['chrom'])
     # uid query
     if keys['uids'] is not None:
         q = resource.select_by_uids(session, q, keys['uids'])
@@ -92,9 +94,6 @@ def genomic_feature_mixin1_queries(session, resource, request):
     if keys['sources'] is not None:
         q = resource.select_by_sources(session, q, keys['sources'])
 
-    last_uid = 0
-    if (keys["last_uid"] == 0): 
-        last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
     return q, last_uid
 
 
@@ -147,7 +146,13 @@ def get_mixin1_keys(request):
                 keys['uids'][i] = int(keys['uids'][i])
     
     # check that location is specified
-    if (keys['start'] is None or keys['end'] is None or keys['location'] is None or keys['chrom'] is None):
+    if (keys['start'] is None and keys['end'] is None and keys['location'] is None and keys['chrom'] is None):
+        pass
+    elif (keys['start'] is None and keys['end'] is None and keys['location'] is None and keys['chrom'] is not None):
+        if re.fullmatch('^(X|Y|[1-9]|1[0-9]|2[0-2])$', keys['chrom']) == None:
+            raise BadRequest(
+                "chromosome should be formatted as Z where Z is X, Y, or 1-22")
+    elif (keys['start'] is None or keys['end'] is None or keys['location'] is None or keys['chrom'] is None):
         raise BadRequest("parameter list must include a region to query (start, end, chrom, location)")
 
     if (keys['start'] is not None and keys['end'] is not None and keys['location']
