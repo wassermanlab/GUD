@@ -13,7 +13,7 @@ function create_row(param, params) {
     // create value box
     var value = document.createElement("td");
     value.id = param + "Val";
-    if (param === "genome" || param === "chrom") {
+    if (param === "genome" || param === "chrom" || param === "location") {
         var input = document.createElement("select")
         input.classList.add("form-control");
         input.id = param + "Input";
@@ -66,16 +66,19 @@ $(function () {
             $('#chromInput').append($('<option>', {value: "Y",text: "Y"}));
             $('#chromInput').append($('<option>', {value: "M",text: "M"}));
         }
+        if (keys.includes("location")) {
+            create_row("location", params)
+            $('#locationInput').append($('<option>', {value: "",text: ""}));
+            $('#locationInput').append($('<option>', {value: "within",text: "within"}));
+            $('#locationInput').append($('<option>', {value: "overlapping",text: "overlapping"}));
+            $('#locationInput').append($('<option>', {value: "exact",text: "exact"}));
+        }
         if (keys.includes("start")) {
             create_row("start", params)
         }
         if (keys.includes("end")) {
             create_row("end", params)
         }
-        if (keys.includes("location")) {
-            create_row("location", params)
-        }
-
         for (param in params) {
             if (!["chrom", "start", "end", "location", "genome"].includes(param)) {
                 create_row(param, params)
