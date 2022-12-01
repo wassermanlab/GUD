@@ -16,6 +16,7 @@ from sqlalchemy_utils import database_exists
 # Import from GUD module
 from GUD import GUDglobals
 from GUD.ORM.chrom import Chrom
+from GUD.ORM.conservation import Conservation
 from GUD.ORM.dna_accessibility import DNAAccessibility
 from GUD.ORM.enhancer import Enhancer
 from GUD.ORM.experiment import Experiment
@@ -25,7 +26,7 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tad import TAD
 from GUD.ORM.tf_binding import TFBinding
-#from .initialize import initialize_gud_db
+from GUD.parsers import ParseUtils
 
 usage_msg = """
 usage: bed2gud.py --file [FILE ...] --feature STR
@@ -89,66 +90,41 @@ def parse_args():
     # Mandatory args
     parser.add_argument("--file", nargs="*")
     parser.add_argument("--feature")
+    parser.add_argument("--metadata")
     parser.add_argument("--experiment")
     parser.add_argument("--sample")
     parser.add_argument("--source")
+    parser.add_argument("--version")
+
+    # File-specific arguments
+    optional_group = parser.add_argument_group("optional arguments")
+    optional_group.add_argument("-h", "--help", action="store_true")
+    optional_group.add_argument("--dummy-dir", default="/tmp/")
+    optional_group.add_argument("-r", "--remove", action="store_true")
+    optional_group.add_argument("-t", "--test", action="store_true")
+    optional_group.add_argument("--threads", default=(cpu_count() - 1))
 
     # Optional args
-    optional_group = parser.add_argument_group(
-        "optional arguments"
-    )
-    optional_group.add_argument(
-        "-h", "--help",
-        action="store_true"
-    )
-    optional_group.add_argument("--histone")
-    optional_group.add_argument("--enzyme")
-    optional_group.add_argument("--tf")
-
-    # Sample args
-    sample_group = parser.add_argument_group(
-        "sample arguments"
-    )
-    sample_group.add_argument(
-        "--cancer",
-        action="store_true"
-    )
-    sample_group.add_argument(
-        "--cell-line",
-        action="store_true"
-    )
-    sample_group.add_argument(
-        "--treatment",
-        action="store_true"
-    )
-
+    optional_group = parser.add_argument_group("optional arguments")
+    optional_group.add_argument("-h", "--help", action="store_true")
+    optional_group.add_argument("--dummy-dir", default="/tmp/")
+    optional_group.add_argument("-r", "--remove", action="store_true")
+    optional_group.add_argument("-t", "--test", action="store_true")
+    optional_group.add_argument("--threads", default=(cpu_count() - 1))
+    
     # MySQL args
-    mysql_group = parser.add_argument_group(
-        "mysql arguments"
-    )
-    mysql_group.add_argument(
-        "-d", "--db",
-        default=GUDglobals.db_name,
-    )
-    mysql_group.add_argument(
-        "-H", "--host",
-        default="localhost"
-    )
+    mysql_group = parser.add_argument_group("mysql arguments")
+    mysql_group.add_argument("-d", "--db", default=GUDUtils.db)
+    mysql_group.add_argument("-H", "--host", default="localhost")
     mysql_group.add_argument("-p", "--pwd")
-    mysql_group.add_argument(
-        "-P", "--port",
-        default=GUDglobals.db_port
-    )
-    mysql_group.add_argument(
-        "-u", "--user",
-        default=getpass.getuser()
-    )
+    mysql_group.add_argument("-P", "--port", default=GUDUtils.port)
+    mysql_group.add_argument("-u", "--user", default=getpass.getuser())
 
     args = parser.parse_args()
 
     check_args(args)
 
-    return args
+    return(args)
 
 def check_args(args):
     """

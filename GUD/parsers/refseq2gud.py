@@ -124,15 +124,8 @@ def main():
     # Parse arguments
     args = parse_args()
 
-    # Set MySQL options
-    GUDUtils.user = args.user
-    GUDUtils.pwd = args.pwd
-    GUDUtils.host = args.host
-    GUDUtils.port = args.port
-    GUDUtils.db = args.db
-
-    # Insert RefGene data
-    refgene_to_gud(args.genome, args.version, args.dummy_dir, args.remove, args.test, args.threads)
+    # Get Regulatory Regions
+    get_regulatory_regions(args)
 
 def refgene_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
