@@ -20,7 +20,7 @@ from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tss import TSS
-from . import ParseUtils
+from GUD.parsers import ParseUtils
 
 usage_msg = """
 usage: %s --genome STR --samples FILE --feature STR [-h] [options]

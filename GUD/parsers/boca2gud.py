@@ -21,7 +21,7 @@ from GUD.ORM.experiment import Experiment
 from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
-from . import ParseUtils
+from GUD.parsers import ParseUtils
 
 usage_msg = """
 usage: %s --genome STR [-h] [options]

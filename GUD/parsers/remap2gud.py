@@ -28,7 +28,7 @@ from GUD.ORM.region import Region
 from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tf_binding import TFBinding
-from . import ParseUtils
+from GUD.parsers import ParseUtils
 
 usage_msg = """
 usage: %s --genome STR --samples FILE [-h] [options]

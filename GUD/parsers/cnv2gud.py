@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from . import ParseUtils
+from GUD.parsers import ParseUtils
 from GUD.ORM.copy_number_variant import CNV
 from GUD.ORM.source import Source
 from GUD.ORM.region import Region

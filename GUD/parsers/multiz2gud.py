@@ -16,7 +16,7 @@ from GUD import GUDUtils
 from GUD.ORM.conservation import Conservation
 from GUD.ORM.region import Region
 from GUD.ORM.source import Source
-from . import ParseUtils
+from GUD.parsers import ParseUtils
 
 usage_msg = """
 usage: %s --genome STR --version STR [-h] [options]
@@ -156,6 +156,8 @@ def conservation_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=F
 
     # Download data
     data_file, url = _download_data(genome, dummy_dir)
+    print(data_file)
+    exit(0)
 
     # Get database name
     db_name = GUDUtils._get_db_name()

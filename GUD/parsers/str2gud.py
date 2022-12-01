@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from . import ParseUtils
+from GUD.parsers import ParseUtils
 from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD.ORM.source import Source
 from GUD.ORM.region import Region

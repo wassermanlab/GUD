@@ -16,7 +16,7 @@ from GUD import GUDUtils
 from GUD.ORM.cpg_island import CpGIsland
 from GUD.ORM.region import Region
 from GUD.ORM.source import Source
-from . import ParseUtils
+from GUD.parsers import ParseUtils
 
 usage_msg = """
 usage: %s --genome STR --version STR [-h] [options]

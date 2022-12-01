@@ -25,7 +25,7 @@ from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
 from GUD.ORM.tad import TAD
 from GUD.ORM.tf_binding import TFBinding
-from .initialize import initialize_gud_db
+#from .initialize import initialize_gud_db
 
 usage_msg = """
 usage: bed2gud.py --file [FILE ...] --feature STR

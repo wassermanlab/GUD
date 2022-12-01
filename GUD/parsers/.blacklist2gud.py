@@ -21,7 +21,7 @@ from GUD import GUDglobals
 from GUD.ORM.region import Region
 from GUD.ORM.blacklist import BlackList
 from GUD.ORM.source import Source
-from . import _get_chroms, _get_db_name, _get_region, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_region,_upsert_repeat, _upsert_source
+#from . import _get_chroms, _get_db_name, _get_region, _get_source, _initialize_gud_db, _initialize_engine_session, _process_data_in_chunks, _upsert_region,_upsert_repeat, _upsert_source
 
 usage_msg = """
 usage: %s --genome STR [-h] [options]

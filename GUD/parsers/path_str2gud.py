@@ -16,6 +16,7 @@ from GUD import GUDglobals
 from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD.ORM.region import Region
 from GUD.ORM.source import Source
+from GUD.parsers import ParseUtils
 
 #-------------#
 # Functions   #

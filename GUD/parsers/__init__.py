@@ -172,8 +172,9 @@ class ParseUtililities:
             compression = "zip"
 
         # Read in chunks
-        for chunk in pandas.read_csv(file_name, compression=compression, header=None,
-                                     encoding="utf8", sep=delimiter, chunksize=1024,
+        for chunk in pandas.read_csv(file_name, compression=compression,
+                                     header=None, encoding="utf8",
+                                     sep=delimiter, chunksize=1024,
                                      comment="#", engine="python"):
             for index, row in chunk.iterrows():
                 yield(row.tolist())
@@ -321,7 +322,8 @@ class ParseUtililities:
         try:
             ftp.cwd(os.path.join("goldenPath", self.genome, "bigZips"))
         except:
-            error = ["error", "cannot connect to UCSC's FTP goldenPath folder", self.genome, "bigZips"]
+            error = ["error", "cannot connect to UCSC's FTP goldenPath folder",
+                     self.genome, "bigZips"]
             print(": ".join(error))
             exit(0)
 
@@ -343,20 +345,27 @@ class ParseUtililities:
     def get_chroms(self, session):
         return(Chrom.chrom_sizes(session))
 
-    def get_experiment(self, session, name, experiment_metadata=None, metadata_descriptor=None):
-        return(Experiment.select_unique(session, name, experiment_metadata, metadata_descriptor))
+    def get_experiment(self, session, name, experiment_metadata=None,
+                       metadata_descriptor=None):
+        return(Experiment.select_unique(session, name, experiment_metadata,
+                                        metadata_descriptor))
 
     def get_region(self, session, chrom, start, end):
         return(Region.select_unique(session, chrom, start, end))
 
     def get_sample(self, session, name, X, Y, treatment, cell_line, cancer):
-        return(Sample.select_unique(session, name, X, Y, treatment, cell_line, cancer))
+        return(Sample.select_unique(session, name, X, Y, treatment, cell_line,
+                                    cancer))
 
-    def get_source(self, session, name, source_metadata=None, metadata_descriptor=None, url=None):
-        return(Source.select_unique(session, name, source_metadata, metadata_descriptor, url))
+    def get_source(self, session, name, source_metadata=None,
+                   metadata_descriptor=None, url=None):
+        return(Source.select_unique(session, name, source_metadata,
+               metadata_descriptor, url))
 
-    def get_tss(self, session, region_id, experiment_id, source_id, gene=None, tss=1):
-        return(TSS.select_unique(session, region_id, experiment_id, source_id, gene, tss))
+    def get_tss(self, session, region_id, experiment_id, source_id, gene=None,
+                tss=1):
+        return(TSS.select_unique(session, region_id, experiment_id, source_id,
+                                 gene, tss))
 
     #--------------#
     # Upserts      #
@@ -364,19 +373,24 @@ class ParseUtililities:
 
     def upsert_accessibility(self, session, accessibility):
 
-        if DNAAccessibility.is_unique(session, accessibility.region_id, accessibility.sample_id, accessibility.experiment_id, accessibility.source_id):
+        if DNAAccessibility.is_unique(session, accessibility.region_id,
+                                      accessibility.sample_id,
+                                      accessibility.experiment_id,
+                                      accessibility.source_id):
             session.add(accessibility)
             session.commit()
 
     def upsert_conservation(self, session, conservation):
 
-        if Conservation.is_unique(session, conservation.region_id, conservation.source_id):
+        if Conservation.is_unique(session, conservation.region_id,
+                                  conservation.source_id):
             session.add(conservation)
             session.commit()
 
     def upsert_cpg_island(self, session, cpg_island):
 
-        if CpGIsland.is_unique(session, cpg_island.region_id, cpg_island.source_id):
+        if CpGIsland.is_unique(session, cpg_island.region_id,
+                               cpg_island.source_id):
             session.add(cpg_island)
             session.commit()
 
@@ -400,13 +414,18 @@ class ParseUtililities:
 
     def upsert_gene(self, session, gene):
 
-        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name, gene.strand):
+        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name,
+                          gene.strand):
             session.add(gene)
             session.commit()
 
     def upsert_histone(self, session, histone):
 
-        if HistoneModification.is_unique(session, histone.region_id, histone.sample_id, histone.experiment_id, histone.source_id, histone.histone_type):
+        if HistoneModification.is_unique(session, histone.region_id,
+                                         histone.sample_id,
+                                         histone.experiment_id,
+                                         histone.source_id,
+                                         histone.histone_type):
             session.add(histone)
             session.commit()
 
@@ -424,35 +443,41 @@ class ParseUtililities:
 
     def upsert_rmsk(self, session, repeat):
 
-        if RepeatMask.is_unique(session, repeat.region_id, repeat.source_id, repeat.name, repeat.strand):
+        if RepeatMask.is_unique(session, repeat.region_id, repeat.source_id,
+                                repeat.name, repeat.strand):
             session.add(repeat)
             session.commit()
 
     def upsert_sample(self, session, sample):
 
-        if Sample.is_unique(session, sample.name, sample.X, sample.Y, sample.treatment, sample.cell_line, sample.cancer):
+        if Sample.is_unique(session, sample.name, sample.X, sample.Y,
+                            sample.treatment, sample.cell_line, sample.cancer):
             session.add(sample)
             session.commit()
 
     def upsert_source(self, session, source):
 
-        if Source.is_unique(session, source.name, source.source_metadata, source.metadata_descriptor, source.url):
+        if Source.is_unique(session, source.name, source.source_metadata,
+                            source.metadata_descriptor, source.url):
             session.add(source)
             session.commit()
 
     def upsert_tf(self, session, tf):
 
-        if TFBinding.is_unique(session, tf.region_id, tf.sample_id, tf.experiment_id, tf.source_id, tf.tf):
+        if TFBinding.is_unique(session, tf.region_id, tf.sample_id,
+                               tf.experiment_id, tf.source_id, tf.tf):
             session.add(tf)
             session.commit()
     
     def upsert_str(self, session, STR):
-        if ShortTandemRepeat.is_unique(session, STR.region_id, STR.source_id, STR.pathogenicity):
+        if ShortTandemRepeat.is_unique(session, STR.region_id, STR.source_id,
+                                       STR.pathogenicity):
             session.add(STR)
             session.commit()
     
     def upsert_cnv(self, session, cnv):
-        if CNV.is_unique(session, cnv.region_id, cnv.source_id, cnv.copy_number_change):
+        if CNV.is_unique(session, cnv.region_id, cnv.source_id,
+                         cnv.copy_number_change):
             session.add(cnv)
             session.commit()
 
@@ -462,12 +487,14 @@ class ParseUtililities:
             session.commit()
 
     def upsert_tad(self, session, tad):
-        if TAD.is_unique(session, tad.region_id, tad.sample_id, tad.experiment_id, tad.source_id):
+        if TAD.is_unique(session, tad.region_id, tad.sample_id,
+                         tad.experiment_id, tad.source_id):
             session.add(tad)
             session.commit()
 
     def upsert_tss(self, session, tss):
-        if TSS.is_unique(session, tss.region_id, tss.experiment_id, tss.source_id, tss.gene, tss.tss):
+        if TSS.is_unique(session, tss.region_id, tss.experiment_id,
+                         tss.source_id, tss.gene, tss.tss):
             session.add(tss)
             session.commit()
 
