@@ -49,12 +49,13 @@ class RepeatMask(GFMixin1, Base):
         qualifiers = {
             "uid": feat.RepeatMask.uid,
             "source": feat.sourceName,
-            "score": feat.RepeatMask.score,
             "name": feat.RepeatMask.name,
             "repeat_class": feat.RepeatMask.repeat_class,
             "family": feat.RepeatMask.family,
-            "strand": feat.RepeatMask.strand,
         }
         genomic_feature = super().as_genomic_feature(feat)
+        genomic_feature.score = feat.RepeatMask.score
+        genomic_feature._strand = feat.RepeatMask.strand
+        genomic_feature.strand = genomic_feature.strand_binary
         genomic_feature.qualifiers = qualifiers
         return genomic_feature

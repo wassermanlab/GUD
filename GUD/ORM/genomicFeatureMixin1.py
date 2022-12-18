@@ -77,12 +77,15 @@ class GFMixin1(object):
         Query objects by genomic location, 
         retrieve all objects that overlap with range.
         """
-        bins = Region._compute_bins(start, end)
-        q = query.filter(Region.chrom == chrom,
-                         Region.start < end,
-                         Region.end > start)\
-            .filter(Region.bin.in_(bins))
-
+        # bins = Region._compute_bins(start, end)
+        # q = query.filter(Region.chrom == chrom,
+        #                  Region.start < end,
+        #                  Region.end > start)\
+        #     .filter(Region.bin.in_(bins))
+        regionIDs = cls._get_region_ids_in_location(session, chrom, start, end,
+                                                    location="overlapping")
+        q = query.filter(cls.region_id.in_(regionIDs))    
+       
         return q
 
     @classmethod
@@ -91,11 +94,14 @@ class GFMixin1(object):
         Query objects by genomic location, 
         retrieve all objects that are within range.
         """
-        bins = Region._compute_bins(start, end)
-        q = query.filter(Region.chrom == chrom,
-                         Region.start >= start,
-                         Region.end <= end)\
-            .filter(Region.bin.in_(bins))
+        # bins = Region._compute_bins(start, end)
+        # q = query.filter(Region.bin.in_(bins))\
+        #     .filter(Region.chrom == chrom,
+        #                  Region.start >= start,
+        #                  Region.end <= end)\
+        regionIDs = cls._get_region_ids_in_location(session, chrom, start, end,
+                                                    location="within")
+        q = query.filter(cls.region_id.in_(regionIDs))    
 
         return q
 
@@ -104,28 +110,44 @@ class GFMixin1(object):
         """
         Query objects by exact genomic location.
         """
-        bins = Region._compute_bins(start, end)
-        q = query.filter(Region.bin.in_(bins))\
-            .filter(Region.chrom == chrom,
-                    Region.start == start,
-                    Region.end == end)
-        return q
+        # bins = Region._compute_bins(start, end)
+        # q = query.filter(Region.bin.in_(bins))\
+        #     .filter(Region.chrom == chrom,
+        #             Region.start == start,
+        #             Region.end == end)
+        regionIDs = cls._get_region_ids_in_location(session, chrom, start, end,
+                                                    location="exact")
+        q = query.filter(cls.region_id.in_(regionIDs))    
+       
+        return q   
 
     @classmethod
-    def select_by_location(cls, session, query, chrom, start=None, end=None, location="within"):
+    def select_by_location(cls, session, query, chrom, start=None, end=None,
+                           location="within"):
         """
         Query objects by genomic location.
         """
         q = cls.make_query(session, query)
-        if location == 'exact':
+        if location == "exact":
             q = cls.select_by_exact_location(session, q,  chrom, start, end)
-        elif location == 'within':
+        elif location == "within":
             q = cls.select_by_within_location(session, q, chrom, start, end)
-        elif location == 'overlapping':
-            q = cls.select_by_overlapping_location(
-                session, q,  chrom, start, end)
+        elif location == "overlapping":
+            q = cls.select_by_overlapping_location(session, q,  chrom, start,
+                                                   end)
         else:
             return False
+
+        return q
+
+    @classmethod
+    def select_by_chrom(cls, session, query, chrom):
+        """
+        Query objects by genomic location, 
+        retrieve all objects that are within range.
+        """
+        q = query.filter(Region.chrom == chrom)
+
         return q
 
     @classmethod
@@ -171,3 +193,12 @@ class GFMixin1(object):
                                getattr(feat, self.__name__).uid),
             qualifiers=None
         )
+
+    @classmethod
+    def _get_region_ids_in_location(cls, session, chrom, start, end,
+                                    location="within"):
+        regions = Region.select_by_bin_range_and_location(session, chrom, start,
+                                                          end, bins=[],
+                                                          compute_bins=True,
+                                                          location=location)
+        return [r.uid for r in regions]

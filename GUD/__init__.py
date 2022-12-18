@@ -2,17 +2,15 @@
 Genomic Universal Database (GUD) module
 """
 
-__author__ = "Oriol Fornes"
+__author__ = "Oriol Fornes, Tamar Av-Shalom",
 __credits__ = [
-    "Oriol Fornes",
-    "Tamar V. Av-Shalom",
-    # "Rachelle A. Farkas", only coded for OnTarget
-    # "David J. Arenillas", any code he wrote for GUD has been re-written
+    "Rachelle A. Farkas",
+    "David J. Arenillas",
     "Wyeth W. Wasserman"
 ]
-__email__ = "oriol@cmmt.ubc.ca"
+__email__ = "oriol.fornes@gmail.com, avshalom.tamar0@gmail.com",
 __organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
-__version__ = "0.0.1"
+__version__ = "22.12.1"
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker

@@ -42,8 +42,9 @@ class Region(Base):
         return(q.first())
 
     @classmethod
-    def select_by_bin_range(cls, session, chrom,
-                            start, end, bins=[], compute_bins=False):
+    def select_by_bin_range_and_location(cls, session, chrom, start, end,
+                                         bins=[], compute_bins=False,
+                                         location="overlapping"):
         """
         Query objects using the bin system to speed
         up range searches. If no bins are provided
@@ -51,11 +52,17 @@ class Region(Base):
         bins. Otherwise, perform the query without
         using the bin system (EXTREMELY slow!).
         """
-
         if not bins and compute_bins:
             bins = cls._compute_bins(start, end)
-        q = session.query(cls)\
-            .filter(cls.chrom == chrom, cls.end > start, cls.start < end)
+        if location == "exact":
+            q = session.query(cls)\
+                .filter(cls.chrom == chrom, cls.start == start, cls.end == end)
+        elif location == "within":
+            q = session.query(cls)\
+                .filter(cls.chrom == chrom, cls.start >= start, cls.end <= end)
+        elif location == "overlapping":
+            q = session.query(cls)\
+                .filter(cls.chrom == chrom, cls.start < end, cls.end > start)
         if bins:
             q = q.filter(cls.bin.in_(bins))
         return q.all()

@@ -1,4 +1,4 @@
-from array import array
+import numpy as np
 from Bio.SeqFeature import FeatureLocation, SeqFeature
 
 class GenomicFeature(SeqFeature):
@@ -43,9 +43,9 @@ class GenomicFeature(SeqFeature):
         self.qualifiers = qualifiers
 
         if profile is not None:
-            if not isinstance(profile, array):
+            if not isinstance(profile, np.ndarray):
                 raise ValueError(
-                    "Input profile is not an array!"
+                    "Input profile is not an NumPy array!"
                 )
 
         self.profile = profile
@@ -148,11 +148,12 @@ class GenomicFeature(SeqFeature):
 
     def serialize(self):
         return {
-            'chrom': self.chrom,
-            'start': self.start,
-            'end': self.end,
-            'id': self.id,
-            'score': self.score,
-            'strand': self.strand,
-            'qualifiers': self.qualifiers,
+            "chrom": self.chrom,
+            "start": self.start,
+            "end": self.end,
+            "type": self.type,
+            "id": self.id,
+            "score": self.score,
+            "strand": self.strand,
+            "qualifiers": self.qualifiers,
         }
