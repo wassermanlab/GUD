@@ -132,9 +132,11 @@ def genes(request, session):
     """retrieves genes"""
     resource = Gene()
     names = check_split(request.args.get('names', default=None))
-    if (len(request.args) == 1 and request.args.get('names') is not None) | (
-            len(request.args) == 2 and request.args.get('names') is not None and request.args.get(
-            'last_uid') is not None):
+    uids = check_split(request.args.get('uids', default=None))
+    if (len(request.args) == 1 and ((request.args.get('names') is not None) | (request.args.get('uids') is not None))) | (
+            len(request.args) == 2 and (
+            (request.args.get('names') is not None) | (request.args.get('uids') is not None)) and request.args.get(
+        'last_uid') is not None):
         q = resource.select_all(session, None)
         keys = {'chrom': request.args.get('chrom', default=None, type=str),
                 'start': request.args.get('start', default=None), 'end': request.args.get('end', default=None),
@@ -149,6 +151,8 @@ def genes(request, session):
         q, last_uid = genomic_feature_mixin1_queries(session, resource, request)
     if names is not None:
         q = resource.select_by_names(session, q, names)
+    if uids is not None:
+        q = resource.select_by_uids(session, q, uids)
     return get_result_from_query(q, request, resource, page_size=1000, result_tuple_type="genomic_feature",
                                  luid=last_uid)
 
