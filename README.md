@@ -1,4 +1,5 @@
 # Genomic Unification Database
+[![DOI](https://zenodo.org/badge/154735006.svg)](https://zenodo.org/badge/latestdoi/154735006)
 
 > This is a database which centralizes and unifies genomic data in a universal manner for specific reference datasets.
 
