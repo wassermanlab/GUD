@@ -39,7 +39,7 @@ class GUDUtilities:
         # i.e. defaults for GUD at the Wasserman Lab
         self._user = "gud_r"
         self._pwd  = ""
-        self._host = "gud.cmmt.ubc.ca"
+        self._host = "localhost"
         self._port = 5506
         self._db   = "hg38"
 
