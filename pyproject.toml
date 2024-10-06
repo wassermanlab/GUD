@@ -1,0 +1,44 @@
+[project]
+name = "gud"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Brad W", email = "bradw@example.com" }
+]
+dependencies = [
+    "biopython>=1.83",
+    "fuzzywuzzy>=0.18.0",
+    "pandas>=2.0.3",
+    "pymysql>=1.1.1",
+    "pyliftover>=0.4.1",
+    "requests>=2.32.3",
+    "interval-binning>=1.0.0",
+    "python-levenshtein>=0.25.1",
+    "sqlalchemy-fulltext-search>=0.3.0",
+    "sqlalchemy-utils>=0.41.2",
+    "importlib-metadata>=8.5.0",
+    "jinja2==3.0.3",
+    "flask==1.0.3",
+    "flask-limiter==2",
+    "flask-sqlalchemy==2",
+    "sqlalchemy>=2.0.35",
+    "werkzeug==2.2.0",
+    "itsdangerous==2.0.1",
+    "setuptools>=75.1.0",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gud"]
