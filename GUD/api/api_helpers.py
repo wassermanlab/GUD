@@ -45,7 +45,7 @@ def create_page(results, url) -> dict:
 
 
 def table_exists(table_name, engine):
-    if not engine.dialect.has_table(engine, table_name):
+    if not engine.dialect.has_table(engine.connect(), table_name):
         raise BadRequest(table_name + ' table does not exist')
 
 
