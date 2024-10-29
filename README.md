@@ -34,10 +34,22 @@ pip install interval-binning SQLAlchemy-FullText-Search sqlalchemy-utils
 conda env create -f environment.yml
 ```
 
-## START UP SERVER
+## START UP SERVER OLD
 
 ```bash
 conda activate GUD
 export FLASK_APP=GUD/api
 export FLASK_ENV=development
+```
+
+## START UP SERVER
+
+```
+FLASK_APP=GUD/api FLASK_ENV=development python -m flask run
+
+FLASK_APP=GUD/api FLASK_ENV=development flask run
+
+export FLASK_APP=GUD/api
+export FLASK_ENV=development
+flask run
 ```
