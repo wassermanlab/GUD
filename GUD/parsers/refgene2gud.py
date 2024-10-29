@@ -7,7 +7,6 @@ import getpass
 from multiprocessing import cpu_count
 import os
 import re
-import shutil
 import subprocess
 import sys
 
@@ -16,7 +15,7 @@ from GUD import GUDUtils
 from GUD.ORM.gene import Gene
 from GUD.ORM.region import Region
 from GUD.ORM.source import Source
-from GUD.parsers import ParseUtils
+from . import ParseUtils
 
 usage_msg = """
 usage: %s --genome STR --version STR [-h] [options]
@@ -149,12 +148,6 @@ def refgene_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False,
         global current_process
         from multiprocessing import current_process
 
-    # Create dummy dir
-    subdir = "%s.%s" % (genome, os.path.basename(__file__))
-    dummy_dir = os.path.join(dummy_dir, subdir)
-    if not os.path.isdir(dummy_dir):
-        os.makedirs(dummy_dir)
-
     # Download data
     data_file, url = _download_data(genome, dummy_dir)
 
@@ -201,12 +194,16 @@ def refgene_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False,
     # Parallelize inserts to the database
     ParseUtils.insert_data_files_in_parallel(data_files, partial(_insert_data, test=test), threads)
 
-    # Remove files
+    # Remove data files
     if remove:
-        shutil.rmtree(dummy_dir)
+        if os.path.exists(data_file):
+            os.remove(data_file)
+        for data_file in data_files:
+            if os.path.exists(data_file):
+                os.remove(data_file)
 
     # Remove session
-    Session.remove()
+    session.close()
 
 def _download_data(genome, dummy_dir="/tmp/"):
 
@@ -218,7 +215,9 @@ def _download_data(genome, dummy_dir="/tmp/"):
         from urllib import urlretrieve
 
     # Initialize
+    print(genome)
     url = "ftp://hgdownload.soe.ucsc.edu/goldenPath/%s/database" % genome
+    print(url)
     ftp_file = os.path.join(url, "refGene.txt.gz")
     data_file = os.path.join(dummy_dir, "refGene.txt.gz")
 

@@ -2,15 +2,19 @@
 Genomic Universal Database (GUD) module
 """
 
-__author__ = "Oriol Fornes, Tamar Av-Shalom",
+__author__ = "Oriol Fornes"
 __credits__ = [
+    "Oriol Fornes",
+    "Tamar V. Av-Shalom",
     "Rachelle A. Farkas",
     "David J. Arenillas",
+    "Michelle Kang",
+    "Phillip A. Richmond",
     "Wyeth W. Wasserman"
 ]
-__email__ = "oriol.fornes@gmail.com, avshalom.tamar0@gmail.com",
+__email__ = "oriol@cmmt.ubc.ca"
 __organization__ = "[Wasserman Lab](http://www.cisreg.ca)"
-__version__ = "22.12.1"
+__version__ = "0.0.1"
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -41,7 +45,7 @@ class GUDUtilities:
         self._pwd  = ""
         self._host = "localhost"
         self._port = 3306
-        self._db   = "hg38"
+        self._db   = "grch38"
 
     @property
     def user(self):
@@ -143,7 +147,6 @@ class GUDUtilities:
 
     def get_engine_session(self, db_name):
 
-        # Initialize
         engine = create_engine(db_name, pool_pre_ping=True, pool_size=100, max_overflow=0, pool_recycle=360)
         session_factory = sessionmaker(bind=engine)
         Session = scoped_session(session_factory)

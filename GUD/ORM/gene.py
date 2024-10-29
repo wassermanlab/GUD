@@ -25,7 +25,7 @@ class Gene(GFMixin1, Base):
         return (
             UniqueConstraint(cls.region_id, cls.name, cls.source_id, cls.strand),
             # query by bin range
-            Index("ix_join", cls.source_id, cls.region_id),
+            Index("ix_source_join", cls.source_id, cls.region_id),
             Index("ix_name", cls.name),
             Index("ix_gene_symbol", cls.gene_symbol),
             {"mysql_engine": "InnoDB", "mysql_charset": "utf8", }
@@ -70,31 +70,30 @@ class Gene(GFMixin1, Base):
         exonEnds = []
 
         # For each exon start...
-        for i in feat.Gene.exon_starts.decode("utf-8").split(","):
+        for i in str(feat.Gene.exon_starts).split(","):
             if i.isdigit():
                 exonStarts.append(int(i))
 
         # For each exon end...
-        for i in feat.Gene.exon_ends.decode("utf-8").split(","):
+        for i in str(feat.Gene.exon_ends).split(","):
             if i.isdigit():
-                exonEnds.append(int(i))
-
-        # Define strand
-        strand = feat.Gene.strand
+                exonStarts.append(int(i))
 
         # Define qualifiers
         qualifiers = {
             "uid": feat.Gene.uid,
-            "name": feat.Gene.name,
+            "accession_number": feat.Gene.name,
             "gene_symbol": feat.Gene.gene_symbol,
             "coding_start": int(feat.Gene.coding_start),
             "coding_end": int(feat.Gene.coding_end),
-            "exon_starts": exonStarts,
-            "exon_ends": exonEnds,
+            "exon_starts": feat.Gene.exon_starts,
+            "exon_ends": feat.Gene.exon_ends,
             "source": feat.sourceName,
         }
         genomic_feature = super().as_genomic_feature(feat)
-        genomic_feature._strand = strand
-        genomic_feature.strand = genomic_feature.strand_binary
         genomic_feature.qualifiers = qualifiers
+        if feat.Gene.strand == "+": 
+            genomic_feature.strand = 1
+        elif feat.Gene.strand == "-": 
+            genomic_feature.strand = -1
         return genomic_feature

@@ -16,7 +16,7 @@ from GUD import GUDUtils
 from GUD.ORM.gene import Gene
 from GUD.ORM.region import Region
 from GUD.ORM.source import Source
-from GUD.parsers import ParseUtils
+from . import ParseUtils
 
 usage_msg = """
 usage: %s --genome STR --version STR [-h] [options]
@@ -28,7 +28,7 @@ inserts features from both the UCSC's "ncbiRefSeq" and
 
   --genome STR        genome assembly
   --version STR       e.g. "NCBI Homo sapiens Annotation
-                      Release 109.20190905 (2019-09-10)"
+                      Release 109.20190905 (2019-09-10)")
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -124,12 +124,19 @@ def main():
     # Parse arguments
     args = parse_args()
 
-    # Get Regulatory Regions
-    get_regulatory_regions(args)
+    # Set MySQL options
+    GUDUtils.user = args.user
+    GUDUtils.pwd = args.pwd
+    GUDUtils.host = args.host
+    GUDUtils.port = args.port
+    GUDUtils.db = args.db
+
+    # Insert RefGene data
+    refgene_to_gud(args.genome, args.version, args.dummy_dir, args.remove, args.test, args.threads)
 
 def refgene_to_gud(genome, version, dummy_dir="/tmp/", remove=False, test=False, threads=1):
     """
-    e.g. python -m GUD.parsers.refseq2gud --genome hg38 --version abcd --test -P 3306
+    e.g. python -m GUD.parsers.refgene2gud --genome hg38 --version abcd --test -P 3306
     """
 
     # Initialize

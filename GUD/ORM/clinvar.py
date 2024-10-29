@@ -4,6 +4,7 @@ from .base import Base
 from .source import Source
 from .genomicFeatureMixin1 import GFMixin1
 from sqlalchemy.ext.declarative import declared_attr
+from flask import request, jsonify
 
 
 class ClinVar(GFMixin1, Base):
@@ -67,20 +68,20 @@ class ClinVar(GFMixin1, Base):
             "ref": feat.ClinVar.ref,
             "alt": feat.ClinVar.alt,
             "clinvarID": feat.ClinVar.clinvar_variation_ID,
-            "ANN_Annotation": feat.ClinVar.ANN_Annotation,
-            "ANN_Annotation_Impact": feat.ClinVar.ANN_Annotation_Impact,
-            "ANN_Gene_Name": feat.ClinVar.ANN_Gene_Name,
-            "ANN_Gene_ID": feat.ClinVar.ANN_Gene_ID,
-            "ANN_Feature_Type": feat.ClinVar.ANN_Feature_Type,
-            "ANN_Feature_ID": feat.ClinVar.ANN_Feature_ID,
-            "CADD": feat.ClinVar.CADD,
-            "CLNDISDB": feat.ClinVar.CLNDISDB,
-            "CLNDN": feat.ClinVar.CLNDN,
+            # "ANN_Annotation": feat.ClinVar.ANN_Annotation,
+            # "ANN_Annotation_Impact": feat.ClinVar.ANN_Annotation_Impact,
+            # "ANN_Gene_Name": feat.ClinVar.ANN_Gene_Name,
+            # "ANN_Gene_ID": feat.ClinVar.ANN_Gene_ID,
+            # "ANN_Feature_Type": feat.ClinVar.ANN_Feature_Type,
+            # "ANN_Feature_ID": feat.ClinVar.ANN_Feature_ID,
+            # "CADD": feat.ClinVar.CADD,
+            # "CLNDISDB": feat.ClinVar.CLNDISDB,
+            # "CLNDN": feat.ClinVar.CLNDN,
             "CLNSIG": feat.ClinVar.CLNSIG,
-            "gnomad_exome_af_global": feat.ClinVar.gnomad_exome_af_global,
-            "gnomad_exome_hom_global": feat.ClinVar.gnomad_exome_hom_global,
-            "gnomad_genome_af_global": feat.ClinVar.gnomad_genome_af_global,
-            "gnomad_genome_hom_global": feat.ClinVar.gnomad_genome_hom_global,
+            # "gnomad_exome_af_global": feat.ClinVar.gnomad_exome_af_global,
+            # "gnomad_exome_hom_global": feat.ClinVar.gnomad_exome_hom_global,
+            # "gnomad_genome_af_global": feat.ClinVar.gnomad_genome_af_global,
+            # "gnomad_genome_hom_global": feat.ClinVar.gnomad_genome_hom_global,
         }
         genomic_feature = super().as_genomic_feature(feat)
         genomic_feature.qualifiers = qualifiers

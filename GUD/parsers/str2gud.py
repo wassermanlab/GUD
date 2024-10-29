@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from GUD.parsers import ParseUtils
+from . import ParseUtils
 from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD.ORM.source import Source
 from GUD.ORM.region import Region
@@ -13,7 +13,6 @@ from numpy import isnan
 import os
 import sys
 import re
-import shutil
 import subprocess
 import warnings
 import argparse
@@ -182,12 +181,6 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
         global current_process
         from multiprocessing import current_process
 
-    # Create dummy dir
-    subdir = "%s.%s" % (genome, os.path.basename(__file__))
-    dummy_dir = os.path.join(dummy_dir, subdir)
-    if not os.path.isdir(dummy_dir):
-        os.makedirs(dummy_dir)
-
     # Get database name
     db_name = GUDUtils._get_db_name()
 
@@ -228,9 +221,10 @@ def str_to_gud(genome, source_name, str_file, based, test=False, threads=1):
     ParseUtils.insert_data_files_in_parallel(
         data_files, partial(_insert_data, based=based, test=test), threads)
 
-    # Remove files
-    if remove:
-        shutil.rmtree(dummy_dir)
+    # Remove data file
+    for df in data_files:
+        if os.path.exists(df):
+            os.remove(df)
 
     # Remove session
     Session.remove()

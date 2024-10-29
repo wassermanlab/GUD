@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from GUD.parsers import ParseUtils
+from . import ParseUtils
 from GUD.ORM.clinvar import ClinVar
 from GUD.ORM.source import Source
 from GUD.ORM.region import Region
@@ -13,7 +13,6 @@ from numpy import isnan
 import os
 import sys
 import re
-import shutil
 import subprocess
 import warnings
 import argparse
@@ -160,12 +159,6 @@ def clinvar_to_gud(genome, source_name, clinvar_file, test=False, threads=1):
         global current_process
         from multiprocessing import current_process
 
-    # Create dummy dir
-    subdir = "%s.%s" % (genome, os.path.basename(__file__))
-    dummy_dir = os.path.join(dummy_dir, subdir)
-    if not os.path.isdir(dummy_dir):
-        os.makedirs(dummy_dir)
-
     # Get database name
     db_name = GUDUtils._get_db_name()
 
@@ -206,9 +199,10 @@ def clinvar_to_gud(genome, source_name, clinvar_file, test=False, threads=1):
     ParseUtils.insert_data_files_in_parallel(
         data_files, partial(_insert_data, test=test), threads)
 
-    # Remove files
-    if remove:
-        shutil.rmtree(dummy_dir)
+    # Remove data file
+    for df in data_files:
+        if os.path.exists(df):
+            os.remove(df)
 
     # Remove session
     Session.remove()
@@ -260,7 +254,7 @@ def _insert_data(data_file, test=False):
             region.chrom = region.chrom[3:]
         if region.chrom not in chroms:
             continue
-        region.start = int(line[1]) - 1
+        region.start = int(line[1]) - 1               #1 based
         region.end = region.start + len(line[3])
         region.bin = assign_bin(region.start, region.end)
         ParseUtils.upsert_region(session, region)

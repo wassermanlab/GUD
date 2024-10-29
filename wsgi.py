@@ -1,4 +1,4 @@
-from GUD.api import app
+from GUD.api import app as application 
 
 if __name__ == "__main__":
-    app.run()
+    application.run()

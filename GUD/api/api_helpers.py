@@ -1,3 +1,4 @@
+import time
 from flask import request, jsonify
 from GUD import GUDUtils
 from werkzeug.exceptions import NotFound, BadRequest
@@ -8,34 +9,31 @@ from GUD.ORM import ShortTandemRepeat
 import time
 
 ## HELPER FUNCTIONS ##
-def get_result_from_query(query, request, resource, page_size=20, result_tuple_type="simple", luid = 0):
-    if (luid == 0):
-        last_uid = request.args.get('last_uid', default=0, type=int)
-    elif (luid is None):
-        raise NotFound('No results from this query') 
-    else: 
-        last_uid = luid
+def get_result_from_query(query, request, resource, result_tuple_type="simple"):
     if query is None:
         raise BadRequest('query not specified correctly')
-    results = query.filter(type(resource).uid > last_uid)\
-        .order_by(type(resource).uid).limit(page_size) 
-    print(results.statement.compile(compile_kwargs={"literal_binds": True}))
+    # results = query.all() 
+    results = []
+    start = time.time()
+    for q in query:
+        s = time.time()
+        r = q.all()
+        print(q.statement.compile(compile_kwargs={"literal_binds": True}))
+        results = results + r
+        print('getting subquery took', time.time()-s, 'seconds.')
+    print('getting queries took', time.time()-start, 'seconds.')
+    # print(results.statement.compile(compile_kwargs={"literal_binds": True}))
     # serialize and get uids of first and last element returned
-    try:
-        if (result_tuple_type == "genomic_feature"):
-            last_uid = getattr(results[page_size-1], type(resource).__name__).uid
-        else:
-            last_uid = results[page_size-1].uid
-    except:
-        last_uid = None
+    start = time.time()
     if (result_tuple_type == "genomic_feature"):
         results = [resource.as_genomic_feature(e) for e in results]
     results = [e.serialize() for e in results]
-    results = create_page(results, last_uid, page_size, request.url)
+    results = create_page(results, request.url)
+    print('serializing', time.time()-start, 'seconds.')
     return jsonify(results)
 
 
-def create_page(results, last_uid, page_size, url) -> dict:
+def create_page(results, url) -> dict:
     """
     returns 404 error or a page
     """
@@ -43,71 +41,40 @@ def create_page(results, last_uid, page_size, url) -> dict:
     if len(results) == 0:
         raise NotFound('No results from this query')
     json = {'results': results}
-    if last_uid != None: 
-        if (re.search('\?', url) is None):
-            next_page = url+'?last_uid='+str(last_uid)
-        elif (re.search('last_uid', url) is None):
-            next_page = url+'&last_uid='+str(last_uid)
-        else:
-            next_page = re.sub('last_uid=\d+', 'last_uid='+str(last_uid), url)
-        json['next'] = next_page
     return json
 
 
 def table_exists(table_name, engine):
-    
-    if not engine.dialect.has_table(engine.connect(), table_name):
+    if not engine.dialect.has_table(engine, table_name):
         raise BadRequest(table_name + ' table does not exist')
 
 
 def set_db(db):
-    if db == "hg19":
-        GUDUtils.db = "hg19"
-    elif db == "hg38":
-        GUDUtils.db = "hg38"
-    elif db == "test":
-        GUDUtils.db = "test"
-    elif db == "test_hg38_chr22":
-        GUDUtils.db = "test_hg38_chr22"
+    if db == "grch37":
+        GUDUtils.db = "grch37"
+    elif db == "grch38":
+        GUDUtils.db = "grch38"
     else:
         raise BadRequest(
-            'database must be hg19 or hg38 or test or test_hg38_chr22')
+            'database must be grch37 or grch38')
 
 
 def genomic_feature_mixin1_queries(session, resource, request):
     """make genomic feature 1 queries"""
-    # this is the line that prevents non complete requests
-    # location query
     keys = get_mixin1_keys(request)
-    q = resource.select_all(session,None)
-# all location
-    if (keys['start'] is not None and keys['end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
-        q = resource.select_by_location(
-                session, q, keys['chrom'], keys['start'], keys['end'], keys['location'])
-    # partial location
-    elif (keys['start'] is not None or keys['end'] is not None or keys['location'] is not None or keys["chrom"] is not None):
-        raise BadRequest("To filter by location you must specify location, chrom, start, and end or just a chrom.")
-    # uid query
+    # query array 
+    q = []
+    # all location
+    if (keys['merged_start_end'] is not None and keys['location'] is not None and keys['chrom'] is not None):
+        for i in keys['merged_start_end']:
+            q.append(resource.select_by_location(session, None, keys['chrom'], i[0], i[1], keys['location']))
+    else: 
+        q.append(resource.select_all(session, None))
     if keys['uids'] is not None:
-        q = resource.select_by_uids(session, q, keys['uids'])
+        q = [resource.select_by_uids(session, i, keys['uids']) for i in q]
     # sources query
     if keys['sources'] is not None:
-        q = resource.select_by_sources(session, q, keys['sources'])
-
-    last_uid = 0
-    if (keys["last_uid"] == 0): 
-        last_uid = resource.get_last_uid_region(session, keys['chrom'], keys['start'], keys['end'])
-    return q, last_uid
-
-
-def genomic_feature_mixin2_queries(session, resource, request, query):
-    """make genomic feature 2 queries"""
-    keys = get_mixin2_keys(request)
-    q = query
-    if keys['experiments'] is not None:
-        q = resource.select_by_experiments(session, q, keys['experiments'])
-    if keys['samples'] is not None:
-        q = resource.select_by_samples(session, q, keys['samples'])
+        q = [resource.select_by_sources(session, i, keys['sources']) for i in q]
     return q
 
 
@@ -134,11 +101,13 @@ def get_mixin1_keys(request):
             'end': '',
             'location': '',
             'sources': [], 
-            'last_uid': ''}
+            'last_uid': '',
+            'merged_start_end': None}
+            
     keys['chrom'] = request.args.get('chrom', default=None, type=str)
-    keys['end'] = request.args.get('end', default=None)
+    keys['end'] = check_split(request.args.get('end', default=None))
     keys['location'] = request.args.get('location', default=None, type=str)
-    keys['start'] = request.args.get('start', default=None)
+    keys['start'] = check_split(request.args.get('start', default=None))
     keys['sources'] = check_split(request.args.get('sources', default=None))
     keys['uids'] = check_split(request.args.get('uids', default=None))
     keys['last_uid'] = request.args.get('last_uid', default=0, type=int)
@@ -149,31 +118,23 @@ def get_mixin1_keys(request):
                 keys['uids'][i] = int(keys['uids'][i])
     
     # check that location is specified
-    if (keys['start'] is None or keys['end'] is None or keys['location'] is None or keys['chrom'] is None):
-        raise BadRequest("parameter list must include a region to query (start, end, chrom, location)")
+    
 
     if (keys['start'] is not None and keys['end'] is not None and keys['location']
             is not None and keys['chrom'] is not None):
+        if (len(keys['start']) != len(keys['end'])):
+            raise BadRequest("start and end lists should be the same length")
         try:
-            keys['start'] = int(keys['start'].replace(',', '')) - 1
-            keys['end'] = int(keys['end'].replace(',', ''))
+            keys['merged_start_end'] = [(int(keys['start'][i]), int(keys['end'][i])) for i in range(0, len(keys['start']))] 
         except:
             raise BadRequest("start and end should be formatted as integers")
-        if (keys['end']-keys['start'] > 4000000): # check limit 
-            raise BadRequest("region must be less than 4,000,000bp")
+        for i in keys['merged_start_end']:
+            if ((i[1]-i[0]) > 4000000): # check limit 
+                raise BadRequest("each region must be less than 4,000,000bp")
         if re.fullmatch('^(X|Y|[1-9]|1[0-9]|2[0-2])$', keys['chrom']) == None:
             raise BadRequest(
                 "chromosome should be formatted as Z where Z is X, Y, or 1-22")
         if keys['location'] not in ['within', 'overlapping', 'exact']:
             raise BadRequest(
                 "location must be specified as within, overlapping, or exact")
-    return keys
-
-
-def get_mixin2_keys(request):
-    keys = {'experiments': [],
-            'samples': []}
-    keys['experiments'] = check_split(
-        request.args.get('experiments', default=None))
-    keys['samples'] = check_split(request.args.get('samples', default=None))
     return keys

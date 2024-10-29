@@ -1,6 +1,5 @@
 # Genomic Unification Database
-[![DOI](https://zenodo.org/badge/154735006.svg)](https://zenodo.org/badge/latestdoi/154735006)
-
+test
 > This is a database which centralizes and unifies genomic data in a universal manner for specific reference datasets.
 
 ## Manifest
@@ -10,42 +9,35 @@
 
 ## Requirements
 GUD requires the following dependencies:
-* [`GNU Core Utilities`](https://www.gnu.org/software/coreutils/)
 * [`MySQL`](https://www.mysql.com)
-* [`Python`](https://www.python.org) `≥2.7` or `3.x` (recommended) with:
+* [`Parallel`](https://www.gnu.org/software/parallel/)
+* [`Python`](https://www.python.org) `≥2.7` or `3.x` with:
     - [`Biopython`](https://biopython.org)
-    - [`Core API`](https://www.coreapi.org/)
-    - [`flask`](https://flask.palletsprojects.com/en/1.0.x/)
-    - [`Flask-SQLAlchemy`](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)
-    - [`FuzzyWuzzy`](https://chairnerd.seatgeek.com/fuzzywuzzy-fuzzy-string-matching-in-python/)
     - [`interval-binning`](https://interval-binning.readthedocs.io/en/latest/)
-    - [`NumPy`](https://numpy.org/)
+    - [`macs2`](https://github.com/taoliu/MACS/)
     - [`pandas`](https://pandas.pydata.org/)
-    - [`pybedtools`](https://daler.github.io/pybedtools/)
     - [`PyMySQL`](https://pymysql.readthedocs.io/en/latest/)
-    - [`pyliftover`](https://github.com/konstantint/pyliftover)
-    - [`requests`](https://requests.readthedocs.io/en/master/)
     - [`SQLAlchemy`](https://www.sqlalchemy.org)
-    - [`SQLAlchemy-FullText-Search`](https://github.com/mengzhuo/sqlalchemy-fulltext-search)
-    - [`SQLAlchemy-Utils`](https://sqlalchemy-utils.readthedocs.io/en/latest/)
+    - `SQLAlchemy-FullText-Search`
+    - `sqlalchemy-utils`
 
-## Configuration
+## INSTALLATION
 
+```bash
+conda create -n gud -c bioconda python=3.7 pybedtools biopython pymysql
+pip install interval-binning SQLAlchemy-FullText-Search sqlalchemy-utils
 ```
-conda create -n gud -c bioconda -c conda-forge python=3.7 biopython coreutils flask \
-    flask-sqlalchemy fuzzywuzzy pandas pymysql pyliftover python-coreapi requests
-pip install flask-limiter interval-binning python-Levenshtein SQLAlchemy-FullText-Search \
-    sqlalchemy-utils
+
+## SETUP
+
+```bash
+conda env create -f environment.yml
 ```
 
 ## START UP SERVER
 
-```
-FLASK_APP=GUD/api FLASK_ENV=development python -m flask run
-
-FLASK_APP=GUD/api FLASK_ENV=development flask run
-
+```bash
+conda activate GUD
 export FLASK_APP=GUD/api
 export FLASK_ENV=development
-flask run
 ```

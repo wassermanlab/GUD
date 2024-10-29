@@ -1,25 +1,49 @@
 name: gud
 channels:
-  - anaconda
   - conda-forge
+  - anaconda
   - defaults
 dependencies:
   - biopython=1.73
+  - blas
+  - ca-certificates
+  - certifi
+  - icu=64.2
+  - intel-openmp
+  - jansson
+  - libedit
+  - libffi
+  - libgcc-ng
+  - libgfortran-ng
+  - libiconv
+  - libprotobuf
+  - libstdcxx-ng
+  - libxml2
+  - mkl
+  - mkl-service
+  - mkl_fft
+  - mkl_random
   - mysql-connector-c
   - mysql-connector-python
   - mysqlclient
+  - numpy
   - openssl
   - parallel
+  - pcre
+  - perl
   - pip
   - python=3.7.3
   - setuptools
+  - six
   - sqlalchemy
   - sqlite
-  - uwsgi
+  - tk
   - wheel
-  - yaml
+  - xz
   - zlib
   - pip:
+    - astroid
+    - attrs
     - click
     - configparser
     - coverage
@@ -33,10 +57,15 @@ dependencies:
     - isort
     - itsdangerous
     - jinja2
+    - lazy-object-proxy
     - limits
     - lxml
     - markupsafe
+    - mccabe
+    - more-itertools
+    - packaging
     - pandas
+    - pluggy
     - py
     - pylint
     - pymysql
@@ -44,7 +73,15 @@ dependencies:
     - pytest
     - python-dateutil
     - python-levenshtein
+    - pytz
     - simplejson
     - sqlalchemy-fulltext-search
     - sqlalchemy-utils
+    - typed-ast
+    - wcwidth
     - werkzeug
+    - wrapt
+    - uwsgi
+    - zipp
+    - zope-interface
+

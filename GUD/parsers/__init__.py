@@ -13,24 +13,13 @@ import sys
 from zipfile import ZipFile
 
 from GUD.ORM.chrom import Chrom
-from GUD.ORM.conservation import Conservation
-from GUD.ORM.cpg_island import CpGIsland
-from GUD.ORM.dna_accessibility import DNAAccessibility
-from GUD.ORM.enhancer import Enhancer
-from GUD.ORM.experiment import Experiment
-from GUD.ORM.expression import Expression
 from GUD.ORM.gene import Gene
 from GUD.ORM.copy_number_variant import CNV
 from GUD.ORM.short_tandem_repeat import ShortTandemRepeat
 from GUD.ORM.clinvar import ClinVar
-from GUD.ORM.histone_modification import HistoneModification
 from GUD.ORM.region import Region
-from GUD.ORM.repeat_mask import RepeatMask
-from GUD.ORM.sample import Sample
 from GUD.ORM.source import Source
-from GUD.ORM.tf_binding import TFBinding
-from GUD.ORM.tad import TAD
-from GUD.ORM.tss import TSS
+
 
 class ParseUtililities:
     """
@@ -103,7 +92,7 @@ class ParseUtililities:
         # Open file handle
         if file_name.endswith(".gz"):
             try:
-                handle = gzip.open(file_name, mode+"b")
+                handle = gzip.open(file_name, mode)
             except:
                 raiseValueError = True
 
@@ -144,11 +133,6 @@ class ParseUtililities:
         # For each line...
         for line in handle:
 
-            try:
-                line = line.decode()
-            except:
-                pass
-
             yield(line.strip("\n"))
 
         handle.close()
@@ -164,20 +148,15 @@ class ParseUtililities:
         @yield: {list}
         """
 
-        # Get compression (if any)
-        compression = None
-        if file_name.endswith(".gz"):
-            compression = "gzip"
-        if file_name.endswith(".zip"):
-            compression = "zip"
+        # Get file handle
+        handle = self._get_file_handle(file_name)
 
         # Read in chunks
-        for chunk in pandas.read_csv(file_name, compression=compression,
-                                     header=None, encoding="utf8",
-                                     sep=delimiter, chunksize=1024,
-                                     comment="#", engine="python"):
+        for chunk in pandas.read_csv(handle, header=None, encoding="utf8", sep=delimiter, chunksize=1024, comment="#"):
             for index, row in chunk.iterrows():
                 yield(row.tolist())
+
+        handle.close()
 
     def parse_tsv_file(self, file_name):
         """
@@ -194,7 +173,7 @@ class ParseUtililities:
 
             yield(line)
 
-    def parse_fasta_file(self, file_name, as_seq_record=False):
+    def parse_fasta_file(self, file_name):
         """
         Parses a FASTA file and yields sequences one by one  as a list of
         length 2 (i.e. [{header}, {sequence}]).
@@ -210,37 +189,13 @@ class ParseUtililities:
 
         # For each SeqRecord...
         for seq_record in SeqIO.parse(handle, "fasta"):
-            if as_seq_record:
-                yield(seq_record)
-            else:
-                yield(seq_record.id, str(seq_record.seq).upper())
+            # Initialize
+            header = seq_record.id
+            sequence = str(seq_record.seq).upper()
+
+            yield(header, sequence)
 
         handle.close()
-
-    # def parse_file_in_chunks(self, file_name=None, chunk_size=1024):
-    #     """
-    #     Parses a file and yields lines in chunks.
-
-    #     @input:
-    #     file_name {str}
-    #     chunk_size {int}
-
-    #     @yield: {str}
-    #     """
-
-    #     # Get file handle
-    #     handle = self._get_file_handle(file_name)
-
-    #     while True:
-
-    #         data = handle.read(chunk_size)
-
-    #         if not data:
-    #             break
-
-    #         yield(data)
-
-    #     handle.close()
 
     def write(self, file_name=None, content=None):
         """
@@ -272,16 +227,13 @@ class ParseUtililities:
             # Initialize
             chroms = []
 
-            # Get valid chromosomes
-            # chrom_ids = list(map(str, range(1, 23))) + ["X", "Y", "M"]
-            # valid_chroms = set(["".join(z) for z in zip(["chr"] * len(chrom_ids), chrom_ids)])
             valid_chroms = set(list(map(str, range(1, 23))) + ["X", "Y", "M"])
 
             # Create database
             create_database(self.dbname)
 
             # For each table...
-            for table in [Chrom(), Experiment(), Region(), Sample(), Source()]:
+            for table in [Chrom(), Region(), Source()]:
                     self.create_table(table)
     
             # Download data
@@ -322,8 +274,7 @@ class ParseUtililities:
         try:
             ftp.cwd(os.path.join("goldenPath", self.genome, "bigZips"))
         except:
-            error = ["error", "cannot connect to UCSC's FTP goldenPath folder",
-                     self.genome, "bigZips"]
+            error = ["error", "cannot connect to UCSC's FTP goldenPath folder", self.genome, "bigZips"]
             print(": ".join(error))
             exit(0)
 
@@ -345,95 +296,22 @@ class ParseUtililities:
     def get_chroms(self, session):
         return(Chrom.chrom_sizes(session))
 
-    def get_experiment(self, session, name, experiment_metadata=None,
-                       metadata_descriptor=None):
-        return(Experiment.select_unique(session, name, experiment_metadata,
-                                        metadata_descriptor))
-
     def get_region(self, session, chrom, start, end):
         return(Region.select_unique(session, chrom, start, end))
 
-    def get_sample(self, session, name, X, Y, treatment, cell_line, cancer):
-        return(Sample.select_unique(session, name, X, Y, treatment, cell_line,
-                                    cancer))
-
-    def get_source(self, session, name, source_metadata=None,
-                   metadata_descriptor=None, url=None):
-        return(Source.select_unique(session, name, source_metadata,
-               metadata_descriptor, url))
-
-    def get_tss(self, session, region_id, experiment_id, source_id, gene=None,
-                tss=1):
-        return(TSS.select_unique(session, region_id, experiment_id, source_id,
-                                 gene, tss))
+    def get_source(self, session, name, source_metadata=None, metadata_descriptor=None, url=None):
+        return(Source.select_unique(session, name, source_metadata, metadata_descriptor, url))
 
     #--------------#
     # Upserts      #
     #--------------#
 
-    def upsert_accessibility(self, session, accessibility):
-
-        if DNAAccessibility.is_unique(session, accessibility.region_id,
-                                      accessibility.sample_id,
-                                      accessibility.experiment_id,
-                                      accessibility.source_id):
-            session.add(accessibility)
-            session.commit()
-
-    def upsert_conservation(self, session, conservation):
-
-        if Conservation.is_unique(session, conservation.region_id,
-                                  conservation.source_id):
-            session.add(conservation)
-            session.commit()
-
-    def upsert_cpg_island(self, session, cpg_island):
-
-        if CpGIsland.is_unique(session, cpg_island.region_id,
-                               cpg_island.source_id):
-            session.add(cpg_island)
-            session.commit()
-
-    def upsert_enhancer(self, session, enhancer):
-
-        if Enhancer.is_unique(session, enhancer.region_id, enhancer.sample_id, enhancer.experiment_id, enhancer.source_id):
-            session.add(enhancer)
-            session.commit()
-
-    def upsert_experiment(self, session, experiment):
-
-        if Experiment.is_unique(session, experiment.name, experiment.experiment_metadata, experiment.metadata_descriptor):
-            session.add(experiment)
-            session.commit()
-
-    def upsert_expression(self, session, expression):
-
-        if Expression.is_unique(session, expression.tss_id, expression.sample_id):
-            session.add(expression)
-            session.commit()
 
     def upsert_gene(self, session, gene):
 
-        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name,
-                          gene.strand):
+        if Gene.is_unique(session, gene.region_id, gene.source_id, gene.name, gene.strand):
             session.add(gene)
             session.commit()
-
-    def upsert_histone(self, session, histone):
-
-        if HistoneModification.is_unique(session, histone.region_id,
-                                         histone.sample_id,
-                                         histone.experiment_id,
-                                         histone.source_id,
-                                         histone.histone_type):
-            session.add(histone)
-            session.commit()
-
-    # def upsert_mask(self, session, mask):
-
-    #     if Mask.is_unique(session, mask.region_id, mask.source_id):
-    #         session.add(mask)
-    #         session.commit()
 
     def upsert_region(self, session, region):
 
@@ -441,61 +319,25 @@ class ParseUtililities:
             session.add(region)
             session.commit()
 
-    def upsert_rmsk(self, session, repeat):
-
-        if RepeatMask.is_unique(session, repeat.region_id, repeat.source_id,
-                                repeat.name, repeat.strand):
-            session.add(repeat)
-            session.commit()
-
-    def upsert_sample(self, session, sample):
-
-        if Sample.is_unique(session, sample.name, sample.X, sample.Y,
-                            sample.treatment, sample.cell_line, sample.cancer):
-            session.add(sample)
-            session.commit()
-
     def upsert_source(self, session, source):
 
-        if Source.is_unique(session, source.name, source.source_metadata,
-                            source.metadata_descriptor, source.url):
+        if Source.is_unique(session, source.name, source.source_metadata, source.metadata_descriptor, source.url):
             session.add(source)
-            session.commit()
-
-    def upsert_tf(self, session, tf):
-
-        if TFBinding.is_unique(session, tf.region_id, tf.sample_id,
-                               tf.experiment_id, tf.source_id, tf.tf):
-            session.add(tf)
             session.commit()
     
     def upsert_str(self, session, STR):
-        if ShortTandemRepeat.is_unique(session, STR.region_id, STR.source_id,
-                                       STR.pathogenicity):
+        if ShortTandemRepeat.is_unique(session, STR.region_id, STR.source_id, STR.pathogenicity):
             session.add(STR)
             session.commit()
     
     def upsert_cnv(self, session, cnv):
-        if CNV.is_unique(session, cnv.region_id, cnv.source_id,
-                         cnv.copy_number_change):
+        if CNV.is_unique(session, cnv.region_id, cnv.source_id, cnv.copy_number_change):
             session.add(cnv)
             session.commit()
 
     def upsert_clinvar(self, session, clinvar):
         if clinvar.is_unique(session, clinvar.clinvar_variation_ID):
             session.add(clinvar)
-            session.commit()
-
-    def upsert_tad(self, session, tad):
-        if TAD.is_unique(session, tad.region_id, tad.sample_id,
-                         tad.experiment_id, tad.source_id):
-            session.add(tad)
-            session.commit()
-
-    def upsert_tss(self, session, tss):
-        if TSS.is_unique(session, tss.region_id, tss.experiment_id,
-                         tss.source_id, tss.gene, tss.tss):
-            session.add(tss)
             session.commit()
 
     #--------------#
