@@ -1,6 +1,8 @@
 ## extra 
 wsgi.py
 gud.ini
+gud-gb.ini
+gud-gb-env
 *.vcf
 GUD/ORM/test.py
 .vscode/*
