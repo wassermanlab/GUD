@@ -40,7 +40,7 @@ class GUDUtilities:
         self._user = "gud_r"
         self._pwd  = ""
         self._host = "localhost"
-        self._port = 5506
+        self._port = 3306
         self._db   = "hg38"
 
     @property

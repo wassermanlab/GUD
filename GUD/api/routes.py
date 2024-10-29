@@ -8,6 +8,7 @@ import os
 import html
 import pandas as pd
 
+print(app.config)
 
 @app.route('/')
 def home():
