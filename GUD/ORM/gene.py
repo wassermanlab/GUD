@@ -72,12 +72,12 @@ class Gene(GFMixin1, Base):
         # For each exon start...
         for i in feat.Gene.exon_starts.decode("utf-8").split(","):
             if i.isdigit():
-                exonStarts.append(int(i))
+                exonStarts.append(i)
 
         # For each exon end...
         for i in feat.Gene.exon_ends.decode("utf-8").split(","):
             if i.isdigit():
-                exonEnds.append(int(i))
+                exonEnds.append(i)
 
         # Define qualifiers
         qualifiers = {
@@ -86,8 +86,8 @@ class Gene(GFMixin1, Base):
             "gene_symbol": feat.Gene.gene_symbol,
             "coding_start": int(feat.Gene.coding_start),
             "coding_end": int(feat.Gene.coding_end),
-            "exon_starts": exonStarts,
-            "exon_ends": exonEnds,
+            "exon_starts": ",".join(exonStarts),
+            "exon_ends": ",".join(exonEnds),
             "source": feat.sourceName,
         }
         genomic_feature = super().as_genomic_feature(feat)
